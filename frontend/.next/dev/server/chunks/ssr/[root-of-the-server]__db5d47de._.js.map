@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///sgoinfre/goinfre/Perso/ahbey/Ft_Transcendence/frontend/app/profil/page.tsx"],"sourcesContent":["export default function Home() {\n  return (\n    <div>\n      <h1>Bienvenue dans mon profil</h1>\n    </div>\n  );\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,0PAAC;kBACC,cAAA,0PAAC;sBAAG;;;;;;;;;;;AAGV"}}]
-}

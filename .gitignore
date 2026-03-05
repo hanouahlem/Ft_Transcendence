@@ -13,8 +13,13 @@ node_modules/
 # testing
 /coverage
 
+.next/
+.env
+dist/
+build/
+
 # next.js
-/.next/
+.next/
 /out/
 
 # production
