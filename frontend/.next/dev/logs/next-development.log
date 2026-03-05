@@ -1,0 +1,48 @@
+[00:00:02.347] Server  LOG     ✓ Ready in 1739ms
+[00:00:15.453] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:25.753] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:31.815] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:42.559] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:46.387] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:08.651] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:06.790] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:03:53.341] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:04:24.609] Browser ERROR   ./frontend/app/profil/page.tsx:4:10
+Parsing ecmascript source code failed
+  2 |   return (
+  3 |     <div>
+> 4 |       <h1""">Bienvenue dans mon profil</h1>
+    |          ^^
+  5 |     </div>
+  6 |   );
+  7 | }
+
+Expected '</', got 'string literal'
+[00:04:26.507] Browser ERROR   ./frontend/app/profil/page.tsx:4:10
+Parsing ecmascript source code failed
+  2 |   return (
+  3 |     <div>
+> 4 |       <h1">Bienvenue dans mon profil</h1>
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 |     </div>
+  6 |   );
+  7 | }
+
+Unterminated string constant
+[00:04:27.988] Browser ERROR   ./frontend/app/profil/page.tsx:4:10
+Parsing ecmascript source code failed
+  2 |   return (
+  3 |     <div>
+> 4 |       <h1"">Bienvenue dans mon profil</h1>
+    |          ^^
+  5 |     </div>
+  6 |   );
+  7 | }
+
+Expected '</', got 'string literal'
+[00:05:33.529] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:38.774] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:41.550] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:08:27.158] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:08:33.622] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:08:59.573] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
