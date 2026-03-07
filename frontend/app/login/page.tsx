@@ -22,6 +22,7 @@ export default function Home() {
   return (
     <div>
       <h1>Bienvenue dans mon maison</h1>
+      <p>Je suis ahlem</p>
       <MyButton />
     </div>
   );
