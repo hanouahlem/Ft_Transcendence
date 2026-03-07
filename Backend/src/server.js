@@ -1,13 +1,37 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import express from "express"; //créer une API
+import cors from "cors"; //autoriser les requêtes depuis le frontend
+import dotenv from "dotenv";//charger .env
+import { PrismaClient } from "@prisma/client";
 
 dotenv.config();
 
-const app = express();
+const app = express(); //Ici tu crées une application Express.
+const prisma = new PrismaClient();
+app.use(cors()); //Autorise le frontend (Next.js par exemple) à appeler ton API.
+app.use(express.json()); // Sinon le navigateur bloque les requêtes.
 
-app.use(cors());
-app.use(express.json());
+
+app.get("/users", async (req, res) => {
+
+    const users = await prisma.user.findMany();
+
+    res.json(users);
+});
+
+app.post("/users", async (req, res) => {
+
+    const { username, email, password } = req.body;
+
+    const user = await prisma.user.create({
+        data: {
+            username,
+            email,
+            password
+        }
+    });
+
+    res.json(user);
+});
 
 app.get("/", (req, res) => {
     res.send("Backend running je m'appel ahleuuum");
@@ -22,7 +46,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/user", (req, res) => {
-    res.send("je me log");
+    res.send("je suis ahlem");
 });
 
 const PORT = process.env.PORT || 3001;
