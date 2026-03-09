@@ -1,6 +1,4 @@
-
 services:
-
   postgres:
     image: postgres:15
     container_name: transcendence_db
@@ -13,6 +11,49 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d transcendence"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: transcendence_backend
+    restart: always
+    working_dir: /app
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/transcendence
+      PORT: 3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./Backend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npx prisma generate && npx prisma migrate deploy && npm run dev"
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: transcendence_frontend
+    restart: always
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      - backend
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"
 
 volumes:
   postgres_data:
