@@ -2,41 +2,16 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import bcrypt from "bcrypt";    
+import route from "./routes/routes.js";   
 
 dotenv.config();
-
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/allusers", async (req, res) => {
-    const users = await prisma.user.findMany();
-    res.json(users);
-    res.send("Backend running");
-});
 
-app.post("/users", async (req, res) => {
-    const { username, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-        data: { 
-            username, 
-            email, 
-            password: hashedPassword
-        }
-    });
-    res.json(user);
-});
-
-app.get("/", (req, res) => {
-    res.send("Backend running");
-});
+app.use("/", route);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
