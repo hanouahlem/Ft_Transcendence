@@ -31,6 +31,7 @@ export async function registerUser(req, res) {
 export async function loginUser(req, res)
 {
     const {email, password} = req.body;
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
         return res.status(400).json({ message: 'User not found' });
@@ -41,5 +42,25 @@ export async function loginUser(req, res)
     }
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
+
 }
-export default { registerUser, allUsers, loginUser};
+
+export async function profilUser(req, res) {
+    const token = req.header('Authorization');
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        console.log("✓ Profil : " + user);
+        res.json(user);
+    } catch (err) {
+        res.status(401).json({ message: 'Invalid token' });
+    }
+}
+
+export default { registerUser, allUsers, loginUser, profilUser};
