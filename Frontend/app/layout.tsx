@@ -1,6 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
+import { AuthProvider } from "@/context/AuthContext";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "ft_transcendence",
@@ -13,10 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body className="min-h-screen bg-gray-50 text-gray-900">
-        <Navbar />
-        <main className="mx-auto max-w-6xl px-6">{children}</main>
+    <html lang="fr" className={cn("font-sans", geist.variable)}>
+      <body className="min-h-screen bg-neutral-950 text-white">
+        <AuthProvider>
+          <Navbar />
+          <main>{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

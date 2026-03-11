@@ -9,5 +9,6 @@ router.get('/users', ctrl.allUsers);
 router.post('/login', ctrl.loginUser);
 router.get('/user',authMiddleware, ctrl.getUser);
 // router.get('/profil', ctrl.profilUser);
+router.post('/friends/request', authMiddleware, ctrl.sendFriendRequest);
 
 export default router;

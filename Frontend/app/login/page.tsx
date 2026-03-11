@@ -1,38 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { useState } from "react";
+import { loginUser } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const route = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("http://localhost:3001/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage("✓ Connecté ! Token " + data.token);
-        localStorage.setItem("token", data.token);
-        route.push("/profil");
-      } else {
-        setMessage("✗ " + data.message);
-      }
-    } catch (error) {
-      setMessage("✗ Serveur inaccessible");
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
+
+  try {
+    const data = await loginUser({ email, password });
+
+    if (data.token) {
+      await login(data.token);
+      router.push("/profil");
+    } else {
+      setError("Token not received.");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setError(err instanceof Error ? err.message : "Login failed.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <section className="flex min-h-screen items-center justify-center bg-neutral-950 px-6 py-10 text-white">
@@ -97,9 +100,6 @@ export default function LoginPage() {
             disabled={loading}
             className="flex w-full items-center justify-center gap-3 rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold uppercase tracking-[0.15em] text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading && (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            )}
             {loading ? "Signing in..." : "Login"}
           </button>
         </form>

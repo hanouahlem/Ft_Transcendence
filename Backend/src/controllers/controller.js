@@ -9,10 +9,22 @@ dotenv.config();
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-export async function  allUsers(req, res) {
-    const users = await prisma.user.findMany();
-    res.send("All users: " + users );
-};
+export async function allUsers(req, res) {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+      },
+    });
+
+    return res.json(users);
+  } catch (error) {
+    console.error("allUsers error:", error);
+    return res.status(500).json({ message: "Failed to fetch users" });
+  }
+}
 
 export async function  getUser(req, res) {
     const user = await prisma.user.findUnique({
@@ -89,4 +101,63 @@ export async function profilUser(req, res) {
     }
 }
 
-export default { registerUser, allUsers, loginUser, profilUser, getUser};
+export async function sendFriendRequest(req, res) {
+    try {
+        const senderId = req.user.id;
+        const { receiverId } = req.body;
+
+        if (!receiverId) {
+            return res.status(400).json({ message: "receiverId is required" });
+        }
+
+        if (senderId === receiverId) {
+            return res.status(400).json({ message: "You cannot add yourself" });
+        }
+
+        const receiver = await prisma.user.findUnique({
+            where: { id: receiverId }
+        });
+
+        if (!receiver) {
+            return res.status(404).json({ message: "Receiver not found" });
+        }
+
+        const existingRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    { senderId, receiverId },
+                    { senderId: receiverId, receiverId: senderId }
+                ]
+            }
+        });
+
+        if (existingRequest) {
+            return res.status(400).json({ message: "Friend request already exists" });
+        }
+
+        const request = await prisma.friendRequest.create({
+            data: {
+                senderId,
+                receiverId,
+                status: "pending"
+            }
+        });
+
+        return res.status(201).json({
+            message: "Friend request sent",
+            request
+        });
+    } catch (error) {
+        console.error("sendFriendRequest error:", error);
+        return res.status(500).json({ message: "Failed to send friend request" });
+    }
+}
+
+export default {
+  registerUser,
+  allUsers,
+  loginUser,
+  profilUser,
+  getUser,
+  sendFriendRequest
+};

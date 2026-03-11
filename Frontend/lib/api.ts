@@ -11,6 +11,12 @@ export type LoginData = {
   password: string;
 };
 
+export type CurrentUser = {
+  id: number;
+  username: string;
+  email: string;
+};
+
 async function handleResponse(response: Response) {
   const data = await response.json();
 
@@ -40,6 +46,31 @@ export async function loginUser(userData: LoginData) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(userData),
+  });
+
+  return handleResponse(response);
+}
+
+export async function getCurrentUser(token: string) {
+  const response = await fetch(`${API_URL}/user`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return handleResponse(response);
+}
+
+export async function sendFriendRequest(receiverId: number, token: string) {
+  const response = await fetch(`${API_URL}/friends/request`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ receiverId }),
   });
 
   return handleResponse(response);
