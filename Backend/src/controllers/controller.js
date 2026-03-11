@@ -71,4 +71,55 @@ export async function profilUser(req, res) {
     }
 }
 
+export async function addFriend(req, res)
+{
+    const {idFriend} = req.body;
+    const user = await prisma.user.findUnique({where: { id : idFriend}});
+    if (!user) {
+        return res.status(400).json({ message: 'User not found' });
+    }
+    
+    if (req.user.id == idFriend){
+        return res.status(400).json({message : 'Cannot add yourself'});
+    }
+
+    const existing = await prisma.friendship.findFirst({
+        where: {
+            userId: req.user.id,
+            friendId: idFriend
+        }
+    });
+    if (existing){
+        return res.status(400).json({message: "You're already friends"});
+    }
+
+}
+
+
+
+// export async function removeFriend(req, res)
+// {
+
+// }
+
+
+// export async function searchUser(req, res)
+// {
+
+// }
+
+
+
+// export async function sendNotif(req, res)
+// {
+
+// }
+
+
+// export async function updateProfile(req, res)
+// {
+
+// }
+
+
 export default { registerUser, allUsers, loginUser, profilUser, getUser};

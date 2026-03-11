@@ -23,3 +23,11 @@ model User {
 }
 
 
+model Friendship {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  friendId  Int
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, friendId])  // Empêche les doublons
+}
