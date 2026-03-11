@@ -12,8 +12,16 @@ const prisma = new PrismaClient({ adapter });
 
 export async function  allUsers(req, res) {
     const users = await prisma.user.findMany();
-    res.send("Backend running");
+    res.send("All users: " + users );
 };
+
+export async function  getUser(req, res) {
+    const user = await prisma.user.findUnique({
+        where: { id : req.user.id }
+    });
+    res.json(user);
+};
+
 
 export async function registerUser(req, res) {
     const { username, email, password } = req.body;
@@ -63,4 +71,4 @@ export async function profilUser(req, res) {
     }
 }
 
-export default { registerUser, allUsers, loginUser, profilUser};
+export default { registerUser, allUsers, loginUser, profilUser, getUser};

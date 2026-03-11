@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const route = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -17,8 +20,9 @@ export default function Login() {
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage("✓ Connecté ! Token : " + data.token);
+        setMessage("✓ Connecté ! Token " + data.token);
         localStorage.setItem("token", data.token);
+        route.push("/profil");
       } else {
         setMessage("✗ " + data.message);
       }
