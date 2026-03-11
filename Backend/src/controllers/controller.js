@@ -9,16 +9,18 @@ dotenv.config();
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-export async function allUsers(req, res) {
-    try {
-        const users = await prisma.user.findMany();
+export async function  allUsers(req, res) {
+    const users = await prisma.user.findMany();
+    res.send("All users: " + users );
+};
 
-        return res.json(users);
-    } catch (error) {
-        console.error('allUsers error:', error);
-        return res.status(500).json({ message: 'Failed to get users' });
-    }
-}
+export async function  getUser(req, res) {
+    const user = await prisma.user.findUnique({
+        where: { id : req.user.id }
+    });
+    res.json(user);
+};
+
 
 export async function registerUser(req, res) {
     try {
@@ -52,43 +54,39 @@ export async function registerUser(req, res) {
     }
 }
 
-export async function loginUser(req, res) {
+export async function loginUser(req, res)
+{
+    const {email, password} = req.body;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+        return res.status(400).json({ message: 'User not found' });
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        return res.status(400).json({ message: 'Invalid password' });
+    }
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
+
+}
+
+export async function profilUser(req, res) {
+    const token = req.header('Authorization');
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
     try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Missing email or password' });
-        }
-
-        const user = await prisma.user.findUnique({
-            where: { email }
-        });
-
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
         if (!user) {
-            return res.status(400).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'User not found' });
         }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordValid) {
-            return res.status(400).json({ message: 'Invalid password' });
-        }
-
-        if (!process.env.JWT_SECRET) {
-            return res.status(500).json({ message: 'JWT_SECRET is missing in .env' });
-        }
-
-        const token = jwt.sign(
-            { id: user.id, email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-
-        return res.json({ token });
-    } catch (error) {
-        console.error('loginUser error:', error);
-        return res.status(500).json({ message: 'Login failed' });
+        console.log("✓ Profil : " + user);
+        res.json(user);
+    } catch (err) {
+        res.status(401).json({ message: 'Invalid token' });
     }
 }
 
-export default { registerUser, allUsers, loginUser };
+export default { registerUser, allUsers, loginUser, profilUser, getUser};

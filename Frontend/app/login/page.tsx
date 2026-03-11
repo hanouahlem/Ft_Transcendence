@@ -2,33 +2,35 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const route = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
     try {
-      // Simulation temporaire
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      if (!email || !password) {
-        setError("Please fill in all fields.");
-        return;
+      const res = await fetch("http://localhost:3001/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("✓ Connecté ! Token " + data.token);
+        localStorage.setItem("token", data.token);
+        route.push("/profil");
+      } else {
+        setMessage("✗ " + data.message);
       }
-
-      console.log("Login attempt:", { email, password });
-    } catch (err) {
-      console.error(err);
-      setError("Unable to connect to the server.");
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      setMessage("✗ Serveur inaccessible");
     }
   };
 

@@ -1,47 +1,123 @@
-export default function ProfilePage() {
-  const user = {
-    username: "nabboud",
-    email: "nabboud@example.com",
-    bio: "Étudiant en informatique, passionné par le développement web, la cybersécurité et les interfaces modernes.",
-    status: "Online",
-    avatar:
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop",
-    location: "France",
-    joinedAt: "March 2026",
-    website: "portfolio.dev",
-    preferences: {
-      theme: "Dark",
-      language: "Français",
-      notifications: "Enabled",
-    },
-    notifications: [
-      "Friend request accepted by Amine",
-      "New message from Yassir",
-      "Your profile was updated successfully",
-    ],
-    activity: [
-      "Updated profile picture",
-      "Accepted a friend request",
-      "Joined a new conversation",
-      "Changed account settings",
-    ],
-    history: [
-      "Connected 2 hours ago",
-      "Last message sent yesterday",
-      "Profile created in March 2026",
-    ],
-    friends: [
-      { name: "Amine", status: "Online" },
-      { name: "Yassir", status: "Offline" },
-      { name: "Sami", status: "Online" },
-      { name: "Ikram", status: "Offline" },
-    ],
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Friend = {
+  name: string;
+  status: string;
+};
+
+type UserProfile = {
+  username: string;
+  email: string;
+  bio: string;
+  status: string;
+  avatar: string;
+  location: string;
+  joinedAt: string;
+  website: string;
+  preferences: {
+    theme: string;
+    language: string;
+    notifications: string;
   };
+  notifications: string[];
+  activity: string[];
+  history: string[];
+  friends: Friend[];
+};
+
+const defaultUser: UserProfile = {
+  username: "nabboud",
+  email: "nabboud@example.com",
+  bio: "Étudiant en informatique, passionné par le développement web, la cybersécurité et les interfaces modernes.",
+  status: "Online",
+  avatar:
+    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop",
+  location: "France",
+  joinedAt: "March 2026",
+  website: "portfolio.dev",
+  preferences: {
+    theme: "Dark",
+    language: "Français",
+    notifications: "Enabled",
+  },
+  notifications: [
+    "Friend request accepted by Amine",
+    "New message from Yassir",
+    "Your profile was updated successfully",
+  ],
+  activity: [
+    "Updated profile picture",
+    "Accepted a friend request",
+    "Joined a new conversation",
+    "Changed account settings",
+  ],
+  history: [
+    "Connected 2 hours ago",
+    "Last message sent yesterday",
+    "Profile created in March 2026",
+  ],
+  friends: [
+    { name: "Amine", status: "Online" },
+    { name: "Yassir", status: "Offline" },
+    { name: "Sami", status: "Online" },
+    { name: "Ikram", status: "Offline" },
+  ],
+};
+
+export default function Profil() {
+  const [user, setUser] = useState<UserProfile>(defaultUser);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    const fetchUser = async () => {
+      if (!token) {
+        setMessage("Aucun token trouvé. Utilisateur non connecté.");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3001/user", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setUser((prevUser) => ({
+            ...prevUser,
+            username: data.username || prevUser.username,
+            email: data.email || prevUser.email,
+          }));
+          setMessage("");
+        } else {
+          setMessage("Erreur : " + (data.message || "Impossible de récupérer l'utilisateur."));
+        }
+      } catch (error) {
+        console.error("Erreur fetch user :", error);
+        setMessage("Erreur réseau lors de la récupération du profil.");
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   return (
     <section className="min-h-screen bg-neutral-950 px-6 py-10 text-white">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
+        {message && (
+          <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {message}
+          </div>
+        )}
+
         <div className="mb-8 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-md">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -80,87 +156,60 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Main grid */}
         <div className="grid gap-6 lg:grid-cols-12">
-          {/* Left column */}
           <div className="space-y-6 lg:col-span-3">
-            {/* Personal Info */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <h2 className="mb-4 text-lg font-semibold">Personal Info</h2>
 
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Username
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-white/40">Username</p>
                   <p className="mt-1 text-sm text-white">{user.username}</p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Email
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-white/40">Email</p>
                   <p className="mt-1 text-sm text-white">{user.email}</p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Location
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-white/40">Location</p>
                   <p className="mt-1 text-sm text-white">{user.location}</p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Joined
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-white/40">Joined</p>
                   <p className="mt-1 text-sm text-white">{user.joinedAt}</p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Website
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-white/40">Website</p>
                   <p className="mt-1 text-sm text-orange-400">{user.website}</p>
                 </div>
               </div>
             </div>
 
-            {/* Preferences */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <h2 className="mb-4 text-lg font-semibold">Preferences</h2>
 
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Theme
-                  </p>
-                  <p className="mt-1 text-sm text-white">
-                    {user.preferences.theme}
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-white/40">Theme</p>
+                  <p className="mt-1 text-sm text-white">{user.preferences.theme}</p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Language
-                  </p>
-                  <p className="mt-1 text-sm text-white">
-                    {user.preferences.language}
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-white/40">Language</p>
+                  <p className="mt-1 text-sm text-white">{user.preferences.language}</p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Notifications
-                  </p>
-                  <p className="mt-1 text-sm text-green-400">
-                    {user.preferences.notifications}
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-white/40">Notifications</p>
+                  <p className="mt-1 text-sm text-green-400">{user.preferences.notifications}</p>
                 </div>
               </div>
             </div>
 
-            {/* Notifications */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <h2 className="mb-4 text-lg font-semibold">Notifications</h2>
 
@@ -177,15 +226,12 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Center column */}
           <div className="space-y-6 lg:col-span-6">
-            {/* About */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
               <h2 className="mb-4 text-xl font-semibold">About</h2>
               <p className="leading-7 text-white/75">{user.bio}</p>
             </div>
 
-            {/* Recent Activity */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
               <h2 className="mb-4 text-xl font-semibold">Recent Activity</h2>
 
@@ -202,7 +248,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Light History */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
               <h2 className="mb-4 text-xl font-semibold">History</h2>
 
@@ -219,9 +264,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Right column */}
           <div className="space-y-6 lg:col-span-3">
-            {/* Friends */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Friends</h2>
@@ -239,18 +282,14 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-white/10" />
                       <div>
-                        <p className="text-sm font-medium text-white">
-                          {friend.name}
-                        </p>
+                        <p className="text-sm font-medium text-white">{friend.name}</p>
                         <p className="text-xs text-white/40">Friend</p>
                       </div>
                     </div>
 
                     <span
                       className={`text-xs font-semibold ${
-                        friend.status === "Online"
-                          ? "text-green-400"
-                          : "text-white/40"
+                        friend.status === "Online" ? "text-green-400" : "text-white/40"
                       }`}
                     >
                       {friend.status}
@@ -260,7 +299,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Profile Summary */}
             <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5">
               <p className="text-xs uppercase tracking-[0.18em] text-orange-300/70">
                 Profile summary
@@ -274,7 +312,6 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            {/* Quick Actions */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <h2 className="mb-4 text-lg font-semibold">Quick Actions</h2>
 

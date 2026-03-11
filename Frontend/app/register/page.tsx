@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { registerUser } from "@/lib/api";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -18,20 +19,7 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3001/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data?.message || "Unable to create account.");
-        return;
-      }
+      await registerUser({ username, email, password });
 
       setSuccess(true);
       setUsername("");
@@ -39,7 +27,7 @@ export default function RegisterPage() {
       setPassword("");
     } catch (err) {
       console.error(err);
-      setError("Unable to connect to the server.");
+      setError(err instanceof Error ? err.message : "Unable to create account.");
     } finally {
       setLoading(false);
     }
