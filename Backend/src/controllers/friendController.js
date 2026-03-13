@@ -113,29 +113,24 @@ export async function acceptFriend(rea , res){
             return res.status(400).json({ message: "senderId is required" });
         }
 
-        const friends = await prisma.friends.findMany({
+        const friends = await prisma.friends.findFirst({
             where: {
                 status: "pending",
                 senderId:senderId,
                 receiverId: userId
                 },
-            
-                include: {
-                    sender: true,
-                    receiver: true
-                }
             });
 
-            if (friends.length === 0) {
-                return res.status(400).json({ message: "Friend request not found" });;
-            }
-            
-            await prisma.friends.update({
-                where: { id: friends[0].id},
-                data: {status: "accepted"}
-            });
+        if (!friends) {
+            return res.status(400).json({ message: "Friend request not found" });;
+        }
+        
+        const updatedFriend = await prisma.friends.update({
+            where: { id: friends.id},
+            data: {status: "accepted"}
+        });
 
-            return res.status(200).json({friend: "updated Friend"});
+        return res.status(200).json({friend: updatedFriend});
 
     }
     catch (error) {
@@ -145,8 +140,46 @@ export async function acceptFriend(rea , res){
 }
 
 
-export async function deleteFriend(rea , res){
+export async function deleteFriend(req , res){
 
+    try {
+        const userId = req.user.id;
+        if (!userId) {
+            return res.status(400).json({ message: "userId required" });
+        }
+
+        const { oldFriend } = req.body;
+
+        if (!oldFriend) {
+            return res.status(400).json({ message: "oldFriend is required" });
+        }
+
+
+        const friend = await prisma.friends.findFirst({
+            where: {
+                id: oldFriend,
+                status: "accepted",
+                OR: [{senderId:userId}, {receiverId: userId}]
+                }
+            
+            });
+
+        if (!friend) {
+            return res.status(400).json({ message: "Friend not found" });;
+        }
+        
+        const deletedFriend = await prisma.friends.delete({
+            where: { id: friend.id}
+        });
+
+        return res.status(200).json({friend: deletedFriend});
+
+    }
+
+    catch (error) {
+        console.error("deleteFriends error: ", error);
+        return res.status(500).json({message: "Failed to delete Friend"});
+    }
 }
 
 
