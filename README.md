@@ -58,3 +58,9 @@ npm install
 npx prisma generate
 npx prisma migrate deploy
 npx prisma studio
+
+
+## Resources
+
+- https://docs.astro.build/fr/guides/backend/prisma-postgres/
+- https://laconsole.dev/formations/express/middlewares

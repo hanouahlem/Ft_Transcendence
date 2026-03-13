@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { registerUser } from "@/lib/api";
 
-export default function Signup() {
+export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,54 +19,32 @@ export default function Signup() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3001/registerUser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, email, password }),
-      });
+      await registerUser({ username, email, password });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data?.message || "Une erreur est survenue lors de l’inscription.");
-        return;
-      }
-
-      console.log(data);
       setSuccess(true);
       setUsername("");
       setEmail("");
       setPassword("");
     } catch (err) {
-      console.error("Erreur :", err);
-      setError("Impossible de contacter le serveur.");
+      // console.error(err);
+      setError(err instanceof Error ? err.message : "Unable to create account.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="relative flex min-h-[calc(100vh-80px)] items-center justify-center overflow-hidden bg-neutral-950 px-6 py-12">
-      <div className="absolute right-[-120px] top-[-120px] h-80 w-80 rounded-full bg-orange-500/10 blur-3xl" />
-      <div className="absolute bottom-[-120px] left-[-120px] h-80 w-80 rounded-full bg-amber-400/10 blur-3xl" />
-
-      <div className="relative w-full max-w-md border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md sm:p-10">
-        <div className="pointer-events-none absolute left-0 top-0 h-5 w-5 border-l-2 border-t-2 border-orange-500" />
-        <div className="pointer-events-none absolute right-0 top-0 h-5 w-5 border-r-2 border-t-2 border-orange-500" />
-        <div className="pointer-events-none absolute bottom-0 left-0 h-5 w-5 border-b-2 border-l-2 border-orange-500" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-5 w-5 border-b-2 border-r-2 border-orange-500" />
-
+    <section className="flex min-h-screen items-center justify-center bg-neutral-950 px-6 py-10 text-white">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md">
         <div className="mb-8">
           <p className="mb-2 text-xs uppercase tracking-[0.25em] text-orange-400">
             ft_transcendence
           </p>
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Create account
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Create your account
           </h1>
           <p className="mt-2 text-sm text-white/60">
-            Rejoins la plateforme et crée ton profil pour commencer.
+            Join the platform and start building your social space.
           </p>
         </div>
 
@@ -80,11 +59,11 @@ export default function Signup() {
             <input
               id="username"
               type="text"
-              placeholder="your_nickname"
+              placeholder="your_username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-500/70 focus:bg-orange-500/5"
+              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-500/60"
             />
           </div>
 
@@ -102,7 +81,7 @@ export default function Signup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-500/70 focus:bg-orange-500/5"
+              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-500/60"
             />
           </div>
 
@@ -120,42 +99,41 @@ export default function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-500/70 focus:bg-orange-500/5"
+              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-500/60"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-3 bg-orange-500 px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading && (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            )}
-            {loading ? "Creating..." : "Sign up"}
-          </button>
-
           {success && (
-            <div className="border border-green-500/30 bg-green-500/10 px-4 py-3 text-center text-sm text-green-400">
-              ✓ Account created successfully!
+            <div className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+              Account created successfully.
             </div>
           )}
 
           {error && (
-            <div className="border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-400">
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
               {error}
             </div>
           )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold uppercase tracking-[0.15em] text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading && (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            )}
+            {loading ? "Creating..." : "Register"}
+          </button>
         </form>
 
         <div className="mt-8 border-t border-white/10 pt-6 text-center">
           <p className="mb-3 text-sm text-white/45">Already have an account?</p>
-
           <Link
             href="/login"
-            className="inline-flex w-full items-center justify-center border border-white/15 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white/70 transition hover:border-orange-500/50 hover:text-white"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white/70 transition hover:border-orange-500/50 hover:text-white"
           >
-            Log in
+            Login
           </Link>
         </div>
       </div>
