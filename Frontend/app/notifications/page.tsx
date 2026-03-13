@@ -1,3 +1,5 @@
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+
 export default function NotificationsPage() {
   const notifications = [
     {
@@ -31,6 +33,7 @@ export default function NotificationsPage() {
   ];
 
   return (
+  <ProtectedRoute>
     <section className="min-h-screen bg-neutral-950 px-6 py-10 text-white">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
@@ -127,5 +130,6 @@ export default function NotificationsPage() {
         </div>
       </div>
     </section>
+  </ProtectedRoute>
   );
 }

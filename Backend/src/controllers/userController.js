@@ -9,10 +9,22 @@ dotenv.config();
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-export async function  allUsers(req, res) {
-    const users = await prisma.user.findMany();
-    res.send("All users: " + users );
-};
+export async function allUsers(req, res) {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+      },
+    });
+
+    return res.json(users);
+  } catch (error) {
+    console.error("allUsers error:", error);
+    return res.status(500).json({ message: "Failed to fetch users" });
+  }
+}
 
 export async function  getUser(req, res) {
     const user = await prisma.user.findUnique({
