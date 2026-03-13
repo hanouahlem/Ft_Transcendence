@@ -26,7 +26,7 @@ export default function RegisterPage() {
       setEmail("");
       setPassword("");
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       setError(err instanceof Error ? err.message : "Unable to create account.");
     } finally {
       setLoading(false);

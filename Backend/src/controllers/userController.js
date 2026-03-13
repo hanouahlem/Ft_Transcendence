@@ -18,6 +18,9 @@ export async function  getUser(req, res) {
     const user = await prisma.user.findUnique({
         where: { id : req.user.id }
     });
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
     res.json(user);
 };
 
@@ -28,6 +31,18 @@ export async function registerUser(req, res) {
 
         if (!username || !email || !password) {
             return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        const userExisting = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    {email},
+                    {username}
+                ]
+            }
+        });
+        if(userExisting){
+            return res.status(400).json({message: "Email or username already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -71,22 +86,4 @@ export async function loginUser(req, res)
 
 }
 
-export async function profilUser(req, res) {
-    const token = req.header('Authorization');
-    if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
-    }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        console.log("✓ Profil : " + user);
-        res.json(user);
-    } catch (err) {
-        res.status(401).json({ message: 'Invalid token' });
-    }
-}
-
-export default { registerUser, allUsers, loginUser, profilUser, getUser};
+export default { registerUser, allUsers, loginUser, getUser};

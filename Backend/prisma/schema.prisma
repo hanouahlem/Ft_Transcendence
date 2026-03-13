@@ -19,7 +19,61 @@ model User {
   password  String
   avatar    String?
   bio       String?
+  status    String?
+  location  String?
   createdAt DateTime @default(now())
+
+  posts           Post[]
+  likes           Like[]
+  comments        Comment[]
+  sentFriends     Friends[] @relation("sent")
+  receivedFriends Friends[] @relation("received")
+  notifications   Notification[]
 }
 
+model Post {
+  id        Int       @id @default(autoincrement())
+  content   String
+  image     String?
+  createdAt DateTime  @default(now())
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  Int
+  likes     Like[]
+  comments  Comment[]
+}
 
+model Like {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+}
+
+model Friends {
+  id         Int    @id @default(autoincrement())
+  sender     User   @relation("sent", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User   @relation("received", fields: [receiverId], references: [id])
+  receiverId Int
+  status     String @default("pending")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  content   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+}
