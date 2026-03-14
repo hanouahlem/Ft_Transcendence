@@ -7,7 +7,7 @@ export type RegisterData = {
 };
 
 export type LoginData = {
-  email: string;
+  identifier: string;
   password: string;
 };
 
@@ -18,7 +18,16 @@ export type CurrentUser = {
 };
 
 async function handleResponse(response: Response) {
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error(
+      response.ok
+        ? "Invalid response from server"
+        : `Request failed (${response.status})`
+    );
+  }
 
   if (!response.ok) {
     throw new Error(data.message || "Request failed");
