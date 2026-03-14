@@ -38,6 +38,10 @@ The project subject is at `transcendance.md` in the repo root. This is the **ult
 4. Keep explanations concise. The audience is students who need to explain this to evaluators, not beginners reading a textbook
 5. Always verify claims against `transcendance.md` before writing
 
+## Frontend style
+
+Read `FRONT_DIRECTIVE.md` before any frontend work. It defines the brutalist editorial design system: color palette, typography rules, component usage, layout patterns, and what to avoid. Reference files are in `examples/`.
+
 ## Rules
 
 - Never add features or modules without checking `transcendance.md` for the exact requirements

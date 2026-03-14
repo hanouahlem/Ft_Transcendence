@@ -44,6 +44,18 @@ Ft_Transcendence/
 └── lessons.md         # Team learning log
 ```
 
+## Frontend style
+
+Read `FRONT_DIRECTIVE.md` before any frontend work. It defines the complete visual identity: brutalist editorial design system, color palette, typography, component library, layout patterns, and anti-patterns. Reference designs are in `examples/react-app.js` and `examples/react-app-2.js`.
+
+## Git commits
+
+- Use short commit messages with a prefix: `feat:`, `fix:`, `refactor:`, `docs:`, `style:`
+- Group changes by logical unit, not by file
+- Use `git add <specific files>` — never `git add .` or `git add -A`
+- Do not add yourself as co-author
+- Do not push unless explicitly asked
+
 ## Conventions
 
 - Secrets in `.env`, never in code or docker-compose. Update `.env.example` when adding new vars
