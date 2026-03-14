@@ -68,9 +68,17 @@ export async function registerUser(req, res) {
 
 export async function loginUser(req, res)
 {
-    const {email, password} = req.body;
+    const { identifier, password } = req.body;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    if (!identifier || !password) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Check if identifier is an email or username
+    const isEmail = identifier.includes("@");
+    const user = await prisma.user.findUnique({
+        where: isEmail ? { email: identifier } : { username: identifier },
+    });
     if (!user) {
         return res.status(400).json({ message: 'User not found' });
     }
