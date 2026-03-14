@@ -76,10 +76,10 @@ export async function getFriends(req , res){
                     { OR: [{senderId:userId}, {receiverId: userId}]}
                 ]},
             
-                include: {
-                    sender: true,
-                    receiver: true
-                }
+               include: {
+                            sender: { select: { id: true, username: true, avatar: true } },
+                            receiver: { select: { id: true, username: true, avatar: true } }
+}
             });
 
         const friendsList = friends.map(f => {
@@ -99,43 +99,40 @@ export async function getFriends(req , res){
 
 }
 
-export async function acceptFriend(rea , res){
-
+export async function acceptFriend(req, res) {
     try {
         const userId = req.user.id;
         if (!userId) {
             return res.status(400).json({ message: "userId required" });
         }
 
-        const { senderId } = req.body;
+        const requestId = parseInt(req.params.id);
 
-        if (!senderId) {
-            return res.status(400).json({ message: "senderId is required" });
-        }
-
-        const friends = await prisma.friends.findFirst({
-            where: {
-                status: "pending",
-                senderId:senderId,
-                receiverId: userId
-                },
-            });
-
-        if (!friends) {
-            return res.status(400).json({ message: "Friend request not found" });;
-        }
-        
-        const updatedFriend = await prisma.friends.update({
-            where: { id: friends.id},
-            data: {status: "accepted"}
+        const friends = await prisma.friends.findUnique({
+            where: { id: requestId }
         });
 
-        return res.status(200).json({friend: updatedFriend});
+        if (!friends) {
+            return res.status(404).json({ message: "Friend request not found" });
+        }
 
-    }
-    catch (error) {
-        console.error("acceptFriends error: ", error);
-        return res.status(500).json({message: "Failed to accept Friend"});
+        if (friends.receiverId !== userId) {
+            return res.status(403).json({ message: "Not authorized" });
+        }
+
+        if (friends.status !== "pending") {
+            return res.status(400).json({ message: "Request already handled" });
+        }
+
+        const updatedFriend = await prisma.friends.update({
+            where: { id: requestId },
+            data: { status: "accepted" }
+        });
+
+        return res.status(200).json({ friend: updatedFriend });
+    } catch (error) {
+        console.error("acceptFriend error:", error);
+        return res.status(500).json({ message: "Failed to accept friend" });
     }
 }
 
@@ -148,7 +145,7 @@ export async function deleteFriend(req , res){
             return res.status(400).json({ message: "userId required" });
         }
 
-        const { oldFriend } = req.body;
+        const { oldFriend } = parseInt(req.params.id);
 
         if (!oldFriend) {
             return res.status(400).json({ message: "oldFriend is required" });

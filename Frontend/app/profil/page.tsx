@@ -12,7 +12,7 @@ type Post = {
 const profileExtras = {
   bio: "Étudiant en informatique, passionné par le développement web, la cybersécurité et les interfaces modernes.",
   avatar:
-    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop",
+   "https://media.istockphoto.com/id/1214284287/fr/vectoriel/avatar-de-visage-neutre-de-genre-anonyme-silhouette-de-t%C3%AAte-incognito.jpg?s=612x612&w=0&k=20&c=JjoW6iF-Je5SV3tazgpzUJPo9XqoP0fq-5Uz7LEYM0M=",
   friendsCount: 4,
   posts: [] as Post[], // remplace avec tes vrais posts depuis l'API
 };
