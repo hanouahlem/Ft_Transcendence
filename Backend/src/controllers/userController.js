@@ -98,4 +98,30 @@ export async function loginUser(req, res)
 
 }
 
-export default { registerUser, allUsers, loginUser, getUser};
+export async function searchUser(req, res){
+
+    try{
+        const { username } = req.query;
+
+        if (!username)
+            return res.status(400).json({message: "Query is required"});
+
+        const users = await prisma.user.findMany({
+            where: {
+                username: {
+                    contains: username,
+                    mode : "insensitive"
+                }
+            },
+            select: {id: true, username: true, avatar: true}
+        });
+        return res.status(200).json(users);
+    }
+    catch(error)
+    {
+        console.error("searchUsers error:", error);
+        return res.status(500).json({ message: "Failed to search users" });
+    }
+}
+
+export default { registerUser, allUsers, loginUser, getUser, searchUser};

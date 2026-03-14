@@ -1,33 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { addFriend } from "@/lib/api";
-// ─── Mock data (remplace avec tes vrais appels API) ───────────────────────────
+import { addFriend, getFriends, getFriendRequests, acceptFriend, deleteFriend, searchUser} from "@/lib/api";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type User = {
   id: number;
   username: string;
   avatar?: string;
-  mutualFriends?: number;
 };
 
-const mockFriends: User[] = [
-  { id: 1, username: "Amine" },
-  { id: 2, username: "Yassir" },
-  { id: 3, username: "Sami" },
-  { id: 4, username: "Ikram" },
-];
-
-const mockRequests: User[] = [
-  { id: 5, username: "Karim", mutualFriends: 2 },
-  { id: 6, username: "Lina", mutualFriends: 1 },
-];
-
-const mockSuggestions: User[] = [
-  { id: 1, username: "ahlem", mutualFriends: 0 },
-  { id: 2, username: "ines", mutualFriends: 0 },
-];
+type FriendRequest = {
+  id: number;
+  sender: User;
+};
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
@@ -46,38 +34,113 @@ function Avatar({ username, size = 40 }: { username: string; size?: number }) {
 
 export default function FriendsPage() {
   const [search, setSearch] = useState("");
-  const [friends, setFriends] = useState<User[]>(mockFriends);
-  const [requests, setRequests] = useState<User[]>(mockRequests);
-  const [suggestions, setSuggestions] = useState<User[]>(mockSuggestions);
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [sentRequests, setSentRequests] = useState<number[]>([]); // ids déjà envoyés
 
-  const filteredFriends = friends.filter((f) =>
-    f.username.toLowerCase().includes(search.toLowerCase())
-  );
+  const [friends, setFriends] = useState<User[]>([]);
+  const [requests, setRequests] = useState<FriendRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const acceptRequest = (id: number) => {
-    const user = requests.find((r) => r.id === id);
-    if (user) {
-      setFriends((prev) => [...prev, user]);
-      setRequests((prev) => prev.filter((r) => r.id !== id));
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Chargement initial ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [friendsData, requestsData] = await Promise.all([
+          getFriends(),
+          getFriendRequests(),
+        ]);
+        setFriends(friendsData);
+        setRequests(requestsData);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // ── Recherche avec debounce ─────────────────────────────────────────────────
+  // debounce = attend 400ms après la dernière frappe avant d'appeler l'API
+  // évite d'envoyer une requête à chaque lettre tapée
+  useEffect(() => {
+    if (!search.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const results = await searchUser(search);
+        // exclure les utilisateurs déjà amis
+        const friendIds = friends.map((f) => f.id);
+        setSearchResults(results.filter((u: User) => !friendIds.includes(u.id)));
+      } catch (err: any) {
+        console.error(err.message);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+  }, [search, friends]);
+
+  // ── Accept ──────────────────────────────────────────────────────────────────
+  const handleAccept = async (requestId: number, sender: User) => {
+    try {
+      await acceptFriend(requestId);
+      setFriends((prev) => [...prev, sender]);
+      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+    } catch (err: any) {
+      console.error(err.message);
     }
   };
 
-  const declineRequest = (id: number) => {
-    setRequests((prev) => prev.filter((r) => r.id !== id));
+  // ── Decline ─────────────────────────────────────────────────────────────────
+  const handleDecline = async (requestId: number) => {
+    try {
+      await deleteFriend(requestId);
+      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+    } catch (err: any) {
+      console.error(err.message);
+    }
   };
-  
-const addSuggestion = async (id: number) => {
-  try {
-    await addFriend(id);
-    setSuggestions((prev) => prev.filter((s) => s.id !== id));
-  } catch (error: any) {
-    console.error(error.message);
-  }
-};
 
-  const removeFriend = (id: number) => {
-    setFriends((prev) => prev.filter((f) => f.id !== id));
+  // ── Add depuis recherche ─────────────────────────────────────────────────────
+  const handleAdd = async (receiverId: number) => {
+    try {
+      await addFriend(receiverId);
+      setSentRequests((prev) => [...prev, receiverId]); // marque comme envoyé
+    } catch (err: any) {
+      console.error(err.message);
+    }
   };
+
+  // ── Remove ──────────────────────────────────────────────────────────────────
+  const handleRemove = async (friendId: number) => {
+    try {
+      await deleteFriend(friendId);
+      setFriends((prev) => prev.filter((f) => f.id !== friendId));
+    } catch (err: any) {
+      console.error(err.message);
+    }
+  };
+
+  // ── Loading ─────────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="flex min-h-screen items-center justify-center bg-neutral-950">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-orange-500" />
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute>
@@ -86,6 +149,12 @@ const addSuggestion = async (id: number) => {
 
           {/* ── Titre ────────────────────────────────────────────────────── */}
           <h1 className="text-2xl font-bold">Friends</h1>
+
+          {error && (
+            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+              {error}
+            </p>
+          )}
 
           {/* ── Recherche ────────────────────────────────────────────────── */}
           <div className="relative">
@@ -104,6 +173,41 @@ const addSuggestion = async (id: number) => {
             />
           </div>
 
+          {/* ── Résultats de recherche ────────────────────────────────────── */}
+          {search.trim() && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-white/40">
+                Results
+              </h2>
+
+              {searchLoading ? (
+                <div className="flex justify-center py-4">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-orange-500" />
+                </div>
+              ) : searchResults.length > 0 ? (
+                <div className="space-y-3">
+                  {searchResults.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between rounded-xl bg-black/20 p-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar username={user.username} />
+                        <p className="text-sm font-medium">{user.username}</p>
+                      </div>
+                      <button
+                        onClick={() => handleAdd(user.id)}
+                        disabled={sentRequests.includes(user.id)}
+                        className="rounded-lg border border-orange-500/40 px-3 py-1.5 text-xs font-semibold text-orange-400 transition hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        {sentRequests.includes(user.id) ? "Sent" : "Add"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="py-4 text-center text-sm text-white/30">No user found.</p>
+              )}
+            </div>
+          )}
+
           {/* ── Demandes reçues ───────────────────────────────────────────── */}
           {requests.length > 0 && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -114,23 +218,18 @@ const addSuggestion = async (id: number) => {
                 {requests.map((req) => (
                   <div key={req.id} className="flex items-center justify-between rounded-xl bg-black/20 p-3">
                     <div className="flex items-center gap-3">
-                      <Avatar username={req.username} />
-                      <div>
-                        <p className="text-sm font-medium">{req.username}</p>
-                        {req.mutualFriends && (
-                          <p className="text-xs text-white/40">{req.mutualFriends} mutual friends</p>
-                        )}
-                      </div>
+                      <Avatar username={req.sender.username} />
+                      <p className="text-sm font-medium">{req.sender.username}</p>
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => acceptRequest(req.id)}
+                        onClick={() => handleAccept(req.id, req.sender)}
                         className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-orange-600"
                       >
                         Accept
                       </button>
                       <button
-                        onClick={() => declineRequest(req.id)}
+                        onClick={() => handleDecline(req.id)}
                         className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/50 transition hover:text-white"
                       >
                         Decline
@@ -145,19 +244,18 @@ const addSuggestion = async (id: number) => {
           {/* ── Liste des amis ────────────────────────────────────────────── */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-white/40">
-              My friends · {filteredFriends.length}
+              My friends · {friends.length}
             </h2>
-
-            {filteredFriends.length > 0 ? (
+            {friends.length > 0 ? (
               <div className="space-y-3">
-                {filteredFriends.map((friend) => (
+                {friends.map((friend) => (
                   <div key={friend.id} className="flex items-center justify-between rounded-xl bg-black/20 p-3">
                     <div className="flex items-center gap-3">
                       <Avatar username={friend.username} />
                       <p className="text-sm font-medium">{friend.username}</p>
                     </div>
                     <button
-                      onClick={() => removeFriend(friend.id)}
+                      onClick={() => handleRemove(friend.id)}
                       className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/40 transition hover:border-red-500/40 hover:text-red-400"
                     >
                       Remove
@@ -166,41 +264,9 @@ const addSuggestion = async (id: number) => {
                 ))}
               </div>
             ) : (
-              <p className="py-4 text-center text-sm text-white/30">
-                {search ? "No results for this search." : "No friends yet."}
-              </p>
+              <p className="py-4 text-center text-sm text-white/30">No friends yet.</p>
             )}
           </div>
-
-          {/* ── Suggestions ──────────────────────────────────────────────── */}
-          {suggestions.length > 0 && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-white/40">
-                Suggestions
-              </h2>
-              <div className="space-y-3">
-                {suggestions.map((s) => (
-                  <div key={s.id} className="flex items-center justify-between rounded-xl bg-black/20 p-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar username={s.username} />
-                      <div>
-                        <p className="text-sm font-medium">{s.username}</p>
-                        {s.mutualFriends && (
-                          <p className="text-xs text-white/40">{s.mutualFriends} mutual friends</p>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => addSuggestion(s.id)}
-                      className="rounded-lg border border-orange-500/40 px-3 py-1.5 text-xs font-semibold text-orange-400 transition hover:bg-orange-500/10"
-                    >
-                      Add
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
         </div>
       </section>

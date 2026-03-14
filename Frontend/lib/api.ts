@@ -75,3 +75,47 @@ export async function addFriend(receiverId: number) {
   });
   return handleResponse(response);
 }
+
+
+export async function getFriends() {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/friends`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse(response);
+}
+
+export async function acceptFriend(requestId: number) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/friends/${requestId}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse(response);
+}
+
+export async function deleteFriend(requestId: number) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/friends/${requestId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse(response);
+}
+
+export async function getFriendRequests() {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/friends/requests`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse(response);
+}
+
+export async function searchUser(username: string) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/users/search?username=${username}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse(response);
+
+}
