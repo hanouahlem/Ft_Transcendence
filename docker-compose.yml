@@ -3,6 +3,8 @@ services:
     image: postgres:15
     container_name: transcendence_db
     restart: always
+    env_file :
+      ./Backend/.env
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
