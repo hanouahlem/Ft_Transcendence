@@ -26,4 +26,6 @@ router.patch('/notifications/:id/read', authMiddleware, notif.markAsRead);
 router.delete('/notifications/:id', authMiddleware, notif.deleteNotif);
 
 
+
+
 export default router;

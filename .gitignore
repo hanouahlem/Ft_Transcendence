@@ -14,7 +14,7 @@ node_modules/
 /coverage
 
 .next/
-Backend/.env
+backend/.env
 dist/
 build/
 
@@ -46,5 +46,5 @@ yarn-error.log*
 next-env.d.ts
 
 
-Backend/node_modules/
+backend/node_modules/
 frontend/node_modules/

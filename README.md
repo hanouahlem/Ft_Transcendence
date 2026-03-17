@@ -53,7 +53,7 @@ cd backend -> npm run dev == serveur qui recois les info du front et lui renvoi
 
 Prisma studio : 
 docker compose up -d
-cd Backend
+cd backend
 npm install
 npx prisma generate
 npx prisma migrate deploy
