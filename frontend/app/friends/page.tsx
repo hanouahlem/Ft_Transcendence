@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   UserPlus,
-  MessageCircle,
   UserRound,
   Users,
   Bell,
@@ -104,13 +103,11 @@ export default function FriendsPage() {
     <ProtectedRoute>
       <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
         <section className="relative overflow-hidden px-6 py-10 lg:px-8">
-          {/* Background */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(216,207,184,0.35),transparent_30%)]" />
           <div className="absolute left-[-80px] top-20 h-72 w-72 rounded-full bg-[#dbe4d3]/40 blur-3xl" />
           <div className="absolute bottom-0 right-[-60px] h-80 w-80 rounded-full bg-[#ddd1bb]/50 blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl">
-            {/* Top intro */}
             <div className="mb-8 rounded-[2rem] border border-[#ddd3c2] bg-[#fffaf2]/90 p-6 shadow-[0_20px_60px_rgba(92,108,91,0.10)] backdrop-blur-xl">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-2xl">
@@ -136,7 +133,6 @@ export default function FriendsPage() {
               </div>
             </div>
 
-            {/* Search */}
             <div className="mb-8 rounded-[1.75rem] border border-[#ddd3c2] bg-[#fffaf2]/90 p-5 shadow-sm">
               <label className="mb-3 block text-sm font-medium text-[#6c756d]">
                 Search users
@@ -154,7 +150,6 @@ export default function FriendsPage() {
               </div>
             </div>
 
-            {/* Messages */}
             {error && (
               <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
@@ -168,7 +163,6 @@ export default function FriendsPage() {
             )}
 
             <div className="grid gap-6 lg:grid-cols-[1.6fr_0.9fr]">
-              {/* Users */}
               <div className="rounded-[2rem] border border-[#ddd3c2] bg-[#fffaf2]/90 p-6 shadow-sm">
                 <div className="mb-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -226,11 +220,6 @@ export default function FriendsPage() {
 
                           <div className="flex flex-wrap gap-3">
                             <button className="inline-flex items-center gap-2 rounded-full border border-[#ddd3c2] bg-[#fffaf2] px-4 py-2 text-sm font-medium text-[#4e5a50] transition hover:bg-[#f3ecdf]">
-                              <MessageCircle className="h-4 w-4" />
-                              Message
-                            </button>
-
-                            <button className="inline-flex items-center gap-2 rounded-full border border-[#ddd3c2] bg-[#fffaf2] px-4 py-2 text-sm font-medium text-[#4e5a50] transition hover:bg-[#f3ecdf]">
                               <UserRound className="h-4 w-4" />
                               Profile
                             </button>
@@ -255,7 +244,6 @@ export default function FriendsPage() {
                 )}
               </div>
 
-              {/* Sidebar */}
               <div className="space-y-6">
                 <div className="rounded-[2rem] border border-[#ddd3c2] bg-[#fffaf2]/90 p-6 shadow-sm">
                   <div className="mb-5 flex items-center gap-3">

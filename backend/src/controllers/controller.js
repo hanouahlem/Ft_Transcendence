@@ -35,6 +35,8 @@ export async function  getUser(req, res) {
 
 
 export async function registerUser(req, res) {
+console.log("req.body =", req.body);
+
     try {
         const { username, email, password } = req.body;
 
