@@ -19,7 +19,7 @@ services:
 
   backend:
     build:
-      context: ./Backend
+      context: ./backend
       dockerfile: Dockerfile
     container_name: transcendence_backend
     restart: always
@@ -33,14 +33,14 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./Backend:/app
+      - ./backend:/app
       - /app/node_modules
     command: sh -c "npm install && npx prisma generate && npx prisma migrate deploy && npm run dev"
 
 
   frontend:
     build:
-      context: ./Frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: transcendence_frontend
     restart: always
@@ -53,7 +53,7 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./Frontend:/app
+      - ./frontend:/app
       - /app/node_modules
     command: sh -c "npm install && npm run dev"
 
