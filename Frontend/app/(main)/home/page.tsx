@@ -1,5 +1,3 @@
-import { Header } from "@/components/header"
-import { MobileNav } from "@/components/mobile-nav"
 import { PostCard } from "@/components/post-card"
 import { UserCard } from "@/components/user-card"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,9 +8,7 @@ import { TrendingUp } from "lucide-react"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <Header />
-      
+    <>
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           {/* Feed principal */}
@@ -96,8 +92,6 @@ export default function HomePage() {
           </aside>
         </div>
       </main>
-      
-      <MobileNav />
-    </div>
+    </>
   )
 }

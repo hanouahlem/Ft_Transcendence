@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { useParams } from "next/navigation"
-import { Header } from "@/components/header"
-import { MobileNav } from "@/components/mobile-nav"
 import { PostCard } from "@/components/post-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -49,9 +47,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <Header />
-      
+    <>
       <main className="mx-auto max-w-4xl">
         {/* Cover & Avatar */}
         <div className="relative">
@@ -221,8 +217,6 @@ export default function ProfilePage() {
           </Tabs>
         </div>
       </main>
-      
-      <MobileNav />
-    </div>
+    </>
   )
 }

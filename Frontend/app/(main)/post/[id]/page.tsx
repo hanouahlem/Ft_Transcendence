@@ -4,8 +4,6 @@ import { useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Header } from "@/components/header"
-import { MobileNav } from "@/components/mobile-nav"
 import { Comment, CommentData } from "@/components/comment"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -116,9 +114,7 @@ export default function PostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <Header />
-      
+    <>
       <main className="mx-auto max-w-3xl px-4 py-6">
         {/* Back button */}
         <Link 
@@ -279,8 +275,6 @@ export default function PostPage() {
           </div>
         </div>
       </main>
-      
-      <MobileNav />
-    </div>
+    </>
   )
 }

@@ -1,4 +1,4 @@
-import Navbar from "@/components/layout/Navbar";
+import { Header } from "@/components/header";
 
 export default function MainLayout({
   children,
@@ -6,9 +6,9 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Navbar />
+    <div className="min-h-screen bg-background">
+      <Header />
       {children}
-    </>
+    </div>
   );
 }

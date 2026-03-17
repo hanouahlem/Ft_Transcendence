@@ -2,8 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { Header } from "@/components/header"
-import { MobileNav } from "@/components/mobile-nav"
 import { PostCard } from "@/components/post-card"
 import { UserCard } from "@/components/user-card"
 import { Input } from "@/components/ui/input"
@@ -242,16 +240,12 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <Header />
-      <Suspense fallback={
-        <main className="mx-auto max-w-3xl px-4 py-6">
-          <div className="h-10 w-full animate-pulse rounded-md bg-muted" />
-        </main>
-      }>
-        <SearchContent />
-      </Suspense>
-      <MobileNav />
-    </div>
+    <Suspense fallback={
+      <main className="mx-auto max-w-3xl px-4 py-6">
+        <div className="h-10 w-full animate-pulse rounded-md bg-muted" />
+      </main>
+    }>
+      <SearchContent />
+    </Suspense>
   )
 }
