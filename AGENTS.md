@@ -6,7 +6,29 @@ A **42 school group project** where 4-5 students build a full-stack web applicat
 
 ## Source of truth
 
-The file `transcendance.md` at the repo root is the **official project subject** from 42. All requirements, module definitions, grading criteria, and constraints come from this document. Always reference it before making architectural decisions or claiming a module is complete.
+The file `transcendance.md` at the repo root is the **official project subject** from 42. All requirements, module definitions, grading criteria, and constraints come from this document. Always reference it before making architectural decisions or claiming a module is complete. Never add features or modules without checking it first.
+
+## Stack
+
+- **Frontend:** Next.js (App Router) + Tailwind CSS + shadcn/ui — runs on port 3000
+- **Backend:** Express.js + Prisma ORM — runs on port 3001
+- **Database:** PostgreSQL — runs on port 5432
+- **Real-time:** Socket.io (attached to the Express server)
+- **Auth:** JWT tokens stored in localStorage, bcrypt for password hashing
+- **Deployment:** Docker Compose (single `docker compose up` to run everything)
+
+## Key files
+
+- `transcendance.md` — the 42 subject (source of truth)
+- `lessons.md` — team learning log (see below)
+- `.env.example` — required environment variables
+- `Frontend/lib/api.ts` — all frontend API calls
+- `Frontend/context/AuthContext.tsx` — auth state (token, user, login/logout)
+- `Frontend/context/SocketContext.tsx` — WebSocket connection and online users
+- `Backend/src/controllers/controller.js` — all route handlers
+- `Backend/src/routes/routes.js` — route definitions
+- `Backend/src/middleware/auth.js` — JWT verification middleware
+- `Backend/prisma/schema.prisma` — database schema
 
 ## Updating lessons.md
 
