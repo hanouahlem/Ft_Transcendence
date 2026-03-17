@@ -14,8 +14,6 @@ import {
   Bell,
   Users,
   Pencil,
-  Mail,
-  Leaf,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,11 +31,6 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-
-type Friend = {
-  name: string;
-  status: string;
-};
 
 type FeedPost = {
   id: number;
@@ -59,20 +52,9 @@ const profileExtras = {
   location: "France",
   joinedAt: "March 2026",
   website: "portfolio.dev",
-  preferences: {
-    theme: "Soft Sage",
-    language: "Français",
-    notifications: "Enabled",
-  },
-  notifications: [
-    "Friend request accepted by Amine",
-    "New message from Yassir",
-    "Your profile was updated successfully",
-  ],
   activity: [
     "Updated profile picture",
     "Accepted a friend request",
-    "Joined a new conversation",
     "Changed account settings",
   ],
   history: [
@@ -80,12 +62,6 @@ const profileExtras = {
     "Last message sent yesterday",
     "Profile created in March 2026",
   ],
-  friends: [
-    { name: "Amine", status: "Online" },
-    { name: "Yassir", status: "Offline" },
-    { name: "Sami", status: "Online" },
-    { name: "Ikram", status: "Offline" },
-  ] as Friend[],
   posts: [
     {
       id: 1,
@@ -227,122 +203,20 @@ export default function Profil() {
       <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
         <section className="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.16),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(216,207,184,0.32),transparent_30%)]" />
-          <div className="relative mx-auto max-w-7xl">
+
+          <div className="relative mx-auto max-w-[1500px]">
             <div className="grid gap-6 lg:grid-cols-12">
-              {/* Left sidebar */}
-              <div className="space-y-6 lg:col-span-3">
-                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex items-center gap-2">
-                      <Leaf className="h-4 w-4 text-[#6f8467]" />
-                      <p className="text-sm font-semibold text-[#6f8467]">
-                        Personal Info
-                      </p>
-                    </div>
-
-                    <div className="space-y-4 text-sm">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#8f968d]">
-                          Username
-                        </p>
-                        <p className="mt-1 text-[#2f3a32]">
-                          {user?.username || "Utilisateur"}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#8f968d]">
-                          Email
-                        </p>
-                        <p className="mt-1 text-[#2f3a32]">
-                          {user?.email || "email@example.com"}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#8f968d]">
-                          Location
-                        </p>
-                        <p className="mt-1 text-[#2f3a32]">{profileExtras.location}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#8f968d]">
-                          Joined
-                        </p>
-                        <p className="mt-1 text-[#2f3a32]">{profileExtras.joinedAt}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#8f968d]">
-                          Website
-                        </p>
-                        <p className="mt-1 text-[#6f8467]">{profileExtras.website}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
-                  <CardContent className="p-6">
-                    <h2 className="mb-4 text-lg font-semibold text-[#2f3a32]">
-                      Preferences
-                    </h2>
-
-                    <div className="space-y-4 text-sm">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#8f968d]">
-                          Theme
-                        </p>
-                        <p className="mt-1">{profileExtras.preferences.theme}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#8f968d]">
-                          Language
-                        </p>
-                        <p className="mt-1">{profileExtras.preferences.language}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#8f968d]">
-                          Notifications
-                        </p>
-                        <p className="mt-1 text-[#6f8467]">
-                          {profileExtras.preferences.notifications}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#eef3e8]/90 shadow-sm">
-                  <CardContent className="p-6">
-                    <p className="text-xs uppercase tracking-[0.18em] text-[#6f8467]">
-                      Profile summary
-                    </p>
-                    <h3 className="mt-2 text-xl font-bold text-[#2f3a32]">
-                      Active community member
-                    </h3>
-                    <p className="mt-3 text-sm leading-6 text-[#617061]">
-                      This profile is active, connected with friends, and regularly
-                      interacting through posts, comments, and reactions.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
               {/* Center column */}
-              <div className="space-y-6 lg:col-span-6">
+              <div className="space-y-6 lg:col-span-9">
                 {/* Cover + profile header */}
                 <Card className="overflow-hidden rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
-                  <div className="h-40 bg-gradient-to-r from-[#b7c7aa] via-[#d8cfb8] to-[#8ca27d]" />
+                  <div className="h-44 bg-gradient-to-r from-[#b7c7aa] via-[#d8cfb8] to-[#8ca27d]" />
 
                   <CardContent className="p-0">
-                    <div className="px-6 pb-6">
+                    <div className="px-8 pb-8">
                       <div className="-mt-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-                          <Avatar className="h-24 w-24 border-4 border-[#fffaf2] shadow-md">
+                          <Avatar className="h-28 w-28 border-4 border-[#fffaf2] shadow-md">
                             <AvatarImage
                               src={profileExtras.avatar}
                               alt="Avatar utilisateur"
@@ -377,13 +251,7 @@ export default function Profil() {
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit profile
                           </Button>
-                          <Button
-                            variant="outline"
-                            className="rounded-full border-[#d8cfbe] bg-[#fffaf2]"
-                          >
-                            <Mail className="mr-2 h-4 w-4" />
-                            Send message
-                          </Button>
+
                           <Button
                             variant="outline"
                             className="rounded-full border-[#d8cfbe] bg-[#fffaf2]"
@@ -394,7 +262,7 @@ export default function Profil() {
                         </div>
                       </div>
 
-                      <p className="mt-5 max-w-3xl text-sm leading-7 text-[#4e5850]">
+                      <p className="mt-5 max-w-4xl text-sm leading-7 text-[#4e5850]">
                         {profileExtras.bio}
                       </p>
 
@@ -415,7 +283,7 @@ export default function Profil() {
                         </div>
                       </div>
 
-                      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
                         <div className="rounded-2xl border border-[#e3d9c8] bg-[#fcf8f1] p-4">
                           <p className="text-2xl font-bold text-[#2f3a32]">34</p>
                           <p className="text-sm text-[#7b847b]">Posts</p>
@@ -437,7 +305,7 @@ export default function Profil() {
                   </CardContent>
                 </Card>
 
-                {/* Twitter-like feed */}
+                {/* Feed */}
                 <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
                   <CardContent className="p-5 sm:p-6">
                     <Tabs defaultValue="posts" className="w-full">
@@ -498,75 +366,7 @@ export default function Profil() {
 
               {/* Right sidebar */}
               <div className="space-y-6 lg:col-span-3">
-                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-[#2f3a32]">
-                        Friends
-                      </h2>
-                      <Button
-                        variant="ghost"
-                        className="h-auto p-0 text-[#6f8467] hover:bg-transparent hover:text-[#5f7358]"
-                      >
-                        See all
-                      </Button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {profileExtras.friends.map((friend, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between rounded-2xl border border-[#e3d9c8] bg-[#fcf8f1] p-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10 border border-[#d8cfbe]">
-                              <AvatarFallback className="bg-[#eef3e8] text-[#6f8467]">
-                                {friend.name.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium text-[#2f3a32]">
-                                {friend.name}
-                              </p>
-                              <p className="text-xs text-[#7b847b]">Friend</p>
-                            </div>
-                          </div>
-
-                          <span
-                            className={`text-xs font-semibold ${
-                              friend.status === "Online"
-                                ? "text-[#6f8467]"
-                                : "text-[#9aa19a]"
-                            }`}
-                          >
-                            {friend.status}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
-                  <CardContent className="p-6">
-                    <h2 className="mb-4 text-lg font-semibold text-[#2f3a32]">
-                      Notifications
-                    </h2>
-
-                    <div className="space-y-3">
-                      {profileExtras.notifications.map((item, index) => (
-                        <div
-                          key={index}
-                          className="rounded-2xl border border-[#e3d9c8] bg-[#fcf8f1] px-4 py-3 text-sm text-[#576358]"
-                        >
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
+                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm lg:sticky lg:top-6">
                   <CardContent className="p-6">
                     <h2 className="mb-4 text-lg font-semibold text-[#2f3a32]">
                       Quick Actions
@@ -580,13 +380,7 @@ export default function Profil() {
                         <Settings className="mr-2 h-4 w-4" />
                         Open settings
                       </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start rounded-2xl border-[#d8cfbe] bg-[#faf5eb]"
-                      >
-                        <Mail className="mr-2 h-4 w-4" />
-                        View conversations
-                      </Button>
+
                       <Button
                         variant="outline"
                         className="w-full justify-start rounded-2xl border-[#d8cfbe] bg-[#faf5eb]"
