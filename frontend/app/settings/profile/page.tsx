@@ -25,7 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 
 export default function SettingsProfilePage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");

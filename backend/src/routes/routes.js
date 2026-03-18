@@ -1,9 +1,9 @@
 import ctrl from "../controllers/userController.js";
 import friend from "../controllers/friendController.js";
+import {createPostHandler,getPostsHandler,deletePostHandler,likePostHandler,unlikePostHandler,} from "../controllers/postController.js";
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
-import {createPostHandler,getPostsHandler,deletePostHandler,} from "../controllers/postController.js";
 
 const router = Router();
 
@@ -19,8 +19,10 @@ router.put("/friends/:id", authMiddleware, friend.acceptFriend);
 router.delete("/friends/:id", authMiddleware, friend.deleteFriend);
 router.get("/friends/requests", authMiddleware, friend.getFriendRequests);
 
-router.get("/posts", getPostsHandler);
+router.get("/posts", authMiddleware, getPostsHandler);
 router.post("/posts", authMiddleware, upload.single("media"), createPostHandler);
 router.delete("/posts/:id", authMiddleware, deletePostHandler);
+router.post("/posts/:id/like", authMiddleware, likePostHandler);
+router.delete("/posts/:id/like", authMiddleware, unlikePostHandler);
 
 export default router;

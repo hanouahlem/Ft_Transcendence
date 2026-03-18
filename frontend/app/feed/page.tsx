@@ -12,6 +12,7 @@ import {
   Leaf,
   Image as ImageIcon,
   X,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,20 @@ function formatPostTime(dateString: string) {
   });
 }
 
-function PostCard({ post }: { post: FeedPost }) {
+function PostCard({
+  post,
+  currentUserId,
+  onDelete,
+  deletingPostId,
+}: {
+  post: FeedPost;
+  currentUserId: number | undefined;
+  onDelete: (postId: number) => Promise<void>;
+  deletingPostId: number | null;
+}) {
+  const isOwner = post.author.id === currentUserId;
+  const isDeleting = deletingPostId === post.id;
+
   return (
     <Card className="overflow-hidden rounded-[1.75rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
       <CardContent className="p-5">
@@ -57,17 +71,32 @@ function PostCard({ post }: { post: FeedPost }) {
           </Avatar>
 
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <p className="font-semibold text-[#2f3a32]">
-                {post.author.username}
-              </p>
-              <p className="text-sm text-[#7b847b]">
-                @{post.author.username.toLowerCase()}
-              </p>
-              <span className="text-sm text-[#a0a79f]">·</span>
-              <p className="text-sm text-[#7b847b]">
-                {formatPostTime(post.createdAt)}
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <p className="font-semibold text-[#2f3a32]">
+                  {post.author.username}
+                </p>
+                <p className="text-sm text-[#7b847b]">
+                  @{post.author.username.toLowerCase()}
+                </p>
+                <span className="text-sm text-[#a0a79f]">·</span>
+                <p className="text-sm text-[#7b847b]">
+                  {formatPostTime(post.createdAt)}
+                </p>
+              </div>
+
+              {isOwner && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onDelete(post.id)}
+                  disabled={isDeleting}
+                  className="rounded-full border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </Button>
+              )}
             </div>
 
             <p className="mt-3 text-sm leading-7 text-[#4e5850]">
@@ -113,7 +142,7 @@ function PostCard({ post }: { post: FeedPost }) {
 }
 
 export default function FeedPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [postContent, setPostContent] = useState("");
@@ -123,37 +152,48 @@ export default function FeedPage() {
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-
+  const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  if (!token) {
+    return;
+  }
 
-      const res = await fetch("http://localhost:3001/posts");
-      const data = await res.json();
+  try {
+    setLoading(true);
+    setError("");
 
-      if (!res.ok) {
-        throw new Error(data.message || "Impossible de récupérer les posts.");
-      }
+    const res = await fetch("http://localhost:3001/posts", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      setPosts(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Erreur fetchPosts :", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Erreur lors du chargement du feed."
-      );
-    } finally {
-      setLoading(false);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Impossible de récupérer les posts.");
     }
-  };
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+    setPosts(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("Erreur fetchPosts :", err);
+    setError(
+      err instanceof Error
+        ? err.message
+        : "Erreur lors du chargement du feed."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+    useEffect(() => {
+    if (token) {
+        fetchPosts();
+    }
+    }, [token]);
 
   const handleOpenFilePicker = () => {
     fileInputRef.current?.click();
@@ -231,6 +271,44 @@ export default function FeedPage() {
       setPublishing(false);
     }
   };
+
+  const handleDelete = async (postId: number) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    setError("Tu dois être connecté pour supprimer un post.");
+    return;
+  }
+
+  try {
+    setDeletingPostId(postId);
+    setError("");
+    setMessage("");
+
+    const res = await fetch(`http://localhost:3001/posts/${postId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Impossible de supprimer le post.");
+    }
+
+    setMessage("Post supprimé avec succès.");
+    await fetchPosts();
+  } catch (err) {
+    console.error("Erreur suppression post :", err);
+    setError(
+      err instanceof Error ? err.message : "Erreur lors de la suppression."
+    );
+  } finally {
+    setDeletingPostId(null);
+  }
+};
 
   return (
     <ProtectedRoute>
@@ -359,8 +437,14 @@ export default function FeedPage() {
                 ) : (
                   <div className="space-y-4">
                     {posts.map((post) => (
-                      <PostCard key={post.id} post={post} />
-                    ))}
+                        <PostCard
+                            key={post.id}
+                            post={post}
+                            currentUserId={user?.id}
+                            onDelete={handleDelete}
+                            deletingPostId={deletingPostId}
+                        />
+                        ))}
                   </div>
                 )}
               </CardContent>
