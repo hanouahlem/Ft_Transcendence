@@ -13,26 +13,28 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setSuccess(false);
-    setError("");
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
+  setSuccess(false);
+  setError("");
 
-    try {
-      await registerUser({ username, email, password });
+  try {
+    const result = await registerUser({ username, email, password });
 
-      setSuccess(true);
-      setUsername("");
-      setEmail("");
-      setPassword("");
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : "Unable to create account.");
-    } finally {
-      setLoading(false);
+    if (!result.ok) {
+      setError(result.message);
+      return;
     }
-  };
+
+    setSuccess(true);
+    setUsername("");
+    setEmail("");
+    setPassword("");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">

@@ -16,6 +16,7 @@ import {
   Pencil,
 } from "lucide-react";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -199,7 +200,7 @@ export default function Profil() {
   const { user } = useAuth();
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute>``  ` `
       <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
         <section className="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.16),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(216,207,184,0.32),transparent_30%)]" />
@@ -247,10 +248,12 @@ export default function Profil() {
                         </div>
 
                         <div className="flex flex-wrap gap-3">
-                          <Button className="rounded-full bg-[#6f8467] text-white hover:bg-[#5f7358]">
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit profile
-                          </Button>
+                          <Button asChild className="rounded-full bg-[#6f8467] text-white hover:bg-[#5f7358]">
+                            <Link href="/settings/profile">
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit profile
+                            </Link>
+                        </Button>
 
                           <Button
                             variant="outline"
@@ -374,11 +377,14 @@ export default function Profil() {
 
                     <div className="space-y-3">
                       <Button
+                        asChild
                         variant="outline"
                         className="w-full justify-start rounded-2xl border-[#d8cfbe] bg-[#faf5eb]"
                       >
-                        <Settings className="mr-2 h-4 w-4" />
-                        Open settings
+                        <Link href="/settings/profile">
+                          <Settings className="mr-2 h-4 w-4" />
+                          Open settings
+                        </Link>
                       </Button>
 
                       <Button
