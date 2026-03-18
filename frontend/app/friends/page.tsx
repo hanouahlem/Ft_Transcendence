@@ -12,7 +12,7 @@ import {
   Leaf,
 } from "lucide-react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { sendFriendRequest } from "@/lib/api";
+import { getFriendRequests } from "@/lib/api";
 
 type UserItem = {
   id: number;
@@ -85,7 +85,7 @@ export default function FriendsPage() {
       setSendingId(receiverId);
       setActionMessage("");
 
-      const data = await sendFriendRequest(receiverId, token);
+      const data = await getFriendRequests(receiverId, token);
 
       setSentRequests((prev) => [...prev, receiverId]);
       setActionMessage(data.message || "Friend request sent.");

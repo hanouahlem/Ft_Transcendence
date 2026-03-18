@@ -30,6 +30,9 @@ export async function  getUser(req, res) {
     const user = await prisma.user.findUnique({
         where: { id : req.user.id }
     });
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
     res.json(user);
 };
 
@@ -42,6 +45,18 @@ console.log("req.body =", req.body);
 
         if (!username || !email || !password) {
             return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        const userExisting = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    {email},
+                    {username}
+                ]
+            }
+        });
+        if(userExisting){
+            return res.status(400).json({message: "Email or username already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -85,81 +100,30 @@ export async function loginUser(req, res)
 
 }
 
-export async function profilUser(req, res) {
-    const token = req.header('Authorization');
-    if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
-    }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        console.log("✓ Profil : " + user);
-        res.json(user);
-    } catch (err) {
-        res.status(401).json({ message: 'Invalid token' });
-    }
-}
+export async function searchUser(req, res){
 
-export async function sendFriendRequest(req, res) {
-    try {
-        const senderId = req.user.id;
-        const { receiverId } = req.body;
+    try{
+        const { username } = req.query;
 
-        if (!receiverId) {
-            return res.status(400).json({ message: "receiverId is required" });
-        }
+        if (!username)
+            return res.status(400).json({message: "Query is required"});
 
-        if (senderId === receiverId) {
-            return res.status(400).json({ message: "You cannot add yourself" });
-        }
-
-        const receiver = await prisma.user.findUnique({
-            where: { id: receiverId }
-        });
-
-        if (!receiver) {
-            return res.status(404).json({ message: "Receiver not found" });
-        }
-
-        const existingRequest = await prisma.friendRequest.findFirst({
+        const users = await prisma.user.findMany({
             where: {
-                OR: [
-                    { senderId, receiverId },
-                    { senderId: receiverId, receiverId: senderId }
-                ]
-            }
+                username: {
+                    contains: username,
+                    mode : "insensitive"
+                }
+            },
+            select: {id: true, username: true, avatar: true}
         });
-
-        if (existingRequest) {
-            return res.status(400).json({ message: "Friend request already exists" });
-        }
-
-        const request = await prisma.friendRequest.create({
-            data: {
-                senderId,
-                receiverId,
-                status: "pending"
-            }
-        });
-
-        return res.status(201).json({
-            message: "Friend request sent",
-            request
-        });
-    } catch (error) {
-        console.error("sendFriendRequest error:", error);
-        return res.status(500).json({ message: "Failed to send friend request" });
+        return res.status(200).json(users);
+    }
+    catch(error)
+    {
+        console.error("searchUsers error:", error);
+        return res.status(500).json({ message: "Failed to search users" });
     }
 }
 
-export default {
-  registerUser,
-  allUsers,
-  loginUser,
-  profilUser,
-  getUser,
-  sendFriendRequest
-};
+export default { registerUser, allUsers, loginUser, getUser, searchUser};
