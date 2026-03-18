@@ -1,6 +1,6 @@
 import ctrl from '../controllers/userController.js';
 import friend from '../controllers/friendController.js';
-// import post from '../controllers/postController.js';
+import post from '../controllers/postController.js';
 
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
@@ -23,3 +23,4 @@ router.get('/friends/requests', authMiddleware, friend.getFriendRequests);
 
 
 export default router;
+

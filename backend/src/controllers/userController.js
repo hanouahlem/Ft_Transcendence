@@ -38,8 +38,8 @@ export async function  getUser(req, res) {
 
 
 export async function registerUser(req, res) {
-console.log("req.body =", req.body);
-
+    
+    console.log("req.body =", req.body);
     try {
         const { username, email, password } = req.body;
 
@@ -55,6 +55,7 @@ console.log("req.body =", req.body);
                 ]
             }
         });
+        
         if(userExisting){
             return res.status(400).json({message: "Email or username already exists" });
         }
@@ -83,6 +84,7 @@ console.log("req.body =", req.body);
     }
 }
 
+
 export async function loginUser(req, res)
 {
     const {email, password} = req.body;
@@ -99,6 +101,7 @@ export async function loginUser(req, res)
     res.json({ token });
 
 }
+
 
 export async function searchUser(req, res){
 
