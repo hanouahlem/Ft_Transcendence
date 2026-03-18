@@ -21,7 +21,8 @@ The file `transcendance.md` at the repo root is the **official project subject**
 
 - `transcendance.md` — the 42 subject (source of truth)
 - `lessons.md` — team learning log (see below)
-- `.env.example` — required environment variables
+- `backend/.env.example` — backend environment template
+- `frontend/.env.local.example` — frontend environment template
 - `frontend/lib/api.ts` — all frontend API calls
 - `frontend/context/AuthContext.tsx` — auth state (token, user, login/logout)
 - `frontend/context/SocketContext.tsx` — WebSocket connection and online users
@@ -61,7 +62,8 @@ Ft_Transcendence/
 │   │   └── middleware/
 │   └── prisma/        # Schema and migrations
 ├── docker-compose.yml
-├── .env.example       # Required env vars (copy to .env)
+├── backend/.env.example            # Backend env template
+├── frontend/.env.local.example     # Frontend env template
 ├── transcendance.md   # 42 subject (source of truth)
 └── lessons.md         # Team learning log
 ```
@@ -77,7 +79,7 @@ Ft_Transcendence/
 
 ## Conventions
 
-- Secrets in `.env`, never in code or docker-compose. Update `.env.example` when adding new vars
+- Secrets in `.env`, never in code or docker-compose. Update the relevant env example file when adding new vars
 - Frontend and backend are separate services communicating via REST API and WebSockets
 - Forms use `noValidate` — all validation is in JavaScript handlers
 - Auth flow: JWT in localStorage, `Authorization: Bearer <token>` header for protected routes

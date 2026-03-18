@@ -49,7 +49,7 @@ Browser (client)
 
 - **`JWT_SECRET`** is the key used to sign and verify JWT tokens. Without it, `jwt.sign()` crashes — the backend cannot create tokens.
 - It lives in a `.env` file at the project root (never committed to git). `docker-compose.yml` reads it via `${JWT_SECRET}`.
-- `.env.example` is committed to show teammates which variables they need. They copy it: `cp .env.example .env` and fill in their values.
+- `backend/.env.example` and `frontend/.env.local.example` are committed to show teammates which variables they need. They copy the backend template to `backend/.env` and, if needed, the frontend template to `frontend/.env.local`.
 - **Why not hardcode it?** Secrets in source code end up in git history. Anyone with repo access can see them. Environment variables keep secrets out of the codebase.
 
 ### Why not cookies?

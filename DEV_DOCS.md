@@ -11,11 +11,16 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/transcendence
 JWT_SECRET=dev-secret-change-me
 ```
 
-The tracked template is `.env.example` and matches the same values, plus the optional frontend API variable:
+The tracked backend template is `backend/.env.example`:
 
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/transcendence
 JWT_SECRET=dev-secret-change-me
+```
+
+The tracked frontend template is `frontend/.env.local.example`:
+
+```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
@@ -101,16 +106,21 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
   - Real local backend env file
   - Ignored by git
 
-- `.env.example`
-  - Tracked template for teammates
+- `backend/.env.example`
+  - Tracked backend template for teammates
 
 - `frontend/.env.local`
   - Optional
   - Only needed if you want to override the frontend API URL
 
+- `frontend/.env.local.example`
+  - Tracked frontend template
+  - Useful if teammates want an explicit frontend env file
+
 ## Summary
 
 - Create and keep `backend/.env` for local backend development
-- Keep `.env.example` updated whenever env variables change
+- Keep `backend/.env.example` updated whenever backend env variables change
+- Keep `frontend/.env.local.example` updated whenever frontend env variables change
 - Use Docker Compose if you want the full stack together
 - Use `frontend/.env.local` only if the frontend API URL needs to change
