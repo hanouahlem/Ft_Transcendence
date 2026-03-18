@@ -1,45 +1,88 @@
-import dotenv from 'dotenv';
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import jwt from 'jsonwebtoken';
+import {
+  createPost,
+  getAllPosts,
+  deletePost,
+} from "../services/postService.js";
 
-dotenv.config();
+export const getPostsHandler = async (req, res) => {
+  try {
+    const posts = await getAllPosts();
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Erreur getPostsHandler :", error);
+    res.status(500).json({ message: "Unable to fetch posts." });
+  }
+};
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
+export const createPostHandler = async (req, res) => {
+  try {
+    const { content } = req.body;
 
-export async function createPost(req, res){
-
-    try{ 
-    const {content, image} = req.body;
-    if(!content){
-        res.status(400).json({message: "Content is required"});
+    if (!content || typeof content !== "string" || !content.trim()) {
+      return res.status(400).json({
+        message: "Post content is required.",
+      });
     }
-    
-    const post = await prisma.post.create({
-        data:{
-            content,
-            image,
-            authorId: req.user.id
-        }
+
+    const authorId = req.user?.id ?? req.user?.userId;
+
+    if (!authorId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    let mediaUrl = null;
+
+    if (req.file) {
+      mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    }
+
+    const newPost = await createPost({
+      content: content.trim(),
+      mediaUrl,
+      authorId,
     });
 
-    res.status(201).json(post);
+    return res.status(201).json({
+      message: "Post created successfully.",
+      post: newPost,
+    });
+  } catch (error) {
+    console.error("Erreur createPostHandler :", error);
+    return res.status(500).json({
+      message: error.message || "Unable to create post.",
+    });
+  }
+};
 
+export const deletePostHandler = async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+
+    if (!postId || Number.isNaN(postId)) {
+      return res.status(400).json({
+        message: "Invalid post id.",
+      });
     }
-    catch (error){
-        console.error("createPost error:", error);
-        res.status(500).json({message: "Server error"});
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
     }
-}
 
-export async function getPosts(req, res) {
-    
-   
-}
+    await deletePost(postId, userId, req);
 
-export async function deletePost(req, res) {
-    
-}
+    return res.status(200).json({
+      message: "Post deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Erreur deletePostHandler :", error);
 
-export default { createPost, getPosts, deletePost };
+    return res.status(500).json({
+      message: error.message || "Unable to delete post.",
+    });
+  }
+};

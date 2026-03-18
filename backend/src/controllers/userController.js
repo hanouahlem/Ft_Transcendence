@@ -1,13 +1,10 @@
 import dotenv from 'dotenv';
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-
+import prisma from "../prisma.js";
 dotenv.config();
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
+
 
 export async function allUsers(req, res) {
   try {
@@ -84,23 +81,34 @@ export async function registerUser(req, res) {
     }
 }
 
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-export async function loginUser(req, res)
-{
-    const {email, password} = req.body;
+    const user = await prisma.user.findUnique({where: { email },});
 
-    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-        return res.status(400).json({ message: 'User not found' });
+      return res.status(401).json({message: "Email or password is incorrect.",});
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-        return res.status(400).json({ message: 'Invalid password' });
-    }
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
 
-}
+    const passwordOk = await bcrypt.compare(password, user.password);
+
+    if (!passwordOk) {
+      return res.status(401).json({message: "Email or password is incorrect.",});
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email },process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return res.status(200).json({message: "Login successful",token,});
+  }
+
+  catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({message: "Server error during login."});
+  }
+};
 
 
 export async function searchUser(req, res){

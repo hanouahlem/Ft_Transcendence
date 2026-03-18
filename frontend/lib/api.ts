@@ -1,5 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
+
 export type RegisterData = {
   username: string;
   email: string;
@@ -17,14 +18,32 @@ export type CurrentUser = {
   email: string;
 };
 
-async function handleResponse(response: Response) {
+export type ApiSuccess<T> = {
+  ok: true;
+  data: T;
+};
+
+export type ApiFailure = {
+  ok: false;
+  message: string;
+};
+
+export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
+
+async function handleResponse<T>(response: Response): Promise<ApiResult<T>> {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "Request failed");
+    return {
+      ok: false,
+      message: data.message || "Request failed",
+    };
   }
 
-  return data;
+  return {
+    ok: true,
+    data,
+  };
 }
 
 export async function registerUser(userData: RegisterData) {
@@ -48,7 +67,7 @@ export async function loginUser(userData: LoginData) {
     body: JSON.stringify(userData),
   });
 
-  return handleResponse(response);
+  return handleResponse<{ token: string }>(response);
 }
 
 export async function getCurrentUser(token: string) {
@@ -60,7 +79,7 @@ export async function getCurrentUser(token: string) {
     },
   });
 
-  return handleResponse(response);
+  return handleResponse<CurrentUser>(response);
 }
 
 export async function addFriend(receiverId: number) {
@@ -73,15 +92,16 @@ export async function addFriend(receiverId: number) {
     },
     body: JSON.stringify({ receiverId }),
   });
+
   return handleResponse(response);
 }
-
 
 export async function getFriends() {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/friends`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
   return handleResponse(response);
 }
 
@@ -91,6 +111,7 @@ export async function acceptFriend(requestId: number) {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
   });
+
   return handleResponse(response);
 }
 
@@ -100,6 +121,7 @@ export async function deleteFriend(requestId: number) {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
+
   return handleResponse(response);
 }
 
@@ -108,6 +130,7 @@ export async function getFriendRequests() {
   const response = await fetch(`${API_URL}/friends/requests`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
   return handleResponse(response);
 }
 
@@ -116,6 +139,6 @@ export async function searchUser(username: string) {
   const response = await fetch(`${API_URL}/users/search?username=${username}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return handleResponse(response);
 
+  return handleResponse(response);
 }

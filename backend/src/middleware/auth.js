@@ -1,7 +1,5 @@
-
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import e from 'express';
 dotenv.config();
 
 export function authMiddleware(req, res, next) {

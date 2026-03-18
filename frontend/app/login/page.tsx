@@ -17,26 +17,28 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    try {
-      const data = await loginUser({ email, password });
+  try {
+    const result = await loginUser({ email, password });
 
-      if (data.token) {
-        await login(data.token);
-        router.push("/profil");
-      } else {
-        setError("Token not received.");
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : "Login failed.");
-    } finally {
-      setLoading(false);
+    if (!result.ok) {
+      setError(result.message);
+      return;
     }
-  };
+
+    if (result.data.token) {
+      await login(result.data.token);
+      router.push("/profil");
+    } else {
+      setError("Token not received.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#f6f1e8] text-[#2f3a32]">
