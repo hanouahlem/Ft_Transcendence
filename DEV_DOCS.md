@@ -1,126 +1,106 @@
 # Dev Docs
 
-## Environment Setup
+## Env Files
 
-This project now uses `backend/.env` as the local development source of truth for backend variables.
+- `backend/.env`: real local backend env file
+- `backend/.env.example`: backend env template
+- `frontend/.env.local`: optional local frontend env file
+- `frontend/.env.local.example`: frontend env template
 
-The file contains:
-
-```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/transcendence
-JWT_SECRET=dev-secret-change-me
-```
-
-The tracked backend template is `backend/.env.example`:
+Backend env:
 
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/transcendence
 JWT_SECRET=dev-secret-change-me
 ```
 
-The tracked frontend template is `frontend/.env.local.example`:
+Frontend env:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-## What Each Variable Does
+Notes:
 
-- `DATABASE_URL`
-  - Used by the backend Prisma client at `backend/src/prisma.js`
-  - Used by Prisma config at `backend/prisma.config.ts`
-  - Local host value uses `localhost:5432`
+- the backend defaults to port `3001`
+- Docker Compose sets `PORT=3001` for the backend container
+- Docker overrides `DATABASE_URL` to use host `postgres` instead of `localhost`
 
-- `JWT_SECRET`
-  - Used by login token creation in `backend/src/controllers/userController.js`
-  - Used by protected-route token verification in `backend/src/middleware/auth.js`
+## Run Commands
 
-- `PORT`
-  - Used by the Express server in `backend/src/server.js`
-  - Defaults to `3001` in the app
-  - Docker Compose sets it explicitly for the backend container
-
-- `NEXT_PUBLIC_API_URL`
-  - Used by the frontend API client in `frontend/lib/api.ts`
-  - Optional because the frontend already falls back to `http://localhost:3001`
-
-## Local Run Modes
-
-### 1. Run with Docker Compose
-
-Use:
+Docker:
 
 ```bash
-docker compose up
+make up
+make down
+make logs
+make ps
+make clean
 ```
 
-How it works:
-
-- `postgres` runs on port `5432`
-- `backend` loads `backend/.env`
-- `backend` overrides only `DATABASE_URL` inside Docker so it can reach the database container with host `postgres`
-- `backend` sets `PORT=3001` in Compose
-- `frontend` runs on port `3000`
-
-Important detail:
-
-- The value in `backend/.env` uses `localhost` because it is meant to work when you run the backend directly on your machine
-- Inside Docker, `docker-compose.yml` replaces that one variable with:
-
-```env
-DATABASE_URL=postgresql://postgres:postgres@postgres:5432/transcendence
-```
-
-This is required because containers must talk to each other through service names, not `localhost`
-
-### 2. Run Backend and Frontend Manually
-
-Backend:
+Manual:
 
 ```bash
-cd backend
-npm run dev
+cd backend && npm run dev
+cd frontend && npm run dev
 ```
 
-Frontend:
+## Implemented API
 
-```bash
-cd frontend
-npm run dev
-```
+Auth and users:
 
-For this mode:
+- `POST /registerUser`
+- `POST /login`
+- `GET /users`
+- `GET /user`
+- `GET /users/search`
 
-- `backend/.env` works as-is because it points to `localhost:5432`
-- the backend does not need `PORT` in `.env` because the app already defaults to `3001`
-- the frontend can rely on its built-in fallback to `http://localhost:3001`
-- if you want to be explicit on the frontend, create `frontend/.env.local` with:
+Friends:
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-```
+- `POST /friends`
+- `GET /friends`
+- `PUT /friends/:id`
+- `DELETE /friends/:id`
+- `GET /friends/requests`
 
-## Current Expected Files
+Posts:
 
-- `backend/.env`
-  - Real local backend env file
-  - Ignored by git
+- `GET /posts`
+- `POST /posts`
+- `DELETE /posts/:id`
+- `POST /posts/:id/like`
+- `DELETE /posts/:id/like`
 
-- `backend/.env.example`
-  - Tracked backend template for teammates
+Protected routes use `Authorization: Bearer <token>`.
 
-- `frontend/.env.local`
-  - Optional
-  - Only needed if you want to override the frontend API URL
+## Implemented Frontend Pages
 
-- `frontend/.env.local.example`
-  - Tracked frontend template
-  - Useful if teammates want an explicit frontend env file
+- `/`
+- `/login`
+- `/register`
+- `/feed`
+- `/friends`
+- `/notifications`
+- `/profil`
+- `/settings/profile`
+- `/settings/security`
+- `/settings/notifications`
 
-## Summary
+## Uploads and Persistence
 
-- Create and keep `backend/.env` for local backend development
-- Keep `backend/.env.example` updated whenever backend env variables change
-- Keep `frontend/.env.local.example` updated whenever frontend env variables change
-- Use Docker Compose if you want the full stack together
-- Use `frontend/.env.local` only if the frontend API URL needs to change
+- uploads are handled by Multer in `backend/src/middleware/upload.js`
+- only image files are accepted
+- uploaded files are stored in `backend/uploads/`
+- Express serves them from `/uploads`
+
+Docker persistence:
+
+- Postgres data lives in the `postgres_data` volume
+- `make down` keeps database data
+- `make clean` removes the Docker database volume
+- `make clean` does not remove files from `backend/uploads/`
+
+Local persistence:
+
+- local Postgres persistence depends on your local setup
+- uploaded files still live in `backend/uploads/`

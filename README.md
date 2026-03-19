@@ -21,6 +21,7 @@ Full-stack 42 group project built with:
 - posts feed with create, delete, like, and unlike
 - media upload support for posts
 
+
 ## Quick Start
 
 Docker:
@@ -51,6 +52,9 @@ make db
 - `transcendance.md`: 42 subject and requirements
 - `lessons.md`: team learning notes
 - `AGENTS.md`: project-specific working conventions
+
+---
+# Notes
 
 ## serveur frontend 
 
