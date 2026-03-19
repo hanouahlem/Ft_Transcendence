@@ -48,7 +48,7 @@ Browser (client)
 ### JWT_SECRET and environment variables:
 
 - **`JWT_SECRET`** is the key used to sign and verify JWT tokens. Without it, `jwt.sign()` crashes — the backend cannot create tokens.
-- It lives in a `.env` file at the project root (never committed to git). `docker-compose.yml` reads it via `${JWT_SECRET}`.
+- It lives in `backend/.env` (never committed to git). The backend loads it through `dotenv` in `backend/src/env.js`.
 - `backend/.env.example` and `frontend/.env.local.example` are committed to show teammates which variables they need. They copy the backend template to `backend/.env` and, if needed, the frontend template to `frontend/.env.local`.
 - **Why not hardcode it?** Secrets in source code end up in git history. Anyone with repo access can see them. Environment variables keep secrets out of the codebase.
 
@@ -232,15 +232,17 @@ app/
 
 ```yaml
 services:
-  postgres:    # Starts first, has healthcheck
-  backend:     # Waits for postgres, runs migrations, then starts Express
-  frontend:    # Waits for backend, runs Next.js dev server
+  postgres:    # Uses POSTGRES_* from backend/.env and exposes a healthcheck
+  backend:     # Waits for postgres, builds Docker DATABASE_URL, runs Prisma, then starts Express
+  frontend:    # Waits for backend health, then starts Next.js dev server
 ```
 
 ### Key concepts:
 - **`depends_on` + `condition: service_healthy`** — ensures postgres is ready before backend starts
-- **`volumes: ./Backend:/app`** — mounts local code into the container for hot reload
+- **Backend `/health` route** — lets Docker know when Express is actually serving requests, not just when the container started
+- **`volumes: ./backend:/app`** — mounts local code into the container for hot reload
 - **`/app/node_modules`** — anonymous volume prevents container's node_modules from being overwritten by the local mount
+- We do **not** run `npm install` on every container start anymore. Dependencies are installed during image build in the Dockerfiles, which makes startup faster and more reproducible.
 - All services communicate via Docker's internal network using service names (e.g., `postgres:5432`)
 
 ---

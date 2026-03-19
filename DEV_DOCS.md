@@ -10,6 +10,9 @@
 Backend env:
 
 ```env
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=transcendence
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/transcendence
 JWT_SECRET=dev-secret-change-me
 ```
@@ -24,7 +27,8 @@ Notes:
 
 - the backend defaults to port `3001`
 - Docker Compose sets `PORT=3001` for the backend container
-- Docker overrides `DATABASE_URL` to use host `postgres` instead of `localhost`
+- Docker builds the backend container `DATABASE_URL` from `POSTGRES_*` and uses host `postgres` instead of `localhost`
+- `POSTGRES_*` is shared by the `postgres` and `backend` services through `backend/.env`
 
 ## Run Commands
 
@@ -37,6 +41,12 @@ make logs
 make ps
 make clean
 ```
+
+Docker behavior:
+
+- backend and frontend use the dependencies already installed in their images
+- backend still runs `prisma generate` and `prisma migrate deploy` on startup for dev consistency
+- frontend waits for backend health, and backend waits for Postgres health
 
 Manual:
 
@@ -70,6 +80,10 @@ Posts:
 - `DELETE /posts/:id`
 - `POST /posts/:id/like`
 - `DELETE /posts/:id/like`
+
+Infra:
+
+- `GET /health`
 
 Protected routes use `Authorization: Bearer <token>`.
 
