@@ -27,10 +27,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      setToken(storedToken);
+
       try {
-        setToken(storedToken);
-        const currentUser = await getCurrentUser(storedToken);
-        setUser(currentUser);
+        const result = await getCurrentUser(storedToken);
+
+        if (!result.ok) {
+          localStorage.removeItem("token");
+          setToken(null);
+          setUser(null);
+          return;
+        }
+
+        setUser(result.data);
       } catch (error) {
         console.error("Erreur chargement utilisateur :", error);
         localStorage.removeItem("token");
@@ -47,8 +56,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(newToken);
 
     try {
-      const currentUser = await getCurrentUser(newToken);
-      setUser(currentUser);
+      const result = await getCurrentUser(newToken);
+
+      if (!result.ok) {
+        localStorage.removeItem("token");
+        setToken(null);
+        setUser(null);
+        return;
+      }
+
+      setUser(result.data);
     } catch (error) {
       console.error("Erreur récupération utilisateur après login :", error);
       localStorage.removeItem("token");

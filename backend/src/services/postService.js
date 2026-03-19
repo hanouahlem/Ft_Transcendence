@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import prisma from "../prisma.js";
 
-const formatPost = (post) => {
+const formatPost = (post, currentUserId) => {
   return {
     id: post.id,
     content: post.content,
@@ -14,11 +14,14 @@ const formatPost = (post) => {
     },
     likesCount: post.likes.length,
     commentsCount: post.comments.length,
+    likedByCurrentUser: post.likes.some(
+      (like) => like.userId === Number(currentUserId)
+    ),
     media: post.image ? [post.image] : [],
   };
 };
 
-export const getAllPosts = async () => {
+export const getAllPosts = async (currentUserId) => {
   const posts = await prisma.post.findMany({
     orderBy: {
       createdAt: "desc",
@@ -30,7 +33,7 @@ export const getAllPosts = async () => {
     },
   });
 
-  return posts.map(formatPost);
+  return posts.map((post) => formatPost(post, currentUserId));
 };
 
 export const createPost = async (input) => {
@@ -57,7 +60,7 @@ export const createPost = async (input) => {
     },
   });
 
-  return formatPost(post);
+  return formatPost(post, input.authorId);
 };
 
 export const deletePost = async (postId, userId) => {
@@ -91,9 +94,84 @@ export const deletePost = async (postId, userId) => {
     }
   }
 
+  await prisma.like.deleteMany({
+    where: {
+      postId: Number(postId),
+    },
+  });
+
+  await prisma.comment.deleteMany({
+    where: {
+      postId: Number(postId),
+    },
+  });
+
   await prisma.post.delete({
     where: {
       id: Number(postId),
+    },
+  });
+
+  return true;
+};
+
+export const likePost = async (postId, userId) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: Number(postId),
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const existingLike = await prisma.like.findFirst({
+    where: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  if (existingLike) {
+    return true;
+  }
+
+  await prisma.like.create({
+    data: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  return true;
+};
+
+export const unlikePost = async (postId, userId) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: Number(postId),
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const existingLike = await prisma.like.findFirst({
+    where: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  if (!existingLike) {
+    return true;
+  }
+
+  await prisma.like.delete({
+    where: {
+      id: existingLike.id,
     },
   });
 

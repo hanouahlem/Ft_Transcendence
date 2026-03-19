@@ -2,11 +2,14 @@ import {
   createPost,
   getAllPosts,
   deletePost,
+  likePost,
+  unlikePost,
 } from "../services/postService.js";
 
 export const getPostsHandler = async (req, res) => {
   try {
-    const posts = await getAllPosts();
+    const currentUserId = req.user?.id ?? req.user?.userId;
+    const posts = await getAllPosts(currentUserId);
     res.status(200).json(posts);
   } catch (error) {
     console.error("Erreur getPostsHandler :", error);
@@ -73,7 +76,7 @@ export const deletePostHandler = async (req, res) => {
       });
     }
 
-    await deletePost(postId, userId, req);
+    await deletePost(postId, userId);
 
     return res.status(200).json({
       message: "Post deleted successfully.",
@@ -83,6 +86,68 @@ export const deletePostHandler = async (req, res) => {
 
     return res.status(500).json({
       message: error.message || "Unable to delete post.",
+    });
+  }
+};
+
+export const likePostHandler = async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+
+    if (!postId || Number.isNaN(postId)) {
+      return res.status(400).json({
+        message: "Invalid post id.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    await likePost(postId, userId);
+
+    return res.status(200).json({
+      message: "Post liked successfully.",
+    });
+  } catch (error) {
+    console.error("Erreur likePostHandler :", error);
+
+    return res.status(500).json({
+      message: error.message || "Unable to like post.",
+    });
+  }
+};
+
+export const unlikePostHandler = async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+
+    if (!postId || Number.isNaN(postId)) {
+      return res.status(400).json({
+        message: "Invalid post id.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    await unlikePost(postId, userId);
+
+    return res.status(200).json({
+      message: "Post unliked successfully.",
+    });
+  } catch (error) {
+    console.error("Erreur unlikePostHandler :", error);
+
+    return res.status(500).json({
+      message: error.message || "Unable to unlike post.",
     });
   }
 };

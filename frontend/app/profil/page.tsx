@@ -197,7 +197,7 @@ function PostCard({ post }: { post: FeedPost }) {
 }
 
 export default function Profil() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   return (
     <ProtectedRoute>``  ` `
