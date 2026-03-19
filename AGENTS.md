@@ -74,6 +74,7 @@ Ft_Transcendence/
 - Use short commit messages with a prefix: `feat:`, `fix:`, `refactor:`, `docs:`, `style:`
 - Group changes by logical unit, not by file
 - Use `git add <specific files>` — never `git add .` or `git add -A`
+- Always show the proposed commit message first and ask for approval before committing
 - Do not add yourself as co-author
 - Do not push unless explicitly asked
 
@@ -83,3 +84,4 @@ Ft_Transcendence/
 - Frontend and backend are separate services communicating via REST API and WebSockets
 - Forms use `noValidate` — all validation is in JavaScript handlers
 - Auth flow: JWT in localStorage, `Authorization: Bearer <token>` header for protected routes
+- Keep changes strictly within the requested scope. Do not bundle adjacent cleanup or unrelated refactors unless the user explicitly asks for them.
