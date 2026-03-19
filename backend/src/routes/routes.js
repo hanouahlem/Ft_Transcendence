@@ -12,6 +12,8 @@ router.get("/users", ctrl.allUsers);
 router.post("/login", ctrl.loginUser);
 router.get("/user", authMiddleware, ctrl.getUser);
 router.get("/users/search", authMiddleware, ctrl.searchUser);
+router.put("/users/:id", authMiddleware, ctrl.updateUser);
+router.put("/users", authMiddleware, ctrl.updatePassword);
 
 router.post("/friends", authMiddleware, friend.addFriend);
 router.get("/friends", authMiddleware, friend.getFriends);
@@ -26,4 +28,3 @@ router.post("/posts/:id/like", authMiddleware, likePostHandler);
 router.delete("/posts/:id/like", authMiddleware, unlikePostHandler);
 
 export default router;
-
