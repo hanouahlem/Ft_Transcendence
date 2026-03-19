@@ -1,10 +1,7 @@
-import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { getEnv } from "../env.js";
 import prisma from "../prisma.js";
-dotenv.config();
-
-
 
 export async function allUsers(req, res) {
   try {
@@ -104,7 +101,7 @@ export const loginUser = async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
+      getEnv("JWT_SECRET"),
       { expiresIn: "1h" }
     );
 

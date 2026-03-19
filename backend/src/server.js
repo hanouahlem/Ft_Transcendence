@@ -4,7 +4,12 @@ import path from "path";
 import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
 
-validateEnv();
+try {
+  validateEnv();
+} catch (error) {
+  console.error(`Startup failed: ${error.message}`);
+  process.exit(1);
+}
 
 const app = express();
 app.use(cors());

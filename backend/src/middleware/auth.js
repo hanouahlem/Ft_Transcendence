@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-dotenv.config();
+import { getEnv } from "../env.js";
 
 export function authMiddleware(req, res, next) {
 
@@ -10,7 +9,7 @@ export function authMiddleware(req, res, next) {
         return res.status(401).json({ message: "Token manquant" });
     }
     try{
-        const verifToken = jwt.verify (token, process.env.JWT_SECRET);
+        const verifToken = jwt.verify (token, getEnv("JWT_SECRET"));
         console.log("Token vérifié:", verifToken);
         req.user = verifToken;
         next();
