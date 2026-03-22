@@ -36,3 +36,12 @@ backend:
 
 db:
 	$(COMPOSE) up -d postgres
+
+prisma-generate:
+	$(COMPOSE) exec backend npx prisma generate
+
+prisma-migrate:
+	$(COMPOSE) exec backend sh -c 'npx prisma migrate dev'
+
+prisma-studio:
+	$(COMPOSE) exec backend npx prisma studio
