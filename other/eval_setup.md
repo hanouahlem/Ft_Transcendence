@@ -76,6 +76,18 @@ Suggested startup flow:
 sh -c "npx prisma migrate deploy && node src/server.js"
 ```
 
+For eval, replace the inline command chain with a proper entrypoint script (e.g. `backend/entrypoint.sh`):
+
+- runs `prisma migrate deploy`
+- then `exec`s into `node src/server.js`
+
+Using `exec` ensures Node receives OS signals (SIGTERM, etc.) directly so Docker can stop the container gracefully. The Dockerfile should use `ENTRYPOINT` in JSON form:
+
+```dockerfile
+COPY entrypoint.sh /app/entrypoint.sh
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
+```
+
 Keep:
 
 - env validation
