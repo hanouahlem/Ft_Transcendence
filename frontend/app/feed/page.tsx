@@ -23,6 +23,17 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 
+type FeedComment = {
+  id: number;
+  content: string;
+  createdAt: string;
+  author: {
+    id: number;
+    username: string;
+    email: string;
+  };
+};
+
 type FeedPost = {
   id: number;
   content: string;
@@ -34,6 +45,8 @@ type FeedPost = {
   };
   likesCount: number;
   commentsCount: number;
+  likedByCurrentUser: boolean;
+  comments: FeedComment[];
   media: string[];
 };
 
@@ -49,15 +62,29 @@ function PostCard({
   post,
   currentUserId,
   onDelete,
+  onToggleLike,
+  onCommentChange,
+  onAddComment,
+  commentValue,
   deletingPostId,
+  likingPostId,
+  commentingPostId,
 }: {
   post: FeedPost;
   currentUserId: number | undefined;
   onDelete: (postId: number) => Promise<void>;
+  onToggleLike: (post: FeedPost) => Promise<void>;
+  onCommentChange: (postId: number, value: string) => void;
+  onAddComment: (postId: number) => Promise<void>;
+  commentValue: string;
   deletingPostId: number | null;
+  likingPostId: number | null;
+  commentingPostId: number | null;
 }) {
   const isOwner = post.author.id === currentUserId;
   const isDeleting = deletingPostId === post.id;
+  const isLiking = likingPostId === post.id;
+  const isCommenting = commentingPostId === post.id;
 
   return (
     <Card className="overflow-hidden rounded-[1.75rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
@@ -124,14 +151,74 @@ function PostCard({
                 <span>0</span>
               </div>
 
-              <div className="inline-flex items-center gap-2">
-                <Heart className="h-4 w-4" />
+              <button
+                type="button"
+                onClick={() => onToggleLike(post)}
+                disabled={isLiking}
+                className={`inline-flex items-center gap-2 transition ${
+                  post.likedByCurrentUser
+                    ? "text-red-600"
+                    : "text-[#6f786f] hover:text-[#2f3a32]"
+                }`}
+              >
+                <Heart
+                  className={`h-4 w-4 ${
+                    post.likedByCurrentUser ? "fill-current text-red-600" : ""
+                  }`}
+                />
                 <span>{post.likesCount}</span>
-              </div>
+              </button>
 
               <div className="inline-flex items-center gap-2">
                 <Bookmark className="h-4 w-4" />
                 <span>0</span>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[1.5rem] border border-[#e3d9c8] bg-[#fcf8f1] p-4">
+              <div className="space-y-3">
+                {post.comments.length === 0 ? (
+                  <p className="text-sm text-[#7b847b]">No comments yet.</p>
+                ) : (
+                  post.comments.map((comment) => (
+                    <div
+                      key={comment.id}
+                      className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] px-4 py-3"
+                    >
+                      <div className="mb-1 flex items-center gap-2">
+                        <p className="text-sm font-semibold text-[#2f3a32]">
+                          {comment.author.username}
+                        </p>
+                        <span className="text-xs text-[#9aa19a]">
+                          @{comment.author.username.toLowerCase()}
+                        </span>
+                      </div>
+
+                      <p className="text-sm leading-6 text-[#4e5850]">
+                        {comment.content}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="text"
+                  value={commentValue}
+                  onChange={(e) => onCommentChange(post.id, e.target.value)}
+                  placeholder="Write a comment..."
+                  className="w-full rounded-2xl border border-[#d8cfbe] bg-[#fffaf2] px-4 py-3 text-sm text-[#2f3a32] outline-none transition placeholder:text-[#98a091] focus:border-[#91a387] focus:ring-4 focus:ring-[#dfe8d7]"
+                />
+
+                <Button
+                  type="button"
+                  onClick={() => onAddComment(post.id)}
+                  disabled={isCommenting}
+                  className="rounded-full bg-[#6f8467] text-white hover:bg-[#5f7358]"
+                >
+                  {isCommenting ? "Sending..." : "Comment"}
+                </Button>
               </div>
             </div>
           </div>
@@ -153,47 +240,107 @@ export default function FeedPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+  const [likingPostId, setLikingPostId] = useState<number | null>(null);
+  const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
+  const [commentingPostId, setCommentingPostId] = useState<number | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const fetchPosts = async () => {
-  if (!token) {
-    return;
-  }
+    if (!token) return;
 
-  try {
-    setLoading(true);
-    setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-    const res = await fetch("http://localhost:3001/posts", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const res = await fetch("http://localhost:3001/posts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message || "Impossible de récupérer les posts.");
+      if (!res.ok) {
+        throw new Error(data.message || "Impossible de récupérer les posts.");
+      }
+
+      setPosts(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Erreur fetchPosts :", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement du feed."
+      );
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setPosts(Array.isArray(data) ? data : []);
-  } catch (err) {
-    console.error("Erreur fetchPosts :", err);
-    setError(
-      err instanceof Error
-        ? err.message
-        : "Erreur lors du chargement du feed."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
-
-    useEffect(() => {
+  useEffect(() => {
     if (token) {
-        fetchPosts();
+      fetchPosts();
     }
-    }, [token]);
+  }, [token]);
+
+  const handleCommentChange = (postId: number, value: string) => {
+    setCommentInputs((prev) => ({
+      ...prev,
+      [postId]: value,
+    }));
+  };
+
+  const handleAddComment = async (postId: number) => {
+    if (!token) {
+      setError("Tu dois être connecté pour commenter.");
+      return;
+    }
+
+    const content = commentInputs[postId]?.trim();
+
+    if (!content) {
+      setError("Tu dois écrire un commentaire.");
+      return;
+    }
+
+    try {
+      setCommentingPostId(postId);
+      setError("");
+      setMessage("");
+
+      const res = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Impossible d'ajouter le commentaire.");
+      }
+
+      setCommentInputs((prev) => ({
+        ...prev,
+        [postId]: "",
+      }));
+
+      await fetchPosts();
+    } catch (err) {
+      console.error("Erreur commentaire :", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors de l'ajout du commentaire."
+      );
+    } finally {
+      setCommentingPostId(null);
+    }
+  };
 
   const handleOpenFilePicker = () => {
     fileInputRef.current?.click();
@@ -229,6 +376,11 @@ export default function FeedPage() {
       return;
     }
 
+    if (!token) {
+      setError("Tu dois être connecté pour publier.");
+      return;
+    }
+
     try {
       setPublishing(true);
       setMessage("");
@@ -241,15 +393,13 @@ export default function FeedPage() {
         formData.append("media", selectedFile);
       }
 
-        const token = localStorage.getItem("token");
-
-        const res = await fetch("http://localhost:3001/posts", {
+      const res = await fetch("http://localhost:3001/posts", {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
-        });
+      });
 
       const data = await res.json();
 
@@ -273,42 +423,77 @@ export default function FeedPage() {
   };
 
   const handleDelete = async (postId: number) => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    setError("Tu dois être connecté pour supprimer un post.");
-    return;
-  }
-
-  try {
-    setDeletingPostId(postId);
-    setError("");
-    setMessage("");
-
-    const res = await fetch(`http://localhost:3001/posts/${postId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || "Impossible de supprimer le post.");
+    if (!token) {
+      setError("Tu dois être connecté pour supprimer un post.");
+      return;
     }
 
-    setMessage("Post supprimé avec succès.");
-    await fetchPosts();
-  } catch (err) {
-    console.error("Erreur suppression post :", err);
-    setError(
-      err instanceof Error ? err.message : "Erreur lors de la suppression."
-    );
-  } finally {
-    setDeletingPostId(null);
-  }
-};
+    try {
+      setDeletingPostId(postId);
+      setError("");
+      setMessage("");
+
+      const res = await fetch(`http://localhost:3001/posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Impossible de supprimer le post.");
+      }
+
+      setMessage("Post supprimé avec succès.");
+      await fetchPosts();
+    } catch (err) {
+      console.error("Erreur suppression post :", err);
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de la suppression."
+      );
+    } finally {
+      setDeletingPostId(null);
+    }
+  };
+
+  const handleToggleLike = async (post: FeedPost) => {
+    if (!token) {
+      setError("Tu dois être connecté pour liker un post.");
+      return;
+    }
+
+    try {
+      setLikingPostId(post.id);
+      setError("");
+      setMessage("");
+
+      const method = post.likedByCurrentUser ? "DELETE" : "POST";
+
+      const res = await fetch(`http://localhost:3001/posts/${post.id}/like`, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Impossible de modifier le like.");
+      }
+
+      await fetchPosts();
+    } catch (err) {
+      console.error("Erreur like post :", err);
+      setError(
+        err instanceof Error ? err.message : "Erreur lors du like."
+      );
+    } finally {
+      setLikingPostId(null);
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -437,14 +622,20 @@ export default function FeedPage() {
                 ) : (
                   <div className="space-y-4">
                     {posts.map((post) => (
-                        <PostCard
-                            key={post.id}
-                            post={post}
-                            currentUserId={user?.id}
-                            onDelete={handleDelete}
-                            deletingPostId={deletingPostId}
-                        />
-                        ))}
+                      <PostCard
+                        key={post.id}
+                        post={post}
+                        currentUserId={user?.id}
+                        onDelete={handleDelete}
+                        onToggleLike={handleToggleLike}
+                        onCommentChange={handleCommentChange}
+                        onAddComment={handleAddComment}
+                        commentValue={commentInputs[post.id] || ""}
+                        deletingPostId={deletingPostId}
+                        likingPostId={likingPostId}
+                        commentingPostId={commentingPostId}
+                      />
+                    ))}
                   </div>
                 )}
               </CardContent>

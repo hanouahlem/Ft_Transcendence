@@ -4,6 +4,7 @@ import {
   deletePost,
   likePost,
   unlikePost,
+  createComment,
 } from "../services/postService.js";
 
 export const getPostsHandler = async (req, res) => {
@@ -148,6 +149,49 @@ export const unlikePostHandler = async (req, res) => {
 
     return res.status(500).json({
       message: error.message || "Unable to unlike post.",
+    });
+  }
+};
+
+export const createCommentHandler = async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+    const { content } = req.body;
+
+    if (!postId || Number.isNaN(postId)) {
+      return res.status(400).json({
+        message: "Invalid post id.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    if (!content || typeof content !== "string" || !content.trim()) {
+      return res.status(400).json({
+        message: "Comment content is required.",
+      });
+    }
+
+    const comment = await createComment({
+      postId,
+      userId,
+      content: content.trim(),
+    });
+
+    return res.status(201).json({
+      message: "Comment created successfully.",
+      comment,
+    });
+  } catch (error) {
+    console.error("Erreur createCommentHandler :", error);
+
+    return res.status(500).json({
+      message: error.message || "Unable to create comment.",
     });
   }
 };

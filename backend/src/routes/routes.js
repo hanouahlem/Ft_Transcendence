@@ -1,6 +1,6 @@
 import ctrl from "../controllers/userController.js";
 import friend from "../controllers/friendController.js";
-import {createPostHandler,getPostsHandler,deletePostHandler,likePostHandler,unlikePostHandler,} from "../controllers/postController.js";
+import {createPostHandler,getPostsHandler,deletePostHandler,likePostHandler,unlikePostHandler,createCommentHandler,} from "../controllers/postController.js";
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
@@ -24,5 +24,5 @@ router.post("/posts", authMiddleware, upload.single("media"), createPostHandler)
 router.delete("/posts/:id", authMiddleware, deletePostHandler);
 router.post("/posts/:id/like", authMiddleware, likePostHandler);
 router.delete("/posts/:id/like", authMiddleware, unlikePostHandler);
-
+router.post("/posts/:id/comments", authMiddleware, createCommentHandler);
 export default router;

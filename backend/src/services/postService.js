@@ -2,6 +2,19 @@ import fs from "fs";
 import path from "path";
 import prisma from "../prisma.js";
 
+const formatComment = (comment) => {
+  return {
+    id: comment.id,
+    content: comment.content,
+    createdAt: comment.createdAt,
+    author: {
+      id: comment.user.id,
+      username: comment.user.username,
+      email: comment.user.email,
+    },
+  };
+};
+
 const formatPost = (post, currentUserId) => {
   return {
     id: post.id,
@@ -17,6 +30,7 @@ const formatPost = (post, currentUserId) => {
     likedByCurrentUser: post.likes.some(
       (like) => like.userId === Number(currentUserId)
     ),
+    comments: post.comments.map(formatComment),
     media: post.image ? [post.image] : [],
   };
 };
@@ -29,7 +43,14 @@ export const getAllPosts = async (currentUserId) => {
     include: {
       author: true,
       likes: true,
-      comments: true,
+      comments: {
+        include: {
+          user: true,
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
     },
   });
 
@@ -53,10 +74,14 @@ export const createPost = async (input) => {
       image: input.mediaUrl || null,
       authorId: author.id,
     },
-    include: {
+        include: {
       author: true,
       likes: true,
-      comments: true,
+      comments: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
 
@@ -176,4 +201,39 @@ export const unlikePost = async (postId, userId) => {
   });
 
   return true;
+};
+
+export const createComment = async (input) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: Number(input.postId),
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: Number(input.userId),
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const comment = await prisma.comment.create({
+    data: {
+      content: input.content,
+      postId: Number(input.postId),
+      userId: Number(input.userId),
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  return formatComment(comment);
 };

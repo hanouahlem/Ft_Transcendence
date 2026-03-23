@@ -5,6 +5,7 @@ import { getCurrentUser, type CurrentUser } from "@/lib/api";
 
 type AuthContextType = {
   isLoggedIn: boolean;
+  isAuthLoading: boolean;
   token: string | null;
   user: CurrentUser | null;
   login: (token: string) => Promise<void>;
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<CurrentUser | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -24,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!storedToken) {
         setToken(null);
         setUser(null);
+        setIsAuthLoading(false);
         return;
       }
 
@@ -36,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem("token");
           setToken(null);
           setUser(null);
+          setIsAuthLoading(false);
           return;
         }
 
@@ -45,6 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("token");
         setToken(null);
         setUser(null);
+      } finally {
+        setIsAuthLoading(false);
       }
     };
 
@@ -54,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (newToken: string) => {
     localStorage.setItem("token", newToken);
     setToken(newToken);
+    setIsAuthLoading(true);
 
     try {
       const result = await getCurrentUser(newToken);
@@ -71,6 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("token");
       setToken(null);
       setUser(null);
+    } finally {
+      setIsAuthLoading(false);
     }
   };
 
@@ -78,12 +87,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
+    setIsAuthLoading(false);
   };
 
   return (
     <AuthContext.Provider
       value={{
         isLoggedIn: !!token,
+        isAuthLoading,
         token,
         user,
         login,

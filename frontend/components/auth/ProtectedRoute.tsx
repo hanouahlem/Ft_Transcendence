@@ -4,26 +4,30 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-type ProtectedRouteProps = {
+export default function ProtectedRoute({
+  children,
+}: {
   children: React.ReactNode;
-};
-
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+}) {
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isAuthLoading } = useAuth();
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isAuthLoading && !isLoggedIn) {
       router.push("/login");
     }
-  }, [isLoggedIn, router]);
+  }, [isAuthLoading, isLoggedIn, router]);
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f6f1e8] text-[#2f3a32]">
+        <p className="text-sm text-[#6b746c]">Loading...</p>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
-    return (
-      <section className="flex min-h-screen items-center justify-center bg-neutral-950 px-6 text-white">
-        <p className="text-sm text-white/60">Redirecting to login...</p>
-      </section>
-    );
+    return null;
   }
 
   return <>{children}</>;
