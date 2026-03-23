@@ -133,6 +133,9 @@ export async function acceptFriend(req, res) {
 export async function deleteFriend(req, res) {
     try {
         const userId = req.user.id;
+        if (!userId) {
+            return res.status(400).json({ message: "userId is required" });
+        }
 
         const friendId = parseInt(req.params.id);
 
@@ -161,6 +164,9 @@ export async function deleteFriend(req, res) {
 export async function getFriendRequests(req, res) {
     try {
         const userId = req.user.id;
+        if (!userId) {
+            return res.status(400).json({ message: "userId is required" });
+        }
 
         const requests = await prisma.friends.findMany({
             where: {

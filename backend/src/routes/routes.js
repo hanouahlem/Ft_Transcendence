@@ -4,6 +4,7 @@ import {createPostHandler,getPostsHandler,deletePostHandler,likePostHandler,unli
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
+import notif from '../controllers/notifController.js';
 
 const router = Router();
 
@@ -15,6 +16,11 @@ router.get("/user", authMiddleware, ctrl.getUser);
 router.get("/users/search", authMiddleware, ctrl.searchUser);
 router.put("/users/:id", authMiddleware, ctrl.updateUser);
 router.put("/settings/security", authMiddleware, ctrl.updatePassword);
+
+router.post('/notifications', authMiddleware, notif.createNotif);
+router.get('/notifications', authMiddleware, notif.getNotif);
+router.patch('/notifications/:id/read', authMiddleware, notif.markAsRead);
+router.delete('/notifications/:id', authMiddleware, notif.deleteNotif);
 
 
 
