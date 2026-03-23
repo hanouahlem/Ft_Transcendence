@@ -5,6 +5,10 @@ import {
   likePost,
   unlikePost,
   createComment,
+  favoritePost,
+  unfavoritePost,
+  repostPost,
+  unrepostPost,
 } from "../services/postService.js";
 
 export const getPostsHandler = async (req, res) => {
@@ -84,7 +88,6 @@ export const deletePostHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur deletePostHandler :", error);
-
     return res.status(500).json({
       message: error.message || "Unable to delete post.",
     });
@@ -115,7 +118,6 @@ export const likePostHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur likePostHandler :", error);
-
     return res.status(500).json({
       message: error.message || "Unable to like post.",
     });
@@ -146,7 +148,6 @@ export const unlikePostHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur unlikePostHandler :", error);
-
     return res.status(500).json({
       message: error.message || "Unable to unlike post.",
     });
@@ -189,9 +190,128 @@ export const createCommentHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur createCommentHandler :", error);
-
     return res.status(500).json({
       message: error.message || "Unable to create comment.",
+    });
+  }
+};
+
+export const favoritePostHandler = async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+
+    if (!postId || Number.isNaN(postId)) {
+      return res.status(400).json({
+        message: "Invalid post id.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    await favoritePost(postId, userId);
+
+    return res.status(200).json({
+      message: "Post favorited successfully.",
+    });
+  } catch (error) {
+    console.error("Erreur favoritePostHandler :", error);
+    return res.status(500).json({
+      message: error.message || "Unable to favorite post.",
+    });
+  }
+};
+
+export const unfavoritePostHandler = async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+
+    if (!postId || Number.isNaN(postId)) {
+      return res.status(400).json({
+        message: "Invalid post id.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    await unfavoritePost(postId, userId);
+
+    return res.status(200).json({
+      message: "Post unfavorited successfully.",
+    });
+  } catch (error) {
+    console.error("Erreur unfavoritePostHandler :", error);
+    return res.status(500).json({
+      message: error.message || "Unable to unfavorite post.",
+    });
+  }
+};
+
+export const repostPostHandler = async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+
+    if (!postId || Number.isNaN(postId)) {
+      return res.status(400).json({
+        message: "Invalid post id.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    await repostPost(postId, userId);
+
+    return res.status(200).json({
+      message: "Post reposted successfully.",
+    });
+  } catch (error) {
+    console.error("Erreur repostPostHandler :", error);
+    return res.status(500).json({
+      message: error.message || "Unable to repost post.",
+    });
+  }
+};
+
+export const unrepostPostHandler = async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+
+    if (!postId || Number.isNaN(postId)) {
+      return res.status(400).json({
+        message: "Invalid post id.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    await unrepostPost(postId, userId);
+
+    return res.status(200).json({
+      message: "Post unreposted successfully.",
+    });
+  } catch (error) {
+    console.error("Erreur unrepostPostHandler :", error);
+    return res.status(500).json({
+      message: error.message || "Unable to unrepost post.",
     });
   }
 };

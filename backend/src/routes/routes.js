@@ -1,10 +1,20 @@
 import ctrl from "../controllers/userController.js";
 import friend from "../controllers/friendController.js";
-import {createPostHandler,getPostsHandler,deletePostHandler,likePostHandler,unlikePostHandler,createCommentHandler,} from "../controllers/postController.js";
+import {
+  createPostHandler,
+  getPostsHandler,
+  deletePostHandler,
+  likePostHandler,
+  unlikePostHandler,
+  createCommentHandler,
+  favoritePostHandler,
+  unfavoritePostHandler,
+  repostPostHandler,
+  unrepostPostHandler,
+} from "../controllers/postController.js";
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
-import notif from '../controllers/notifController.js';
 
 const router = Router();
 
@@ -40,4 +50,8 @@ router.delete("/posts/:id", authMiddleware, deletePostHandler);
 router.post("/posts/:id/like", authMiddleware, likePostHandler);
 router.delete("/posts/:id/like", authMiddleware, unlikePostHandler);
 router.post("/posts/:id/comments", authMiddleware, createCommentHandler);
+router.post("/posts/:id/favorite", authMiddleware, favoritePostHandler);
+router.delete("/posts/:id/favorite", authMiddleware, unfavoritePostHandler);
+router.post("/posts/:id/repost", authMiddleware, repostPostHandler);
+router.delete("/posts/:id/repost", authMiddleware, unrepostPostHandler);
 export default router;

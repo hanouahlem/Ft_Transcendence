@@ -27,8 +27,16 @@ const formatPost = (post, currentUserId) => {
     },
     likesCount: post.likes.length,
     commentsCount: post.comments.length,
+    favoritesCount: post.favorites.length,
+    repostsCount: post.reposts.length,
     likedByCurrentUser: post.likes.some(
       (like) => like.userId === Number(currentUserId)
+    ),
+    favoritedByCurrentUser: post.favorites.some(
+      (favorite) => favorite.userId === Number(currentUserId)
+    ),
+    repostedByCurrentUser: post.reposts.some(
+      (repost) => repost.userId === Number(currentUserId)
     ),
     comments: post.comments.map(formatComment),
     media: post.image ? [post.image] : [],
@@ -43,6 +51,8 @@ export const getAllPosts = async (currentUserId) => {
     include: {
       author: true,
       likes: true,
+      reposts: true,
+      favorites: true,
       comments: {
         include: {
           user: true,
@@ -77,6 +87,8 @@ export const createPost = async (input) => {
         include: {
       author: true,
       likes: true,
+      favorites: true,
+      reposts: true,
       comments: {
         include: {
           user: true,
@@ -119,6 +131,12 @@ export const deletePost = async (postId, userId) => {
     }
   }
 
+  await prisma.favorite.deleteMany({
+  where: {
+    postId: Number(postId),
+  },
+});
+
   await prisma.like.deleteMany({
     where: {
       postId: Number(postId),
@@ -130,6 +148,12 @@ export const deletePost = async (postId, userId) => {
       postId: Number(postId),
     },
   });
+
+  await prisma.repost.deleteMany({
+  where: {
+    postId: Number(postId),
+  },
+});
 
   await prisma.post.delete({
     where: {
@@ -236,4 +260,130 @@ export const createComment = async (input) => {
   });
 
   return formatComment(comment);
+};
+
+export const favoritePost = async (postId, userId) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: Number(postId),
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const existingFavorite = await prisma.favorite.findFirst({
+    where: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  if (existingFavorite) {
+    return true;
+  }
+
+  await prisma.favorite.create({
+    data: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  return true;
+};
+
+export const unfavoritePost = async (postId, userId) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: Number(postId),
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const existingFavorite = await prisma.favorite.findFirst({
+    where: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  if (!existingFavorite) {
+    return true;
+  }
+
+  await prisma.favorite.delete({
+    where: {
+      id: existingFavorite.id,
+    },
+  });
+
+  return true;
+};
+
+export const repostPost = async (postId, userId) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: Number(postId),
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const existingRepost = await prisma.repost.findFirst({
+    where: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  if (existingRepost) {
+    return true;
+  }
+
+  await prisma.repost.create({
+    data: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  return true;
+};
+
+export const unrepostPost = async (postId, userId) => {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: Number(postId),
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const existingRepost = await prisma.repost.findFirst({
+    where: {
+      postId: Number(postId),
+      userId: Number(userId),
+    },
+  });
+
+  if (!existingRepost) {
+    return true;
+  }
+
+  await prisma.repost.delete({
+    where: {
+      id: existingRepost.id,
+    },
+  });
+
+  return true;
 };

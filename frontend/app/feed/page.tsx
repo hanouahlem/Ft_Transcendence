@@ -45,9 +45,15 @@ type FeedPost = {
   };
   likesCount: number;
   commentsCount: number;
+  favoritesCount: number;
   likedByCurrentUser: boolean;
+  favoritedByCurrentUser: boolean;
   comments: FeedComment[];
   media: string[];
+
+  // prêts pour le repost backend
+  repostsCount?: number;
+  repostedByCurrentUser?: boolean;
 };
 
 function formatPostTime(dateString: string) {
@@ -63,28 +69,41 @@ function PostCard({
   currentUserId,
   onDelete,
   onToggleLike,
+  onToggleFavorite,
+  onToggleRepost,
   onCommentChange,
   onAddComment,
   commentValue,
   deletingPostId,
   likingPostId,
+  favoritingPostId,
+  repostingPostId,
   commentingPostId,
 }: {
   post: FeedPost;
   currentUserId: number | undefined;
   onDelete: (postId: number) => Promise<void>;
   onToggleLike: (post: FeedPost) => Promise<void>;
+  onToggleFavorite: (post: FeedPost) => Promise<void>;
+  onToggleRepost: (post: FeedPost) => Promise<void>;
   onCommentChange: (postId: number, value: string) => void;
   onAddComment: (postId: number) => Promise<void>;
   commentValue: string;
   deletingPostId: number | null;
   likingPostId: number | null;
+  favoritingPostId: number | null;
+  repostingPostId: number | null;
   commentingPostId: number | null;
 }) {
   const isOwner = post.author.id === currentUserId;
   const isDeleting = deletingPostId === post.id;
   const isLiking = likingPostId === post.id;
+  const isFavoriting = favoritingPostId === post.id;
+  const isReposting = repostingPostId === post.id;
   const isCommenting = commentingPostId === post.id;
+
+  const isReposted = post.repostedByCurrentUser ?? false;
+  const repostsCount = post.repostsCount ?? 0;
 
   return (
     <Card className="overflow-hidden rounded-[1.75rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
@@ -146,10 +165,23 @@ function PostCard({
                 <span>{post.commentsCount}</span>
               </div>
 
-              <div className="inline-flex items-center gap-2">
-                <Repeat2 className="h-4 w-4" />
-                <span>0</span>
-              </div>
+              <button
+                type="button"
+                onClick={() => onToggleRepost(post)}
+                disabled={isReposting}
+                className={`inline-flex items-center gap-2 transition ${
+                  isReposted
+                    ? "text-[#6f8467]"
+                    : "text-[#6f786f] hover:text-[#2f3a32]"
+                }`}
+              >
+                <Repeat2
+                  className={`h-4 w-4 ${
+                    isReposted ? "text-[#6f8467]" : ""
+                  }`}
+                />
+                <span>{repostsCount}</span>
+              </button>
 
               <button
                 type="button"
@@ -169,10 +201,25 @@ function PostCard({
                 <span>{post.likesCount}</span>
               </button>
 
-              <div className="inline-flex items-center gap-2">
-                <Bookmark className="h-4 w-4" />
-                <span>0</span>
-              </div>
+              <button
+                type="button"
+                onClick={() => onToggleFavorite(post)}
+                disabled={isFavoriting}
+                className={`inline-flex items-center gap-2 transition ${
+                  post.favoritedByCurrentUser
+                    ? "text-[#6f8467]"
+                    : "text-[#6f786f] hover:text-[#2f3a32]"
+                }`}
+              >
+                <Bookmark
+                  className={`h-4 w-4 ${
+                    post.favoritedByCurrentUser
+                      ? "fill-current text-[#6f8467]"
+                      : ""
+                  }`}
+                />
+                <span>{post.favoritesCount}</span>
+              </button>
             </div>
 
             <div className="mt-5 rounded-[1.5rem] border border-[#e3d9c8] bg-[#fcf8f1] p-4">
@@ -239,8 +286,12 @@ export default function FeedPage() {
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
   const [likingPostId, setLikingPostId] = useState<number | null>(null);
+  const [favoritingPostId, setFavoritingPostId] = useState<number | null>(null);
+  const [repostingPostId, setRepostingPostId] = useState<number | null>(null);
+
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
   const [commentingPostId, setCommentingPostId] = useState<number | null>(null);
 
@@ -487,11 +538,83 @@ export default function FeedPage() {
       await fetchPosts();
     } catch (err) {
       console.error("Erreur like post :", err);
-      setError(
-        err instanceof Error ? err.message : "Erreur lors du like."
-      );
+      setError(err instanceof Error ? err.message : "Erreur lors du like.");
     } finally {
       setLikingPostId(null);
+    }
+  };
+
+  const handleToggleFavorite = async (post: FeedPost) => {
+    if (!token) {
+      setError("Tu dois être connecté pour gérer les favoris.");
+      return;
+    }
+
+    try {
+      setFavoritingPostId(post.id);
+      setError("");
+      setMessage("");
+
+      const method = post.favoritedByCurrentUser ? "DELETE" : "POST";
+
+      const res = await fetch(`http://localhost:3001/posts/${post.id}/favorite`, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Impossible de modifier le favori.");
+      }
+
+      await fetchPosts();
+    } catch (err) {
+      console.error("Erreur favorite post :", err);
+      setError(
+        err instanceof Error ? err.message : "Erreur lors du favori."
+      );
+    } finally {
+      setFavoritingPostId(null);
+    }
+  };
+
+  const handleToggleRepost = async (post: FeedPost) => {
+    if (!token) {
+      setError("Tu dois être connecté pour repartager un post.");
+      return;
+    }
+
+    try {
+      setRepostingPostId(post.id);
+      setError("");
+      setMessage("");
+
+      const method = post.repostedByCurrentUser ? "DELETE" : "POST";
+
+      const res = await fetch(`http://localhost:3001/posts/${post.id}/repost`, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Impossible de modifier le repost.");
+      }
+
+      await fetchPosts();
+    } catch (err) {
+      console.error("Erreur repost post :", err);
+      setError(
+        err instanceof Error ? err.message : "Erreur lors du repost."
+      );
+    } finally {
+      setRepostingPostId(null);
     }
   };
 
@@ -628,11 +751,15 @@ export default function FeedPage() {
                         currentUserId={user?.id}
                         onDelete={handleDelete}
                         onToggleLike={handleToggleLike}
+                        onToggleFavorite={handleToggleFavorite}
+                        onToggleRepost={handleToggleRepost}
                         onCommentChange={handleCommentChange}
                         onAddComment={handleAddComment}
                         commentValue={commentInputs[post.id] || ""}
                         deletingPostId={deletingPostId}
                         likingPostId={likingPostId}
+                        favoritingPostId={favoritingPostId}
+                        repostingPostId={repostingPostId}
                         commentingPostId={commentingPostId}
                       />
                     ))}
