@@ -32,8 +32,8 @@ export async function  getUser(req, res) {
 
 
 export async function registerUser(req, res) {
-console.log("req.body =", req.body);
-
+    
+    console.log("req.body =", req.body);
     try {
         const { username, email, password } = req.body;
 
@@ -49,6 +49,7 @@ console.log("req.body =", req.body);
                 ]
             }
         });
+        
         if(userExisting){
             return res.status(400).json({message: "Email or username already exists" });
         }
@@ -81,22 +82,16 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const user = await prisma.user.findUnique({where: { email },});
 
     if (!user) {
-      return res.status(401).json({
-        message: "Email or password is incorrect.",
-      });
+      return res.status(401).json({message: "Email or password is incorrect.",});
     }
 
     const passwordOk = await bcrypt.compare(password, user.password);
 
     if (!passwordOk) {
-      return res.status(401).json({
-        message: "Email or password is incorrect.",
-      });
+      return res.status(401).json({message: "Email or password is incorrect.",});
     }
 
     const token = jwt.sign(
@@ -105,17 +100,15 @@ export const loginUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    return res.status(200).json({
-      message: "Login successful",
-      token,
-    });
-  } catch (error) {
+    return res.status(200).json({message: "Login successful",token,});
+  }
+
+  catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({
-      message: "Server error during login.",
-    });
+    return res.status(500).json({message: "Server error during login."});
   }
 };
+
 
 export async function searchUser(req, res){
 
@@ -143,4 +136,76 @@ export async function searchUser(req, res){
     }
 }
 
-export default { registerUser, allUsers, loginUser, getUser, searchUser};
+export async function updateUser(req, res){
+
+    const requestId = parseInt(req.params.id);
+    const { username, avatar, bio, status, location} = req.body;
+
+
+    const userExisting = await prisma.user.findFirst({ 
+        where: {username}
+    });
+
+    if(userExisting){
+        return res.status(400).json({message: "Email or username already exists" });
+    }
+
+    try{
+        // voir si un utilisateur existe deja avec ce pseudo - si oui return erreur
+        const updatedUser = await prisma.user.update({
+            where:{id: requestId},
+            data:{
+                username,
+                avatar,
+                bio,
+                status,
+                location,
+            },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                avatar: true,
+                bio: true,
+                status: true,
+                location: true,
+                createdAt: true,
+            }
+        });
+        res.json(updatedUser);
+    }
+    catch(error){
+        console.error("updateUser error:", error);
+        res.status(500).json({ message: "Failed to update user" });
+    }
+
+}
+
+
+// export async function updatePassword(req, res){
+    
+//     const { currentPassword, newPassword, confirmPassword} = req.body;
+    
+    
+//     try{
+
+//         const passwordOk = await bcrypt.hash(currentPassword, 10);
+//         if (!passwordOk) {
+//             return res.status(401).json({ message: "Current password is incorrect" });
+//         }
+    
+//         if(newPassword !== confirmPassword){
+//             return res.status(401).json({message: "Current password is incorrect"});
+//         }
+        
+//         const updatePassword = await prisma.user.update({
+//         where:{id: requestId},
+//         data:{
+        
+            
+//         }
+//     });
+    // }
+
+
+export default { registerUser, allUsers, loginUser, getUser, searchUser,updateUser,updatePassword };

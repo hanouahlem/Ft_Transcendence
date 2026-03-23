@@ -134,7 +134,7 @@ export async function deleteFriend(req, res) {
     try {
         const userId = req.user.id;
 
-        const friendId = parseInt(req.params.id); // ← req.params.id pas req.body
+        const friendId = parseInt(req.params.id);
 
         const friend = await prisma.friends.findFirst({
             where: {
