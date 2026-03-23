@@ -1,14 +1,23 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import path from "path";
+import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
 
-dotenv.config();
+try {
+  validateEnv();
+} catch (error) {
+  console.error(`Startup failed: ${error.message}`);
+  process.exit(1);
+}
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 app.use("/uploads", express.static(path.resolve("uploads")));
 

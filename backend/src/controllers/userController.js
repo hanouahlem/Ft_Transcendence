@@ -1,10 +1,7 @@
-import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { getEnv } from "../env.js";
 import prisma from "../prisma.js";
-dotenv.config();
-
-
 
 export async function allUsers(req, res) {
   try {
@@ -97,8 +94,11 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({message: "Email or password is incorrect.",});
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email },process.env.JWT_SECRET,
-      { expiresIn: "5h" });
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      getEnv("JWT_SECRET"),
+      { expiresIn: "3h" }
+    );
 
     return res.status(200).json({message: "Login successful",token,});
   }
@@ -135,7 +135,6 @@ export async function searchUser(req, res){
         return res.status(500).json({ message: "Failed to search users" });
     }
 }
-
 
 export async function updateUser(req, res){
 

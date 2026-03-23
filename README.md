@@ -1,43 +1,60 @@
+# ft_transcendence
+
+Full-stack 42 group project built with:
+
+- Next.js frontend on port `3000`
+- Express + Prisma backend on port `3001`
+- PostgreSQL on port `5432`
+
+## Project Structure
+
+- `frontend/`: Next.js app, pages, and UI components
+- `backend/`: Express API, Prisma client, controllers, middleware, and uploads
+- `docker-compose.yml`: local Docker stack
+- `Makefile`: common Docker and local run commands
+
+## Current Features
+
+- user registration and login with JWT auth
+- protected current-user route
+- friends search, add, accept, delete, and pending requests
+- posts feed with create, delete, like, and unlike
+- media upload support for posts
 
 
+## Quick Start
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
+Docker:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+make up
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Useful commands:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+make down
+make logs
+make ps
+make db
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment
 
-## Learn More
+- local backend env lives in `backend/.env`
+- backend template lives in `backend/.env.example`
+- optional frontend template lives in `frontend/.env.local.example`
+- detailed setup notes live in `DEV_DOCS.md`
 
-To learn more about Next.js, take a look at the following resources:
+## Main Docs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `DEV_DOCS.md`: environment setup and run modes
+- `transcendance.md`: 42 subject and requirements
+- `lessons.md`: team learning notes
+- `AGENTS.md`: project-specific working conventions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
+---
+# Notes
 
 ## serveur frontend 
 

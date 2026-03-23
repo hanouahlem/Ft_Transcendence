@@ -1,8 +1,5 @@
-import dotenv from 'dotenv';
 import prisma from "../prisma.js";
 import jwt from 'jsonwebtoken';
-
-dotenv.config();
 
 
 export async function addFriend(req, res) {
