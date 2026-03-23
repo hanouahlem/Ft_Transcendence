@@ -207,5 +207,5 @@ export async function updateUser(req, res){
 //     });
     // }
 
-
-export default { registerUser, allUsers, loginUser, getUser, searchUser,updateUser,updatePassword };
+export default { registerUser, allUsers, loginUser, getUser, searchUser, updateUser };
+// export default { registerUser, allUsers, loginUser, getUser, searchUser,updateUser,updatePassword };
