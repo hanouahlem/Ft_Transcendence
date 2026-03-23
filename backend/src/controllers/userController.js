@@ -98,8 +98,7 @@ export const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, email: user.email },process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+      { expiresIn: "5h" });
 
     return res.status(200).json({message: "Login successful",token,});
   }
@@ -153,7 +152,7 @@ export async function updateUser(req, res){
     }
 
     try{
-        // voir si un utilisateur existe deja avec ce pseudo - si oui return erreur
+
         const updatedUser = await prisma.user.update({
             where:{id: requestId},
             data:{
@@ -184,30 +183,43 @@ export async function updateUser(req, res){
 }
 
 
-// export async function updatePassword(req, res){
+export async function updatePassword(req, res){
     
-//     const { currentPassword, newPassword, confirmPassword} = req.body;
+    const { currentPassword, newPassword, confirmPassword} = req.body;
     
     
-//     try{
+    try{
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
 
-//         const passwordOk = await bcrypt.hash(currentPassword, 10);
-//         if (!passwordOk) {
-//             return res.status(401).json({ message: "Current password is incorrect" });
-//         }
-    
-//         if(newPassword !== confirmPassword){
-//             return res.status(401).json({message: "Current password is incorrect"});
-//         }
-        
-//         const updatePassword = await prisma.user.update({
-//         where:{id: requestId},
-//         data:{
-        
-            
-//         }
-//     });
-    // }
+         const user = await prisma.user.findUnique({
+            where: { id: req.user.id }
+        });
 
+        const passwordOk = await bcrypt.compare(currentPassword, user.password);
+        if (!passwordOk) {
+            return res.status(401).json({ message: "Current password is incorrect" });
+        }
+    
+        if(newPassword !== confirmPassword){
+            return res.status(401).json({message: "Passwords do not match"});
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        await prisma.user.update({
+        where:{id: req.user.id},
+        data:{ password: hashedPassword}
+        
+        });
+        res.json({message: "Password updated successfully" });
+    }
+    catch(error)
+    {
+        console.error("updatePassword error:", error);
+        res.status(500).json({ message: "Failed to update password" });
+    }
+}
 
 export default { registerUser, allUsers, loginUser, getUser, searchUser,updateUser,updatePassword };
