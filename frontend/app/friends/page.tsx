@@ -11,6 +11,7 @@ import {
   X,
   Leaf,
 } from "lucide-react";
+
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { getFriendRequests } from "@/lib/api";
 
