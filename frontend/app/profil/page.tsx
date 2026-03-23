@@ -20,8 +20,18 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
 type FeedPost = {
   id: number;
@@ -34,7 +44,6 @@ type FeedPost = {
   reposts: number;
   favorites: number;
 };
-type Friend = { name: string; status: string };
 
 const profileExtras = {
   bio: "Étudiant en informatique, passionné par le développement web, la cybersécurité et les interfaces modernes.",
@@ -55,44 +64,130 @@ const profileExtras = {
     "Profile created in March 2026",
   ],
   posts: [
-    { id: 1, author: "Nabil", handle: "@nabil.dev", time: "2h", content: "Je travaille sur une interface plus propre et plus calme...", likes: 28, comments: 6, reposts: 3 },
-    { id: 2, author: "Nabil", handle: "@nabil.dev", time: "5h", content: "J’aime les interfaces qui respirent : plus d’espace...", likes: 41, comments: 9, reposts: 5 },
-    { id: 3, author: "Nabil", handle: "@nabil.dev", time: "1d", content: "Petit focus du jour : quand on garde la logique intacte...", likes: 19, comments: 4, reposts: 2 },
+    {
+      id: 1,
+      author: "Nabil",
+      handle: "@nabil.dev",
+      time: "2h",
+      content:
+        "Je travaille sur une interface plus propre et plus calme, inspirée d’un mélange entre Twitter et un blog éditorial. L’objectif : garder la lisibilité sans perdre l’aspect social.",
+      likes: 28,
+      comments: 6,
+      reposts: 3,
+      favorites: 12,
+    },
+    {
+      id: 2,
+      author: "Nabil",
+      handle: "@nabil.dev",
+      time: "5h",
+      content:
+        "J’aime les interfaces qui respirent : plus d’espace, des couleurs naturelles, et une hiérarchie visuelle simple. Ça change complètement la perception du produit.",
+      likes: 41,
+      comments: 9,
+      reposts: 5,
+      favorites: 18,
+    },
+    {
+      id: 3,
+      author: "Nabil",
+      handle: "@nabil.dev",
+      time: "1d",
+      content:
+        "Petit focus du jour : quand on garde la logique intacte et qu’on refait seulement la DA, on voit très vite si l’UX devient plus cohérente.",
+      likes: 19,
+      comments: 4,
+      reposts: 2,
+      favorites: 10,
+    },
   ] as FeedPost[],
   likedPosts: [
-    { id: 4, author: "Amine", handle: "@amine.ui", time: "3h", content: "Une bonne interface sociale ne doit pas seulement être belle...", likes: 52, comments: 11, reposts: 7 },
+    {
+      id: 4,
+      author: "Amine",
+      handle: "@amine.ui",
+      time: "3h",
+      content:
+        "Une bonne interface sociale ne doit pas seulement être belle, elle doit aussi guider naturellement le regard.",
+      likes: 52,
+      comments: 11,
+      reposts: 7,
+      favorites: 23,
+    },
+  ] as FeedPost[],
+  favoritePosts: [
+    {
+      id: 5,
+      author: "Sara",
+      handle: "@sara.codes",
+      time: "8h",
+      content:
+        "Les palettes vert sauge et beige donnent souvent une sensation plus premium que les contrastes trop agressifs.",
+      likes: 63,
+      comments: 14,
+      reposts: 8,
+      favorites: 31,
+    },
   ] as FeedPost[],
   commentedPosts: [
-    { id: 6, author: "Yassir", handle: "@yassir.dev", time: "1d", content: "Refaire une page profil en gardant la logique existante...", likes: 34, comments: 12, reposts: 4 },
+    {
+      id: 6,
+      author: "Yassir",
+      handle: "@yassir.dev",
+      time: "1d",
+      content:
+        "Refaire une page profil en gardant la logique existante, c’est un très bon exercice pour séparer UI et métier.",
+      likes: 34,
+      comments: 12,
+      reposts: 4,
+      favorites: 15,
+    },
   ] as FeedPost[],
 };
 
-// --- Post Card ---
 function PostCard({ post }: { post: FeedPost }) {
   return (
-    <Card className="rounded-3xl bg-white shadow-md hover:shadow-xl transition-all overflow-hidden">
+    <Card className="overflow-hidden rounded-[1.75rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
-          <Avatar className="h-14 w-14 border border-gray-200">
-            <AvatarFallback>{post.author.slice(0,2).toUpperCase()}</AvatarFallback>
+          <Avatar className="h-11 w-11 border border-[#d8cfbe]">
+            <AvatarFallback className="bg-[#eef3e8] text-[#6f8467]">
+              {post.author.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-              <p className="font-semibold text-gray-800">{post.author}</p>
-              <p>{post.handle}</p>
-              <span>· {post.time}</span>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="font-semibold text-[#2f3a32]">{post.author}</p>
+              <p className="text-sm text-[#7b847b]">{post.handle}</p>
+              <span className="text-sm text-[#a0a79f]">·</span>
+              <p className="text-sm text-[#7b847b]">{post.time}</p>
             </div>
-            <p className="mt-2 text-sm text-gray-700">{post.content}</p>
-            <div className="mt-3 flex gap-6">
-              <button className="flex items-center gap-2 text-[#9CAF88] hover:scale-105 transition-transform">
-                <Heart className="h-5 w-5" /> {post.likes}
-              </button>
-              <button className="flex items-center gap-2 text-[#8AA678] hover:scale-105 transition-transform">
-                <MessageCircle className="h-5 w-5" /> {post.comments}
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:scale-105 transition-transform">
-                <Repeat2 className="h-5 w-5" /> {post.reposts}
-              </button>
+
+            <p className="mt-3 text-sm leading-7 text-[#4e5850]">
+              {post.content}
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-[#6f786f]">
+              <div className="inline-flex items-center gap-2">
+                <MessageCircle className="h-4 w-4" />
+                <span>{post.comments}</span>
+              </div>
+
+              <div className="inline-flex items-center gap-2">
+                <Repeat2 className="h-4 w-4" />
+                <span>{post.reposts}</span>
+              </div>
+
+              <div className="inline-flex items-center gap-2">
+                <Heart className="h-4 w-4" />
+                <span>{post.likes}</span>
+              </div>
+
+              <div className="inline-flex items-center gap-2">
+                <Bookmark className="h-4 w-4" />
+                <span>{post.favorites}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -101,7 +196,6 @@ function PostCard({ post }: { post: FeedPost }) {
   );
 }
 
-// --- Profile Page ---
 export default function Profil() {
   const { user, token } = useAuth();
 
@@ -325,38 +419,6 @@ export default function Profil() {
                 </Card>
               </div>
             </div>
-
-            {/* Right Sidebar: Friends + Notifications */}
-            <div className="space-y-6 lg:col-span-3 sticky top-6">
-              {/* Friends */}
-              <Card className="rounded-3xl bg-white shadow-lg">
-                <CardContent className="p-6 space-y-4">
-                  <h2 className="font-semibold text-gray-800 text-lg">Friends</h2>
-                  {profileExtras.friends.map((friend,i)=>(
-                    <Button key={i} className="w-full justify-between bg-[#F4F3E8] p-4 rounded-2xl hover:bg-[#E0E3D5] transition text-gray-800">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12 border border-gray-200">
-                          <AvatarFallback>{friend.name.slice(0,2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <p className="text-base font-medium">{friend.name}</p>
-                      </div>
-                      <span className={`text-sm font-semibold ${friend.status==="Online"?"text-[#4A6440]":"text-gray-400"}`}>{friend.status}</span>
-                    </Button>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Notifications */}
-              <Card className="rounded-3xl bg-white shadow-lg">
-                <CardContent className="p-6 space-y-3">
-                  <h2 className="font-semibold text-gray-800 text-lg">Notifications</h2>
-                  {profileExtras.notifications.map((notif,i)=>
-                    <div key={i} className="bg-[#F4F3E8] rounded-2xl p-3 text-sm text-gray-800">{notif}</div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
           </div>
         </section>
       </main>
