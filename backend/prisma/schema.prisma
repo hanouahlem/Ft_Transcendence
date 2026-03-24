@@ -16,6 +16,9 @@ model User {
   status    String?
   location  String?
   createdAt DateTime @default(now())
+  
+  twoFactorSecret  String?  // secret code
+  twoFactorEnabled Boolean  @default(false)
 
   posts           Post[]
   likes           Like[]
