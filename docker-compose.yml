@@ -24,6 +24,7 @@ services:
       - ./backend/.env
     ports:
       - "3001:3001"
+      - "5555:5555"
     environment:
       PORT: 3001
     depends_on:
