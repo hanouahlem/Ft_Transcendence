@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent, FormEvent, ReactNode } from "react";
+import type { ChangeEvent, CSSProperties, FormEvent, ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +9,44 @@ import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 const ACCENT_COLORS = ["#3A698A", "#285A35", "#FF4A1C"];
+
+const LOGIN_LAYOUT = {
+	stageMaxWidth: "69rem",
+	greenPanel: {
+		top: "2.5rem",
+		right: "1rem",
+		bottom: "2.5rem",
+		width: "65%",
+	},
+	paperCard: {
+		left: "3rem",
+		width: "50%",
+		rotate: "-2deg",
+	},
+	leftBeads: {
+		left: "0rem",
+		top: "20%",
+		shiftX: "50%",
+	},
+	signupStrip: {
+		bottom: "-4rem",
+	},
+};
+
+const LOGIN_LAYOUT_VARS = {
+	"--login-stage-max-width": LOGIN_LAYOUT.stageMaxWidth,
+	"--login-green-top": LOGIN_LAYOUT.greenPanel.top,
+	"--login-green-right": LOGIN_LAYOUT.greenPanel.right,
+	"--login-green-bottom": LOGIN_LAYOUT.greenPanel.bottom,
+	"--login-green-width": LOGIN_LAYOUT.greenPanel.width,
+	"--login-paper-left": LOGIN_LAYOUT.paperCard.left,
+	"--login-paper-width": LOGIN_LAYOUT.paperCard.width,
+	"--login-paper-rotate": LOGIN_LAYOUT.paperCard.rotate,
+	"--login-beads-left": LOGIN_LAYOUT.leftBeads.left,
+	"--login-beads-top": LOGIN_LAYOUT.leftBeads.top,
+	"--login-beads-shift-x": LOGIN_LAYOUT.leftBeads.shiftX,
+	"--login-signup-bottom": LOGIN_LAYOUT.signupStrip.bottom,
+} as CSSProperties;
 
 function MonoText({
 	children,
@@ -101,7 +139,7 @@ function AccentBeads({
 
 function ArchivePanel() {
 	return (
-		<section className="relative overflow-hidden border border-black/20 bg-[#285A35] px-6 py-8 text-[#F5F2EB] shadow-[15px_15px_30px_rgba(0,0,0,0.2)] sm:px-8 sm:py-10 lg:absolute lg:inset-y-10 lg:right-4 lg:left-[36%] lg:px-10 lg:py-10">
+		<section className="relative overflow-hidden border border-black/20 bg-[#285A35] px-6 py-8 text-[#F5F2EB] shadow-[15px_15px_30px_rgba(0,0,0,0.2)] sm:px-8 sm:py-10 lg:absolute lg:top-[var(--login-green-top)] lg:right-[var(--login-green-right)] lg:bottom-[var(--login-green-bottom)] lg:w-[var(--login-green-width)] lg:px-10 lg:py-10">
 			<svg
 				className="pointer-events-none absolute -bottom-20 -right-10 h-80 w-80 rotate-12 fill-none stroke-white/10"
 				viewBox="0 0 50 50"
@@ -307,7 +345,7 @@ function PaperCard({
 	onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
 	return (
-		<section className="relative z-20 overflow-visible border border-[#E8E1D5] bg-[#F5F2EB] shadow-[0_20px_50px_rgba(0,0,0,0.4)] lg:absolute lg:inset-y-0 lg:left-4 lg:w-[46%] lg:-rotate-2">
+		<section className="relative z-20 overflow-visible border border-[#E8E1D5] bg-[#F5F2EB] shadow-[0_20px_50px_rgba(0,0,0,0.4)] lg:absolute lg:inset-y-0 lg:left-[var(--login-paper-left)] lg:w-[var(--login-paper-width)] lg:[transform:rotate(var(--login-paper-rotate))]">
 			<div
 				className="pointer-events-none absolute inset-0 opacity-50"
 				style={{
@@ -490,7 +528,10 @@ export default function LoginPage() {
 		>
 			<SvgDefinitions />
 
-			<div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1200px] items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+			<div
+				className="relative z-10 mx-auto flex min-h-screen w-full max-w-[var(--login-stage-max-width)] items-center justify-center px-4 py-10 sm:px-6 lg:px-8"
+				style={LOGIN_LAYOUT_VARS}
+			>
 				<div className="relative flex w-full flex-col gap-6 lg:h-[700px] lg:justify-center">
 					<ArchivePanel />
 
@@ -506,11 +547,11 @@ export default function LoginPage() {
 					/>
 
 					<AccentBeads
-						className="absolute left-0 top-[20%] z-30 hidden translate-x-1/2 lg:flex"
+						className="absolute z-30 hidden lg:flex lg:left-[var(--login-beads-left)] lg:top-[var(--login-beads-top)] lg:translate-x-[var(--login-beads-shift-x)]"
 						vertical
 					/>
 
-					<div className="text-center lg:absolute lg:-bottom-16 lg:left-0 lg:right-0">
+					<div className="text-center lg:absolute lg:bottom-[var(--login-signup-bottom)] lg:left-0 lg:right-0">
 						<p className="inline-block border border-[#5A564C]/20 bg-[#E8E1D5] px-4 py-2 font-['Courier_Prime'] text-[11px] uppercase tracking-[0.3em] text-[#1A1A1A]/65">
 							Not a member?
 							<Link
