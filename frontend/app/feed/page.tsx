@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
@@ -31,6 +32,7 @@ type FeedComment = {
     id: number;
     username: string;
     email: string;
+    avatar?: string | null;
   };
 };
 
@@ -42,6 +44,7 @@ type FeedPost = {
     id: number;
     username: string;
     email: string;
+    avatar?: string | null;
   };
   likesCount: number;
   commentsCount: number;
@@ -51,7 +54,6 @@ type FeedPost = {
   comments: FeedComment[];
   media: string[];
 
-  // prêts pour le repost backend
   repostsCount?: number;
   repostedByCurrentUser?: boolean;
 };
@@ -68,6 +70,7 @@ function PostCard({
   post,
   currentUserId,
   onDelete,
+  onDeleteComment,
   onToggleLike,
   onToggleFavorite,
   onToggleRepost,
@@ -75,6 +78,7 @@ function PostCard({
   onAddComment,
   commentValue,
   deletingPostId,
+  deletingCommentId,
   likingPostId,
   favoritingPostId,
   repostingPostId,
@@ -83,6 +87,7 @@ function PostCard({
   post: FeedPost;
   currentUserId: number | undefined;
   onDelete: (postId: number) => Promise<void>;
+  onDeleteComment: (commentId: number) => Promise<void>;
   onToggleLike: (post: FeedPost) => Promise<void>;
   onToggleFavorite: (post: FeedPost) => Promise<void>;
   onToggleRepost: (post: FeedPost) => Promise<void>;
@@ -90,6 +95,7 @@ function PostCard({
   onAddComment: (postId: number) => Promise<void>;
   commentValue: string;
   deletingPostId: number | null;
+  deletingCommentId: number | null;
   likingPostId: number | null;
   favoritingPostId: number | null;
   repostingPostId: number | null;
@@ -109,24 +115,38 @@ function PostCard({
     <Card className="overflow-hidden rounded-[1.75rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
-          <Avatar className="h-12 w-12 border border-[#d8cfbe]">
-            <AvatarImage src="" alt="Avatar utilisateur" />
-            <AvatarFallback className="bg-[#eef3e8] text-[#6f8467]">
-              {post.author.username.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <Link href={`/profil/${post.author.id}`} className="shrink-0">
+            <Avatar className="h-12 w-12 border border-[#d8cfbe] transition hover:opacity-90">
+              <AvatarImage
+                src={post.author.avatar || ""}
+                alt={post.author.username}
+              />
+              <AvatarFallback className="bg-[#eef3e8] text-[#6f8467]">
+                {post.author.username.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <p className="font-semibold text-[#2f3a32]">
+                <Link
+                  href={`/profil/${post.author.id}`}
+                  className="font-semibold text-[#2f3a32] transition hover:underline"
+                >
                   {post.author.username}
-                </p>
+                </Link>
                 <p className="text-sm text-[#7b847b]">
+                <Link
+                  href={`/profil/${post.author.id}`}
+                >
+                  {post.author.username}
+                </Link>
                   @{post.author.username.toLowerCase()}
                 </p>
                 <span className="text-sm text-[#a0a79f]">·</span>
                 <p className="text-sm text-[#7b847b]">
+                  
                   {formatPostTime(post.createdAt)}
                 </p>
               </div>
@@ -227,25 +247,46 @@ function PostCard({
                 {post.comments.length === 0 ? (
                   <p className="text-sm text-[#7b847b]">No comments yet.</p>
                 ) : (
-                  post.comments.map((comment) => (
-                    <div
-                      key={comment.id}
-                      className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] px-4 py-3"
-                    >
-                      <div className="mb-1 flex items-center gap-2">
-                        <p className="text-sm font-semibold text-[#2f3a32]">
-                          {comment.author.username}
-                        </p>
-                        <span className="text-xs text-[#9aa19a]">
-                          @{comment.author.username.toLowerCase()}
-                        </span>
-                      </div>
+                  post.comments.map((comment) => {
+                    const isCommentOwner = comment.author.id === currentUserId;
+                    const isDeletingComment = deletingCommentId === comment.id;
 
-                      <p className="text-sm leading-6 text-[#4e5850]">
-                        {comment.content}
-                      </p>
-                    </div>
-                  ))
+                    return (
+                      <div
+                        key={comment.id}
+                        className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] px-4 py-3"
+                      >
+                        <div className="mb-2 flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold text-[#2f3a32]">
+                                {comment.author.username}
+                              </p>
+                              <span className="text-xs text-[#9aa19a]">
+                                @{comment.author.username.toLowerCase()}
+                              </span>
+                            </div>
+                          </div>
+
+                          {isCommentOwner && (
+                            <button
+                              type="button"
+                              onClick={() => onDeleteComment(comment.id)}
+                              disabled={isDeletingComment}
+                              className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              {isDeletingComment ? "Deleting..." : "Delete"}
+                            </button>
+                          )}
+                        </div>
+
+                        <p className="text-sm leading-6 text-[#4e5850]">
+                          {comment.content}
+                        </p>
+                      </div>
+                    );
+                  })
                 )}
               </div>
 
@@ -288,6 +329,7 @@ export default function FeedPage() {
   const [message, setMessage] = useState("");
 
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
   const [likingPostId, setLikingPostId] = useState<number | null>(null);
   const [favoritingPostId, setFavoritingPostId] = useState<number | null>(null);
   const [repostingPostId, setRepostingPostId] = useState<number | null>(null);
@@ -296,6 +338,61 @@ export default function FeedPage() {
   const [commentingPostId, setCommentingPostId] = useState<number | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleDeleteComment = async (commentId: number) => {
+    if (!token) {
+      setError("Tu dois être connecté pour supprimer un commentaire.");
+      return;
+    }
+
+    try {
+      setDeletingCommentId(commentId);
+      setError("");
+      setMessage("");
+
+      const response = await fetch(`http://localhost:3001/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Erreur lors de la suppression du commentaire"
+        );
+      }
+
+      setPosts((prevPosts) =>
+        prevPosts.map((post) => {
+          const hasComment = post.comments.some(
+            (comment) => comment.id === commentId
+          );
+
+          if (!hasComment) {
+            return post;
+          }
+
+          return {
+            ...post,
+            comments: post.comments.filter((comment) => comment.id !== commentId),
+            commentsCount: Math.max(0, post.commentsCount - 1),
+          };
+        })
+      );
+
+      setMessage("Commentaire supprimé avec succès.");
+    } catch (error) {
+      console.error(error);
+      setError(
+        error instanceof Error ? error.message : "Erreur inconnue"
+      );
+    } finally {
+      setDeletingCommentId(null);
+    }
+  };
 
   const fetchPosts = async () => {
     if (!token) return;
@@ -750,6 +847,7 @@ export default function FeedPage() {
                         post={post}
                         currentUserId={user?.id}
                         onDelete={handleDelete}
+                        onDeleteComment={handleDeleteComment}
                         onToggleLike={handleToggleLike}
                         onToggleFavorite={handleToggleFavorite}
                         onToggleRepost={handleToggleRepost}
@@ -757,6 +855,7 @@ export default function FeedPage() {
                         onAddComment={handleAddComment}
                         commentValue={commentInputs[post.id] || ""}
                         deletingPostId={deletingPostId}
+                        deletingCommentId={deletingCommentId}
                         likingPostId={likingPostId}
                         favoritingPostId={favoritingPostId}
                         repostingPostId={repostingPostId}

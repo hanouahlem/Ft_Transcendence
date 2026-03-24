@@ -387,3 +387,27 @@ export const unrepostPost = async (postId, userId) => {
 
   return true;
 };
+
+export const deleteComment = async (commentId, userId) => {
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: Number(commentId),
+    },
+  });
+
+  if (!comment) {
+    throw new Error("Comment not found");
+  }
+
+  if (comment.userId !== Number(userId)) {
+    throw new Error("You are not allowed to delete this comment");
+  }
+
+  await prisma.comment.delete({
+    where: {
+      id: Number(commentId),
+    },
+  });
+
+  return true;
+};

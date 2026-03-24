@@ -5,6 +5,7 @@ import {
   likePost,
   unlikePost,
   createComment,
+  deleteComment,
   favoritePost,
   unfavoritePost,
   repostPost,
@@ -60,6 +61,49 @@ export const createPostHandler = async (req, res) => {
     console.error("Erreur createPostHandler :", error);
     return res.status(500).json({
       message: error.message || "Unable to create post.",
+    });
+  }
+};
+
+export const deleteCommentHandler = async (req, res) => {
+  try {
+    const commentId = Number(req.params.id);
+    const userId = req.user?.id ?? req.user?.userId;
+
+    if (Number.isNaN(commentId) || commentId < 1) {
+      return res.status(400).json({
+        message: "Invalid comment id.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not found in token.",
+      });
+    }
+
+    await deleteComment(commentId, userId);
+
+    return res.status(200).json({
+      message: "Comment deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Erreur deleteCommentHandler :", error);
+
+    if (error.message === "Comment not found") {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
+
+    if (error.message === "You are not allowed to delete this comment") {
+      return res.status(403).json({
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      message: error.message || "Unable to delete comment.",
     });
   }
 };

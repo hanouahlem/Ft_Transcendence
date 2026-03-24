@@ -221,4 +221,54 @@ export async function updatePassword(req, res){
     }
 }
 
-export default { registerUser, allUsers, loginUser, getUser, searchUser,updateUser,updatePassword };
+const getUserById = async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    if (Number.isNaN(userId) || userId < 1) {
+      return res.status(400).json({
+        message: "Invalid user id.",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        avatar: true,
+        bio: true,
+        status: true,
+        location: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("Erreur getUserById :", error);
+    return res.status(500).json({
+      message: "Unable to fetch user.",
+    });
+  }
+};
+
+export default {
+  registerUser,
+  allUsers,
+  loginUser,
+  getUser,
+  getUserById,
+  searchUser,
+  updateUser,
+  updatePassword,
+};

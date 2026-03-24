@@ -7,6 +7,7 @@ import {
   likePostHandler,
   unlikePostHandler,
   createCommentHandler,
+  deleteCommentHandler,
   favoritePostHandler,
   unfavoritePostHandler,
   repostPostHandler,
@@ -25,12 +26,13 @@ router.post("/login", ctrl.loginUser);
 router.get("/user", authMiddleware, ctrl.getUser);
 router.get("/users/search", authMiddleware, ctrl.searchUser);
 router.put("/users/:id", authMiddleware, ctrl.updateUser);
+router.get("/users/:id", authMiddleware, ctrl.getUserById);
 router.put("/settings/security", authMiddleware, ctrl.updatePassword);
 
-router.post('/notifications', authMiddleware, notif.createNotif);
-router.get('/notifications', authMiddleware, notif.getNotif);
-router.patch('/notifications/:id/read', authMiddleware, notif.markAsRead);
-router.delete('/notifications/:id', authMiddleware, notif.deleteNotif);
+// router.post('/notifications', authMiddleware, notif.createNotif);
+// router.get('/notifications', authMiddleware, notif.getNotif);
+// router.patch('/notifications/:id/read', authMiddleware, notif.markAsRead);
+// router.delete('/notifications/:id', authMiddleware, notif.deleteNotif);
 
 
 
@@ -54,4 +56,6 @@ router.post("/posts/:id/favorite", authMiddleware, favoritePostHandler);
 router.delete("/posts/:id/favorite", authMiddleware, unfavoritePostHandler);
 router.post("/posts/:id/repost", authMiddleware, repostPostHandler);
 router.delete("/posts/:id/repost", authMiddleware, unrepostPostHandler);
+
+
 export default router;
