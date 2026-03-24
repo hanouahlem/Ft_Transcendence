@@ -46,3 +46,8 @@ prisma-migrate:
 
 prisma-studio:
 	$(COMPOSE) exec backend sh -c '$(DB_URL) npx prisma studio --browser none --port 5555'
+
+
+ms: prisma-migrate prisma-studio
+
+.PHONY: up down restart build logs ps clean fclean re frontend backend db prisma-generate prisma-migrate prisma-studio studio migrate
