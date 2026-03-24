@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   Heart,
   MessageCircle,
@@ -9,13 +13,29 @@ import {
   Bell,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/AuthContext";
+import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function HomePage() {
+  const router = useRouter();
+  const { isLoggedIn, isAuthLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthLoading && isLoggedIn) {
+      router.replace("/feed");
+    }
+  }, [isLoggedIn, isAuthLoading, router]);
+
+  if (isAuthLoading || isLoggedIn) {
+    return null;
+  }
+
   return (
+    <>
+    <Navbar />
     <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
       <section className="relative overflow-hidden">
         {/* Background decoration */}
@@ -316,5 +336,6 @@ export default function HomePage() {
         </div>
       </section>
     </main>
+    </>
   );
 }
