@@ -49,8 +49,8 @@ make db
 ## Main Docs
 
 - `DEV_DOCS.md`: environment setup and run modes
-- `transcendance.md`: 42 subject and requirements
-- `lessons.md`: team learning notes
+- `other/transcendance.md`: 42 subject and requirements
+- `other/lessons/`: team learning notes
 - `AGENTS.md`: project-specific working conventions
 
 ---

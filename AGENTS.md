@@ -6,7 +6,7 @@ A **42 school group project** where 4-5 students build a full-stack web applicat
 
 ## Source of truth
 
-The file `transcendance.md` at the repo root is the **official project subject** from 42. All requirements, module definitions, grading criteria, and constraints come from this document. Always reference it before making architectural decisions or claiming a module is complete. Never add features or modules without checking it first.
+The file `other/transcendance.md` is the **official project subject** from 42. All requirements, module definitions, grading criteria, and constraints come from this document. Always reference it before making architectural decisions or claiming a module is complete. Never add features or modules without checking it first.
 
 ## Stack
 
@@ -19,8 +19,8 @@ The file `transcendance.md` at the repo root is the **official project subject**
 
 ## Key files
 
-- `transcendance.md` — the 42 subject (source of truth)
-- `lessons.md` — team learning log (see below)
+- `other/transcendance.md` — the 42 subject (source of truth)
+- `other/lessons/` — team learning notes (see below)
 - `backend/.env.example` — backend environment template
 - `frontend/.env.local.example` — frontend environment template
 - `frontend/lib/api.ts` — all frontend API calls
@@ -31,11 +31,11 @@ The file `transcendance.md` at the repo root is the **official project subject**
 - `fackend/src/middleware/auth.js` — JWT verification middleware
 - `fackend/prisma/schema.prisma` — database schema
 
-## Updating lessons.md
+## Updating Team Lessons
 
-`lessons.md` is a team learning document. It exists so students can review what they need to know before evaluation. When you implement or change something:
+`other/lessons/` is the team learning area. It exists so students can review what they need to know before evaluation. When you implement or change something:
 
-1. **Check first** — read `lessons.md` to see if the topic already has a section
+1. **Check first** — read the relevant file under `other/lessons/` to see if the topic already has a section
 2. **Update or add** — if the topic exists, update it. If not, add a new numbered section
 3. **Use real code** — snippets should come from the actual codebase, not generic examples. Include file paths
 4. **Explain for students** — write as if explaining to a teammate who wasn't present when the code was written. Cover:
@@ -43,7 +43,7 @@ The file `transcendance.md` at the repo root is the **official project subject**
    - Why it's needed
    - How it works (brief, with code)
    - Key terms an evaluator might ask about
-5. **Verify against the subject** — cross-check any claims about requirements or module criteria against `transcendance.md`
+5. **Verify against the subject** — cross-check any claims about requirements or module criteria against `other/transcendance.md`
 6. **Keep it concise** — each section should be scannable in under 2 minutes
 
 ## Project structure
@@ -64,8 +64,9 @@ Ft_Transcendence/
 ├── docker-compose.yml
 ├── backend/.env.example            # Backend env template
 ├── frontend/.env.local.example     # Frontend env template
-├── transcendance.md   # 42 subject (source of truth)
-└── lessons.md         # Team learning log
+├── other/
+│   ├── transcendance.md   # 42 subject (source of truth)
+│   └── lessons/           # Team learning notes
 ```
 
 

@@ -157,4 +157,4 @@ Study file:
 - Use this as a study map, not as a full explanation document.
 - We create each concept file when we start that section.
 - If one section feels unclear, drill into that section before moving on.
-- Every explanation should stay consistent with `transcendance.md`, which is the project source of truth.
+- Every explanation should stay consistent with `other/transcendance.md`, which is the project source of truth.
