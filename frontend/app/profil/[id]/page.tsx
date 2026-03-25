@@ -1,25 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import {
-  Leaf,
-  MessageCircle,
-  FileText,
-  Mail,
-  MapPin,
-  Info,
-  CalendarDays,
-} from "lucide-react";
-
+import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Leaf, MessageCircle, Heart, Bookmark } from "lucide-react";
 
 type ProfileUser = {
   id: number;
@@ -42,6 +30,19 @@ type FeedComment = {
     email: string;
     avatar?: string | null;
   };
+  likesCount: number;
+  favoritesCount: number;
+  likedByCurrentUser: boolean;
+  favoritedByCurrentUser: boolean;
+  media: string[];
+  post?: {
+    id: number;
+    content: string;
+    author: {
+      id: number;
+      username: string;
+    };
+  } | null;
 };
 
 type FeedPost = {
@@ -57,139 +58,209 @@ type FeedPost = {
   likesCount: number;
   commentsCount: number;
   favoritesCount: number;
-  repostsCount?: number;
   likedByCurrentUser: boolean;
   favoritedByCurrentUser: boolean;
-  repostedByCurrentUser?: boolean;
   comments: FeedComment[];
   media: string[];
 };
 
-type UserCommentItem = {
-  id: number;
-  content: string;
-  createdAt: string;
-  postId: number;
-  postContent: string;
-  postAuthor: {
-    id: number;
-    username: string;
-  };
+type ReactionResponse = {
+  posts: FeedPost[];
+  comments: FeedComment[];
 };
 
 function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleString("fr-FR", {
+  return new Date(dateString).toLocaleString("fr-FR", {
     dateStyle: "short",
     timeStyle: "short",
   });
 }
 
 export default function PublicProfilePage() {
+  const { token } = useAuth();
   const params = useParams();
-  const id = params?.id;
+  const userId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [comments, setComments] = useState<FeedComment[]>([]);
+  const [likedPosts, setLikedPosts] = useState<FeedPost[]>([]);
+  const [likedComments, setLikedComments] = useState<FeedComment[]>([]);
+  const [favoritePosts, setFavoritePosts] = useState<FeedPost[]>([]);
+  const [favoriteComments, setFavoriteComments] = useState<FeedComment[]>([]);
+  const [activeTab, setActiveTab] = useState<"posts" | "comments" | "likes" | "favorites">("posts");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"posts" | "comments">("posts");
-
-  const userId = useMemo(() => {
-    if (!id || Array.isArray(id)) return null;
-    const parsed = Number(id);
-    return Number.isNaN(parsed) ? null : parsed;
-  }, [id]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem("token");
+    if (!token || !userId) return;
 
-      if (!token) {
-        setError("Tu dois être connecté.");
-        setLoading(false);
-        return;
-      }
-
-      if (!userId || userId < 1) {
-        setError("Identifiant utilisateur invalide.");
-        setLoading(false);
-        return;
-      }
-
+    const fetchAll = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const [profileRes, postsRes] = await Promise.all([
-          fetch(`http://localhost:3001/users/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-          fetch("http://localhost:3001/posts", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-        ]);
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+
+        const [profileRes, postsRes, commentsRes, likesRes, favoritesRes] =
+          await Promise.all([
+            fetch(`http://localhost:3001/users/${userId}`, { headers }),
+            fetch(`http://localhost:3001/users/${userId}/posts`, { headers }),
+            fetch(`http://localhost:3001/users/${userId}/comments`, { headers }),
+            fetch(`http://localhost:3001/users/${userId}/likes`, { headers }),
+            fetch(`http://localhost:3001/users/${userId}/favorites`, { headers }),
+          ]);
 
         const profileData = await profileRes.json();
         const postsData = await postsRes.json();
+        const commentsData = await commentsRes.json();
+        const likesData: ReactionResponse = await likesRes.json();
+        const favoritesData: ReactionResponse = await favoritesRes.json();
 
         if (!profileRes.ok) {
-          throw new Error(
-            profileData.message || "Impossible de récupérer le profil."
-          );
+          throw new Error(profileData.message || "Impossible de charger le profil.");
         }
-
         if (!postsRes.ok) {
-          throw new Error(
-            postsData.message || "Impossible de récupérer les posts."
-          );
+          throw new Error(postsData.message || "Impossible de charger les posts.");
+        }
+        if (!commentsRes.ok) {
+          throw new Error(commentsData.message || "Impossible de charger les commentaires.");
+        }
+        if (!likesRes.ok) {
+          throw new Error(likesData?.posts ? "Impossible de charger les likes." : "Impossible de charger les likes.");
+        }
+        if (!favoritesRes.ok) {
+          throw new Error(favoritesData?.posts ? "Impossible de charger les favoris." : "Impossible de charger les favoris.");
         }
 
         setProfile(profileData);
         setPosts(Array.isArray(postsData) ? postsData : []);
+        setComments(Array.isArray(commentsData) ? commentsData : []);
+        setLikedPosts(Array.isArray(likesData.posts) ? likesData.posts : []);
+        setLikedComments(Array.isArray(likesData.comments) ? likesData.comments : []);
+        setFavoritePosts(Array.isArray(favoritesData.posts) ? favoritesData.posts : []);
+        setFavoriteComments(Array.isArray(favoritesData.comments) ? favoritesData.comments : []);
       } catch (err) {
-        console.error("Erreur chargement profil public :", err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Erreur lors du chargement du profil."
-        );
+        console.error("Erreur chargement profil :", err);
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [userId]);
+    fetchAll();
+  }, [token, userId]);
 
-  const userPosts = useMemo(() => {
-    if (!userId) return [];
-    return posts.filter((post) => post.author.id === userId);
-  }, [posts, userId]);
+  const renderPostCard = (post: FeedPost) => (
+    <div
+      key={post.id}
+      className="rounded-[1.5rem] border border-[#e4dacb] bg-[#fcf8f1] p-5"
+    >
+      <div className="mb-3 flex items-center gap-3">
+        <Avatar className="h-11 w-11 border border-[#d8cfbe]">
+          <AvatarImage src={post.author.avatar || ""} alt={post.author.username} />
+          <AvatarFallback className="bg-[#eef3e8] text-[#6f8467]">
+            {post.author.username.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
 
-  const userComments = useMemo<UserCommentItem[]>(() => {
-    if (!userId) return [];
+        <div>
+          <Link
+            href={`/profil/${post.author.id}`}
+            className="font-semibold text-[#2f3a32] hover:underline"
+          >
+            {post.author.username}
+          </Link>
+          <p className="text-sm text-[#7b847b]">{formatDate(post.createdAt)}</p>
+        </div>
+      </div>
 
-    return posts.flatMap((post) =>
-      post.comments
-        .filter((comment) => comment.author.id === userId)
-        .map((comment) => ({
-          id: comment.id,
-          content: comment.content,
-          createdAt: comment.createdAt,
-          postId: post.id,
-          postContent: post.content,
-          postAuthor: {
-            id: post.author.id,
-            username: post.author.username,
-          },
-        }))
-    );
-  }, [posts, userId]);
+      <p className="text-sm leading-7 text-[#4e5850]">{post.content}</p>
+
+      {post.media.length > 0 && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-[#d8cfbe] bg-[#fffaf2]">
+          <img
+            src={post.media[0]}
+            alt="Post media"
+            className="max-h-[420px] w-full object-cover"
+          />
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-wrap items-center gap-5 text-sm text-[#6f786f]">
+        <div className="inline-flex items-center gap-2">
+          <MessageCircle className="h-4 w-4" />
+          <span>{post.commentsCount}</span>
+        </div>
+
+        <div className="inline-flex items-center gap-2">
+          <Heart className="h-4 w-4" />
+          <span>{post.likesCount}</span>
+        </div>
+
+        <div className="inline-flex items-center gap-2">
+          <Bookmark className="h-4 w-4" />
+          <span>{post.favoritesCount}</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCommentCard = (comment: FeedComment) => (
+    <div
+      key={comment.id}
+      className="rounded-[1.5rem] border border-[#e4dacb] bg-[#fcf8f1] p-5"
+    >
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <Link
+            href={`/profil/${comment.author.id}`}
+            className="font-semibold text-[#2f3a32] hover:underline"
+          >
+            {comment.author.username}
+          </Link>
+          <p className="text-sm text-[#7b847b]">{formatDate(comment.createdAt)}</p>
+        </div>
+      </div>
+
+      <p className="text-sm leading-7 text-[#4e5850]">{comment.content}</p>
+
+      {comment.media.length > 0 && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-[#d8cfbe] bg-[#fffaf2]">
+          <img
+            src={comment.media[0]}
+            alt="Comment media"
+            className="max-h-[320px] w-full object-cover"
+          />
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-wrap items-center gap-5 text-sm text-[#6f786f]">
+        <div className="inline-flex items-center gap-2">
+          <Heart className="h-4 w-4" />
+          <span>{comment.likesCount}</span>
+        </div>
+
+        <div className="inline-flex items-center gap-2">
+          <Bookmark className="h-4 w-4" />
+          <span>{comment.favoritesCount}</span>
+        </div>
+      </div>
+
+      {comment.post && (
+        <div className="mt-4 rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4">
+          <p className="text-xs uppercase tracking-wide text-[#8a9288]">
+            Sous le post de @{comment.post.author.username}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[#667066]">
+            {comment.post.content || "Post sans contenu texte."}
+          </p>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <ProtectedRoute>
@@ -225,8 +296,7 @@ export default function PublicProfilePage() {
                       </h1>
 
                       <p className="mt-3 max-w-2xl text-sm leading-7 text-[#667066] md:text-base">
-                        Consulte le profil public, les posts et les commentaires
-                        de ce membre.
+                        Consulte l’activité publique de ce membre.
                       </p>
                     </div>
 
@@ -234,10 +304,7 @@ export default function PublicProfilePage() {
                       <div className="rounded-[1.75rem] border border-[#e3d9c8] bg-[#fcf8f1] p-5">
                         <div className="flex items-center gap-4">
                           <Avatar className="h-20 w-20 border border-[#d8cfbe]">
-                            <AvatarImage
-                              src={profile.avatar || ""}
-                              alt={profile.username}
-                            />
+                            <AvatarImage src={profile.avatar || ""} alt={profile.username} />
                             <AvatarFallback className="bg-[#eef3e8] text-[#6f8467] text-lg">
                               {profile.username.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
@@ -255,84 +322,153 @@ export default function PublicProfilePage() {
 
                         <div className="mt-6 grid gap-4">
                           <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4">
-                            <div className="mb-2 flex items-center gap-2 text-[#6f8467]">
-                              <Mail className="h-4 w-4" />
-                              <p className="text-sm font-medium">Email</p>
-                            </div>
-                            <p className="text-sm text-[#2f3a32]">
+                            <p className="text-sm font-medium text-[#6f8467]">Email</p>
+                            <p className="mt-2 text-sm text-[#2f3a32]">
                               {profile.email || "Non renseigné"}
                             </p>
                           </div>
 
                           <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4">
-                            <div className="mb-2 flex items-center gap-2 text-[#6f8467]">
-                              <MapPin className="h-4 w-4" />
-                              <p className="text-sm font-medium">Localisation</p>
-                            </div>
-                            <p className="text-sm text-[#2f3a32]">
-                              {profile.location || "Non renseignée"}
+                            <p className="text-sm font-medium text-[#6f8467]">Bio</p>
+                            <p className="mt-2 text-sm text-[#2f3a32]">
+                              {profile.bio || "Aucune bio pour le moment."}
                             </p>
                           </div>
 
-                          <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4">
-                            <div className="mb-2 flex items-center gap-2 text-[#6f8467]">
-                              <Info className="h-4 w-4" />
-                              <p className="text-sm font-medium">Statut</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4 text-center">
+                              <p className="text-2xl font-bold text-[#2f3a32]">{posts.length}</p>
+                              <p className="text-sm text-[#7b847b]">Posts</p>
                             </div>
-                            <p className="text-sm text-[#2f3a32]">
-                              {profile.status || "Non renseigné"}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4">
-                            <div className="mb-2 flex items-center gap-2 text-[#6f8467]">
-                              <CalendarDays className="h-4 w-4" />
-                              <p className="text-sm font-medium">Membre depuis</p>
+                            <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4 text-center">
+                              <p className="text-2xl font-bold text-[#2f3a32]">{comments.length}</p>
+                              <p className="text-sm text-[#7b847b]">Commentaires</p>
                             </div>
-                            <p className="text-sm text-[#2f3a32]">
-                              {profile.createdAt
-                                ? new Date(profile.createdAt).toLocaleDateString("fr-FR")
-                                : "Non disponible"}
-                            </p>
                           </div>
                         </div>
                       </div>
 
                       <div className="rounded-[1.75rem] border border-[#e3d9c8] bg-[#fcf8f1] p-5">
-                        <h3 className="text-lg font-semibold text-[#2f3a32]">
-                          Bio
-                        </h3>
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("posts")}
+                            className={`rounded-full px-4 py-2 text-sm font-medium ${
+                              activeTab === "posts"
+                                ? "bg-[#6f8467] text-white"
+                                : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50]"
+                            }`}
+                          >
+                            Posts
+                          </button>
 
-                        <div className="mt-4 rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4">
-                          <p className="text-sm leading-7 text-[#4e5850]">
-                            {profile.bio || "Aucune bio pour le moment."}
-                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("comments")}
+                            className={`rounded-full px-4 py-2 text-sm font-medium ${
+                              activeTab === "comments"
+                                ? "bg-[#6f8467] text-white"
+                                : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50]"
+                            }`}
+                          >
+                            Commentaires
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("likes")}
+                            className={`rounded-full px-4 py-2 text-sm font-medium ${
+                              activeTab === "likes"
+                                ? "bg-[#6f8467] text-white"
+                                : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50]"
+                            }`}
+                          >
+                            Likes
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("favorites")}
+                            className={`rounded-full px-4 py-2 text-sm font-medium ${
+                              activeTab === "favorites"
+                                ? "bg-[#6f8467] text-white"
+                                : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50]"
+                            }`}
+                          >
+                            Favoris
+                          </button>
                         </div>
 
-                        <div className="mt-5 grid grid-cols-2 gap-3">
-                          <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4 text-center">
-                            <p className="text-2xl font-bold text-[#2f3a32]">
-                              {userPosts.length}
-                            </p>
-                            <p className="text-sm text-[#7b847b]">Posts</p>
-                          </div>
+                        <div className="mt-6 space-y-4">
+                          {activeTab === "posts" &&
+                            (posts.length === 0 ? (
+                              <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
+                                Aucun post.
+                              </div>
+                            ) : (
+                              posts.map(renderPostCard)
+                            ))}
 
-                          <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4 text-center">
-                            <p className="text-2xl font-bold text-[#2f3a32]">
-                              {userComments.length}
-                            </p>
-                            <p className="text-sm text-[#7b847b]">Commentaires</p>
-                          </div>
-                        </div>
+                          {activeTab === "comments" &&
+                            (comments.length === 0 ? (
+                              <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
+                                Aucun commentaire.
+                              </div>
+                            ) : (
+                              comments.map(renderCommentCard)
+                            ))}
 
-                        <div className="mt-5 rounded-2xl border border-[#d8cfbe] bg-[#eef3e8]/80 p-4">
-                          <p className="text-xs uppercase tracking-[0.18em] text-[#6f8467]">
-                            Lecture seule
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-[#667066]">
-                            Cette page affiche le profil public, les posts et les
-                            commentaires visibles dans le feed.
-                          </p>
+                          {activeTab === "likes" && (
+                            <>
+                              <h3 className="text-lg font-semibold text-[#2f3a32]">
+                                Posts likés
+                              </h3>
+                              {likedPosts.length === 0 ? (
+                                <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
+                                  Aucun post liké.
+                                </div>
+                              ) : (
+                                likedPosts.map(renderPostCard)
+                              )}
+
+                              <h3 className="pt-4 text-lg font-semibold text-[#2f3a32]">
+                                Commentaires likés
+                              </h3>
+                              {likedComments.length === 0 ? (
+                                <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
+                                  Aucun commentaire liké.
+                                </div>
+                              ) : (
+                                likedComments.map(renderCommentCard)
+                              )}
+                            </>
+                          )}
+
+                          {activeTab === "favorites" && (
+                            <>
+                              <h3 className="text-lg font-semibold text-[#2f3a32]">
+                                Posts favoris
+                              </h3>
+                              {favoritePosts.length === 0 ? (
+                                <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
+                                  Aucun post favori.
+                                </div>
+                              ) : (
+                                favoritePosts.map(renderPostCard)
+                              )}
+
+                              <h3 className="pt-4 text-lg font-semibold text-[#2f3a32]">
+                                Commentaires favoris
+                              </h3>
+                              {favoriteComments.length === 0 ? (
+                                <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
+                                  Aucun commentaire favori.
+                                </div>
+                              ) : (
+                                favoriteComments.map(renderCommentCard)
+                              )}
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -340,158 +476,6 @@ export default function PublicProfilePage() {
                 )}
               </CardContent>
             </Card>
-
-            {!loading && !error && profile && (
-              <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
-                <CardContent className="p-5 sm:p-6">
-                  <div className="mb-5 flex flex-wrap items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("posts")}
-                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                        activeTab === "posts"
-                          ? "bg-[#6f8467] text-white"
-                          : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50] hover:bg-[#f3ecdf]"
-                      }`}
-                    >
-                      <FileText className="h-4 w-4" />
-                      Posts
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("comments")}
-                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                        activeTab === "comments"
-                          ? "bg-[#6f8467] text-white"
-                          : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50] hover:bg-[#f3ecdf]"
-                      }`}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      Commentaires
-                    </button>
-                  </div>
-
-                  {activeTab === "posts" ? (
-                    userPosts.length === 0 ? (
-                      <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
-                        Aucun post pour le moment.
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {userPosts.map((post) => (
-                          <div
-                            key={post.id}
-                            className="rounded-[1.5rem] border border-[#e4dacb] bg-[#fcf8f1] p-5"
-                          >
-                            <div className="mb-3 flex items-center gap-3">
-                              <Avatar className="h-11 w-11 border border-[#d8cfbe]">
-                                <AvatarImage
-                                  src={post.author.avatar || ""}
-                                  alt={post.author.username}
-                                />
-                                <AvatarFallback className="bg-[#eef3e8] text-[#6f8467]">
-                                  {post.author.username.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-
-                              <div>
-                                <p className="font-semibold text-[#2f3a32]">
-                                  {post.author.username}
-                                </p>
-                                <p className="text-sm text-[#7b847b]">
-                                  {formatDate(post.createdAt)}
-                                </p>
-                              </div>
-                            </div>
-
-                            <p className="text-sm leading-7 text-[#4e5850]">
-                              {post.content}
-                            </p>
-
-                            {post.media.length > 0 && (
-                              <div className="mt-4 overflow-hidden rounded-2xl border border-[#d8cfbe] bg-[#fffaf2]">
-                                <img
-                                  src={post.media[0]}
-                                  alt="Post media"
-                                  className="max-h-[420px] w-full object-cover"
-                                />
-                              </div>
-                            )}
-
-                            <div className="mt-4 flex flex-wrap items-center gap-5 text-sm text-[#6f786f]">
-                              <div className="inline-flex items-center gap-2">
-                                <MessageCircle className="h-4 w-4" />
-                                <span>{post.commentsCount}</span>
-                              </div>
-
-                              <div className="inline-flex items-center gap-2">
-                                <span>❤️</span>
-                                <span>{post.likesCount}</span>
-                              </div>
-
-                              <div className="inline-flex items-center gap-2">
-                                <span>🔖</span>
-                                <span>{post.favoritesCount}</span>
-                              </div>
-
-                              <div className="inline-flex items-center gap-2">
-                                <span>🔁</span>
-                                <span>{post.repostsCount ?? 0}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  ) : userComments.length === 0 ? (
-                    <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
-                      Aucun commentaire pour le moment.
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {userComments.map((comment) => (
-                        <div
-                          key={comment.id}
-                          className="rounded-[1.5rem] border border-[#e4dacb] bg-[#fcf8f1] p-5"
-                        >
-                          <div className="mb-3 flex items-center justify-between gap-3">
-                            <div>
-                              <p className="font-semibold text-[#2f3a32]">
-                                {profile.username}
-                              </p>
-                              <p className="text-sm text-[#7b847b]">
-                                {formatDate(comment.createdAt)}
-                              </p>
-                            </div>
-
-                            <Link
-                              href={`/feed`}
-                              className="text-sm text-[#6f8467] hover:underline"
-                            >
-                              Voir le feed
-                            </Link>
-                          </div>
-
-                          <p className="text-sm leading-7 text-[#4e5850]">
-                            {comment.content}
-                          </p>
-
-                          <div className="mt-4 rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4">
-                            <p className="text-xs uppercase tracking-wide text-[#8a9288]">
-                              Posté sous le post de @{comment.postAuthor.username}
-                            </p>
-                            <p className="mt-2 text-sm leading-6 text-[#667066]">
-                              {comment.postContent || "Post sans contenu texte."}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
           </div>
         </section>
       </main>

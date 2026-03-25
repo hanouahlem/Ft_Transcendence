@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import prisma from "../prisma.js";
 
-const formatComment = (comment) => {
+const formatComment = (comment, currentUserId) => {
   return {
     id: comment.id,
     content: comment.content,
@@ -11,7 +11,17 @@ const formatComment = (comment) => {
       id: comment.user.id,
       username: comment.user.username,
       email: comment.user.email,
+      avatar: comment.user.avatar,
     },
+    likesCount: comment.commentLikes.length,
+    favoritesCount: comment.commentFavorites.length,
+    likedByCurrentUser: comment.commentLikes.some(
+      (like) => like.userId === Number(currentUserId)
+    ),
+    favoritedByCurrentUser: comment.commentFavorites.some(
+      (favorite) => favorite.userId === Number(currentUserId)
+    ),
+    media: comment.image ? [comment.image] : [],
   };
 };
 
@@ -24,21 +34,20 @@ const formatPost = (post, currentUserId) => {
       id: post.author.id,
       username: post.author.username,
       email: post.author.email,
+      avatar: post.author.avatar,
     },
     likesCount: post.likes.length,
     commentsCount: post.comments.length,
     favoritesCount: post.favorites.length,
-    repostsCount: post.reposts.length,
     likedByCurrentUser: post.likes.some(
       (like) => like.userId === Number(currentUserId)
     ),
     favoritedByCurrentUser: post.favorites.some(
       (favorite) => favorite.userId === Number(currentUserId)
     ),
-    repostedByCurrentUser: post.reposts.some(
-      (repost) => repost.userId === Number(currentUserId)
+    comments: post.comments.map((comment) =>
+      formatComment(comment, currentUserId)
     ),
-    comments: post.comments.map(formatComment),
     media: post.image ? [post.image] : [],
   };
 };
@@ -51,11 +60,12 @@ export const getAllPosts = async (currentUserId) => {
     include: {
       author: true,
       likes: true,
-      reposts: true,
       favorites: true,
       comments: {
         include: {
           user: true,
+          commentLikes: true,
+          commentFavorites: true,
         },
         orderBy: {
           createdAt: "asc",
@@ -251,15 +261,18 @@ export const createComment = async (input) => {
   const comment = await prisma.comment.create({
     data: {
       content: input.content,
+      image: input.mediaUrl || null,
       postId: Number(input.postId),
       userId: Number(input.userId),
     },
     include: {
       user: true,
+      commentLikes: true,
+      commentFavorites: true,
     },
   });
 
-  return formatComment(comment);
+  return formatComment(comment, input.userId);
 };
 
 export const favoritePost = async (postId, userId) => {
@@ -403,9 +416,139 @@ export const deleteComment = async (commentId, userId) => {
     throw new Error("You are not allowed to delete this comment");
   }
 
+  if (comment.image) {
+    try {
+      const filename = comment.image.split("/uploads/")[1];
+
+      if (filename) {
+        const filePath = path.resolve("uploads", filename);
+
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    } catch (error) {
+      console.error("Erreur suppression image commentaire :", error);
+    }
+  }
+
+  await prisma.commentLike.deleteMany({
+    where: {
+      commentId: Number(commentId),
+    },
+  });
+
+  await prisma.commentFavorite.deleteMany({
+    where: {
+      commentId: Number(commentId),
+    },
+  });
+
   await prisma.comment.delete({
     where: {
       id: Number(commentId),
+    },
+  });
+
+  return true;
+};
+
+export const likeComment = async (commentId, userId) => {
+  const comment = await prisma.comment.findUnique({
+    where: { id: Number(commentId) },
+  });
+
+  if (!comment) {
+    throw new Error("Comment not found");
+  }
+
+  const existingLike = await prisma.commentLike.findFirst({
+    where: {
+      commentId: Number(commentId),
+      userId: Number(userId),
+    },
+  });
+
+  if (existingLike) {
+    return true;
+  }
+
+  await prisma.commentLike.create({
+    data: {
+      commentId: Number(commentId),
+      userId: Number(userId),
+    },
+  });
+
+  return true;
+};
+
+export const unlikeComment = async (commentId, userId) => {
+  const existingLike = await prisma.commentLike.findFirst({
+    where: {
+      commentId: Number(commentId),
+      userId: Number(userId),
+    },
+  });
+
+  if (!existingLike) {
+    return true;
+  }
+
+  await prisma.commentLike.delete({
+    where: {
+      id: existingLike.id,
+    },
+  });
+
+  return true;
+};
+
+export const favoriteComment = async (commentId, userId) => {
+  const comment = await prisma.comment.findUnique({
+    where: { id: Number(commentId) },
+  });
+
+  if (!comment) {
+    throw new Error("Comment not found");
+  }
+
+  const existingFavorite = await prisma.commentFavorite.findFirst({
+    where: {
+      commentId: Number(commentId),
+      userId: Number(userId),
+    },
+  });
+
+  if (existingFavorite) {
+    return true;
+  }
+
+  await prisma.commentFavorite.create({
+    data: {
+      commentId: Number(commentId),
+      userId: Number(userId),
+    },
+  });
+
+  return true;
+};
+
+export const unfavoriteComment = async (commentId, userId) => {
+  const existingFavorite = await prisma.commentFavorite.findFirst({
+    where: {
+      commentId: Number(commentId),
+      userId: Number(userId),
+    },
+  });
+
+  if (!existingFavorite) {
+    return true;
+  }
+
+  await prisma.commentFavorite.delete({
+    where: {
+      id: existingFavorite.id,
     },
   });
 

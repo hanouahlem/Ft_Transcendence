@@ -6,7 +6,6 @@ import {
   Heart,
   MessageCircle,
   Bookmark,
-  Repeat2,
   MapPin,
   CalendarDays,
   Globe,
@@ -14,6 +13,9 @@ import {
   Bell,
   Users,
   Pencil,
+  Sparkles,
+  Activity,
+  History,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -31,7 +33,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 
 type FeedPost = {
   id: number;
@@ -147,44 +148,40 @@ const profileExtras = {
 
 function PostCard({ post }: { post: FeedPost }) {
   return (
-    <Card className="overflow-hidden rounded-[1.75rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
+    <Card className="rounded-3xl border-0 bg-white shadow-[0_16px_40px_rgba(74,100,64,0.12)] transition-all hover:shadow-[0_20px_50px_rgba(74,100,64,0.18)]">
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
-          <Avatar className="h-11 w-11 border border-[#d8cfbe]">
-            <AvatarFallback className="bg-[#eef3e8] text-[#6f8467]">
+          <Avatar className="h-14 w-14 border border-[#d8e3d1]">
+            <AvatarImage src="" alt={post.author} />
+            <AvatarFallback className="bg-[#EAF1E6] font-semibold text-[#4A6440]">
               {post.author.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <p className="font-semibold text-[#2f3a32]">{post.author}</p>
-              <p className="text-sm text-[#7b847b]">{post.handle}</p>
-              <span className="text-sm text-[#a0a79f]">·</span>
-              <p className="text-sm text-[#7b847b]">{post.time}</p>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-[#73816b]">
+              <p className="font-semibold text-[#33412c]">{post.author}</p>
+              <p>{post.handle}</p>
+              <span>•</span>
+              <p>{post.time}</p>
             </div>
 
-            <p className="mt-3 text-sm leading-7 text-[#4e5850]">
+            <p className="mt-3 text-sm leading-7 text-[#4d5847]">
               {post.content}
             </p>
 
-            <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-[#6f786f]">
-              <div className="inline-flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                <span>{post.comments}</span>
-              </div>
-
-              <div className="inline-flex items-center gap-2">
-                <Repeat2 className="h-4 w-4" />
-                <span>{post.reposts}</span>
-              </div>
-
-              <div className="inline-flex items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-6 text-sm">
+              <div className="inline-flex items-center gap-2 font-medium text-[#8AA678]">
                 <Heart className="h-4 w-4" />
                 <span>{post.likes}</span>
               </div>
 
-              <div className="inline-flex items-center gap-2">
+              <div className="inline-flex items-center gap-2 font-medium text-[#7B9270]">
+                <MessageCircle className="h-4 w-4" />
+                <span>{post.comments}</span>
+              </div>
+
+              <div className="inline-flex items-center gap-2 font-medium text-[#6B7C5D]">
                 <Bookmark className="h-4 w-4" />
                 <span>{post.favorites}</span>
               </div>
@@ -197,143 +194,166 @@ function PostCard({ post }: { post: FeedPost }) {
 }
 
 export default function Profil() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <ProtectedRoute>``  ` `
-      <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
-        <section className="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.16),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(216,207,184,0.32),transparent_30%)]" />
+    <ProtectedRoute>
+      <main className="min-h-screen bg-gradient-to-br from-[#EAF1E6] via-[#dbe7d2] to-[#9CAF88] text-gray-800">
+        <section className="relative px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-[#4A6440] shadow-md backdrop-blur">
+                <Sparkles className="h-4 w-4" />
+                Profile overview
+              </div>
 
-          <div className="relative mx-auto max-w-[1500px]">
+              <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-[#33412c]">
+                Mon profil
+              </h1>
+
+              <p className="mt-3 max-w-2xl text-base leading-7 text-[#4f5d49]">
+                Une vue plus douce, plus moderne et plus cohérente de ton espace personnel.
+              </p>
+            </div>
+
             <div className="grid gap-6 lg:grid-cols-12">
-              {/* Center column */}
               <div className="space-y-6 lg:col-span-9">
-                {/* Cover + profile header */}
-                <Card className="overflow-hidden rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
+                <Card className="overflow-hidden rounded-[2rem] border-0 bg-white/92 shadow-[0_18px_50px_rgba(74,100,64,0.15)] backdrop-blur">
                   <div className="h-44 bg-gradient-to-r from-[#b7c7aa] via-[#d8cfb8] to-[#8ca27d]" />
 
                   <CardContent className="p-0">
                     <div className="px-8 pb-8">
                       <div className="-mt-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-                          <Avatar className="h-28 w-28 border-4 border-[#fffaf2] shadow-md">
+                          <Avatar className="h-28 w-28 border-4 border-white shadow-lg">
                             <AvatarImage
                               src={profileExtras.avatar}
                               alt="Avatar utilisateur"
                             />
-                            <AvatarFallback>
+                            <AvatarFallback className="bg-[#EAF1E6] text-[#4A6440]">
                               {(user?.username || "U").slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
 
                           <div className="sm:pb-1">
                             <div className="flex flex-wrap items-center gap-3">
-                              <h1 className="text-2xl font-bold text-[#2f3a32] sm:text-3xl">
+                              <h2 className="text-3xl font-bold text-[#33412c]">
                                 {user?.username || "Utilisateur"}
-                              </h1>
+                              </h2>
 
-                              <Badge className="rounded-full border-[#b7c9ae] bg-[#edf4e8] text-[#5f7358] hover:bg-[#edf4e8]">
+                              <Badge className="rounded-full border-0 bg-[#C3D1B2] text-[#4A6440] hover:bg-[#C3D1B2]">
                                 {profileExtras.status}
                               </Badge>
                             </div>
 
-                            <p className="mt-1 text-sm text-[#7b847b]">
+                            <p className="mt-1 text-sm text-[#70806a]">
                               @{(user?.username || "utilisateur").toLowerCase()}
                             </p>
-                            <p className="mt-2 text-sm text-[#6b746c]">
+
+                            <p className="mt-2 text-sm text-[#5e6c58]">
                               {user?.email || "email@example.com"}
                             </p>
                           </div>
                         </div>
 
                         <div className="flex flex-wrap gap-3">
-                          <Button asChild className="rounded-full bg-[#6f8467] text-white hover:bg-[#5f7358]">
+                          <Button
+                            asChild
+                            className="rounded-2xl bg-[#8AA678] text-white hover:bg-[#79956a]"
+                          >
                             <Link href="/settings/profile">
                               <Pencil className="mr-2 h-4 w-4" />
                               Edit profile
                             </Link>
-                        </Button>
+                          </Button>
 
                           <Button
+                            asChild
                             variant="outline"
-                            className="rounded-full border-[#d8cfbe] bg-[#fffaf2]"
+                            className="rounded-2xl border-[#d8e3d1] bg-[#F4F8F1] text-[#4A6440] hover:bg-[#e7f0e1]"
                           >
-                            <Users className="mr-2 h-4 w-4" />
-                            Add friend
+                            <Link href="/friends">
+                              <Users className="mr-2 h-4 w-4" />
+                              Add friend
+                            </Link>
                           </Button>
                         </div>
                       </div>
 
-                      <p className="mt-5 max-w-4xl text-sm leading-7 text-[#4e5850]">
+                      <p className="mt-5 max-w-4xl text-sm leading-7 text-[#4d5847]">
                         {profileExtras.bio}
                       </p>
 
-                      <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-[#6f786f]">
-                        <div className="inline-flex items-center gap-2">
+                      <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-[#65745f]">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[#F4F8F1] px-3 py-2">
                           <MapPin className="h-4 w-4" />
                           <span>{profileExtras.location}</span>
                         </div>
 
-                        <div className="inline-flex items-center gap-2">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[#F4F8F1] px-3 py-2">
                           <CalendarDays className="h-4 w-4" />
                           <span>Joined {profileExtras.joinedAt}</span>
                         </div>
 
-                        <div className="inline-flex items-center gap-2">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[#F4F8F1] px-3 py-2">
                           <Globe className="h-4 w-4" />
                           <span>{profileExtras.website}</span>
                         </div>
                       </div>
 
                       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-                        <div className="rounded-2xl border border-[#e3d9c8] bg-[#fcf8f1] p-4">
-                          <p className="text-2xl font-bold text-[#2f3a32]">34</p>
-                          <p className="text-sm text-[#7b847b]">Posts</p>
+                        <div className="rounded-2xl bg-[#F4F8F1] p-4">
+                          <p className="text-2xl font-bold text-[#33412c]">34</p>
+                          <p className="mt-1 text-sm text-[#7b847b]">Posts</p>
                         </div>
-                        <div className="rounded-2xl border border-[#e3d9c8] bg-[#fcf8f1] p-4">
-                          <p className="text-2xl font-bold text-[#2f3a32]">128</p>
-                          <p className="text-sm text-[#7b847b]">Following</p>
+
+                        <div className="rounded-2xl bg-[#F4F8F1] p-4">
+                          <p className="text-2xl font-bold text-[#33412c]">128</p>
+                          <p className="mt-1 text-sm text-[#7b847b]">Following</p>
                         </div>
-                        <div className="rounded-2xl border border-[#e3d9c8] bg-[#fcf8f1] p-4">
-                          <p className="text-2xl font-bold text-[#2f3a32]">86</p>
-                          <p className="text-sm text-[#7b847b]">Followers</p>
+
+                        <div className="rounded-2xl bg-[#F4F8F1] p-4">
+                          <p className="text-2xl font-bold text-[#33412c]">86</p>
+                          <p className="mt-1 text-sm text-[#7b847b]">Followers</p>
                         </div>
-                        <div className="rounded-2xl border border-[#e3d9c8] bg-[#fcf8f1] p-4">
-                          <p className="text-2xl font-bold text-[#2f3a32]">47</p>
-                          <p className="text-sm text-[#7b847b]">Favorites</p>
+
+                        <div className="rounded-2xl bg-[#F4F8F1] p-4">
+                          <p className="text-2xl font-bold text-[#33412c]">47</p>
+                          <p className="mt-1 text-sm text-[#7b847b]">Favorites</p>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Feed */}
-                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
+                <Card className="rounded-[2rem] border-0 bg-white/92 shadow-[0_18px_50px_rgba(74,100,64,0.15)] backdrop-blur">
                   <CardContent className="p-5 sm:p-6">
                     <Tabs defaultValue="posts" className="w-full">
-                      <TabsList className="grid w-full grid-cols-4 rounded-2xl bg-[#f3ecdf] p-1">
+                      <TabsList className="grid w-full grid-cols-4 rounded-2xl bg-[#F4F3E8] p-1">
                         <TabsTrigger
                           value="posts"
-                          className="rounded-xl data-[state=active]:bg-[#fffaf2] data-[state=active]:text-[#2f3a32]"
+                          className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#33412c]"
                         >
                           Posts
                         </TabsTrigger>
+
                         <TabsTrigger
                           value="likes"
-                          className="rounded-xl data-[state=active]:bg-[#fffaf2] data-[state=active]:text-[#2f3a32]"
+                          className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#33412c]"
                         >
                           Likes
                         </TabsTrigger>
+
                         <TabsTrigger
                           value="favorites"
-                          className="rounded-xl data-[state=active]:bg-[#fffaf2] data-[state=active]:text-[#2f3a32]"
+                          className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#33412c]"
                         >
                           Favorites
                         </TabsTrigger>
+
                         <TabsTrigger
                           value="comments"
-                          className="rounded-xl data-[state=active]:bg-[#fffaf2] data-[state=active]:text-[#2f3a32]"
+                          className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#33412c]"
                         >
                           Comments
                         </TabsTrigger>
@@ -367,56 +387,38 @@ export default function Profil() {
                 </Card>
               </div>
 
-              {/* Right sidebar */}
               <div className="space-y-6 lg:col-span-3">
-                <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm lg:sticky lg:top-6">
-                  <CardContent className="p-6">
-                    <h2 className="mb-4 text-lg font-semibold text-[#2f3a32]">
-                      Quick Actions
-                    </h2>
+                <div className="lg:sticky lg:top-24">
+                  <Card className="rounded-[2rem] border-0 bg-white/92 shadow-[0_18px_50px_rgba(74,100,64,0.15)] backdrop-blur">
+                    <CardContent className="p-6">
+                      <div className="mb-5 flex items-center gap-2 text-[#4A6440]">
+                        <Settings className="h-5 w-5" />
+                        <h2 className="text-lg font-semibold">Quick Actions</h2>
+                      </div>
 
-                    <div className="space-y-3">
-                      <Button
-                        asChild
-                        variant="outline"
-                        className="w-full justify-start rounded-2xl border-[#d8cfbe] bg-[#faf5eb]"
-                      >
-                        <Link href="/settings/profile">
-                          <Settings className="mr-2 h-4 w-4" />
-                          Open settings
-                        </Link>
-                      </Button>
+                      <div className="space-y-3">
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="w-full justify-start rounded-2xl border-[#d8e3d1] bg-[#F4F8F1] text-[#4A6440] hover:bg-[#e7f0e1]"
+                        >
+                          <Link href="/settings/profile">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Open settings
+                          </Link>
+                        </Button>
 
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start rounded-2xl border-[#d8cfbe] bg-[#faf5eb]"
-                      >
-                        <Bell className="mr-2 h-4 w-4" />
-                        Manage notifications
-                      </Button>
-                    </div>
-
-                    <Separator className="my-5 bg-[#e5dccd]" />
-
-                    <div className="space-y-3">
-                      {profileExtras.activity.map((item, index) => (
-                        <div key={index} className="text-sm text-[#667066]">
-                          • {item}
-                        </div>
-                      ))}
-                    </div>
-
-                    <Separator className="my-5 bg-[#e5dccd]" />
-
-                    <div className="space-y-3">
-                      {profileExtras.history.map((item, index) => (
-                        <div key={index} className="text-sm text-[#7b847b]">
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start rounded-2xl border-[#d8e3d1] bg-[#F4F8F1] text-[#4A6440] hover:bg-[#e7f0e1]"
+                        >
+                          <Bell className="mr-2 h-4 w-4" />
+                          Manage notifications
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           </div>
