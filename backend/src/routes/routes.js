@@ -5,7 +5,8 @@ import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
 import notif from '../controllers/notifController.js';
-
+import twoFa from '../controllers/twoFactorController.js';
+import {setupCodeTowFa, checkTwoFaCode, disableTwoFA} from '../controllers/twoFactorController.js';
 const router = Router();
 
 //user
@@ -40,4 +41,12 @@ router.delete("/posts/:id", authMiddleware, deletePostHandler);
 router.post("/posts/:id/like", authMiddleware, likePostHandler);
 router.delete("/posts/:id/like", authMiddleware, unlikePostHandler);
 router.post("/posts/:id/comments", authMiddleware, createCommentHandler);
+
+
+
+// 2FA
+router.post('/auth/2fa/setup',   authMiddleware, twoFa.setupCodeTwoFa);
+router.post('/auth/2fa/verify',  authMiddleware, twoFa.checkTwoFaCode);
+router.post('/auth/2fa/disable', authMiddleware, twoFa.disableTwoFA);
+
 export default router;
