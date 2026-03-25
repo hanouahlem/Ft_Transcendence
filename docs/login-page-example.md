@@ -15,7 +15,6 @@ The original example file was a large standalone React demo. For the real app, t
 The page is still a single Next.js route, but it is split into small local components:
 
 - `SvgDefinitions`: declares the SVG filters used by the paper and stamp effects
-- `CanvasBackground`: draws the animated dust/thread layer behind the page
 - `ArchivePanel`: renders the green repository panel on the right
 - `PaperCard`: renders the paper card, form, footer, and social section
 - `FieldInput`: keeps the framed input styling and focus states in one place
@@ -27,10 +26,10 @@ This keeps the main `LoginPage` component focused on auth state and form submiss
 
 ## Real Authentication Flow
 
-The redesign did not change the real login logic:
+The redesign keeps the same token/session flow while now accepting either a username or an email at login:
 
-1. `LoginPage` stores `email`, `password`, `loading`, and `error` in local state.
-2. On submit, it calls `loginUser({ email, password })` from `frontend/lib/api.ts`.
+1. `LoginPage` stores a login `identifier`, `password`, `loading`, and `error` in local state.
+2. On submit, it calls `loginUser({ identifier, password })` from `frontend/lib/api.ts`.
 3. If the backend returns a token, it calls `await login(result.data.token)` from `frontend/context/AuthContext.tsx`.
 4. Authenticated users are redirected to `/feed`.
 

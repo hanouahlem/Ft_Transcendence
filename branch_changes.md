@@ -4,6 +4,8 @@
 
 This branch introduces **authenticated route redirection** and **replaces the old design example files** with new ones matching the current visual direction.
 
+It also now contains a **real login-page redesign in `frontend/app/login/page.tsx`** and a **backend login behavior change** to support username-or-email authentication. That backend part is important to call out separately because this branch is no longer frontend-only.
+
 ---
 
 ## 1. Authenticated User Redirect (Public Pages → `/feed`)
@@ -81,3 +83,87 @@ Old React example/prototype files were **deleted** and replaced with new ones th
 
 All new examples use the same warm palette (`#F5F2EB` background, `#E8E1D5` dots) and share the "soft journal / scrapbook" visual language that the current app (`frontend/`) follows.
 
+---
+
+## 3. Live Login Page Redesign (`frontend/app/login/page.tsx`)
+
+The branch no longer only updates example files. The real login route was redesigned to match the new notebook / archive aesthetic.
+
+### What changed
+
+- Rebuilt the live login page using a cleaner component-based structure inside `frontend/app/login/page.tsx`
+- Added a grouped `LOGIN_LAYOUT` config near the top of the file so the main layout values can be tuned from one place
+- Matched the example more closely for:
+  - archive-green right panel placement
+  - paper-card overlap
+  - stamp button placement
+  - left-side beads
+  - signup strip placement
+- Kept the backup page untouched: `frontend/app/login/page.backup.tsx`
+- Removed the temporary particle background experiment
+- Removed the bottom-right bead cluster so the composition stays cleaner
+
+### Internal page helpers now used
+
+- `SvgDefinitions`
+- `ArchivePanel`
+- `PaperCard`
+- `FieldInput`
+- `SocialProviderButton`
+- `StampSubmitButton`
+- `MonoText`
+- `Bead`
+
+### Important behavior preserved
+
+- Already authenticated users are still redirected away from `/login` to `/feed`
+- Successful login still stores the token through `AuthContext`
+- Placeholder social buttons are still visual-only
+
+### Files involved
+
+- `frontend/app/login/page.tsx`
+- `docs/login-page-example.md`
+- `docs/plans/2026-03-24-login-page-design.md`
+- `docs/plans/2026-03-24-login-page-implementation.md`
+
+---
+
+## 4. Backend Login Change (Important Cross-Layer Update)
+
+**Important:** this branch now includes a backend authentication change, not just UI work.
+
+The login form label already suggested "username / email", but the backend was still authenticating by **email only**. To make the real page behavior match the UI, the login flow was extended so users can authenticate with **either username or email**.
+
+### Backend change
+
+#### `backend/src/controllers/userController.js`
+
+- `POST /login` now reads a flexible login identifier (`identifier`, with fallback support for the old `email` field)
+- The user lookup now checks:
+  - `email === identifier`
+  - `username === identifier`
+- Login errors now say `Username/email or password is incorrect.`
+- Added a `400` response when login credentials are missing
+
+### Frontend/API alignment
+
+#### `frontend/lib/api.ts`
+
+- `LoginData` now supports `identifier + password`
+- Backward compatibility with the older `email + password` shape is still preserved in the type for now
+
+#### `frontend/app/login/page.tsx`
+
+- The login input state was renamed from `email` to `identifier`
+- The page now sends `loginUser({ identifier, password })`
+
+### Why this should be emphasized
+
+This is a **real backend behavior change** in the branch, not just documentation or wording cleanup. Anyone reviewing ownership or splitting work between teammates should note that this branch now touches:
+
+- frontend presentation
+- frontend API contract
+- backend authentication logic
+
+If the backend login logic belongs primarily to another teammate's area, this cross-layer change should be made explicit during handoff and in any contribution breakdown.

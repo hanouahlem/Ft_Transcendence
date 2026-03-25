@@ -80,18 +80,32 @@ export async function registerUser(req, res) {
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, email, password } = req.body;
+    const loginValue =
+      typeof identifier === "string" && identifier.trim()
+        ? identifier.trim()
+        : typeof email === "string"
+          ? email.trim()
+          : "";
 
-    const user = await prisma.user.findUnique({where: { email },});
+    if (!loginValue || !password) {
+      return res.status(400).json({ message: "Login credentials are required." });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ email: loginValue }, { username: loginValue }],
+      },
+    });
 
     if (!user) {
-      return res.status(401).json({message: "Email or password is incorrect.",});
+      return res.status(401).json({message: "Username/email or password is incorrect.",});
     }
 
     const passwordOk = await bcrypt.compare(password, user.password);
 
     if (!passwordOk) {
-      return res.status(401).json({message: "Email or password is incorrect.",});
+      return res.status(401).json({message: "Username/email or password is incorrect.",});
     }
 
     const token = jwt.sign(

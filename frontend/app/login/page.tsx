@@ -141,7 +141,7 @@ function ArchivePanel() {
 	return (
 		<section className="relative overflow-hidden border border-black/20 bg-[#285A35] px-6 py-8 text-[#F5F2EB] shadow-[15px_15px_30px_rgba(0,0,0,0.2)] sm:px-8 sm:py-10 lg:absolute lg:top-[var(--login-green-top)] lg:right-[var(--login-green-right)] lg:bottom-[var(--login-green-bottom)] lg:w-[var(--login-green-width)] lg:px-10 lg:py-10">
 			<svg
-				className="pointer-events-none absolute -bottom-20 -right-10 h-80 w-80 rotate-12 fill-none stroke-white/10"
+				className="pointer-events-none absolute -bottom-24 -right-14 h-[26rem] w-[26rem] rotate-12 fill-none stroke-white/10"
 				viewBox="0 0 50 50"
 				aria-hidden="true"
 			>
@@ -196,9 +196,17 @@ function ArchivePanel() {
 
 function WaxSeal() {
 	return (
-		<div className="relative -mt-4 mr-[-0.5rem] flex h-12 w-12 rotate-[15deg] items-center justify-center rounded-full bg-[#A52A2A] font-['Noto_Serif_SC'] text-sm font-bold text-white/60 shadow-[inset_2px_2px_6px_rgba(0,0,0,0.5),2px_3px_5px_rgba(0,0,0,0.3)] sm:h-14 sm:w-14">
-			42
-			<div className="absolute inset-[2px] rounded-full border border-white/20" />
+		<div className="relative -mt-4 mr-2 flex h-12 w-12 rotate-15 items-center justify-center rounded-full bg-[#A52A2A] font-['Noto_Serif_SC'] text-base font-bold shadow-[inset_2px_2px_6px_rgba(0,0,0,0.5),2px_3px_5px_rgba(0,0,0,0.3)] sm:h-14 sm:w-14 sm:text-2xl">
+			<span
+				className="text-[#A52A2A]/70"
+				style={{
+					textShadow:
+						"-0.75px -0.75px 0 rgba(255,255,255,0.22), 1px 1px 0 rgba(90,20,20,0.42)",
+				}}
+			>
+				42
+			</span>
+			<div className="absolute inset-0.5 rounded-full border border-white/20" />
 		</div>
 	);
 }
@@ -287,7 +295,7 @@ function StampSubmitButton({ loading }: { loading: boolean }) {
 			className="absolute right-0 bottom-8 origin-center cursor-pointer transition-transform duration-200 hover:scale-105 hover:-rotate-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:right-2 lg:bottom-9"
 		>
 			<span
-				className="flex items-center justify-center border-[4px] border-[#D32F2F] bg-transparent px-6 py-3 font-['Noto_Serif_SC'] text-xl font-black uppercase tracking-[0.2em] text-[#D32F2F] sm:px-8 sm:text-2xl"
+				className="flex items-center justify-center border-4 rounded-xl border-[#D32F2F] bg-transparent px-4 py-2 font-['Noto_Serif_SC'] text-3xl font-black uppercase tracking-[0.2em] text-[#D32F2F]"
 				style={{ filter: "url(#ink-texture)", transform: "rotate(-6deg)" }}
 			>
 				{loading ? "..." : "Login"}
@@ -456,7 +464,7 @@ export default function LoginPage() {
 	const router = useRouter();
 	const { login, isLoggedIn, isAuthLoading } = useAuth();
 
-	const [email, setEmail] = useState("");
+	const [identifier, setIdentifier] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
@@ -471,7 +479,7 @@ export default function LoginPage() {
 		const style = document.createElement("style");
 		style.textContent = `
       @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Serif+SC:wght@400;700;900&display=swap');
-      ::selection { background-color: #285A35; color: #F5F2EB; }
+      ::selection { background-color: #FF4A1C; color: #F5F2EB; }
     `;
 		document.head.appendChild(style);
 
@@ -498,7 +506,7 @@ export default function LoginPage() {
 		setError("");
 
 		try {
-			const result = await loginUser({ email, password });
+			const result = await loginUser({ identifier, password });
 
 			if (!result.ok) {
 				setError(result.message);
@@ -536,12 +544,12 @@ export default function LoginPage() {
 					<ArchivePanel />
 
 					<PaperCard
-						email={email}
+						email={identifier}
 						password={password}
 						loading={loading}
 						error={error}
 						dateLabel={dateLabel}
-						onEmailChange={(event) => setEmail(event.target.value)}
+						onEmailChange={(event) => setIdentifier(event.target.value)}
 						onPasswordChange={(event) => setPassword(event.target.value)}
 						onSubmit={handleSubmit}
 					/>
