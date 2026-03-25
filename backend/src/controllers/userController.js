@@ -20,15 +20,28 @@ export async function allUsers(req, res) {
   }
 }
 
-export async function  getUser(req, res) {
-    const user = await prisma.user.findUnique({
-        where: { id : req.user.id }
-    });
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
-    res.json(user);
-};
+export async function getUser(req, res) {
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      avatar: true,
+      bio: true,
+      status: true,
+      location: true,
+      website: true,
+      createdAt: true,
+    },
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.json(user);
+}
 
 
 export async function registerUser(req, res) {
@@ -136,49 +149,77 @@ export async function searchUser(req, res){
     }
 }
 
-export async function updateUser(req, res){
+export async function updateUser(req, res) {
+  const requestId = parseInt(req.params.id);
+  const currentUserId = req.user?.id ?? req.user?.userId;
+  const { username, avatar, bio, status, location, website } = req.body;
 
-    const requestId = parseInt(req.params.id);
-    const { username, avatar, bio, status, location} = req.body;
+  if (Number.isNaN(requestId) || requestId < 1) {
+    return res.status(400).json({
+      message: "Invalid user id.",
+    });
+  }
 
+  if (!currentUserId) {
+    return res.status(401).json({
+      message: "User not found in token.",
+    });
+  }
 
-    const userExisting = await prisma.user.findFirst({ 
-        where: {username}
+  if (currentUserId !== requestId) {
+    return res.status(403).json({
+      message: "You are not allowed to update this profile.",
+    });
+  }
+
+  try {
+    if (username) {
+      const userExisting = await prisma.user.findFirst({
+        where: {
+          username,
+          id: {
+            not: requestId,
+          },
+        },
+      });
+
+      if (userExisting) {
+        return res.status(400).json({
+          message: "Username already exists",
+        });
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: requestId },
+      data: {
+        username,
+        avatar,
+        bio,
+        status,
+        location,
+        website,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        avatar: true,
+        bio: true,
+        status: true,
+        location: true,
+        website: true,
+        createdAt: true,
+      },
     });
 
-    if(userExisting){
-        return res.status(400).json({message: "Email or username already exists" });
-    }
-
-    try{
-
-        const updatedUser = await prisma.user.update({
-            where:{id: requestId},
-            data:{
-                username,
-                avatar,
-                bio,
-                status,
-                location,
-            },
-            select: {
-                id: true,
-                username: true,
-                email: true,
-                avatar: true,
-                bio: true,
-                status: true,
-                location: true,
-                createdAt: true,
-            }
-        });
-        res.json(updatedUser);
-    }
-    catch(error){
-        console.error("updateUser error:", error);
-        res.status(500).json({ message: "Failed to update user" });
-    }
-
+    return res.json(updatedUser);
+  } catch (error) {
+    console.error("updateUser error:", error);
+    return res.status(500).json({
+      message: "Failed to update user",
+    });
+  }
 }
 
 
@@ -236,15 +277,16 @@ const getUserById = async (req, res) => {
         id: userId,
       },
       select: {
-        id: true,
-        username: true,
-        email: true,
-        avatar: true,
-        bio: true,
-        status: true,
-        location: true,
-        createdAt: true,
-      },
+            id: true,
+            username: true,
+            email: true,
+            avatar: true,
+            bio: true,
+            status: true,
+            location: true,
+            website: true,
+            createdAt: true,
+            },
     });
 
     if (!user) {

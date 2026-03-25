@@ -32,38 +32,99 @@ export default function SettingsProfilePage() {
   const [location, setLocation] = useState("");
   const [website, setWebsite] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    setUsername(user?.username || "");
-    setBio(
-      "Étudiant en informatique, passionné par le développement web, la cybersécurité et les interfaces modernes."
-    );
-    setLocation("France");
-    setWebsite("portfolio.dev");
-    setAvatarUrl(
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop"
-    );
-  }, [user]);
+useEffect(() => {
+  const fetchCurrentUser = async () => {
+    if (!token) return;
 
-  const handleSave = async () => {
     try {
-      setSaving(true);
+      setLoadingProfile(true);
+      setError("");
       setMessage("");
 
-      // TODO: brancher ton API ici
-      // await updateProfile({ username, bio, location, website, avatarUrl });
+      const res = await fetch("http://localhost:3001/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      setMessage("Profile updated successfully.");
-    } catch (error) {
-      console.error(error);
-      setMessage("Unable to save profile changes.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Impossible de charger le profil.");
+      }
+
+      setUsername(data.username || "");
+      setBio(data.bio || "");
+      setLocation(data.location || "");
+      setWebsite(data.website || "");
+      setAvatarUrl(data.avatar || "");
+      setStatus(data.status || "");
+    } catch (err) {
+      console.error("Erreur fetch current user :", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement du profil."
+      );
     } finally {
-      setSaving(false);
+      setLoadingProfile(false);
     }
   };
+
+  fetchCurrentUser();
+}, [token]);
+
+const handleSave = async () => {
+  if (!token || !user?.id) {
+    setError("Tu dois être connecté.");
+    return;
+  }
+
+  try {
+    setSaving(true);
+    setMessage("");
+    setError("");
+
+    const res = await fetch(`http://localhost:3001/users/${user.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        username,
+        avatar: avatarUrl,
+        bio,
+        status,
+        location,
+        website,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Impossible de mettre à jour le profil.");
+    }
+
+    setMessage("Profile updated successfully.");
+  } catch (error) {
+    console.error(error);
+    setError(
+      error instanceof Error
+        ? error.message
+        : "Unable to save profile changes."
+    );
+  } finally {
+    setSaving(false);
+  }
+};
 
   return (
     <ProtectedRoute>
@@ -78,7 +139,12 @@ export default function SettingsProfilePage() {
                 variant="outline"
                 className="rounded-full border-[#d8cfbe] bg-[#fffaf2]"
               >
-                <Link href="/profile">
+                <Link href="/profil">
+                  {error && (
+                    <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {error}
+                    </div>
+                  )}
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to profile
                 </Link>
@@ -270,11 +336,11 @@ export default function SettingsProfilePage() {
                     <div className="pt-2">
                       <Button
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={saving || loadingProfile}
                         className="rounded-full bg-[#6f8467] text-white hover:bg-[#5f7358]"
                       >
                         <Save className="mr-2 h-4 w-4" />
-                        {saving ? "Saving..." : "Save changes"}
+                        {loadingProfile ? "Loading..." : saving ? "Saving..." : "Save changes"}
                       </Button>
                     </div>
                   </div>

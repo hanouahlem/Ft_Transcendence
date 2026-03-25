@@ -15,16 +15,17 @@ model User {
   bio       String?
   status    String?
   location  String?
+  website   String?
   createdAt DateTime @default(now())
 
-  posts            Post[]
-  likes            Like[]
-  comments         Comment[]
-  reposts          Repost[]
-  sentFriends      Friends[]         @relation("sent")
-  receivedFriends  Friends[]         @relation("received")
-  notifications    Notification[]
-  favorites        Favorite[]
+  posts           Post[]
+  likes           Like[]
+  comments        Comment[]
+  reposts         Repost[]
+  sentFriends     Friends[] @relation("sent")
+  receivedFriends Friends[] @relation("received")
+  notifications   Notification[]
+  favorites       Favorite[]
   commentLikes     CommentLike[]
   commentFavorites CommentFavorite[]
 }
