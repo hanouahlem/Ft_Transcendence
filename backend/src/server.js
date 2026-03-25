@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "path";
 import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
+import { apiKeyMiddleware } from "./middleware/apiKey.js";
 
 try {
   validateEnv();
@@ -21,9 +22,12 @@ app.get("/health", (_req, res) => {
 
 app.use("/uploads", express.static(path.resolve("uploads")));
 
-app.use("/", route);
+// Ici, toutes les routes passent par API Key middleware
+app.use("/api/v1", apiKeyMiddleware, route);
+// app.use("/", route);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
