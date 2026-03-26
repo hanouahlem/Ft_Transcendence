@@ -12,6 +12,8 @@ const router = Router();
 //oauth
 router.get("/auth/github", oauth.startGitHubOAuth);
 router.get("/auth/github/callback", oauth.handleGitHubCallback);
+router.get("/auth/42", oauth.startFortyTwoOAuth);
+router.get("/auth/42/callback", oauth.handleFortyTwoCallback);
 
 //user
 router.post("/registerUser", ctrl.registerUser);

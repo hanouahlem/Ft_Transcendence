@@ -114,7 +114,7 @@ export const loginUser = async (req, res) => {
 
     if (!user.password) {
       return res.status(401).json({
-        message: "This account uses GitHub login. Sign in with GitHub instead.",
+        message: "Username/email or password is incorrect.",
       });
     }
 
@@ -232,7 +232,7 @@ export async function updatePassword(req, res){
 
         if (!user.password) {
             return res.status(400).json({
-                message: "This account does not have a password yet. Sign in with GitHub.",
+                message: "This account does not have a local password yet.",
             });
         }
 
