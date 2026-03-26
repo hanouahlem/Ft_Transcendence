@@ -6,7 +6,6 @@ import { authMiddleware } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
 import notif from '../controllers/notifController.js';
 import twoFa from '../controllers/twoFactorController.js';
-import {setupCodeTowFa, checkTwoFaCode, disableTwoFA} from '../controllers/twoFactorController.js';
 const router = Router();
 
 //user
@@ -45,8 +44,8 @@ router.post("/posts/:id/comments", authMiddleware, createCommentHandler);
 
 
 // 2FA
-router.post('/auth/2fa/setup',   authMiddleware, twoFa.setupCodeTwoFa);
-router.post('/auth/2fa/verify',  authMiddleware, twoFa.checkTwoFaCode);
-router.post('/auth/2fa/disable', authMiddleware, twoFa.disableTwoFA);
+router.post('/settings/auth/2fa/setup',   authMiddleware, twoFa.setupCodeTwoFa);
+router.post('/settings/auth/2fa/confirm',  authMiddleware, twoFa.checkTwoFaCode);
+router.post('/settings/auth/2fa/disable', authMiddleware, twoFa.disableTwoFA);
 
 export default router;

@@ -21,5 +21,3 @@ export async function Emailconfirmation(to, code){
     });
 }
 
-
-export default {Emailconfirmation};
