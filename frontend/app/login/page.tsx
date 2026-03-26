@@ -2,7 +2,7 @@
 
 import type { ChangeEvent, CSSProperties, FormEvent, ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { loginUser } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -271,13 +271,16 @@ function FieldInput({
 function SocialProviderButton({
 	label,
 	children,
+	onClick,
 }: {
 	label: string;
 	children: ReactNode;
+	onClick?: () => void;
 }) {
 	return (
 		<button
 			type="button"
+			onClick={onClick}
 			className="flex flex-1 items-center justify-center gap-3 border border-[#5A564C]/30 bg-white px-4 py-3 font-['Courier_Prime'] text-[11px] uppercase tracking-[0.12em] text-[#1A1A1A] transition-all hover:border-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-[#F5F2EB]"
 		>
 			{children}
@@ -342,6 +345,7 @@ function PaperCard({
 	onEmailChange,
 	onPasswordChange,
 	onSubmit,
+	onGitHubLogin,
 }: {
 	email: string;
 	password: string;
@@ -351,6 +355,7 @@ function PaperCard({
 	onEmailChange: (event: ChangeEvent<HTMLInputElement>) => void;
 	onPasswordChange: (event: ChangeEvent<HTMLInputElement>) => void;
 	onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+	onGitHubLogin: () => void;
 }) {
 	return (
 		<section className="relative z-20 overflow-visible border border-[#E8E1D5] bg-[#F5F2EB] shadow-[0_20px_50px_rgba(0,0,0,0.4)] lg:absolute lg:inset-y-0 lg:left-[var(--login-paper-left)] lg:w-[var(--login-paper-width)] lg:[transform:rotate(var(--login-paper-rotate))]">
@@ -448,7 +453,7 @@ function PaperCard({
 								<SocialProviderButton label="Google">
 									<GoogleIcon />
 								</SocialProviderButton>
-								<SocialProviderButton label="GitHub">
+								<SocialProviderButton label="GitHub" onClick={onGitHubLogin}>
 									<GitHubIcon />
 								</SocialProviderButton>
 							</div>
@@ -462,6 +467,7 @@ function PaperCard({
 
 export default function LoginPage() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const { login, isLoggedIn, isAuthLoading } = useAuth();
 
 	const [identifier, setIdentifier] = useState("");
@@ -474,6 +480,14 @@ export default function LoginPage() {
 			router.replace("/feed");
 		}
 	}, [isAuthLoading, isLoggedIn, router]);
+
+	useEffect(() => {
+		const oauthError = searchParams.get("error");
+
+		if (oauthError) {
+			setError(oauthError);
+		}
+	}, [searchParams]);
 
 	useEffect(() => {
 		const style = document.createElement("style");
@@ -500,6 +514,10 @@ export default function LoginPage() {
 		})
 		.toUpperCase();
 
+	const handleGitHubLogin = () => {
+		window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/github`;
+	};
+
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		setLoading(true);
@@ -514,7 +532,13 @@ export default function LoginPage() {
 			}
 
 			if (result.data.token) {
-				await login(result.data.token);
+				const loginSucceeded = await login(result.data.token);
+
+				if (!loginSucceeded) {
+					setError("Login failed while loading your account.");
+					return;
+				}
+
 				router.push("/feed");
 				return;
 			}
@@ -552,6 +576,7 @@ export default function LoginPage() {
 						onEmailChange={(event) => setIdentifier(event.target.value)}
 						onPasswordChange={(event) => setPassword(event.target.value)}
 						onSubmit={handleSubmit}
+						onGitHubLogin={handleGitHubLogin}
 					/>
 
 					<AccentBeads
