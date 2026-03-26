@@ -42,6 +42,8 @@ OAuth adds one requirement here:
 
 - the public GitHub callback path must be forwarded to the backend service
 - the frontend GitHub handoff page must stay on the frontend service
+- the public 42 callback path must be forwarded to the backend service
+- the frontend 42 handoff page must stay on the frontend service
 
 ## Main Differences From Dev Compose
 
@@ -133,6 +135,11 @@ For GitHub OAuth, the route split now matters:
 - backend OAuth callback: `/auth/github/callback`
 - frontend handoff page: `/auth/github/handoff`
 
+For 42 OAuth, the same split applies:
+
+- backend OAuth callback: `/auth/42/callback`
+- frontend handoff page: `/auth/42/handoff`
+
 Two realistic options:
 
 - `nginx`
@@ -182,11 +189,14 @@ OAuth env vars that now matter:
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
 - `GITHUB_CALLBACK_URL`
+- `FORTYTWO_CLIENT_ID`
+- `FORTYTWO_CLIENT_SECRET`
+- `FORTYTWO_CALLBACK_URL`
 - `FRONTEND_URL`
 
 Important rule:
 
-- `GITHUB_CALLBACK_URL` and `FRONTEND_URL` must be browser-reachable public URLs
+- `GITHUB_CALLBACK_URL`, `FORTYTWO_CALLBACK_URL`, and `FRONTEND_URL` must be browser-reachable public URLs
 - do not use Docker service names like `backend` or `frontend` for these values
 - only internal container-to-container traffic should use service names like `postgres`
 
@@ -258,6 +268,7 @@ The README should clearly explain:
 For OAuth, documentation should also state:
 
 - the deployed `GITHUB_CALLBACK_URL` must exactly match the callback URL configured in the GitHub OAuth app
+- the deployed `FORTYTWO_CALLBACK_URL` must exactly match the callback URL configured in the 42 application
 - OAuth login depends on database migrations being applied before testing
 
 It should be obvious to an evaluator which command launches the evaluation-ready stack.

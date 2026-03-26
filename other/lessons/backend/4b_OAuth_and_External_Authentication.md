@@ -1,6 +1,6 @@
 # 4b. OAuth and External Authentication
 
-Goal: understand where OAuth fits in this project, how it differs from password login, and how it would connect to the existing JWT-based auth flow.
+Goal: understand where OAuth fits in this project, how it differs from password login, and how it connects to the existing JWT-based auth flow.
 
 ## Subject Context
 
@@ -91,35 +91,36 @@ Because:
 - callback/token exchange logic is easier to secure on the backend
 - it would fight the current architecture instead of reusing it
 
-## How OAuth Would Fit Into The Existing Files
+## How OAuth Fits Into The Existing Files
 
 ### Backend
 
-Likely additions:
+Current routes:
 
-- new routes such as:
-  - `GET /auth/github`
-  - `GET /auth/github/callback`
-  - or the same pattern for 42
-- controller logic to:
-  - redirect to the provider
-  - exchange the callback `code` for an access token
-  - fetch provider profile data
-  - find or create the local user
-  - sign the normal app JWT
+- `GET /auth/github`
+- `GET /auth/github/callback`
+- `GET /auth/42`
+- `GET /auth/42/callback`
 
-Possible files:
+Current controller responsibilities:
+
+- redirect to the provider
+- exchange the callback `code` for an access token
+- fetch provider profile data
+- find or create the local user
+- sign the normal app JWT
+
+Current files:
 
 - `backend/src/routes/routes.js`
-- `backend/src/controllers/userController.js`
-- or a new `backend/src/controllers/oauthController.js`
+- `backend/src/controllers/oauthController.js`
 
 ### Frontend
 
 The frontend should stay thin:
 
 - login page button sends the user to the backend OAuth route
-- callback page receives the backend-issued JWT
+- frontend handoff page receives the backend-issued JWT
 - `AuthContext.login(token)` stores the token and loads the user
 
 This matches the current context code:
@@ -154,7 +155,7 @@ That means OAuth logic usually does:
 
 ## GitHub OAuth In This Project
 
-For GitHub, a clean flow would be:
+For GitHub, the implemented flow is:
 
 1. redirect to GitHub authorize URL
 2. get callback `code`
@@ -164,14 +165,17 @@ For GitHub, a clean flow would be:
 6. sign normal JWT
 7. redirect frontend with that JWT
 
-Important implementation detail:
+Important implementation details:
 
 - GitHub may require fetching email separately
-- account-linking rules must be decided clearly
+- only a verified email is accepted
+- matching local email is auto-linked
+- backend callback is `/auth/github/callback`
+- frontend handoff page is `/auth/github/handoff`
 
 ## 42 OAuth In This Project
 
-For 42, the flow is almost the same:
+For 42, the implemented flow is almost the same:
 
 1. redirect to `https://api.intra.42.fr/oauth/authorize`
 2. exchange callback `code` at `https://api.intra.42.fr/oauth/token`
@@ -179,25 +183,29 @@ For 42, the flow is almost the same:
 4. find or create local user
 5. sign normal JWT
 
+Important implementation details:
+
+- 42 uses the authorization-code flow documented by the 42 API guide
+- the backend callback is `/auth/42/callback`
+- the frontend handoff page is `/auth/42/handoff`
+- matching local email is auto-linked
+- the stable external identity stored in Prisma is `fortyTwoId`
+
 Why 42 OAuth is especially relevant:
 
 - it directly matches the school ecosystem
 - the provider gives a strong school identity
 - it can be easier to justify during evaluation because it clearly relates to 42
 
-## Local User Linking Questions
+## Local User Linking Rules
 
-Before implementing OAuth, the team must decide:
+Current rules:
 
-- if provider email matches an existing local account, do we auto-link?
-- what happens if provider email is missing or unverified?
-- what happens if provider username conflicts with an existing local username?
-
-These decisions matter because they affect:
-
-- duplicate accounts
-- account ownership
-- evaluation explanations
+- if provider email matches an existing local account, the provider is linked to that user
+- if a provider-specific id already exists, that user is reused
+- if the provider username/login conflicts with a local username, a suffix is added until it becomes unique
+- if GitHub does not return a verified email, login fails
+- if 42 does not return a usable email, login fails
 
 ## Environment Variables Likely Needed
 
@@ -227,9 +235,12 @@ That separation keeps the rest of the application simple.
 
 ## Current Status In This Repository
 
-OAuth is **not implemented yet**.
+OAuth is implemented for:
 
-The planning note is here:
+- GitHub
+- 42
+
+The project note is here:
 
 - `other/todo_oauth.md`
 
