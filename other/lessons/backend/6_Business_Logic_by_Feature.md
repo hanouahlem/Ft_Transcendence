@@ -41,8 +41,8 @@ What it does:
 
 What it does:
 
-- reads email and password
-- finds user by email
+- reads a login identifier and password
+- finds user by username or email
 - compares password with bcrypt
 - signs JWT if valid
 - returns token

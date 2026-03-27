@@ -1,17 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ArrowRight, Leaf, ShieldCheck, Sparkles } from "lucide-react";
 import { registerUser } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { isLoggedIn, isAuthLoading } = useAuth();
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!isAuthLoading && isLoggedIn) {
+      router.replace("/feed");
+    }
+  }, [isLoggedIn, isAuthLoading, router]);
+
+  if (isAuthLoading || isLoggedIn) {
+    return null;
+  }
 
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();

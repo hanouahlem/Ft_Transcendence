@@ -46,4 +46,4 @@ Use this folder as a guided study path for the backend.
 - Do not dump the whole backend explanation at once.
 - Do not create future lesson files before they are needed.
 - Do not move forward just because the explanation was given; move forward only when the student is ready.
-- Keep everything consistent with `transcendance.md`, which is the project source of truth.
+- Keep everything consistent with `other/transcendance.md`, which is the project source of truth.

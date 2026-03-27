@@ -50,7 +50,7 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-2 rounded-full border border-[#ddd3c2] bg-[#fffaf2]/90 p-1.5 shadow-[0_8px_30px_rgba(90,107,86,0.08)]">
-          <Link href="/" className={navLinkClass("/")}>
+          <Link href={isLoggedIn ? "/feed" : "/"} className={navLinkClass(isLoggedIn ? "/feed" : "/")}>
             <House className="h-4 w-4" />
             <span className="hidden sm:inline">Home</span>
           </Link>

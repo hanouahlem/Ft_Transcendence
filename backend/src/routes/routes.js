@@ -1,4 +1,5 @@
 import ctrl from "../controllers/userController.js";
+import oauth from "../controllers/oauthController.js";
 import friend from "../controllers/friendController.js";
 import {createPostHandler,getPostsHandler,deletePostHandler,likePostHandler,unlikePostHandler,createCommentHandler,} from "../controllers/postController.js";
 import { Router } from "express";
@@ -7,6 +8,12 @@ import upload from "../middleware/upload.js";
 import notif from '../controllers/notifController.js';
 import twoFa from '../controllers/twoFactorController.js';
 const router = Router();
+
+//oauth
+router.get("/auth/github", oauth.startGitHubOAuth);
+router.get("/auth/github/callback", oauth.handleGitHubCallback);
+router.get("/auth/42", oauth.startFortyTwoOAuth);
+router.get("/auth/42/callback", oauth.handleFortyTwoCallback);
 
 //user
 router.post("/registerUser", ctrl.registerUser);
