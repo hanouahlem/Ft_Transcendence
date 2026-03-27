@@ -68,6 +68,19 @@ Study file:
 
 - `lessons/backend/4_Authentication_and_Authorization.md`
 
+## 4b. OAuth and External Authentication
+
+Goal: understand how GitHub or 42 OAuth would plug into the existing JWT auth flow.
+
+- why OAuth is optional in the subject
+- why backend-driven OAuth fits this repo
+- provider token vs app JWT
+- how external auth would connect to Prisma users and `AuthContext`
+
+Study file:
+
+- `lessons/backend/4b_OAuth_and_External_Authentication.md`
+
 ## 5. Prisma and Database Layer
 
 Goal: understand how backend code talks to Postgres.
@@ -133,14 +146,15 @@ Study file:
 2. HTTP and Express Basics
 3. Routing and Request Flow
 4. Authentication and Authorization
-5. Prisma and Database Layer
-6. Business Logic by Feature
-7. File Uploads and Static Media
-8. Dev Workflow and Failure Modes
+5. OAuth and External Authentication
+6. Prisma and Database Layer
+7. Business Logic by Feature
+8. File Uploads and Static Media
+9. Dev Workflow and Failure Modes
 
 ## Notes
 
 - Use this as a study map, not as a full explanation document.
 - We create each concept file when we start that section.
 - If one section feels unclear, drill into that section before moving on.
-- Every explanation should stay consistent with `transcendance.md`, which is the project source of truth.
+- Every explanation should stay consistent with `other/transcendance.md`, which is the project source of truth.

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import Navbar from "@/components/layout/Navbar";
 import { getFriendRequests } from "@/lib/api";
 
 type UserItem = {
@@ -102,6 +103,7 @@ export default function FriendsPage() {
 
   return (
     <ProtectedRoute>
+      <Navbar />
       <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
         <section className="relative overflow-hidden px-6 py-10 lg:px-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(216,207,184,0.35),transparent_30%)]" />
