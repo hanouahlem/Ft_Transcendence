@@ -46,6 +46,25 @@ make re          # fclean + up
 make db          # start only postgres in background
 ```
 
+Devcontainer workflow:
+
+1. Reopen the repo in the devcontainer
+2. Run `make up`
+3. Run `make down` when you want to stop the stack
+4. Run `make studio` when you want Prisma Studio on `http://localhost:5555`
+
+Devcontainer notes:
+
+- the repo includes `.devcontainer/` for editor tooling and AI CLIs
+- the container mounts the repo at the exact same absolute path as the host path
+- this is required because `docker compose` talks to the host Docker socket, and the bind mounts in `docker-compose.yml` must resolve to real host paths
+- the app still runs through the normal Docker stack, not inside the devcontainer itself
+- browser access stays on `http://localhost:3000`
+- API access stays on `http://localhost:3001`
+- Prisma Studio stays on `http://localhost:5555`
+- `post-create.sh` copies missing env files from the examples and installs frontend/backend dependencies for editor tooling
+- Claude Code, Codex, and OpenCode config directories are mounted from the host into the devcontainer so their auth and local settings persist
+
 Prisma (runs inside the backend container):
 
 ```bash

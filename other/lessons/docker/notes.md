@@ -127,3 +127,27 @@ Why:
 - prod wants immutable images, no live source mounts, tighter secrets and cleaner startup
 
 Our current `docker-compose.yml` is clearly a dev setup.
+
+## Devcontainer With Host Docker Socket
+
+The repo now also includes a `.devcontainer/` setup for coding tools such as Claude Code, Codex, and OpenCode.
+
+Important detail:
+
+- the devcontainer mounts the repo at the exact same absolute path as on the host
+- it also mounts `/var/run/docker.sock` from the host
+
+Why this matters:
+
+- `docker compose` runs against the host Docker daemon
+- the bind mounts in `docker-compose.yml` use host paths like `./backend` and `./frontend`
+- if the repo were mounted inside the devcontainer at a different path, Docker would try to resolve a container-only path that does not exist on the host
+
+So the safe pattern is:
+
+- use the devcontainer for editors, shells, Git, and AI CLIs
+- use `make up` from inside the devcontainer to launch the normal host-backed Compose stack
+- open the frontend at `http://localhost:3000`
+- open Prisma Studio at `http://localhost:5555`
+
+This keeps one source tree, one Docker stack, and one browser workflow.
