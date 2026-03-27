@@ -2,20 +2,18 @@ import jwt from 'jsonwebtoken';
 import { getEnv } from "../env.js";
 
 export function authMiddleware(req, res, next) {
+    const token = req.headers.authorization?.split(" ")[1];
 
-    // const token = req.header('Authorization');
-    const apiKey = req.headers.authorization?.split(" ")[1];
-    if (!apiKey) {
-        return res.status(401).json({ message: "apiKey missing" });
+    if (!token) {
+        return res.status(401).json({ message: "Token manquant" });
     }
-    try{
-        const verifapiKey = jwt.verify (apiKey, getEnv("JWT_SECRET"));
-        console.log("apiKey verified:", verifapiKey);
-        req.user = verifapiKey;
+
+    try {
+        const decoded = jwt.verify(token, getEnv("JWT_SECRET"));
+        req.user = decoded;
         next();
-    }
-    catch (error) {
-        return res.status(401).json({ message: "apiKey invalid" });
+    } catch (error) {
+        return res.status(401).json({ message: "Token invalide" });
     }
 }
 
