@@ -332,7 +332,6 @@ export default function FeedPage() {
 
       await fetchPosts();
     } catch (err) {
-      console.error("Erreur commentaire :", err);
       setError(
         err instanceof Error
           ? err.message

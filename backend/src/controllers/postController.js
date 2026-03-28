@@ -188,8 +188,6 @@ export const createCommentHandler = async (req, res) => {
       comment,
     });
   } catch (error) {
-    console.error("Erreur createCommentHandler :", error);
-
     return res.status(500).json({
       message: error.message || "Unable to create comment.",
     });
