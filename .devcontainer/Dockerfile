@@ -23,4 +23,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/*
 
+# Install AI coding assistants
+RUN npm install -g @anthropic-ai/claude-code @openai/codex opencode-ai
+
 USER node
