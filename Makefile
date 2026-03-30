@@ -53,4 +53,20 @@ migrate: prisma-migrate
 
 ms: migrate studio
 
-.PHONY: up down restart build logs ps clean fclean re frontend backend db prisma-generate prisma-migrate prisma-studio studio migrate
+dc-build:
+	docker build -f .devcontainer/Dockerfile -t ft_devcontainer .
+
+dc-stop:
+	-docker stop ft_devcontainer
+
+dc-rm:
+	-docker rm ft_devcontainer
+
+dc-rmi:
+	-docker rmi ft_devcontainer
+
+dc-clean: dc-stop dc-rm dc-rmi
+	-docker volume rm transcendance-backend-node-modules transcendance-frontend-node-modules
+	docker builder prune -f
+
+.PHONY: up down restart build logs ps clean fclean re frontend backend db prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean
