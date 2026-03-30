@@ -11,15 +11,14 @@ if [ ! -f frontend/.env.local ] && [ -f frontend/.env.local.example ]; then
   cp frontend/.env.local.example frontend/.env.local
 fi
 
-if [ -f backend/package-lock.json ]; then
-  npm --prefix backend install
-fi
-
-if [ -f frontend/package-lock.json ]; then
-  npm --prefix frontend install
-fi
-
 mkdir -p "$HOME/.config/opencode"
+
+for svc in backend frontend; do
+  if [ -d "$svc/node_modules" ] && [ ! -f "$svc/node_modules/.package-lock.json" ] && [ -d "/usr/local/share/${svc}-node-modules" ]; then
+    sudo chown node:node "$svc/node_modules"
+    cp -a "/usr/local/share/${svc}-node-modules/." "$svc/node_modules/"
+  fi
+done
 
 printf '%s\n' \
   "Devcontainer ready." \
