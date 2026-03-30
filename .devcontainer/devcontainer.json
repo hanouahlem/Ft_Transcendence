@@ -21,6 +21,8 @@
     "source=${localEnv:HOME}/.codex,target=/home/node/.codex,type=bind,consistency=cached",
     "source=${localEnv:HOME}/.config/opencode,target=/home/node/.config/opencode,type=bind,consistency=cached",
     "source=${localEnv:HOME}/.opencode,target=/home/node/.opencode,type=bind,consistency=cached",
+    "source=transcendance-backend-node-modules,target=${localWorkspaceFolder}/backend/node_modules,type=volume",
+    "source=transcendance-frontend-node-modules,target=${localWorkspaceFolder}/frontend/node_modules,type=volume"
   ],
   "forwardPorts": [3000, 3001, 5432, 5555],
   "postCreateCommand": "bash .devcontainer/post-create.sh",
