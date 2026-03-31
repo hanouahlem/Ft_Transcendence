@@ -17,6 +17,7 @@ model User {
   bio       String?
   status    String?
   location  String?
+  website   String?
   createdAt DateTime @default(now())
   
   twoFactorcode  String?  // secret code
@@ -26,20 +27,46 @@ model User {
   posts           Post[]
   likes           Like[]
   comments        Comment[]
+  reposts         Repost[]
   sentFriends     Friends[] @relation("sent")
   receivedFriends Friends[] @relation("received")
   notifications   Notification[]
+  favorites       Favorite[]
+  commentLikes     CommentLike[]
+  commentFavorites CommentFavorite[]
 }
 
 model Post {
-  id        Int       @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   content   String
   image     String?
-  createdAt DateTime  @default(now())
-  author    User      @relation(fields: [authorId], references: [id])
+  createdAt DateTime   @default(now())
+  author    User       @relation(fields: [authorId], references: [id])
   authorId  Int
   likes     Like[]
   comments  Comment[]
+  favorites Favorite[]
+  reposts   Repost[]
+}
+
+model Repost {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+
+  @@unique([userId, postId])
+}
+
+model Favorite {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+
+  @@unique([userId, postId])
 }
 
 model Like {
@@ -48,16 +75,21 @@ model Like {
   userId Int
   post   Post @relation(fields: [postId], references: [id])
   postId Int
+
+  @@unique([userId, postId])
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
-  content   String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    Int
+  id               Int               @id @default(autoincrement())
+  content          String
+  image            String?
+  createdAt        DateTime          @default(now())
+  user             User              @relation(fields: [userId], references: [id])
+  userId           Int
+  post             Post              @relation(fields: [postId], references: [id])
+  postId           Int
+  commentLikes     CommentLike[]
+  commentFavorites CommentFavorite[]
 }
 
 model Friends {
@@ -76,4 +108,24 @@ model Notification {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
+}
+
+model CommentLike {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  comment   Comment @relation(fields: [commentId], references: [id])
+  commentId Int
+
+  @@unique([userId, commentId])
+}
+
+model CommentFavorite {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  comment   Comment @relation(fields: [commentId], references: [id])
+  commentId Int
+
+  @@unique([userId, commentId])
 }
