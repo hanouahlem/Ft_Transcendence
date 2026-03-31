@@ -37,55 +37,55 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 };
 
   return (
-    <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
+    <main className="min-h-screen bg-gradient-to-br from-[#EAF1E6] via-[#dbe7d2] to-[#9CAF88] text-[#33412c]">
       <section className="relative overflow-hidden px-6 py-12 lg:px-8">
         {/* Background */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(216,207,184,0.35),transparent_30%)]" />
-        <div className="absolute left-[-60px] top-20 h-72 w-72 rounded-full bg-[#dbe4d3]/40 blur-3xl" />
-        <div className="absolute bottom-0 right-[-60px] h-80 w-80 rounded-full bg-[#ddd1bb]/50 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(74,100,64,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(156,175,136,0.30),transparent_30%)]" />
+        <div className="absolute left-[-60px] top-20 h-72 w-72 rounded-full bg-[#EAF1E6]/40 blur-3xl" />
+        <div className="absolute bottom-0 right-[-60px] h-80 w-80 rounded-full bg-[#c8dbbf]/50 blur-3xl" />
 
         <div className="relative mx-auto grid min-h-[calc(100vh-6rem)] max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           {/* Left side */}
           <div className="hidden lg:block">
             <div className="max-w-xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#d8cfbe] bg-[#eef3e8] px-4 py-2 text-sm font-medium text-[#64785f]">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border-0 bg-white/80 px-4 py-2 text-sm font-medium text-[#4A6440] shadow-md backdrop-blur">
                 <Leaf className="h-4 w-4" />
                 Calm social blogging experience
               </div>
 
-              <h1 className="text-5xl font-bold leading-tight tracking-tight text-[#2f3a32]">
+              <h1 className="text-5xl font-bold leading-tight tracking-tight text-[#33412c]">
                 Create your space in a softer, warmer social universe
               </h1>
 
-              <p className="mt-6 text-lg leading-8 text-[#667066]">
+              <p className="mt-6 text-lg leading-8 text-[#4f5d49]">
                 Join a platform designed for storytelling, connection, and clean
                 visual sharing with an elegant editorial atmosphere.
               </p>
 
               <div className="mt-10 space-y-4">
-                <div className="flex items-start gap-4 rounded-2xl border border-[#ddd3c2] bg-[#fffaf2]/80 p-4 shadow-sm">
-                  <div className="rounded-xl bg-[#eef3e8] p-2 text-[#6f8467]">
+                <div className="flex items-start gap-4 rounded-2xl border-0 bg-white/90 p-4 shadow-md backdrop-blur">
+                  <div className="rounded-xl bg-[#EAF1E6] p-2 text-[#4A6440]">
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[#2f3a32]">
+                    <p className="font-semibold text-[#33412c]">
                       Elegant onboarding
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-[#697268]">
+                    <p className="mt-1 text-sm leading-6 text-[#4f5d49]">
                       A clean and welcoming entry point for your users.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 rounded-2xl border border-[#ddd3c2] bg-[#fffaf2]/80 p-4 shadow-sm">
-                  <div className="rounded-xl bg-[#f3ecdf] p-2 text-[#8a7a5d]">
+                <div className="flex items-start gap-4 rounded-2xl border-0 bg-white/90 p-4 shadow-md backdrop-blur">
+                  <div className="rounded-xl bg-[#EAF1E6] p-2 text-[#4A6440]">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[#2f3a32]">
+                    <p className="font-semibold text-[#33412c]">
                       Familiar logic
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-[#697268]">
+                    <p className="mt-1 text-sm leading-6 text-[#4f5d49]">
                       Same backend communication, same form behavior, new visual
                       identity only.
                     </p>
@@ -97,17 +97,17 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
           {/* Right side / form */}
           <div className="mx-auto w-full max-w-md">
-            <div className="rounded-[2rem] border border-[#ddd3c2] bg-[#fffaf2]/90 p-8 shadow-[0_20px_60px_rgba(92,108,91,0.12)] backdrop-blur-xl sm:p-10">
+            <div className="rounded-[2rem] border-0 bg-white/90 p-8 shadow-2xl backdrop-blur sm:p-10">
               <div className="mb-8">
-                <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[#7a8d72]">
+                <p className="mb-3 text-xs uppercase tracking-[0.28em] text-[#4A6440]">
                   ft_transcendence
                 </p>
 
-                <h1 className="text-3xl font-bold tracking-tight text-[#2f3a32]">
+                <h1 className="text-3xl font-bold tracking-tight text-[#33412c]">
                   Create your account
                 </h1>
 
-                <p className="mt-3 text-sm leading-6 text-[#6b746c]">
+                <p className="mt-3 text-sm leading-6 text-[#4f5d49]">
                   Join the platform and start building your social space in a
                   warm and modern interface.
                 </p>
@@ -117,7 +117,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 <div>
                   <label
                     htmlFor="username"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-[#7a8376]"
+                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-[#5a6b54]"
                   >
                     Username
                   </label>
@@ -128,14 +128,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    className="w-full rounded-2xl border border-[#d8cfbe] bg-[#fcf8f1] px-4 py-3 text-sm text-[#2f3a32] outline-none transition placeholder:text-[#9aa296] focus:border-[#91a387] focus:ring-4 focus:ring-[#dfe8d7]"
+                    className="w-full rounded-2xl border border-[#d8e3d1] bg-[#fbfdf9] px-4 py-3 text-sm text-[#33412c] outline-none transition placeholder:text-[#9aac94] focus:border-[#6B7C5D] focus:ring-4 focus:ring-[#d9e6d0]"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-[#7a8376]"
+                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-[#5a6b54]"
                   >
                     Email
                   </label>
@@ -146,14 +146,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full rounded-2xl border border-[#d8cfbe] bg-[#fcf8f1] px-4 py-3 text-sm text-[#2f3a32] outline-none transition placeholder:text-[#9aa296] focus:border-[#91a387] focus:ring-4 focus:ring-[#dfe8d7]"
+                    className="w-full rounded-2xl border border-[#d8e3d1] bg-[#fbfdf9] px-4 py-3 text-sm text-[#33412c] outline-none transition placeholder:text-[#9aac94] focus:border-[#6B7C5D] focus:ring-4 focus:ring-[#d9e6d0]"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="password"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-[#7a8376]"
+                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-[#5a6b54]"
                   >
                     Password
                   </label>
@@ -164,12 +164,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full rounded-2xl border border-[#d8cfbe] bg-[#fcf8f1] px-4 py-3 text-sm text-[#2f3a32] outline-none transition placeholder:text-[#9aa296] focus:border-[#91a387] focus:ring-4 focus:ring-[#dfe8d7]"
+                    className="w-full rounded-2xl border border-[#d8e3d1] bg-[#fbfdf9] px-4 py-3 text-sm text-[#33412c] outline-none transition placeholder:text-[#9aac94] focus:border-[#6B7C5D] focus:ring-4 focus:ring-[#d9e6d0]"
                   />
                 </div>
 
                 {success && (
-                  <div className="rounded-2xl border border-[#b7c9ae] bg-[#edf4e8] px-4 py-3 text-sm text-[#5f7358]">
+                  <div className="rounded-2xl border border-[#cfe0c4] bg-[#F4F8F1] px-4 py-3 text-sm text-[#4A6440]">
                     Account created successfully.
                   </div>
                 )}
@@ -183,7 +183,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-[#6f8467] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#5f7358] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-[#4A6440] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#3a5230] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading && (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -193,14 +193,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 </button>
               </form>
 
-              <div className="mt-8 border-t border-[#e5dccd] pt-6 text-center">
-                <p className="mb-3 text-sm text-[#7a8376]">
+              <div className="mt-8 border-t border-[#d8e3d1] pt-6 text-center">
+                <p className="mb-3 text-sm text-[#5a6b54]">
                   Already have an account?
                 </p>
 
                 <Link
                   href="/login"
-                  className="inline-flex w-full items-center justify-center rounded-2xl border border-[#d8cfbe] bg-[#faf5eb] px-4 py-3 text-sm font-semibold text-[#4c584d] transition hover:bg-[#f3ecdf]"
+                  className="inline-flex w-full items-center justify-center rounded-2xl border border-[#d8e3d1] bg-[#EAF1E6] px-4 py-3 text-sm font-semibold text-[#4A6440] transition hover:bg-[#d9e6d0]"
                 >
                   Login
                 </Link>

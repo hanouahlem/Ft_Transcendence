@@ -1,5 +1,6 @@
 import ctrl from "../controllers/userController.js";
 import friend from "../controllers/friendController.js";
+import notif from "../controllers/notifController.js";
 import {
   createPostHandler,
   getPostsHandler,
@@ -38,12 +39,19 @@ router.get("/users/:id", authMiddleware, ctrl.getUserById);
 router.put("/users/:id", authMiddleware, ctrl.updateUser);
 router.put("/settings/security", authMiddleware, ctrl.updatePassword);
 
+// notifications
+router.get("/notifications", authMiddleware, notif.getNotif);
+router.post("/notifications", authMiddleware, notif.createNotif);
+router.patch("/notifications/:id/read", authMiddleware, notif.markAsRead);
+router.delete("/notifications/:id", authMiddleware, notif.deleteNotif);
+
 // friends
 router.post("/friends", authMiddleware, friend.addFriend);
 router.get("/friends", authMiddleware, friend.getFriends);
 router.put("/friends/:id", authMiddleware, friend.acceptFriend);
 router.delete("/friends/:id", authMiddleware, friend.deleteFriend);
 router.get("/friends/requests", authMiddleware, friend.getFriendRequests);
+router.get("/users/:id/friends", authMiddleware, friend.getUserFriends);
 
 // post
 router.get("/posts", authMiddleware, getPostsHandler);

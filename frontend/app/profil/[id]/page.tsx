@@ -20,6 +20,12 @@ type ProfileUser = {
   createdAt?: string;
 };
 
+type FriendItem = {
+  id: number;
+  username: string;
+  avatar?: string | null;
+};
+
 type FeedComment = {
   id: number;
   content: string;
@@ -88,7 +94,8 @@ export default function PublicProfilePage() {
   const [likedComments, setLikedComments] = useState<FeedComment[]>([]);
   const [favoritePosts, setFavoritePosts] = useState<FeedPost[]>([]);
   const [favoriteComments, setFavoriteComments] = useState<FeedComment[]>([]);
-  const [activeTab, setActiveTab] = useState<"posts" | "comments" | "likes" | "favorites">("posts");
+  const [friends, setFriends] = useState<FriendItem[]>([]);
+  const [activeTab, setActiveTab] = useState<"posts" | "friends" | "comments" | "likes" | "favorites">("posts");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -104,13 +111,14 @@ export default function PublicProfilePage() {
           Authorization: `Bearer ${token}`,
         };
 
-        const [profileRes, postsRes, commentsRes, likesRes, favoritesRes] =
+        const [profileRes, postsRes, commentsRes, likesRes, favoritesRes, friendsRes] =
           await Promise.all([
             fetch(`http://localhost:3001/users/${userId}`, { headers }),
             fetch(`http://localhost:3001/users/${userId}/posts`, { headers }),
             fetch(`http://localhost:3001/users/${userId}/comments`, { headers }),
             fetch(`http://localhost:3001/users/${userId}/likes`, { headers }),
             fetch(`http://localhost:3001/users/${userId}/favorites`, { headers }),
+            fetch(`http://localhost:3001/users/${userId}/friends`, { headers }),
           ]);
 
         const profileData = await profileRes.json();
@@ -118,6 +126,7 @@ export default function PublicProfilePage() {
         const commentsData = await commentsRes.json();
         const likesData: ReactionResponse = await likesRes.json();
         const favoritesData: ReactionResponse = await favoritesRes.json();
+        const friendsData = await friendsRes.json();
 
         if (!profileRes.ok) {
           throw new Error(profileData.message || "Impossible de charger le profil.");
@@ -129,10 +138,10 @@ export default function PublicProfilePage() {
           throw new Error(commentsData.message || "Impossible de charger les commentaires.");
         }
         if (!likesRes.ok) {
-          throw new Error(likesData?.posts ? "Impossible de charger les likes." : "Impossible de charger les likes.");
+          throw new Error("Impossible de charger les likes.");
         }
         if (!favoritesRes.ok) {
-          throw new Error(favoritesData?.posts ? "Impossible de charger les favoris." : "Impossible de charger les favoris.");
+          throw new Error("Impossible de charger les favoris.");
         }
 
         setProfile(profileData);
@@ -142,6 +151,7 @@ export default function PublicProfilePage() {
         setLikedComments(Array.isArray(likesData.comments) ? likesData.comments : []);
         setFavoritePosts(Array.isArray(favoritesData.posts) ? favoritesData.posts : []);
         setFavoriteComments(Array.isArray(favoritesData.comments) ? favoritesData.comments : []);
+        setFriends(Array.isArray(friendsData) ? friendsData : []);
       } catch (err) {
         console.error("Erreur chargement profil :", err);
         setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -335,14 +345,18 @@ export default function PublicProfilePage() {
                             </p>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-3 gap-3">
                             <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4 text-center">
                               <p className="text-2xl font-bold text-[#2f3a32]">{posts.length}</p>
                               <p className="text-sm text-[#7b847b]">Posts</p>
                             </div>
                             <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4 text-center">
+                              <p className="text-2xl font-bold text-[#2f3a32]">{friends.length}</p>
+                              <p className="text-sm text-[#7b847b]">Amis</p>
+                            </div>
+                            <div className="rounded-2xl border border-[#e3d9c8] bg-[#fffaf2] p-4 text-center">
                               <p className="text-2xl font-bold text-[#2f3a32]">{comments.length}</p>
-                              <p className="text-sm text-[#7b847b]">Commentaires</p>
+                              <p className="text-sm text-[#7b847b]">Comments</p>
                             </div>
                           </div>
                         </div>
@@ -350,56 +364,52 @@ export default function PublicProfilePage() {
 
                       <div className="rounded-[1.75rem] border border-[#e3d9c8] bg-[#fcf8f1] p-5">
                         <div className="flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            onClick={() => setActiveTab("posts")}
-                            className={`rounded-full px-4 py-2 text-sm font-medium ${
-                              activeTab === "posts"
-                                ? "bg-[#6f8467] text-white"
-                                : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50]"
-                            }`}
-                          >
-                            Posts
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setActiveTab("comments")}
-                            className={`rounded-full px-4 py-2 text-sm font-medium ${
-                              activeTab === "comments"
-                                ? "bg-[#6f8467] text-white"
-                                : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50]"
-                            }`}
-                          >
-                            Commentaires
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setActiveTab("likes")}
-                            className={`rounded-full px-4 py-2 text-sm font-medium ${
-                              activeTab === "likes"
-                                ? "bg-[#6f8467] text-white"
-                                : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50]"
-                            }`}
-                          >
-                            Likes
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setActiveTab("favorites")}
-                            className={`rounded-full px-4 py-2 text-sm font-medium ${
-                              activeTab === "favorites"
-                                ? "bg-[#6f8467] text-white"
-                                : "border border-[#d8cfbe] bg-[#fffaf2] text-[#4e5a50]"
-                            }`}
-                          >
-                            Favoris
-                          </button>
+                          {(["posts", "friends", "comments", "likes", "favorites"] as const).map((tab) => (
+                            <button
+                              key={tab}
+                              type="button"
+                              onClick={() => setActiveTab(tab)}
+                              className={`rounded-full px-4 py-2 text-sm font-medium capitalize ${
+                                activeTab === tab
+                                  ? "bg-[#4A6440] text-white"
+                                  : "border border-[#d8e3d1] bg-[#F4F8F1] text-[#4e5a50]"
+                              }`}
+                            >
+                              {tab === "comments" ? "Commentaires" : tab === "favorites" ? "Favoris" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            </button>
+                          ))}
                         </div>
 
                         <div className="mt-6 space-y-4">
+                          {activeTab === "friends" && (
+                            friends.length === 0 ? (
+                              <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">
+                                Aucun ami.
+                              </div>
+                            ) : (
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {friends.map((friend) => (
+                                  <Link
+                                    key={friend.id}
+                                    href={`/profil/${friend.id}`}
+                                    className="flex items-center gap-3 rounded-2xl border border-[#e3d9c8] bg-[#fcf8f1] p-4 transition hover:bg-[#eef3e8]"
+                                  >
+                                    <Avatar className="h-11 w-11 border border-[#d8cfbe]">
+                                      <AvatarImage src={friend.avatar || ""} alt={friend.username} />
+                                      <AvatarFallback className="bg-[#EAF1E6] text-[#4A6440]">
+                                        {friend.username.slice(0, 2).toUpperCase()}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-semibold text-[#2f3a32]">{friend.username}</p>
+                                      <p className="text-sm text-[#7b847b]">@{friend.username.toLowerCase()}</p>
+                                    </div>
+                                  </Link>
+                                ))}
+                              </div>
+                            )
+                          )}
+
                           {activeTab === "posts" &&
                             (posts.length === 0 ? (
                               <div className="rounded-3xl border border-[#e4dacb] bg-[#faf5eb] p-6 text-sm text-[#6b746c]">

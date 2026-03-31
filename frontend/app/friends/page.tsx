@@ -15,13 +15,9 @@ import {
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { getFriendRequests } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type UserItem = {
   id: number;
@@ -29,66 +25,107 @@ type UserItem = {
   email: string;
 };
 
+type FriendItem = {
+  id: number;
+  username: string;
+  avatar?: string | null;
+};
+
+type FriendRequest = {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  status: string;
+  sender: {
+    id: number;
+    username: string;
+    avatar?: string | null;
+  };
+};
+
 export default function FriendsPage() {
+  const { user, token } = useAuth();
+
   const [users, setUsers] = useState<UserItem[]>([]);
-  const [requests] = useState([{ name: "Sarah" }, { name: "Mehdi" }]);
+  const [friends, setFriends] = useState<FriendItem[]>([]);
+  const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingRequests, setLoadingRequests] = useState(true);
   const [error, setError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
   const [sentRequests, setSentRequests] = useState<number[]>([]);
   const [sendingId, setSendingId] = useState<number | null>(null);
+  const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
         setError("");
-
         const res = await fetch("http://localhost:3001/users");
         const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(
-            data.message || "Impossible de récupérer les utilisateurs."
-          );
-        }
-
-        if (Array.isArray(data)) {
-          setUsers(data);
-        } else {
-          setUsers([]);
-        }
+        if (!res.ok) throw new Error(data.message || "Impossible de récupérer les utilisateurs.");
+        setUsers(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Erreur fetch users :", err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Erreur lors du chargement des utilisateurs."
-        );
+        setError(err instanceof Error ? err.message : "Erreur lors du chargement des utilisateurs.");
       } finally {
         setLoading(false);
       }
     };
 
+    const fetchFriends = async () => {
+      if (!token) return;
+      try {
+        const res = await fetch("http://localhost:3001/friends", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok) setFriends(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Erreur fetch friends:", err);
+      }
+    };
+
     fetchUsers();
-  }, []);
+    fetchFriends();
+  }, [token]);
+
+  const fetchRequests = async () => {
+    if (!token) return;
+    try {
+      setLoadingRequests(true);
+      const res = await fetch("http://localhost:3001/friends/requests", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setRequests(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Erreur fetch requests:", err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRequests();
+  }, [token]);
+
+  const friendIds = useMemo(() => new Set(friends.map((f) => f.id)), [friends]);
 
   const filteredUsers = useMemo(() => {
     const term = search.trim().toLowerCase();
-
-    if (!term) return users;
-
-    return users.filter(
-      (user) =>
-        user.username.toLowerCase().includes(term) ||
-        user.email.toLowerCase().includes(term)
+    // exclure l'user courant et les amis déjà acceptés
+    const list = users.filter((u) => u.id !== user?.id && !friendIds.has(u.id));
+    if (!term) return list;
+    return list.filter(
+      (u) =>
+        u.username.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term)
     );
-  }, [users, search]);
+  }, [users, search, user?.id, friendIds]);
 
   const handleAddFriend = async (receiverId: number) => {
-    const token = localStorage.getItem("token");
-
     if (!token) {
       setActionMessage("You must be logged in to send a friend request.");
       return;
@@ -98,19 +135,66 @@ export default function FriendsPage() {
       setSendingId(receiverId);
       setActionMessage("");
 
-      const data = await getFriendRequests(receiverId, token);
+      const res = await fetch("http://localhost:3001/friends", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ receiverId }),
+      });
 
-      setSentRequests((prev) =>
-        prev.includes(receiverId) ? prev : [...prev, receiverId]
-      );
+      const data = await res.json();
+
+      if (!res.ok) {
+        setActionMessage(data.message || "Unable to send friend request.");
+        return;
+      }
+
+      setSentRequests((prev) => [...prev, receiverId]);
       setActionMessage(data.message || "Friend request sent.");
     } catch (err) {
-      console.error("Erreur add friend :", err);
-      setActionMessage(
-        err instanceof Error ? err.message : "Unable to send friend request."
-      );
+      setActionMessage(err instanceof Error ? err.message : "Unable to send friend request.");
     } finally {
       setSendingId(null);
+    }
+  };
+
+  const handleAccept = async (requestId: number) => {
+    if (!token) return;
+    try {
+      setProcessingRequestId(requestId);
+      const res = await fetch(`http://localhost:3001/friends/${requestId}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setRequests((prev) => prev.filter((r) => r.id !== requestId));
+        setActionMessage("Friend request accepted.");
+      }
+    } catch (err) {
+      console.error("Accept error:", err);
+    } finally {
+      setProcessingRequestId(null);
+    }
+  };
+
+  const handleDecline = async (requestId: number) => {
+    if (!token) return;
+    try {
+      setProcessingRequestId(requestId);
+      const res = await fetch(`http://localhost:3001/friends/${requestId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setRequests((prev) => prev.filter((r) => r.id !== requestId));
+        setActionMessage("Friend request declined.");
+      }
+    } catch (err) {
+      console.error("Decline error:", err);
+    } finally {
+      setProcessingRequestId(null);
     }
   };
 
@@ -132,7 +216,7 @@ export default function FriendsPage() {
               </h1>
 
               <p className="mt-3 max-w-2xl text-base leading-7 text-[#51604b]">
-                Découvre des profils, envoie des demandes d’amis et développe
+                Découvre des profils, envoie des demandes d'amis et développe
                 ton réseau dans une interface plus douce et plus lisible.
               </p>
             </div>
@@ -140,24 +224,15 @@ export default function FriendsPage() {
             <div className="mb-8 grid gap-6 lg:grid-cols-[1.6fr_0.9fr]">
               <Card className="rounded-[2rem] border-0 bg-white/92 shadow-[0_18px_50px_rgba(74,100,64,0.15)] backdrop-blur">
                 <CardContent className="p-6">
-                  <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="max-w-2xl">
-                      <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#EAF1E6] px-4 py-2 text-sm font-medium text-[#4A6440]">
-                        <Leaf className="h-4 w-4" />
-                        Community space
-                      </div>
-
-                      <h2 className="text-2xl font-bold text-[#33412c]">
-                        Connect with people
-                      </h2>
-
-                      <p className="mt-3 text-sm leading-7 text-[#60705a]">
-                        Explore user profiles, send requests, and organise your
-                        future social interactions with a cleaner visual rhythm.
-                      </p>
-                    </div>
-
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#EAF1E6] px-4 py-2 text-sm font-medium text-[#4A6440]">
+                    <Leaf className="h-4 w-4" />
+                    Community space
                   </div>
+                  <h2 className="text-2xl font-bold text-[#33412c]">Connect with people</h2>
+                  <p className="mt-3 text-sm leading-7 text-[#60705a]">
+                    Explore user profiles, send requests, and organise your
+                    future social interactions with a cleaner visual rhythm.
+                  </p>
                 </CardContent>
               </Card>
 
@@ -166,7 +241,6 @@ export default function FriendsPage() {
                   <label className="mb-3 block text-sm font-medium text-[#5f6f58]">
                     Search users
                   </label>
-
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a9983]" />
                     <input
@@ -194,6 +268,7 @@ export default function FriendsPage() {
             )}
 
             <div className="grid gap-6 lg:grid-cols-[1.6fr_0.9fr]">
+              {/* Users list */}
               <Card className="rounded-[2rem] border-0 bg-white/92 shadow-[0_18px_50px_rgba(74,100,64,0.15)] backdrop-blur">
                 <CardContent className="p-6">
                   <div className="mb-5 flex items-center justify-between">
@@ -202,15 +277,10 @@ export default function FriendsPage() {
                         <Users className="h-5 w-5" />
                       </div>
                       <div>
-                        <h2 className="text-xl font-semibold text-[#33412c]">
-                          Users
-                        </h2>
-                        <p className="text-sm text-[#71806c]">
-                          Browse and connect
-                        </p>
+                        <h2 className="text-xl font-semibold text-[#33412c]">Users</h2>
+                        <p className="text-sm text-[#71806c]">Browse and connect</p>
                       </div>
                     </div>
-
                     <span className="rounded-full bg-[#F4F8F1] px-3 py-1 text-sm text-[#5d6c56]">
                       {filteredUsers.length} total
                     </span>
@@ -226,36 +296,31 @@ export default function FriendsPage() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredUsers.map((user) => {
-                        const alreadySent = sentRequests.includes(user.id);
-                        const isSending = sendingId === user.id;
+                      {filteredUsers.map((u) => {
+                        const alreadySent = sentRequests.includes(u.id);
+                        const isSending = sendingId === u.id;
 
                         return (
                           <div
-                            key={user.id}
+                            key={u.id}
                             className="flex flex-col gap-4 rounded-[1.5rem] bg-[#fbfdf9] p-4 shadow-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
                           >
                             <div className="flex items-center gap-4">
                               <Avatar className="h-14 w-14 border border-[#d8e3d1]">
-                                <AvatarImage src="" alt={user.username} />
+                                <AvatarImage src="" alt={u.username} />
                                 <AvatarFallback className="bg-[#EAF1E6] font-bold text-[#4A6440]">
-                                  {user.username.slice(0, 2).toUpperCase()}
+                                  {u.username.slice(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
-
                               <div>
-                                <p className="text-base font-semibold text-[#33412c]">
-                                  {user.username}
-                                </p>
-                                <p className="text-sm text-[#71806c]">
-                                  {user.email}
-                                </p>
+                                <p className="text-base font-semibold text-[#33412c]">{u.username}</p>
+                                <p className="text-sm text-[#71806c]">{u.email}</p>
                               </div>
                             </div>
 
                             <div className="flex flex-wrap gap-3">
                               <Link
-                                href={`/profil/${user.id}`}
+                                href={`/profil/${u.id}`}
                                 className="inline-flex items-center gap-2 rounded-full bg-[#F4F8F1] px-4 py-2 text-sm font-medium text-[#4e5a50] transition hover:bg-[#e7f0e1]"
                               >
                                 <UserRound className="h-4 w-4" />
@@ -263,16 +328,12 @@ export default function FriendsPage() {
                               </Link>
 
                               <button
-                                onClick={() => handleAddFriend(user.id)}
+                                onClick={() => handleAddFriend(u.id)}
                                 disabled={alreadySent || isSending}
                                 className="inline-flex items-center gap-2 rounded-full bg-[#8AA678] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#79956a] disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 <UserPlus className="h-4 w-4" />
-                                {isSending
-                                  ? "Sending..."
-                                  : alreadySent
-                                  ? "Sent"
-                                  : "Add"}
+                                {isSending ? "Sending..." : alreadySent ? "Sent" : "Add"}
                               </button>
                             </div>
                           </div>
@@ -283,8 +344,10 @@ export default function FriendsPage() {
                 </CardContent>
               </Card>
 
+              {/* Sidebar */}
               <div className="space-y-6">
                 <div className="lg:sticky lg:top-24 space-y-6">
+                  {/* Friend requests */}
                   <Card className="rounded-[2rem] border-0 bg-white/92 shadow-[0_18px_50px_rgba(74,100,64,0.15)] backdrop-blur">
                     <CardContent className="p-6">
                       <div className="mb-5 flex items-center gap-3">
@@ -295,61 +358,69 @@ export default function FriendsPage() {
                           <h2 className="text-xl font-semibold text-[#33412c]">
                             Friend Requests
                           </h2>
-                          <p className="text-sm text-[#71806c]">
-                            Pending connections
-                          </p>
+                          <p className="text-sm text-[#71806c]">Pending connections</p>
                         </div>
                       </div>
 
-                      <div className="space-y-4">
-                        {requests.map((request, index) => (
-                          <div
-                            key={index}
-                            className="rounded-[1.5rem] bg-[#fbfdf9] p-4 shadow-sm"
-                          >
-                            <div className="mb-4 flex items-center gap-3">
-                              <Avatar className="h-12 w-12 border border-[#d8e3d1]">
-                                <AvatarImage src="" alt={request.name} />
-                                <AvatarFallback className="bg-[#EAF1E6] font-semibold text-[#4A6440]">
-                                  {request.name.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
+                      {loadingRequests ? (
+                        <p className="text-sm text-[#7d8b76]">Loading...</p>
+                      ) : requests.length === 0 ? (
+                        <p className="text-sm text-[#7d8b76]">No pending requests.</p>
+                      ) : (
+                        <div className="space-y-4">
+                          {requests.map((request) => {
+                            const isProcessing = processingRequestId === request.id;
+                            return (
+                              <div
+                                key={request.id}
+                                className="rounded-[1.5rem] bg-[#fbfdf9] p-4 shadow-sm"
+                              >
+                                <div className="mb-4 flex items-center gap-3">
+                                  <Avatar className="h-12 w-12 border border-[#d8e3d1]">
+                                    <AvatarImage src={request.sender.avatar || ""} alt={request.sender.username} />
+                                    <AvatarFallback className="bg-[#EAF1E6] font-semibold text-[#4A6440]">
+                                      {request.sender.username.slice(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="font-medium text-[#33412c]">{request.sender.username}</p>
+                                    <p className="text-sm text-[#71806c]">Wants to connect</p>
+                                  </div>
+                                </div>
 
-                              <div>
-                                <p className="font-medium text-[#33412c]">
-                                  {request.name}
-                                </p>
-                                <p className="text-sm text-[#71806c]">
-                                  Wants to connect
-                                </p>
+                                <div className="flex gap-3">
+                                  <button
+                                    onClick={() => handleAccept(request.id)}
+                                    disabled={isProcessing}
+                                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#8AA678] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#79956a] disabled:opacity-60"
+                                  >
+                                    <Check className="h-4 w-4" />
+                                    Accept
+                                  </button>
+
+                                  <button
+                                    onClick={() => handleDecline(request.id)}
+                                    disabled={isProcessing}
+                                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#F4F8F1] px-4 py-2 text-sm font-semibold text-[#5a665c] transition hover:bg-[#e7f0e1] disabled:opacity-60"
+                                  >
+                                    <X className="h-4 w-4" />
+                                    Decline
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-
-                            <div className="flex gap-3">
-                              <button className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#8AA678] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#79956a]">
-                                <Check className="h-4 w-4" />
-                                Accept
-                              </button>
-
-                              <button className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#F4F8F1] px-4 py-2 text-sm font-semibold text-[#5a665c] transition hover:bg-[#e7f0e1]">
-                                <X className="h-4 w-4" />
-                                Decline
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
                   <Card className="rounded-[2rem] border-0 bg-white/92 shadow-[0_18px_50px_rgba(74,100,64,0.15)] backdrop-blur">
                     <CardContent className="p-6">
-                      <p className="text-xs uppercase tracking-[0.18em] text-[#6f8467]">
+                      <p className="text-xs uppercase tracking-[0.18em] text-[#4A6440]">
                         Community
                       </p>
-                      <h3 className="mt-2 text-lg font-bold text-[#33412c]">
-                        Stay connected
-                      </h3>
+                      <h3 className="mt-2 text-lg font-bold text-[#33412c]">Stay connected</h3>
                       <p className="mt-2 text-sm leading-6 text-[#60705a]">
                         Build your network, discover people, and organise your
                         future social interactions in a calmer interface.
