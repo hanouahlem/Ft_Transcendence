@@ -32,28 +32,49 @@ Notes:
 
 ## Run Commands
 
-Docker:
+Docker lifecycle:
 
 ```bash
-make up
-make down
-make logs
-make ps
-make clean
+make up          # build and start all services
+make down        # stop services (keeps data)
+make restart     # down + up
+make logs        # follow all service logs
+make ps          # show running containers
+make clean       # stop and remove volumes (deletes DB data)
+make fclean      # clean + prune all Docker images
+make re          # fclean + up
+make db          # start only postgres in background
+```
+
+Prisma (runs inside the backend container):
+
+```bash
+make migrate          # run prisma migrate dev (create/apply migrations)
+make studio           # open Prisma Studio on http://localhost:5555
+make ms               # migrate + open Prisma Studio
+make prisma-generate  # regenerate Prisma client
+```
+
+Prisma Studio is exposed on `http://localhost:5555`.
+
+Manual (without Docker, requires local Postgres):
+
+```bash
+make frontend    # install deps + run Next.js dev server
+make backend     # install deps + run Express dev server
+```
+
+Seed the database (requires backend running on localhost:3001):
+
+```bash
+sh other/seed.sh
 ```
 
 Docker behavior:
 
 - backend and frontend use the dependencies already installed in their images
-- backend still runs `prisma generate` and `prisma migrate deploy` on startup for dev consistency
+- backend runs `prisma generate` and `prisma migrate deploy` on startup for dev consistency
 - frontend waits for backend health, and backend waits for Postgres health
-
-Manual:
-
-```bash
-cd backend && npm run dev
-cd frontend && npm run dev
-```
 
 ## Implemented API
 

@@ -8,7 +8,7 @@ type AuthContextType = {
   isAuthLoading: boolean;
   token: string | null;
   user: CurrentUser | null;
-  login: (token: string) => Promise<void>;
+  login: (token: string) => Promise<boolean>;
   logout: () => void;
 };
 
@@ -69,15 +69,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("token");
         setToken(null);
         setUser(null);
-        return;
+        return false;
       }
 
       setUser(result.data);
+      return true;
     } catch (error) {
       console.error("Erreur récupération utilisateur après login :", error);
       localStorage.removeItem("token");
       setToken(null);
       setUser(null);
+      return false;
     } finally {
       setIsAuthLoading(false);
     }

@@ -1,4 +1,5 @@
 COMPOSE = docker compose
+DB_URL = DATABASE_URL=postgresql://$$POSTGRES_USER:$$POSTGRES_PASSWORD@postgres:5432/$$POSTGRES_DB
 
 up:
 	$(COMPOSE) up --build
@@ -41,7 +42,15 @@ prisma-generate:
 	$(COMPOSE) exec backend npx prisma generate
 
 prisma-migrate:
-	$(COMPOSE) exec backend sh -c 'npx prisma migrate dev'
+	$(COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate dev'
 
 prisma-studio:
-	$(COMPOSE) exec backend npx prisma studio
+	$(COMPOSE) exec backend sh -c '$(DB_URL) npx prisma studio --browser none --port 5555'
+
+studio: prisma-studio
+
+migrate: prisma-migrate
+
+ms: migrate studio
+
+.PHONY: up down restart build logs ps clean fclean re frontend backend db prisma-generate prisma-migrate prisma-studio studio migrate

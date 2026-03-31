@@ -3,6 +3,7 @@
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
+import Navbar from "@/components/layout/Navbar";
 import {
   Bell,
   CheckCheck,
@@ -120,6 +121,7 @@ export default function NotificationsPage() {
 
   return (
     <ProtectedRoute>
+      <Navbar />
       <main className="min-h-screen bg-gradient-to-br from-[#EAF1E6] via-[#dbe7d2] to-[#9CAF88] text-[#33412c]">
         <section className="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.25),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.18),transparent_28%)]" />

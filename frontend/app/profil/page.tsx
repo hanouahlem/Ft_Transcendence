@@ -1,6 +1,7 @@
 "use client";
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import Navbar from "@/components/layout/Navbar";
 import { useAuth } from "@/context/AuthContext";
 import {
   Heart,
@@ -245,6 +246,7 @@ export default function Profil() {
 
   return (
     <ProtectedRoute>
+      <Navbar />
       <main className="min-h-screen bg-gradient-to-br from-[#EAF1E6] via-[#dbe7d2] to-[#9CAF88] text-[#33412c]">
         <section className="relative px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">

@@ -1,4 +1,5 @@
 import ctrl from "../controllers/userController.js";
+import oauth from "../controllers/oauthController.js";
 import friend from "../controllers/friendController.js";
 import notif from "../controllers/notifController.js";
 import {
@@ -19,11 +20,17 @@ import {
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
-
+import notif from '../controllers/notifController.js';
+import twoFa from '../controllers/twoFactorController.js';
 const router = Router();
 
-// user
-// user
+//oauth
+router.get("/auth/github", oauth.startGitHubOAuth);
+router.get("/auth/github/callback", oauth.handleGitHubCallback);
+router.get("/auth/42", oauth.startFortyTwoOAuth);
+router.get("/auth/42/callback", oauth.handleFortyTwoCallback);
+
+//user
 router.post("/registerUser", ctrl.registerUser);
 router.get("/users", ctrl.allUsers);
 router.post("/login", ctrl.loginUser);
@@ -69,5 +76,14 @@ router.post("/comments/:id/like", authMiddleware, likeCommentHandler);
 router.delete("/comments/:id/like", authMiddleware, unlikeCommentHandler);
 router.post("/comments/:id/favorite", authMiddleware, favoriteCommentHandler);
 router.delete("/comments/:id/favorite", authMiddleware, unfavoriteCommentHandler);
+
+router.post("/posts/:id/comments", authMiddleware, createCommentHandler);
+
+
+
+// 2FA
+router.post('/settings/auth/2fa/setup',   authMiddleware, twoFa.setupCodeTwoFa);
+router.post('/settings/auth/2fa/confirm',  authMiddleware, twoFa.checkTwoFaCode);
+router.post('/settings/auth/2fa/disable', authMiddleware, twoFa.disableTwoFA);
 
 export default router;

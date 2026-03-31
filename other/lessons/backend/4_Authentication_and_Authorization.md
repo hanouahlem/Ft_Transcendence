@@ -26,12 +26,12 @@ POST /login
 
 with:
 
-- email
+- username or email
 - password
 
 The backend then:
 
-1. finds the user by email in the database
+1. finds the user by username or email in the database
 2. compares the plain password with the stored hashed password using `bcrypt.compare(...)`
 3. if valid, creates a JWT with `jwt.sign(...)`
 4. sends the token back to the frontend
@@ -166,3 +166,9 @@ controller uses req.user to decide what is allowed
 - Why do we hash passwords instead of storing them directly?
 - What does `authMiddleware` do before calling `next()`?
 - Why do controllers use `req.user`?
+
+## Related Next Step
+
+If you want to understand how external providers such as GitHub or 42 would integrate with this same JWT flow, read:
+
+- `lessons/backend/4b_OAuth_and_External_Authentication.md`

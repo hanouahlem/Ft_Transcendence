@@ -10,13 +10,19 @@ model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
   email     String   @unique
-  password  String
+  password  String?
+  githubId  String?  @unique
+  fortyTwoId String? @unique
   avatar    String?
   bio       String?
   status    String?
   location  String?
   website   String?
   createdAt DateTime @default(now())
+  
+  twoFactorcode  String?  // secret code
+  twoFactorEnabled Boolean  @default(false)
+  twoFactorExpires DateTime?
 
   posts           Post[]
   likes           Like[]

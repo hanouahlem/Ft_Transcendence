@@ -7,10 +7,15 @@ export type RegisterData = {
   password: string;
 };
 
-export type LoginData = {
-  email: string;
-  password: string;
-};
+export type LoginData =
+  | {
+      identifier: string;
+      password: string;
+    }
+  | {
+      email: string;
+      password: string;
+    };
 
 export type CurrentUser = {
   id: number;
