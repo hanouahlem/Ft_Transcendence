@@ -7,6 +7,7 @@ import { Leaf, LockKeyhole, ArrowRight } from "lucide-react";
 import { loginUser } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
+
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
@@ -30,15 +31,18 @@ export default function LoginPage() {
     }
 
     if (result.data.token) {
-      await login(result.data.token);
-      router.push("/profil");
+      localStorage.setItem("token", result.data.token);
+      window.location.href = "/profil";
     } else {
       setError("Token not received.");
     }
+  } catch (err) {
+    // ← C'était ça qui manquait
+    setError("Erreur réseau, vérifie que le serveur est bien démarré.");
   } finally {
     setLoading(false);
   }
-};
+  };
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#f6f1e8] text-[#2f3a32]">

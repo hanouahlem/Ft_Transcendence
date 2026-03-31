@@ -3,7 +3,9 @@ import { getEnv } from "../env.js";
 export function apiKeyMiddleware(req, res, next) {
     // Routes publiques
     const publicRoutes = ["/login", "/registerUser"];
-    if (publicRoutes.includes(req.path)) return next();
+    if (req.path === "/login" || req.path === "/registerUser") {
+        return next();
+    }
 
     const token = req.headers['x-api-key'];
     if (!token) {
