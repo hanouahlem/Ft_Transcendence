@@ -549,7 +549,6 @@ export default function FeedPage() {
       setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
       await fetchPosts();
     } catch (err) {
-      console.error("Erreur commentaire :", err);
       setError(
         err instanceof Error
           ? err.message

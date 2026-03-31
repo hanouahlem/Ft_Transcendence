@@ -302,7 +302,6 @@ export const unfavoritePostHandler = async (req, res) => {
       message: "Post unfavorited successfully.",
     });
   } catch (error) {
-    console.error("Erreur unfavoritePostHandler :", error);
     return res.status(500).json({
       message: error.message || "Unable to unfavorite post.",
     });
@@ -427,4 +426,21 @@ export const unfavoriteCommentHandler = async (req, res) => {
       message: error.message || "Unable to unfavorite comment.",
     });
   }
+};
+
+
+export default {
+  createPostHandler,
+  getPostsHandler,
+  deletePostHandler,
+  likePostHandler,
+  unlikePostHandler,
+  createCommentHandler,
+  deleteCommentHandler,
+  likeCommentHandler,
+  unlikeCommentHandler,
+  favoritePostHandler,
+  unfavoritePostHandler,
+  favoriteCommentHandler,
+  unfavoriteCommentHandler,
 };

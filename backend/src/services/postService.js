@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import prisma from "../prisma.js";
+import { checkComment } from './commentChecker.js';
 
 const formatComment = (comment, currentUserId) => {
   return {
@@ -248,6 +249,11 @@ export const createComment = async (input) => {
     throw new Error("Post not found");
   }
 
+  const allowed = await checkComment(input.content);
+  
+  if (!allowed) {
+    throw new Error('Ce commentaire contient du contenu inapproprié.');
+  }
   const user = await prisma.user.findUnique({
     where: {
       id: Number(input.userId),
@@ -554,3 +560,4 @@ export const unfavoriteComment = async (commentId, userId) => {
 
   return true;
 };
+
