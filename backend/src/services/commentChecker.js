@@ -10,7 +10,7 @@ export async function checkComment(content) {
       messages: [
         {
           role: 'system',
-          content: 'You are a content moderator. Reply ONLY with "ok" if the message is acceptable, or "interdit" if it contains insults, hate speech, or inappropriate content. This includes body-shaming, abbreviated insults (fdp, ftg, tg, ntm...), and words used to demean someone (sale grosse, moche, nique...). No explanation, just one word.',        },
+          content: 'You are a content moderator. Reply ONLY with "ok" if the message is acceptable, or "interdit" if it contains insults, hate speech, or inappropriate content. This includes body-shaming, abbreviated insults (fdp, ftg, tg, ntm...), and words used to demean someone (sale grosse, moche, nique...). No explanation, just one word.', },
         {
           role: 'user',
           content: content,
