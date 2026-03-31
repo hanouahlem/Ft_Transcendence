@@ -36,7 +36,10 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#d9cfbf] bg-[#f7f1e7]/85 backdrop-blur-xl">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex items-center gap-3 transition">
+        <Link
+          href={isLoggedIn ? "/feed" : "/"}
+          className="group flex items-center gap-3 transition"
+        >
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#d7ccb8] bg-[#eef3e8] shadow-sm transition group-hover:scale-[1.03]">
             <Leaf className="h-5 w-5 text-[#6f8467]" />
           </div>
@@ -50,10 +53,12 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-2 rounded-full border border-[#ddd3c2] bg-[#fffaf2]/90 p-1.5 shadow-[0_8px_30px_rgba(90,107,86,0.08)]">
-          <Link href={isLoggedIn ? "/feed" : "/"} className={navLinkClass(isLoggedIn ? "/feed" : "/")}>
-            <House className="h-4 w-4" />
-            <span className="hidden sm:inline">Home</span>
-          </Link>
+          {!isLoggedIn && (
+            <Link href="/" className={navLinkClass("/")}>
+              <House className="h-4 w-4" />
+              <span className="hidden sm:inline">Home</span>
+            </Link>
+          )}
 
           {isLoggedIn ? (
             <>

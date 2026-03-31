@@ -36,12 +36,12 @@ export default function HomePage() {
   return (
     <>
     <Navbar />
-    <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
+    <main className="min-h-screen bg-gradient-to-br from-[#EAF1E6] via-[#dbe7d2] to-[#9CAF88] text-[#33412c]">
       <section className="relative overflow-hidden">
         {/* Background decoration */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.22),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(168,179,138,0.22),transparent_30%)]" />
-        <div className="absolute left-[-80px] top-24 h-72 w-72 rounded-full bg-[#dbe4d3]/40 blur-3xl" />
-        <div className="absolute bottom-0 right-[-60px] h-80 w-80 rounded-full bg-[#d8cfb8]/50 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(74,100,64,0.20),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(156,175,136,0.28),transparent_30%)]" />
+        <div className="absolute left-[-80px] top-24 h-72 w-72 rounded-full bg-[#EAF1E6]/40 blur-3xl" />
+        <div className="absolute bottom-0 right-[-60px] h-80 w-80 rounded-full bg-[#c8dbbf]/50 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-6 pb-14 pt-28 lg:px-8 lg:pt-32">
           <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -51,11 +51,11 @@ export default function HomePage() {
 
               <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
                 A softer way to{" "}
-                <span className="text-[#6f8467]">share stories</span>, connect
+                <span className="text-[#4A6440]">share stories</span>, connect
                 with people, and grow a meaningful blog community
               </h1>
 
-              <p className="mt-6 max-w-xl text-base leading-8 text-[#5c665d] sm:text-lg">
+              <p className="mt-6 max-w-xl text-base leading-8 text-[#4f5d49] sm:text-lg">
                 Publish your thoughts, capture moments, and explore a curated
                 social feed in a warm, elegant interface inspired by modern
                 editorial platforms and lifestyle communities.
@@ -65,7 +65,7 @@ export default function HomePage() {
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-full bg-[#6f8467] px-7 text-white hover:bg-[#5f7358]"
+                  className="rounded-full bg-[#4A6440] px-7 text-white hover:bg-[#3a5230]"
                 >
                   <Link href="/register">
                     Start your journey
@@ -77,55 +77,55 @@ export default function HomePage() {
                   asChild
                   size="lg"
                   variant="outline"
-                  className="rounded-full border-[#cfc4af] bg-[#fffaf2] px-7 text-[#384338] hover:bg-[#f3ecdf]"
+                  className="rounded-full border-0 bg-white/80 px-7 text-[#33412c] shadow-md backdrop-blur hover:bg-white/95"
                 >
                   <Link href="/login">Login</Link>
                 </Button>
               </div>
 
               <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                <Card className="border-[#ddd3c2] bg-[#fffaf2] shadow-sm">
+                <Card className="border-0 bg-white/90 shadow-md backdrop-blur">
                   <CardContent className="flex items-start gap-3 p-4">
-                    <div className="rounded-xl bg-[#e8efe2] p-2 text-[#6f8467]">
+                    <div className="rounded-xl bg-[#EAF1E6] p-2 text-[#4A6440]">
                       <Users className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-[#2f3a32]">
+                      <p className="text-sm font-semibold text-[#33412c]">
                         Community
                       </p>
-                      <p className="text-xs leading-5 text-[#6b746c]">
+                      <p className="text-xs leading-5 text-[#4f5d49]">
                         Follow creators and build genuine connections
                       </p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="border-[#ddd3c2] bg-[#fffaf2] shadow-sm">
+                <Card className="border-0 bg-white/90 shadow-md backdrop-blur">
                   <CardContent className="flex items-start gap-3 p-4">
-                    <div className="rounded-xl bg-[#f1ebdd] p-2 text-[#8a7a5d]">
+                    <div className="rounded-xl bg-[#EAF1E6] p-2 text-[#4A6440]">
                       <Heart className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-[#2f3a32]">
+                      <p className="text-sm font-semibold text-[#33412c]">
                         Reactions
                       </p>
-                      <p className="text-xs leading-5 text-[#6b746c]">
+                      <p className="text-xs leading-5 text-[#4f5d49]">
                         Engage through likes, comments and saved posts
                       </p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="border-[#ddd3c2] bg-[#fffaf2] shadow-sm">
+                <Card className="border-0 bg-white/90 shadow-md backdrop-blur">
                   <CardContent className="flex items-start gap-3 p-4">
-                    <div className="rounded-xl bg-[#e8efe2] p-2 text-[#6f8467]">
+                    <div className="rounded-xl bg-[#EAF1E6] p-2 text-[#4A6440]">
                       <Bell className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-[#2f3a32]">
+                      <p className="text-sm font-semibold text-[#33412c]">
                         Updates
                       </p>
-                      <p className="text-xs leading-5 text-[#6b746c]">
+                      <p className="text-xs leading-5 text-[#4f5d49]">
                         Stay in touch with activity and new stories
                       </p>
                     </div>
@@ -138,35 +138,35 @@ export default function HomePage() {
             <div className="relative mx-auto w-full max-w-2xl">
               <div className="grid gap-4 md:grid-cols-[1.15fr_0.85fr]">
                 {/* Main featured post */}
-                <Card className="overflow-hidden border-[#d8cfbe] bg-[#fffaf4] shadow-[0_20px_60px_rgba(92,108,91,0.12)]">
-                  <div className="h-56 bg-gradient-to-br from-[#b8c7aa] via-[#d8cfb8] to-[#8ba17d]" />
+                <Card className="overflow-hidden border-0 bg-white/95 shadow-[0_20px_60px_rgba(74,100,64,0.14)] backdrop-blur">
+                  <div className="h-56 bg-gradient-to-br from-[#a8c49a] via-[#c4d9b8] to-[#7B9270]" />
                   <CardContent className="space-y-5 p-5">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 border border-[#d9d1c2]">
+                      <Avatar className="h-10 w-10 border-2 border-[#d8e3d1]">
                         <AvatarImage src="https://i.pravatar.cc/100?img=32" />
-                        <AvatarFallback>EM</AvatarFallback>
+                        <AvatarFallback className="bg-[#EAF1E6] text-[#4A6440]">EM</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-semibold text-[#2f3a32]">
+                        <p className="text-sm font-semibold text-[#33412c]">
                           @emma.journal
                         </p>
-                        <p className="text-xs text-[#7b847b]">3 min ago</p>
+                        <p className="text-xs text-[#7a8874]">3 min ago</p>
                       </div>
                     </div>
 
                     <div>
-                      <h2 className="text-lg font-semibold leading-snug text-[#2f3a32]">
+                      <h2 className="text-lg font-semibold leading-snug text-[#33412c]">
                         Creating a slower, warmer social experience for modern
                         storytelling
                       </h2>
-                      <p className="mt-2 text-sm leading-6 text-[#667066]">
+                      <p className="mt-2 text-sm leading-6 text-[#4f5d49]">
                         Thoughtful design, quiet tones, and elegant content
                         cards help users focus on stories, people, and everyday
                         inspiration.
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-5 text-sm text-[#6d756d]">
+                    <div className="flex items-center gap-5 text-sm text-[#6B7C5D]">
                       <div className="flex items-center gap-2">
                         <Heart className="h-4 w-4" />
                         <span>864</span>
@@ -185,9 +185,9 @@ export default function HomePage() {
 
                 {/* Side blocks */}
                 <div className="space-y-4">
-                  <Card className="border-[#d8cfbe] bg-[#fffaf4] shadow-sm">
+                  <Card className="border-0 bg-white/90 shadow-md backdrop-blur">
                     <CardContent className="p-5">
-                      <p className="mb-4 text-sm font-semibold text-[#2f3a32]">
+                      <p className="mb-4 text-sm font-semibold text-[#33412c]">
                         Featured creators
                       </p>
 
@@ -214,17 +214,17 @@ export default function HomePage() {
                             className="flex items-center justify-between"
                           >
                             <div className="flex items-center gap-3">
-                              <Avatar className="h-9 w-9 border border-[#d9d1c2]">
-                                <AvatarFallback className="bg-[#eef3ea] text-[#60735d]">
+                              <Avatar className="h-9 w-9">
+                                <AvatarFallback className="bg-[#EAF1E6] text-[#4A6440]">
                                   {user.fallback}
                                 </AvatarFallback>
                               </Avatar>
 
                               <div>
-                                <p className="text-sm font-medium text-[#2f3a32]">
+                                <p className="text-sm font-medium text-[#33412c]">
                                   @{user.name}
                                 </p>
-                                <p className="text-xs text-[#7b847b]">
+                                <p className="text-xs text-[#7a8874]">
                                   {user.role}
                                 </p>
                               </div>
@@ -233,7 +233,7 @@ export default function HomePage() {
                             <Button
                               variant="secondary"
                               size="sm"
-                              className="rounded-full bg-[#eef3ea] text-[#587056] hover:bg-[#e2eadb]"
+                              className="rounded-full bg-[#EAF1E6] text-[#4A6440] hover:bg-[#d9e6d0]"
                             >
                               Follow
                             </Button>
@@ -243,38 +243,38 @@ export default function HomePage() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-[#d8cfbe] bg-[#fffaf4] shadow-sm">
+                  <Card className="border-0 bg-white/90 shadow-md backdrop-blur">
                     <CardContent className="p-5">
-                      <p className="mb-4 text-sm font-semibold text-[#2f3a32]">
+                      <p className="mb-4 text-sm font-semibold text-[#33412c]">
                         This week’s mood
                       </p>
 
                       <div className="space-y-3">
-                        <div className="rounded-2xl border border-[#e3d9c8] bg-[#faf4ea] p-3">
-                          <div className="mb-2 flex items-center gap-2 text-[#6f8467]">
+                        <div className="rounded-2xl border border-[#cfe0c4] bg-[#F4F8F1] p-3">
+                          <div className="mb-2 flex items-center gap-2 text-[#4A6440]">
                             <Leaf className="h-4 w-4" />
                             <p className="text-sm font-medium">#SlowLiving</p>
                           </div>
-                          <p className="text-xs text-[#6d756d]">
+                          <p className="text-xs text-[#5a6b54]">
                             Gentle routines, mindful sharing, and calm visual
                             storytelling
                           </p>
                         </div>
 
-                        <div className="rounded-2xl border border-[#e3d9c8] bg-[#faf4ea] p-3">
-                          <p className="text-sm font-medium text-[#2f3a32]">
+                        <div className="rounded-2xl border border-[#cfe0c4] bg-[#F4F8F1] p-3">
+                          <p className="text-sm font-medium text-[#33412c]">
                             #NaturePalette
                           </p>
-                          <p className="text-xs text-[#6d756d]">
+                          <p className="text-xs text-[#5a6b54]">
                             Sage, sand, olive and warm neutral tones
                           </p>
                         </div>
 
-                        <div className="rounded-2xl border border-[#e3d9c8] bg-[#faf4ea] p-3">
-                          <p className="text-sm font-medium text-[#2f3a32]">
+                        <div className="rounded-2xl border border-[#cfe0c4] bg-[#F4F8F1] p-3">
+                          <p className="text-sm font-medium text-[#33412c]">
                             #PersonalStories
                           </p>
-                          <p className="text-xs text-[#6d756d]">
+                          <p className="text-xs text-[#5a6b54]">
                             Everyday moments shaped into beautiful narratives
                           </p>
                         </div>
@@ -288,45 +288,45 @@ export default function HomePage() {
 
           {/* Bottom section */}
           <div className="mt-16 grid gap-6 md:grid-cols-3">
-            <Card className="border-[#ddd3c2] bg-[#fffaf4] shadow-sm">
+            <Card className="border-0 bg-white/90 shadow-md backdrop-blur">
               <CardContent className="p-6">
-                <p className="text-sm font-semibold text-[#6f8467]">
+                <p className="text-sm font-semibold text-[#4A6440]">
                   Elegant content
                 </p>
-                <h3 className="mt-2 text-xl font-semibold text-[#2f3a32]">
+                <h3 className="mt-2 text-xl font-semibold text-[#33412c]">
                   Share visual posts and thoughtful writing
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[#667066]">
+                <p className="mt-3 text-sm leading-6 text-[#4f5d49]">
                   A homepage designed to feel clean, breathable, and editorial,
                   while still keeping the social energy of a modern platform.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-[#ddd3c2] bg-[#fffaf4] shadow-sm">
+            <Card className="border-0 bg-white/90 shadow-md backdrop-blur">
               <CardContent className="p-6">
-                <p className="text-sm font-semibold text-[#8a7a5d]">
+                <p className="text-sm font-semibold text-[#4A6440]">
                   Soft interactions
                 </p>
-                <h3 className="mt-2 text-xl font-semibold text-[#2f3a32]">
+                <h3 className="mt-2 text-xl font-semibold text-[#33412c]">
                   Designed for calm engagement
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[#667066]">
+                <p className="mt-3 text-sm leading-6 text-[#4f5d49]">
                   Likes, comments, saves, and notifications are still present,
                   but wrapped in a quieter and more refined interface.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-[#ddd3c2] bg-[#fffaf4] shadow-sm">
+            <Card className="border-0 bg-white/90 shadow-md backdrop-blur">
               <CardContent className="p-6">
-                <p className="text-sm font-semibold text-[#6f8467]">
+                <p className="text-sm font-semibold text-[#4A6440]">
                   Lifestyle aesthetic
                 </p>
-                <h3 className="mt-2 text-xl font-semibold text-[#2f3a32]">
+                <h3 className="mt-2 text-xl font-semibold text-[#33412c]">
                   A blog universe with a warmer identity
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[#667066]">
+                <p className="mt-3 text-sm leading-6 text-[#4f5d49]">
                   This direction works well if you want something between a
                   social app, a journal platform, and an aesthetic content hub.
                 </p>
