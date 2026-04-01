@@ -1,0 +1,47 @@
+{
+  "name": "ft_devcontainer",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
+  "workspaceFolder": "${localWorkspaceFolder}",
+  "runArgs": ["--init", "--name", "ft_devcontainer"],
+  "privileged": true,
+  "remoteUser": "node",
+  "updateRemoteUserUID": false,
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": "true"
+    }
+  },
+  "containerEnv": {
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+  },
+  "initializeCommand": "bash .devcontainer/ensure-mounts.sh",
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.codex,target=/home/node/.codex,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.config/opencode,target=/home/node/.config/opencode,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.opencode,target=/home/node/.opencode,type=bind,consistency=cached",
+    "source=transcendance-backend-node-modules,target=${localWorkspaceFolder}/backend/node_modules,type=volume",
+    "source=transcendance-frontend-node-modules,target=${localWorkspaceFolder}/frontend/node_modules,type=volume"
+  ],
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+      },
+      "extensions": [
+        "Prisma.prisma",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+      ],
+    },
+  },
+}

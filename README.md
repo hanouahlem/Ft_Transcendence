@@ -44,14 +44,15 @@ make db
 - local backend env lives in `backend/.env`
 - backend template lives in `backend/.env.example`
 - optional frontend template lives in `frontend/.env.local.example`
-- detailed setup notes live in `DEV_DOCS.md`
+- detailed setup notes live in `other/DEV_DOCS.md`
 
 ## Main Docs
 
-- `DEV_DOCS.md`: environment setup and run modes
+- `other/DEV_DOCS.md`: environment setup and run modes
 - `other/transcendance.md`: 42 subject and requirements
 - `other/lessons/`: team learning notes
 - `AGENTS.md`: project-specific working conventions
+- `.devcontainer/`: coding container for Claude Code, Codex, and OpenCode
 
 ---
 # Notes
