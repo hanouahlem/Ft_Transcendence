@@ -44,6 +44,19 @@ export async function addFriend(req, res) {
             }
         });
 
+        const sender = await prisma.user.findUnique({
+            where: { id: senderId },
+            select: { username: true }
+        });
+
+        await prisma.notification.create({
+            data: {
+                userId: receiverId,
+                content: `${sender?.username ?? "Someone"} sent you a friend request.`,
+                read: false,
+            }
+        });
+
         return res.status(201).json({
             message: "Friend request sent",
             request
@@ -185,4 +198,34 @@ export async function getFriendRequests(req, res) {
     }
 }
 
-export default { addFriend, getFriends, acceptFriend, deleteFriend, getFriendRequests };
+export async function getUserFriends(req, res) {
+    try {
+        const targetUserId = parseInt(req.params.id);
+
+        if (Number.isNaN(targetUserId) || targetUserId < 1) {
+            return res.status(400).json({ message: "Invalid user id." });
+        }
+
+        const friends = await prisma.friends.findMany({
+            where: {
+                status: "accepted",
+                OR: [{ senderId: targetUserId }, { receiverId: targetUserId }],
+            },
+            include: {
+                sender: { select: { id: true, username: true, avatar: true } },
+                receiver: { select: { id: true, username: true, avatar: true } },
+            },
+        });
+
+        const friendsList = friends.map((f) =>
+            f.senderId === targetUserId ? f.receiver : f.sender
+        );
+
+        return res.status(200).json(friendsList);
+    } catch (error) {
+        console.error("getUserFriends error:", error);
+        return res.status(500).json({ message: "Failed to get user friends" });
+    }
+}
+
+export default { addFriend, getFriends, getUserFriends, acceptFriend, deleteFriend, getFriendRequests };
