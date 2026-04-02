@@ -13,6 +13,7 @@ import {
   Plus,
   Users,
   Image as ImageIcon,
+  FileText,
   X,
   Trash2,
   Sparkles,
@@ -171,11 +172,23 @@ function PostCard({
 
         {post.media.length > 0 && (
           <div className="overflow-hidden border-y border-[#edf2e9]">
-            <img
-              src={post.media[0]}
-              alt="Post media"
-              className="max-h-[560px] w-full object-cover"
-            />
+            {/\.(txt|md)$/i.test(post.media[0]) ? (
+              <a
+                href={post.media[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-5 py-4 text-sm text-[#4A6440] hover:underline"
+              >
+                <FileText className="h-5 w-5" />
+                Voir le document
+              </a>
+            ) : (
+              <img
+                src={post.media[0]}
+                alt="Post media"
+                className="max-h-[560px] w-full object-cover"
+              />
+            )}
           </div>
         )}
 
@@ -278,11 +291,23 @@ function PostCard({
 
                     {comment.media.length > 0 && (
                       <div className="mt-3 overflow-hidden rounded-2xl border border-[#dfe8d7] bg-[#f7faf4]">
-                        <img
-                          src={comment.media[0]}
-                          alt="Comment media"
-                          className="max-h-[280px] w-full object-cover"
-                        />
+                        {/\.(txt|md)$/i.test(comment.media[0]) ? (
+                          <a
+                            href={comment.media[0]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 px-4 py-3 text-sm text-[#4A6440] hover:underline"
+                          >
+                            <FileText className="h-5 w-5" />
+                            Voir le document
+                          </a>
+                        ) : (
+                          <img
+                            src={comment.media[0]}
+                            alt="Comment media"
+                            className="max-h-[280px] w-full object-cover"
+                          />
+                        )}
                       </div>
                     )}
 
@@ -382,6 +407,7 @@ export default function FeedPage() {
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
   const [commentingPostId, setCommentingPostId] = useState<number | null>(null);
 
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
@@ -568,7 +594,21 @@ export default function FeedPage() {
 
     if (!file) return;
 
+    const ALLOWED_MIME = ["image/jpeg", "image/png", "image/gif", "text/plain", "text/markdown"];
+    const MAX_SIZE = 20 * 1024 * 1024;
+
+    if (!ALLOWED_MIME.includes(file.type)) {
+      setError("Type de fichier non supporté. Utilise JPG, PNG, WEBP, GIF, TXT ou MD.");
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      setError("Le fichier dépasse la limite de 20 MB.");
+      return;
+    }
+
+    setError("");
     setSelectedFile(file);
+    setUploadProgress(0);
 
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
@@ -602,6 +642,7 @@ export default function FeedPage() {
       setPublishing(true);
       setMessage("");
       setError("");
+      setUploadProgress(0);
 
       const formData = new FormData();
       formData.append("content", postContent);
@@ -610,22 +651,27 @@ export default function FeedPage() {
         formData.append("media", selectedFile);
       }
 
-      const res = await fetch("http://localhost:3001/posts", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:3001/posts");
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setUploadProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        };
+        xhr.onload = () => {
+          const data = JSON.parse(xhr.responseText);
+          if (xhr.status >= 400) reject(new Error(data.message || "Impossible de publier le post."));
+          else resolve();
+        };
+        xhr.onerror = () => reject(new Error("Erreur réseau lors de l'upload."));
+        xhr.send(formData);
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Impossible de publier le post.");
-      }
 
       setPostContent("");
       handleRemoveFile();
+      setUploadProgress(0);
       setCreateOpen(false);
       setMessage("Post publié avec succès.");
 
@@ -1184,18 +1230,40 @@ const handleAddFriend = async (receiverId: number) => {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/gif,text/plain,text/markdown"
                     onChange={handleFileChange}
                     className="hidden"
                   />
 
-                  {previewUrl && (
+                  {selectedFile && uploadProgress > 0 && uploadProgress < 100 && (
+                    <div className="mt-4">
+                      <div className="mb-1 flex justify-between text-xs text-[#6B7C5D]">
+                        <span>Upload en cours...</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-[#dbe7d2]">
+                        <div
+                          className="h-2 rounded-full bg-[#8AA678] transition-all duration-200"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {previewUrl && selectedFile && (
                     <div className="relative mt-4 overflow-hidden rounded-3xl border border-[#d8e3d1] bg-[#f7faf4]">
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="max-h-[360px] w-full object-cover"
-                      />
+                      {selectedFile.type.startsWith("image/") ? (
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
+                          className="max-h-[360px] w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-3 px-5 py-4">
+                          <FileText className="h-8 w-8 text-[#8AA678]" />
+                          <span className="text-sm text-[#2f3a32]">{selectedFile.name}</span>
+                        </div>
+                      )}
 
                       <button
                         type="button"

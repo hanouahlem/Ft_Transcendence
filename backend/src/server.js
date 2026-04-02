@@ -1,8 +1,10 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
+import { authMiddleware } from "./middleware/auth.js";
 
 try {
   validateEnv();
@@ -19,7 +21,14 @@ app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.use("/uploads", express.static(path.resolve("uploads")));
+app.get("/uploads/:filename", authMiddleware, (req, res) => {
+  const filename = path.basename(req.params.filename);
+  const filePath = path.resolve("uploads", filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ message: "File not found" });
+  }
+  res.sendFile(filePath);
+});
 
 app.use("/", route);
 
