@@ -142,6 +142,72 @@
   }
 }
 
+@layer components {
+  .archive-page {
+    background-color: var(--color-field-stage);
+    background-image:
+      linear-gradient(rgba(26, 26, 26, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26, 26, 26, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: var(--color-field-ink);
+    font-family: var(--font-field-display-source);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .archive-paper {
+    background: var(--color-field-paper);
+    box-shadow: 8px 12px 30px rgba(26, 26, 26, 0.12);
+  }
+
+  .archive-tape {
+    opacity: 0.85;
+    mix-blend-mode: multiply;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .archive-thread {
+    position: absolute;
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    opacity: 0.5;
+    background: repeating-linear-gradient(
+      to bottom,
+      #3a698a 0,
+      #3a698a 10px,
+      transparent 10px,
+      transparent 20px
+    );
+  }
+
+  .archive-lines {
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      rgba(90, 86, 76, 0.2) 28px
+    );
+    line-height: 28px;
+  }
+
+  .archive-input {
+    color: var(--color-field-ink);
+    outline: none;
+  }
+
+  .archive-input::placeholder {
+    color: rgb(90 86 76 / 0.55);
+  }
+
+  .archive-input:focus {
+    box-shadow: inset 0 -2px 0 rgba(255, 74, 28, 0.4);
+  }
+
+  .archive-photo {
+    filter: grayscale(100%) contrast(1.18) sepia(0.22);
+  }
+}
+
 @keyframes ft-shape-spin {
   from {
     transform: rotate(0deg);
