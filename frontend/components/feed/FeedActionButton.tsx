@@ -1,0 +1,85 @@
+import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type AccentTone = "blue" | "green" | "orange";
+
+type FeedActionButtonProps = {
+  icon: LucideIcon;
+  label: string;
+  count: number;
+  accent: AccentTone;
+  active?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+};
+
+const BUTTON_STYLES: Record<
+  AccentTone,
+  { idle: string; active: string; iconActive: string }
+> = {
+  blue: {
+    idle: "text-field-accent-blue hover:bg-field-accent-blue hover:text-field-paper",
+    active: "bg-field-accent-blue text-field-paper",
+    iconActive: "fill-current text-field-paper",
+  },
+  green: {
+    idle: "text-field-accent-green hover:bg-field-accent-green hover:text-field-paper",
+    active: "bg-field-accent-green text-field-paper",
+    iconActive: "fill-current text-field-paper",
+  },
+  orange: {
+    idle: "text-field-accent hover:bg-field-accent hover:text-field-paper",
+    active: "bg-field-accent text-field-paper",
+    iconActive: "fill-current text-field-paper",
+  },
+};
+
+export function FeedActionButton({
+  icon: Icon,
+  label,
+  count,
+  accent,
+  active = false,
+  disabled = false,
+  onClick,
+}: FeedActionButtonProps) {
+  const palette = BUTTON_STYLES[accent];
+  const content = (
+    <>
+      <Icon
+        className={cn("h-4.5 w-4.5", active && palette.iconActive)}
+        strokeWidth={1.9}
+      />
+      <span>{count}</span>
+    </>
+  );
+
+  if (!onClick) {
+    return (
+      <div
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-field-mono text-sm transition-all duration-200",
+          active ? palette.active : `${palette.idle} bg-transparent`
+        )}
+        title={label}
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-field-mono text-sm transition-all duration-200 disabled:cursor-not-allowed",
+        active ? palette.active : palette.idle
+      )}
+      title={label}
+    >
+      {content}
+    </button>
+  );
+}
