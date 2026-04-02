@@ -21,6 +21,7 @@ export type CurrentUser = {
   id: number;
   username: string;
   email: string;
+  avatar?: string | null;
 };
 
 export type ApiSuccess<T> = {
