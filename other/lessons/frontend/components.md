@@ -10,7 +10,7 @@ The feed route is split into:
 
 - one page file that owns data fetching and mutations
 - archive-level reusable layout components
-- feed-specific components for posts, composer, and modal
+- feed-specific components for posts, composer, and dialogs
 
 Current files:
 
@@ -22,11 +22,15 @@ Current files:
 - `frontend/components/archive/NatureCanvas.tsx`
 - `frontend/components/archive/archiveUtils.ts`
 - `frontend/components/feed/FeedActionButton.tsx`
-- `frontend/components/feed/FeedComposerCard.tsx`
+- `frontend/components/feed/FeedCommentCard.tsx`
+- `frontend/components/feed/FeedCommentComposer.tsx`
+- `frontend/components/feed/NewPostCard.tsx`
+- `frontend/components/feed/FeedPostDialog.tsx`
 - `frontend/components/feed/FeedPostCard.tsx`
-- `frontend/components/feed/NewPostModal.tsx`
+- `frontend/components/feed/NewPostDialog.tsx`
 - `frontend/components/feed/feedUtils.ts`
 - `frontend/components/feed/types.ts`
+- `frontend/components/ui/dialog.tsx`
 
 The important rule is:
 
@@ -42,16 +46,13 @@ Real code:
   onLogout={logout}
 />
 
-<FeedComposerCard
-  user={user}
+<NewPostCard
   content={postContent}
   previewUrl={previewUrl}
   selectedFileName={selectedFile?.name || ""}
   publishing={publishing}
-  fileInputRef={fileInputRef}
   onPublish={handlePublish}
   onContentChange={setPostContent}
-  onFileChange={handleFileChange}
   onOpenFilePicker={handleOpenFilePicker}
   onRemoveFile={handleRemoveFile}
 />
@@ -78,6 +79,7 @@ const [selectedFile, setSelectedFile] = useState<File | null>(null);
 const [previewUrl, setPreviewUrl] = useState("");
 const [createOpen, setCreateOpen] = useState(false);
 const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
+const [activePostId, setActivePostId] = useState<number | null>(null);
 ```
 
 Important derived data:
@@ -101,6 +103,7 @@ Explain this during evaluation:
 - the right rail does not fetch its own data
 - it reuses already-fetched post authors to build suggestions
 - this keeps the number of requests lower and the page logic centralized
+- the page also controls both dialogs: `createOpen` for publishing and `activePostId` for opened post details
 
 API base:
 
@@ -350,6 +353,47 @@ Used by:
 
 These components understand feed data like posts, comments, likes, and publishing.
 
+### `frontend/components/ui/dialog.tsx`
+
+Purpose:
+
+- wrap the Ark UI dialog primitive in one local reusable API
+
+Why we use it:
+
+- the repo already follows a shadcn-style pattern with local UI wrappers
+- dialogs need focus trapping, escape handling, overlay behavior, and accessibility
+- this is better than hand-writing modal behavior with plain `<div>` elements
+- Ark is now the primitive layer for dialogs, while the app still imports our local wrapper
+
+Important evaluation sentence:
+
+- the app still imports `@/components/ui/dialog`
+- only the hidden implementation backing changed from Radix to Ark
+
+Real code:
+
+```tsx
+import { Dialog as ArkDialog, Portal } from "@ark-ui/react";
+
+function DialogContent({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof ArkDialog.Content>) {
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      <ArkDialog.Positioner className="fixed inset-0 ...">
+        <ArkDialog.Content className={cn(...)} {...props}>
+          {children}
+        </ArkDialog.Content>
+      </ArkDialog.Positioner>
+    </DialogPortal>
+  );
+}
+```
+
 ### `FeedActionButton.tsx`
 
 Purpose:
@@ -377,7 +421,7 @@ Why:
 - like and favorite are interactive
 - one component covers both cases
 
-### `FeedComposerCard.tsx`
+### `NewPostCard.tsx`
 
 Purpose:
 
@@ -389,13 +433,11 @@ Data it uses:
 - preview URL
 - selected file name
 - publishing status
-- a file input ref
 
 Actions it receives:
 
 - `onPublish`
 - `onContentChange`
-- `onFileChange`
 - `onOpenFilePicker`
 - `onRemoveFile`
 
@@ -403,6 +445,7 @@ Key detail:
 
 - this component does not upload anything itself
 - it only exposes user actions back to the page
+- the hidden file input now lives once in `frontend/app/feed/page.tsx`
 
 That means the page still controls:
 
@@ -410,54 +453,138 @@ That means the page still controls:
 - when preview URLs are created/revoked
 - when the actual `POST /posts` request happens
 
-### `NewPostModal.tsx`
+### `NewPostDialog.tsx`
 
 Purpose:
 
-- render the modal version of the same publishing flow
+- render the dialog version of the same publishing flow
 
-Important difference from `FeedComposerCard`:
+Important difference from `NewPostCard`:
 
-- the modal adds `open` and `onClose`
-- it includes the current user avatar and header
-- it returns `null` when `open` is false
+- the dialog adds `open` and `onClose`
+- it is rendered through the shared dialog wrapper
+- it reuses the exact same `NewPostCard` UI instead of duplicating a second file input
 
 Real code:
 
 ```tsx
-if (!open) {
-  return null;
-}
+<Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+  <DialogContent className="overflow-visible p-0">
 ```
 
 Explain this clearly:
 
-- the modal is controlled by the page
+- the dialog is controlled by the page
 - it does not own the text/file state
-- the same data can be reused between the inline composer and modal if we want to evolve the design later
+- the same data can be reused between the inline composer and dialog if we want to evolve the design later
+- accessibility behavior now comes from Ark instead of custom modal markup
+
+### `FeedPostDialog.tsx`
+
+Purpose:
+
+- render the full post detail view in a dialog
+- orchestrate the comment list and reply input
+
+Why it exists:
+
+- the feed timeline should stay compact
+- comments should not be expanded under every post in the main feed
+- clicking the post body opens this dialog
+- clicking the comment button opens this dialog and focuses the reply input
+
+Data it uses:
+
+- `post: FeedPost | null`
+- `currentUserId`
+- `commentValue`
+- all post/comment mutation callbacks
+- all loading flags for post and comment actions
+
+Important architecture point:
+
+- `FeedPostDialog` coordinates comment components
+- `page.tsx` still owns comment state and backend requests
+
+So the split is:
+
+- `FeedPostCard` = preview in the timeline
+- `FeedPostDialog` = detailed interaction surface for comments
+
+### `FeedCommentCard.tsx`
+
+Purpose:
+
+- render one archived comment inside the post dialog
+
+Data it uses:
+
+- `comment: FeedComment`
+- `currentUserId`
+- `index`
+- comment-level mutation callbacks
+- comment-level loading flags
+
+What it renders:
+
+- comment author and timestamp
+- comment body
+- optional comment media
+- delete action for the comment owner
+- like and favorite actions for the comment
+
+Why it is separate:
+
+- comment markup was making `FeedPostDialog` too large
+- a comment is now a clear UI unit with its own actions
+- if we reuse this archive comment style later, extraction is already done
+
+### `FeedCommentComposer.tsx`
+
+Purpose:
+
+- render the reply textarea and submit button for a post dialog
+
+Data it uses:
+
+- `postId`
+- `value`
+- `submitting`
+- `onChange(postId, value)`
+- `onSubmit(postId)`
+
+Important technical detail:
+
+- it uses `forwardRef`
+- this lets `FeedPostDialog` keep programmatic focus control for the textarea
+
+Why it is separate:
+
+- the reply form has its own role and focus behavior
+- extracting it keeps dialog orchestration readable
+- state still stays in `page.tsx`, so we improved structure without moving business logic
 
 ### `FeedPostCard.tsx`
 
 Purpose:
 
-- render one post, its actions, its comments, and the reply box under it
+- render one post preview inside the timeline
 
-This is the largest feed component because it contains:
+This component contains:
 
 - multiple visual card variants
-- a nested `CommentNote` renderer
-- the reply textarea
-- like/favorite/delete actions for both posts and comments
+- clickable body/content area
+- like/favorite/delete actions for the post
+- a comment action that opens the post dialog
 
 Props:
 
 - `post`
 - `currentUserId`
 - `variantIndex`
-- `showConnector`
-- all mutation callbacks
-- all loading flags
-- the current comment draft for this post
+- `onOpenPost`
+- post-level mutation callbacks
+- post-level loading flags
 
 Why `variantIndex` exists:
 
@@ -472,14 +599,10 @@ const variantKey = variantIndex % POST_VARIANTS.length;
 const variant = POST_VARIANTS[variantKey];
 ```
 
-Why `showConnector` exists:
-
-- it decides whether to draw the dashed line between this post and the next one
-
 Important evaluation point:
 
 - `FeedPostCard` still does not own the real backend mutations
-- it receives callbacks like `onToggleLike(post)` and `onAddComment(post.id)`
+- it receives callbacks like `onToggleLike(post)` and `onOpenPost(post.id)`
 - the page remains the source of truth
 
 ### `feedUtils.ts`
@@ -513,24 +636,36 @@ Why this is separate:
 
 ### Publish a post
 
-1. user types in `FeedComposerCard` or `NewPostModal`
+1. user types in `NewPostCard` or `NewPostDialog`
 2. component calls `onContentChange`
 3. page updates `postContent`
 4. user clicks publish
 5. component calls `onPublish`
 6. page builds a `FormData`
 7. page sends `POST /posts`
-8. page resets composer state and refetches posts
+8. page prepends the new post into `posts`
+9. page resets composer state
 
 ### Add a comment
 
-1. user types in the reply textarea inside `FeedPostCard`
-2. component calls `onCommentChange(post.id, value)`
-3. page stores the text in `commentInputs[postId]`
-4. user clicks comment
-5. component calls `onAddComment(post.id)`
-6. page posts to `POST /posts/:postId/comments`
-7. page clears the specific comment input and refreshes posts
+1. user opens a post dialog from the post body or the comment button
+2. user types in the reply textarea inside `FeedPostDialog`
+3. component calls `onCommentChange(post.id, value)`
+4. page stores the text in `commentInputs[postId]`
+5. user clicks comment
+6. component calls `onAddComment(post.id)`
+7. page posts to `POST /posts/:postId/comments`
+8. page appends the returned comment inside the correct post
+9. page clears the specific comment input
+
+### Open a post
+
+1. user clicks the post body or comment action in `FeedPostCard`
+2. `FeedPostCard` calls `onOpenPost(post.id, focusCommentInput?)`
+3. `page.tsx` stores that id in `activePostId`
+4. if the comment action was used, `page.tsx` also sets a flag to focus the reply textarea
+5. `activePost` is derived from `posts.find(...)`
+6. `FeedPostDialog` receives the selected post and opens
 
 ### Follow from right rail
 
@@ -575,7 +710,7 @@ Because it owns all backend communication and page state. We extracted rendering
 
 ### Why separate `archive` and `feed` folders?
 
-Because some components are visual shell primitives that can be reused on other pages (`ArchiveSidebar`, `ArchiveButton`, `NatureCanvas`), while others are tied to feed entities like posts and comments (`FeedPostCard`, `FeedComposerCard`).
+Because some components are visual shell primitives that can be reused on other pages (`ArchiveSidebar`, `ArchiveButton`, `NatureCanvas`), while others are tied to feed entities like posts and comments (`FeedPostCard`, `NewPostCard`).
 
 ### Why does the right rail not fetch its own data?
 
@@ -594,8 +729,22 @@ Business data like posts, comments, publish state, and loading state stays in th
 
 Because children should stay reusable and predictable. If every component fetched and mutated on its own, data flow would be harder to follow during evaluation.
 
+### Why use Ark for dialogs?
+
+Because dialogs are accessibility-heavy primitives and Ark gives us focus handling, dismissal behavior, and keyboard support without forcing the app to import Ark directly. We keep our own wrapper in `frontend/components/ui/dialog.tsx`, so the app stays stable while the primitive layer changes underneath.
+
+### Why do actions feel instant now instead of reloading the feed?
+
+Because the page no longer refetches all posts after every successful mutation. After actions like like, favorite, publish, add comment, and delete post, `page.tsx` updates `posts` locally with `setPosts(...)`.
+
+That means:
+
+- the browser page is not reloaded
+- the feed state changes in place
+- the interface feels much more responsive
+
 ## 9. Fast Evaluation Summary
 
 If you need a 30-second explanation:
 
-> The feed page is controlled by `frontend/app/feed/page.tsx`. It fetches posts, stores all UI state, and owns every backend mutation. Archive components in `frontend/components/archive` provide the reusable shell and styling primitives. Feed components in `frontend/components/feed` render feed-specific UI like the composer, post cards, action buttons, and modal. Data always flows from the page into components through props, and user actions flow back up through callbacks.
+> The feed page is controlled by `frontend/app/feed/page.tsx`. It fetches posts, stores all UI state, and owns every backend mutation. Archive components in `frontend/components/archive` provide the reusable shell and styling primitives. Feed components in `frontend/components/feed` render feed-specific UI like the composer, preview post cards, and the post detail dialog. Data always flows from the page into components through props, and user actions flow back up through callbacks.

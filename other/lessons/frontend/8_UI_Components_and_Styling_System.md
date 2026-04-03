@@ -63,7 +63,7 @@ But the archive UI is now composed from:
 
 - `Frontend/components/feed/ArchiveSidebar.tsx`
 - `Frontend/components/feed/FeedPostCard.tsx`
-- `Frontend/components/feed/NewPostModal.tsx`
+- `Frontend/components/feed/NewPostDialog.tsx`
 - `Frontend/components/feed/FeedRightRail.tsx`
 - `Frontend/components/feed/FeedActionButton.tsx`
 - `Frontend/components/feed/ArchiveButton.tsx`
@@ -153,5 +153,5 @@ Before evaluation, each teammate should be able to explain:
 
 1. why archive styling moved into `Frontend/app/globals.css`
 2. why `Frontend/app/feed/page.tsx` still owns the fetch/mutation logic
-3. what `ArchiveSidebar`, `FeedPostCard`, `NewPostModal`, and `FeedRightRail` each do
+3. what `ArchiveSidebar`, `FeedPostCard`, `NewPostDialog`, and `FeedRightRail` each do
 4. how real actions like publish, like, favorite, comment, and friend request still work after the redesign
