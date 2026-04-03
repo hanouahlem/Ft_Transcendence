@@ -43,8 +43,12 @@ export function ArchiveSidebar({
 
   return (
     <aside
-      className="hidden h-screen shrink-0 flex-col overflow-hidden border-r border-black/10 bg-field-paper-muted px-3 py-8 lg:flex"
-      style={{ width: expanded ? "240px" : "76px", transition: "width 0.2s ease-out" }}
+      className="fixed inset-y-0 z-30 hidden flex-col overflow-hidden border-r border-black/10 bg-field-paper-muted px-3 py-8 lg:flex"
+      style={{
+        left: 0,
+        width: expanded ? "240px" : "76px",
+        transition: "width 0.2s ease-out",
+      }}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
