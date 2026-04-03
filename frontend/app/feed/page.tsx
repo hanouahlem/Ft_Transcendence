@@ -63,6 +63,23 @@ type FeedPost = {
   media: string[];
 };
 
+function TextFilePreview({ url }: { url: string }) {
+  const [content, setContent] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(url)
+      .then((r) => r.text())
+      .then(setContent)
+      .catch(() => setContent("Impossible de charger le fichier."));
+  }, [url]);
+
+  return (
+    <div className="max-h-[300px] overflow-y-auto whitespace-pre-wrap break-words px-5 py-4 font-mono text-sm text-[#2f3a32]">
+      {content ?? "Chargement..."}
+    </div>
+  );
+}
+
 function formatPostTime(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleString("fr-FR", {
@@ -173,15 +190,7 @@ function PostCard({
         {post.media.length > 0 && (
           <div className="overflow-hidden border-y border-[#edf2e9]">
             {/\.(txt|md)$/i.test(post.media[0]) ? (
-              <a
-                href={post.media[0]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 px-5 py-4 text-sm text-[#4A6440] hover:underline"
-              >
-                <FileText className="h-5 w-5" />
-                Voir le document
-              </a>
+              <TextFilePreview url={post.media[0]} />
             ) : (
               <img
                 src={post.media[0]}
@@ -292,15 +301,7 @@ function PostCard({
                     {comment.media.length > 0 && (
                       <div className="mt-3 overflow-hidden rounded-2xl border border-[#dfe8d7] bg-[#f7faf4]">
                         {/\.(txt|md)$/i.test(comment.media[0]) ? (
-                          <a
-                            href={comment.media[0]}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-4 py-3 text-sm text-[#4A6440] hover:underline"
-                          >
-                            <FileText className="h-5 w-5" />
-                            Voir le document
-                          </a>
+                          <TextFilePreview url={comment.media[0]} />
                         ) : (
                           <img
                             src={comment.media[0]}
@@ -392,6 +393,7 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
+  const [modalError, setModalError] = useState("");
   const [message, setMessage] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [sentRequests, setSentRequests] = useState<number[]>([]);
@@ -629,19 +631,19 @@ export default function FeedPage() {
 
   const handlePublish = async () => {
     if (!postContent.trim()) {
-      setMessage("Tu dois écrire quelque chose avant de publier.");
+      setModalError("Tu dois écrire quelque chose avant de publier.");
       return;
     }
 
     if (!token) {
-      setError("Tu dois être connecté pour publier.");
+      setModalError("Tu dois être connecté pour publier.");
       return;
     }
 
     try {
       setPublishing(true);
       setMessage("");
-      setError("");
+      setModalError("");
       setUploadProgress(0);
 
       const formData = new FormData();
@@ -678,7 +680,7 @@ export default function FeedPage() {
       await fetchPosts();
     } catch (err) {
       console.error("Erreur publish post :", err);
-      setError(
+      setModalError(
         err instanceof Error ? err.message : "Erreur lors de la publication."
       );
     } finally {
@@ -1203,6 +1205,7 @@ const handleAddFriend = async (receiverId: number) => {
                   onClick={() => {
                     setCreateOpen(false);
                     setPostContent("");
+                    setModalError("");
                     handleRemoveFile();
                   }}
                   className="rounded-full bg-[#f2f5ef] p-2 text-[#5d6c56] transition hover:bg-[#e6ede0]"
@@ -1276,6 +1279,10 @@ const handleAddFriend = async (receiverId: number) => {
                   )}
 
                   <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    {modalError && (
+                      <p className="w-full text-sm text-red-600">{modalError}</p>
+                    )}
+
                     <Button
                       type="button"
                       variant="outline"

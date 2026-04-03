@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { getEnv } from "../env.js";
 import prisma from "../prisma.js";
+import { Emailconfirmation } from "./mailSenderController.js";
+import crypto from "crypto";
 
 const currentUserSelect = {
   id: true,
@@ -124,6 +126,17 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({message: "Username/email or password is incorrect.",});
     }
 
+    if (user.twoFactorEnabled) {
+      const code = crypto.randomInt(100000, 999999).toString();
+      const timeToExpireCode = new Date(Date.now() + 10 * 60 * 1000);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { twoFactorcode: code, twoFactorExpires: timeToExpireCode },
+      });
+      await Emailconfirmation(user.email, code);
+      return res.status(200).json({ requiresTwoFactor: true, userId: user.id });
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email },
       getEnv("JWT_SECRET"),
@@ -215,7 +228,6 @@ export async function updateUser(req, res) {
         bio,
         status,
         location,
-        website,
       },
       select: {
         id: true,
@@ -225,7 +237,6 @@ export async function updateUser(req, res) {
         bio: true,
         status: true,
         location: true,
-        website: true,
         createdAt: true,
       },
     });

@@ -70,5 +70,6 @@ router.post("/posts/:id/comments", authMiddleware,  post.createCommentHandler);
 router.post('/settings/auth/2fa/setup',   authMiddleware, twoFa.setupCodeTwoFa);
 router.post('/settings/auth/2fa/confirm',  authMiddleware, twoFa.checkTwoFaCode);
 router.post('/settings/auth/2fa/disable', authMiddleware, twoFa.disableTwoFA);
+router.post('/auth/2fa/login', twoFa.verifyLoginTwoFa);
 
 export default router;

@@ -1,6 +1,8 @@
 import prisma from "../prisma.js";
 import crypto from "crypto";
 import {Emailconfirmation} from "./mailSenderController.js";
+import jwt from "jsonwebtoken";
+import { getEnv } from "../env.js";
 
 
 export async function setupCodeTwoFa(req, res) {
@@ -83,4 +85,33 @@ export async function disableTwoFA(req, res){
     return res.json({ message: '2FA successfully disabled' });
 }
 
-export default { setupCodeTwoFa, checkTwoFaCode, disableTwoFA};
+export async function verifyLoginTwoFa(req, res) {
+    try {
+        const { userId, code } = req.body;
+
+        const user = await prisma.user.findFirst({ where: { id: Number(userId) } });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        if (!user.twoFactorcode) return res.status(400).json({ message: "No code sent" });
+        if (new Date() > user.twoFactorExpires) return res.status(400).json({ message: "Code expired" });
+        if (user.twoFactorcode !== code) return res.status(401).json({ message: "Invalid code" });
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { twoFactorcode: null, twoFactorExpires: null },
+        });
+
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            getEnv("JWT_SECRET"),
+            { expiresIn: "3h" }
+        );
+
+        return res.status(200).json({ message: "Login successful", token });
+    } catch (error) {
+        console.error("verifyLoginTwoFa error:", error);
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export default { setupCodeTwoFa, checkTwoFaCode, disableTwoFA, verifyLoginTwoFa };

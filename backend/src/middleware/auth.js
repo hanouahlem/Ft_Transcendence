@@ -9,7 +9,6 @@ export function authMiddleware(req, res, next) {
     }
     try{
         const verifToken = jwt.verify (token, getEnv("JWT_SECRET"));
-        // console.log("Token vérifié:", verifToken);
         req.user = verifToken;
         next();
     }

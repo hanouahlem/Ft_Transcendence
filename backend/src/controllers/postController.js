@@ -242,6 +242,9 @@ export const createCommentHandler = async (req, res) => {
       comment,
     });
   } catch (error) {
+    if (error.message === "Ce commentaire contient du contenu inapproprié.") {
+      return res.status(400).json({ message: error.message });
+    }
     console.error("Erreur createCommentHandler :", error);
     return res.status(500).json({
       message: error.message || "Unable to create comment.",
