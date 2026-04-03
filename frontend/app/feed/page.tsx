@@ -6,9 +6,10 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { ArchiveRightRail } from "@/components/archive/ArchiveRightRail";
 import { ArchiveSidebar } from "@/components/archive/ArchiveSidebar";
 import { NatureCanvas } from "@/components/archive/NatureCanvas";
-import { FeedComposerCard } from "@/components/feed/FeedComposerCard";
+import { FeedPostDialog } from "@/components/feed/FeedPostDialog";
 import { FeedPostCard } from "@/components/feed/FeedPostCard";
-import { NewPostModal } from "@/components/feed/NewPostModal";
+import { NewPostCard } from "@/components/feed/NewPostCard";
+import { NewPostDialog } from "@/components/feed/NewPostDialog";
 import type { FeedComment, FeedPost } from "@/components/feed/types";
 import { useAuth } from "@/context/AuthContext";
 
@@ -38,6 +39,12 @@ export default function FeedPage() {
 
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
   const [commentingPostId, setCommentingPostId] = useState<number | null>(null);
+  const [dialogPostId, setDialogPostId] = useState<number | null>(null);
+  const [dialogPostSnapshot, setDialogPostSnapshot] = useState<FeedPost | null>(
+    null
+  );
+  const [postDialogOpen, setPostDialogOpen] = useState(false);
+  const [focusCommentInput, setFocusCommentInput] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -63,6 +70,12 @@ export default function FeedPage() {
     [posts]
   );
 
+  const activePost = useMemo(
+    () =>
+      posts.find((post) => post.id === dialogPostId) ?? dialogPostSnapshot ?? null,
+    [posts, dialogPostId, dialogPostSnapshot]
+  );
+
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -80,6 +93,19 @@ export default function FeedPage() {
     fetchExistingFriendRelations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, user?.id]);
+
+  useEffect(() => {
+    if (dialogPostId === null) {
+      return;
+    }
+
+    const nextPost =
+      posts.find((post) => post.id === dialogPostId) ?? dialogPostSnapshot;
+
+    if (nextPost) {
+      setDialogPostSnapshot(nextPost);
+    }
+  }, [posts, dialogPostId, dialogPostSnapshot]);
 
   const resetComposer = () => {
     setPostContent("");
@@ -178,6 +204,54 @@ export default function FeedPage() {
     }));
   };
 
+  const updatePostInState = (
+    postId: number,
+    updater: (post: FeedPost) => FeedPost
+  ) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => (post.id === postId ? updater(post) : post))
+    );
+  };
+
+  const updateCommentInState = (
+    commentId: number,
+    updater: (comment: FeedComment) => FeedComment
+  ) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
+        const hasComment = post.comments.some((comment) => comment.id === commentId);
+
+        if (!hasComment) {
+          return post;
+        }
+
+        return {
+          ...post,
+          comments: post.comments.map((comment) =>
+            comment.id === commentId ? updater(comment) : comment
+          ),
+        };
+      })
+    );
+  };
+
+  const handleOpenPost = (postId: number, shouldFocusCommentInput = false) => {
+    const post = posts.find((item) => item.id === postId) ?? null;
+
+    setDialogPostId(postId);
+    setDialogPostSnapshot(post);
+    setPostDialogOpen(true);
+    setFocusCommentInput(shouldFocusCommentInput);
+  };
+
+  const handlePostDialogChange = (open: boolean) => {
+    setPostDialogOpen(open);
+
+    if (!open) {
+      setFocusCommentInput(false);
+    }
+  };
+
   const handleDeleteComment = async (commentId: number) => {
     if (!token) {
       setError("Tu dois être connecté pour supprimer un commentaire.");
@@ -267,7 +341,13 @@ export default function FeedPage() {
       }
 
       setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
-      await fetchPosts();
+      if (data.comment) {
+        updatePostInState(postId, (post) => ({
+          ...post,
+          comments: [...post.comments, data.comment],
+          commentsCount: post.commentsCount + 1,
+        }));
+      }
     } catch (err) {
       setError(
         err instanceof Error
@@ -347,8 +427,10 @@ export default function FeedPage() {
       }
 
       setMessage("Post publié avec succès.");
+      if (data.post) {
+        setPosts((prevPosts) => [data.post, ...prevPosts]);
+      }
       resetComposer();
-      await fetchPosts();
     } catch (err) {
       console.error("Erreur publish post :", err);
       setError(
@@ -384,7 +466,10 @@ export default function FeedPage() {
       }
 
       setMessage("Post supprimé avec succès.");
-      await fetchPosts();
+      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+      setPostDialogOpen((prevOpen) =>
+        prevOpen && dialogPostId === postId ? false : prevOpen
+      );
     } catch (err) {
       console.error("Erreur suppression post :", err);
       setError(
@@ -421,7 +506,14 @@ export default function FeedPage() {
         throw new Error(data.message || "Impossible de modifier le like.");
       }
 
-      await fetchPosts();
+      updatePostInState(post.id, (currentPost) => ({
+        ...currentPost,
+        likedByCurrentUser: !currentPost.likedByCurrentUser,
+        likesCount: Math.max(
+          0,
+          currentPost.likesCount + (currentPost.likedByCurrentUser ? -1 : 1)
+        ),
+      }));
     } catch (err) {
       console.error("Erreur like post :", err);
       setError(err instanceof Error ? err.message : "Erreur lors du like.");
@@ -456,7 +548,15 @@ export default function FeedPage() {
         throw new Error(data.message || "Impossible de modifier le favori.");
       }
 
-      await fetchPosts();
+      updatePostInState(post.id, (currentPost) => ({
+        ...currentPost,
+        favoritedByCurrentUser: !currentPost.favoritedByCurrentUser,
+        favoritesCount: Math.max(
+          0,
+          currentPost.favoritesCount +
+            (currentPost.favoritedByCurrentUser ? -1 : 1)
+        ),
+      }));
     } catch (err) {
       console.error("Erreur favorite post :", err);
       setError(err instanceof Error ? err.message : "Erreur lors du favori.");
@@ -543,7 +643,15 @@ export default function FeedPage() {
         );
       }
 
-      await fetchPosts();
+      updateCommentInState(comment.id, (currentComment) => ({
+        ...currentComment,
+        likedByCurrentUser: !currentComment.likedByCurrentUser,
+        likesCount: Math.max(
+          0,
+          currentComment.likesCount +
+            (currentComment.likedByCurrentUser ? -1 : 1)
+        ),
+      }));
     } catch (err) {
       console.error("Erreur like commentaire :", err);
       setError(
@@ -584,7 +692,15 @@ export default function FeedPage() {
         );
       }
 
-      await fetchPosts();
+      updateCommentInState(comment.id, (currentComment) => ({
+        ...currentComment,
+        favoritedByCurrentUser: !currentComment.favoritedByCurrentUser,
+        favoritesCount: Math.max(
+          0,
+          currentComment.favoritesCount +
+            (currentComment.favoritedByCurrentUser ? -1 : 1)
+        ),
+      }));
     } catch (err) {
       console.error("Erreur favori commentaire :", err);
       setError(
@@ -602,26 +718,23 @@ export default function FeedPage() {
       <main className="archive-page relative min-h-screen overflow-x-hidden text-field-ink">
         <NatureCanvas />
 
-        <div className="relative z-10 flex min-h-screen">
+        <div className="relative z-10 min-h-screen lg:pl-[76px]">
           <ArchiveSidebar
             user={user}
             onCreatePost={() => setCreateOpen(true)}
             onLogout={logout}
           />
 
-          <div className="flex flex-1 justify-center gap-12">
-            <section className="min-w-0 max-w-[800px] flex-1 px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+          <div className="mx-auto flex w-full max-w-[1132px] items-start justify-start gap-8 xl:gap-10">
+            <section className="min-w-0 w-full max-w-[800px] px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
               <div className="flex flex-col gap-8 lg:gap-12">
-                <FeedComposerCard
-                  user={user}
+                <NewPostCard
                   content={postContent}
                   previewUrl={previewUrl}
                   selectedFileName={selectedFile?.name || ""}
                   publishing={publishing}
-                  fileInputRef={fileInputRef}
                   onPublish={handlePublish}
                   onContentChange={setPostContent}
-                  onFileChange={handleFileChange}
                   onOpenFilePicker={handleOpenFilePicker}
                   onRemoveFile={handleRemoveFile}
                 />
@@ -664,23 +777,13 @@ export default function FeedPage() {
                         post={post}
                         currentUserId={user?.id}
                         variantIndex={index}
-                        showConnector={index < posts.length - 1}
+                        onOpenPost={handleOpenPost}
                         onDelete={handleDelete}
-                        onDeleteComment={handleDeleteComment}
                         onToggleLike={handleToggleLike}
                         onToggleFavorite={handleToggleFavorite}
-                        onToggleCommentLike={handleToggleCommentLike}
-                        onToggleCommentFavorite={handleToggleCommentFavorite}
-                        onCommentChange={handleCommentChange}
-                        onAddComment={handleAddComment}
-                        commentValue={commentInputs[post.id] || ""}
                         deletingPostId={deletingPostId}
-                        deletingCommentId={deletingCommentId}
                         likingPostId={likingPostId}
                         favoritingPostId={favoritingPostId}
-                        likingCommentId={likingCommentId}
-                        favoritingCommentId={favoritingCommentId}
-                        commentingPostId={commentingPostId}
                       />
                     ))}
                   </div>
@@ -713,20 +816,49 @@ export default function FeedPage() {
           <Plus className="h-6 w-6" />
         </button>
 
-        <NewPostModal
+        <NewPostDialog
           open={createOpen}
-          user={user}
           content={postContent}
           previewUrl={previewUrl}
           selectedFileName={selectedFile?.name || ""}
           publishing={publishing}
-          fileInputRef={fileInputRef}
           onClose={resetComposer}
           onPublish={handlePublish}
           onContentChange={setPostContent}
-          onFileChange={handleFileChange}
           onOpenFilePicker={handleOpenFilePicker}
           onRemoveFile={handleRemoveFile}
+        />
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        <FeedPostDialog
+          open={postDialogOpen}
+          post={activePost}
+          focusCommentInput={focusCommentInput}
+          currentUserId={user?.id}
+          onOpenChange={handlePostDialogChange}
+          onDelete={handleDelete}
+          onDeleteComment={handleDeleteComment}
+          onToggleLike={handleToggleLike}
+          onToggleFavorite={handleToggleFavorite}
+          onToggleCommentLike={handleToggleCommentLike}
+          onToggleCommentFavorite={handleToggleCommentFavorite}
+          onCommentChange={handleCommentChange}
+          onAddComment={handleAddComment}
+          commentValue={dialogPostId ? commentInputs[dialogPostId] || "" : ""}
+          deletingPostId={deletingPostId}
+          deletingCommentId={deletingCommentId}
+          likingPostId={likingPostId}
+          favoritingPostId={favoritingPostId}
+          likingCommentId={likingCommentId}
+          favoritingCommentId={favoritingCommentId}
+          commentingPostId={commentingPostId}
         />
       </main>
     </ProtectedRoute>
