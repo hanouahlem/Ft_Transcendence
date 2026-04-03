@@ -89,6 +89,7 @@ Study file:
 Goal: know the shortcuts and how they work under the hood.
 
 - `make up` / `make down` / `make restart`: lifecycle
+- `make up-build` / `make rebuild`: explicit rebuild workflows
 - `make clean` / `make fclean` / `make re`: cleanup and rebuild
 - `make prisma-migrate`: runs `prisma migrate dev` inside Docker with correct `DATABASE_URL`
 - `make prisma-studio`: runs Prisma Studio on port 5555 with `--browser none`
