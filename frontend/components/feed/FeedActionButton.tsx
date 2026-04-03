@@ -1,3 +1,4 @@
+import type { MouseEventHandler } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ type FeedActionButtonProps = {
   active?: boolean;
   disabled?: boolean;
   onClick?: () => void;
+  onMouseDown?: MouseEventHandler<HTMLButtonElement>;
 };
 
 const BUTTON_STYLES: Record<
@@ -42,6 +44,7 @@ export function FeedActionButton({
   active = false,
   disabled = false,
   onClick,
+  onMouseDown,
 }: FeedActionButtonProps) {
   const palette = BUTTON_STYLES[accent];
   const content = (
@@ -72,6 +75,7 @@ export function FeedActionButton({
     <button
       type="button"
       onClick={onClick}
+      onMouseDown={onMouseDown}
       disabled={disabled}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-field-mono text-sm transition-all duration-200 disabled:cursor-not-allowed",
