@@ -114,7 +114,7 @@ function renderBody(
 		const rest = content.slice(1);
 
 		return (
-			<p className={cn(contentClass, "font-field-display")}>
+			<p className={cn(contentClass, "font-display")}>
 				<span className="float-left mr-2 text-4xl leading-none font-black text-field-accent">
 					{firstCharacter}
 				</span>
@@ -125,7 +125,7 @@ function renderBody(
 
 	if (variantIndex === 3 && !post.media.length && content.length < 200) {
 		return (
-			<p className={cn(contentClass, "font-field-display")}>
+			<p className={cn(contentClass, "font-display")}>
 				&quot;{content}&quot;
 			</p>
 		);
@@ -133,13 +133,13 @@ function renderBody(
 
 	if (variantIndex === 3) {
 		return (
-			<p className="font-field-display text-lg leading-relaxed text-field-ink">
+			<p className="font-display text-lg leading-relaxed text-field-ink">
 				{content}
 			</p>
 		);
 	}
 
-	return <p className={cn(contentClass, "font-field-display")}>{content}</p>;
+	return <p className={cn(contentClass, "font-display")}>{content}</p>;
 }
 
 export function PostCard({
@@ -207,7 +207,7 @@ export function PostCard({
 									alt={post.author.username}
 									className="archive-photo object-cover"
 								/>
-								<AvatarFallback className="rounded-none bg-field-stage font-field-display text-xs font-black text-field-ink">
+								<AvatarFallback className="rounded-none bg-field-stage font-display text-xs font-black text-field-ink">
 									{getInitials(post.author.username)}
 								</AvatarFallback>
 							</Avatar>
@@ -226,7 +226,7 @@ export function PostCard({
 								>
 									{post.author.username}
 								</Link>
-								<span className="font-field-mono text-xs text-field-label">
+								<span className="font-mono text-xs text-field-label">
 									@{post.author.username.toLowerCase()}
 								</span>
 							</div>
@@ -236,7 +236,7 @@ export function PostCard({
 					<div className="flex items-center gap-3">
 						<RelativeTime
 							dateString={post.createdAt}
-							className="shrink-0 font-field-mono text-[10px] text-field-label"
+							className="shrink-0 font-mono text-[10px] text-field-label"
 						/>
 						{isOwner ? (
 							<ArchiveButton
@@ -278,7 +278,7 @@ export function PostCard({
 									}
 								/>
 								{variant.imageFrame ? (
-									<div className="absolute bottom-2 right-3 font-field-mono text-[10px] text-field-label">
+									<div className="absolute bottom-2 right-3 font-mono text-[10px] text-field-label">
 										FILM ROLL 42 - EXP {post.id}
 									</div>
 								) : null}

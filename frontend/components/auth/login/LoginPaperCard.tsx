@@ -33,7 +33,7 @@ function FieldInput({
 			<div className="absolute -top-3 left-1 right-1 z-10 flex items-center justify-between">
 				<label
 					className={cn(
-						"bg-field-paper px-1 font-field-mono text-[11px] uppercase tracking-[0.12em] transition-colors",
+						"bg-field-paper px-1 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors",
 						focused ? "text-field-accent" : "text-field-label",
 					)}
 				>
@@ -57,7 +57,7 @@ function FieldInput({
 					onBlur={() => setFocused(false)}
 					required={required}
 					className={cn(
-						"w-full border-0 border-b-2 border-dotted border-field-label bg-transparent px-1 pt-3 pb-1 font-field-mono text-lg text-field-ink outline-none transition-colors placeholder:text-field-label/40 focus:border-field-accent focus:bg-field-accent/[0.02]",
+						"w-full border-0 border-b-2 border-dotted border-field-label bg-transparent px-1 pt-3 pb-1 font-mono text-lg text-field-ink outline-none transition-colors placeholder:text-field-label/40 focus:border-field-accent focus:bg-field-accent/[0.02]",
 						type === "password" && "tracking-[0.1em]",
 					)}
 				/>
@@ -75,7 +75,7 @@ function StampSubmitButton({ loading }: { loading: boolean }) {
 			className="absolute right-0 bottom-8 origin-center cursor-pointer transition-transform duration-200 hover:scale-105 hover:-rotate-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:right-2 lg:bottom-9"
 		>
 			<span
-				className="flex items-center justify-center rounded-xl border-4 border-field-stamp bg-transparent px-4 py-2 font-field-display text-3xl font-black uppercase tracking-[0.2em] text-field-stamp"
+				className="flex items-center justify-center rounded-xl border-4 border-field-stamp bg-transparent px-4 py-2 font-display text-3xl font-black uppercase tracking-[0.2em] text-field-stamp"
 				style={{ filter: "url(#ink-texture)", transform: "rotate(-6deg)" }}
 			>
 				{loading ? "..." : "Login"}
@@ -126,13 +126,13 @@ export default function LoginPaperCard({
 			<div className="relative flex h-full flex-col px-6 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-12">
 				<header className="mb-10 flex items-start justify-between gap-6">
 					<div>
-						<div className="mb-3 inline-block bg-field-ink px-2 py-1 font-field-mono text-[9px] uppercase tracking-[0.12em] text-field-paper sm:text-[10px]">
+						<div className="mb-3 inline-block bg-field-ink px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-field-paper sm:text-[10px]">
 							Form 4A - Authorized Personnel
 						</div>
-						<h2 className="font-field-display text-3xl font-black uppercase tracking-[-0.025em] text-field-ink sm:text-4xl">
+						<h2 className="font-display text-3xl font-black uppercase tracking-[-0.025em] text-field-ink sm:text-4xl">
 							Login Entry
 						</h2>
-						<p className="mt-1 font-field-mono text-[11px] uppercase tracking-[0.12em] text-field-label">
+						<p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-field-label">
 							Log_ID: Secure_Entry_V4
 						</p>
 					</div>
@@ -164,7 +164,7 @@ export default function LoginPaperCard({
 						action={
 							<button
 								type="button"
-								className="bg-field-paper px-1 font-field-mono text-[11px] uppercase tracking-[0.12em] text-field-accent underline decoration-dotted underline-offset-4"
+								className="bg-field-paper px-1 font-mono text-[11px] uppercase tracking-[0.12em] text-field-accent underline decoration-dotted underline-offset-4"
 							>
 								Lost Key?
 							</button>
@@ -172,14 +172,14 @@ export default function LoginPaperCard({
 					/>
 
 					{error ? (
-						<div className="border border-field-stamp bg-field-stamp/5 px-3 py-2 font-field-mono text-xs uppercase tracking-[0.08em] text-field-stamp">
+						<div className="border border-field-stamp bg-field-stamp/5 px-3 py-2 font-mono text-xs uppercase tracking-[0.08em] text-field-stamp">
 							{error}
 						</div>
 					) : null}
 
 					<div className="mt-auto pt-6">
 						<div className="relative mb-6 border-b-2 border-field-ink pb-8">
-							<div className="space-y-2 font-field-mono text-[10px] uppercase tracking-[0.12em] text-field-label sm:text-[11px]">
+							<div className="space-y-2 font-mono text-[10px] uppercase tracking-[0.12em] text-field-label sm:text-[11px]">
 								<div className="flex gap-4">
 									<span className="w-12 opacity-60">Date:</span>
 									<span className="font-bold text-field-ink">{dateLabel}</span>

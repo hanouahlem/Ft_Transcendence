@@ -119,7 +119,7 @@ export default function LoginPage() {
           />
 
           <div className="text-center lg:absolute lg:bottom-[var(--login-signup-bottom)] lg:left-0 lg:right-0">
-            <p className="inline-block border border-field-label/20 bg-field-paper-muted px-4 py-2 font-field-mono text-[11px] uppercase tracking-[0.3em] text-field-ink/65">
+            <p className="inline-block border border-field-label/20 bg-field-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-field-ink/65">
               Not a member?
               <Link
                 href="/register"

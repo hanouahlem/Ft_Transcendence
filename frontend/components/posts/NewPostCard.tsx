@@ -33,7 +33,7 @@ export function NewPostCard({
 			<div className="archive-thread" />
 
 			<div className="pl-10">
-				<div className="mb-4 flex justify-between gap-3 border-b border-dashed border-field-label/30 pb-2 font-field-mono text-xs text-field-label">
+				<div className="mb-4 flex justify-between gap-3 border-b border-dashed border-field-label/30 pb-2 font-mono text-xs text-field-label">
 					<span>NEW LOG [ENTRY: PENDING]</span>
 					<span>DATE: --/--/----</span>
 				</div>
@@ -43,7 +43,7 @@ export function NewPostCard({
 					onChange={(event) => onContentChange(event.target.value)}
 					placeholder="What have you observed today?"
 					className="archive-input archive-lines min-h-[140px] w-full resize-none border-0 bg-transparent px-0 py-0 text-lg leading-7 text-field-ink"
-					style={{ fontFamily: "var(--font-field-display-source)" }}
+					style={{ fontFamily: "var(--font-display)" }}
 				/>
 
 				{previewUrl ? (
@@ -53,7 +53,7 @@ export function NewPostCard({
 							alt="Selected upload preview"
 							className="archive-photo max-h-[420px] w-full border border-field-label/20 object-cover"
 						/>
-						<div className="absolute bottom-2 right-3 font-field-mono text-[10px] text-field-label">
+						<div className="absolute bottom-2 right-3 font-mono text-[10px] text-field-label">
 							{selectedFileName || "FILM ROLL 42"}
 						</div>
 						<ArchiveButton
@@ -72,7 +72,7 @@ export function NewPostCard({
 					<button
 						type="button"
 						onClick={onOpenFilePicker}
-						className="inline-flex items-center gap-2 font-field-mono text-xs text-field-label transition-colors hover:text-field-ink"
+						className="inline-flex items-center gap-2 font-mono text-xs text-field-label transition-colors hover:text-field-ink"
 					>
 						<ImageIcon className="h-4 w-4" />[ ADD SKETCH ]
 					</button>

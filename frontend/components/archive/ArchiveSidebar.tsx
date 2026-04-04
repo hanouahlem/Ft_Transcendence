@@ -70,7 +70,7 @@ export function ArchiveSidebar({
 				</div>
 
 				<span
-					className="whitespace-nowrap font-field-display text-[1.7rem] font-black tracking-[-0.05em] text-field-ink transition-opacity duration-150"
+					className="whitespace-nowrap font-display text-[1.7rem] font-black tracking-[-0.05em] text-field-ink transition-opacity duration-150"
 					style={{ opacity: expanded ? 1 : 0 }}
 				>
 					Field Notes
@@ -94,7 +94,7 @@ export function ArchiveSidebar({
 					type="button"
 					variant="black"
 					className={cn(
-						"mt-4 w-full font-archive-inter",
+						"mt-4 w-full font-sans",
 						expanded
 							? "justify-start gap-3 px-3"
 							: "justify-start px-3",
@@ -131,7 +131,7 @@ export function ArchiveSidebar({
 					href="/profil"
 					className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-black/5"
 				>
-					<div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-field-stage font-field-display text-sm font-black text-field-ink -rotate-3">
+					<div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-field-stage font-display text-sm font-black text-field-ink -rotate-3">
 						{user?.avatar ? (
 							<img
 								src={user.avatar}
@@ -150,7 +150,7 @@ export function ArchiveSidebar({
 						<p className="truncate text-sm font-semibold text-field-ink">
 							{user?.username || "Field User"}
 						</p>
-						<p className="truncate font-field-mono text-[11px] uppercase tracking-[0.16em] text-field-label">
+						<p className="truncate font-mono text-[11px] uppercase tracking-[0.16em] text-field-label">
 							@{(user?.username || "observer").toLowerCase()}
 						</p>
 					</div>

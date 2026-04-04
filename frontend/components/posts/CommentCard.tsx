@@ -49,7 +49,7 @@ export function CommentCard({
 								alt={comment.author.username}
 								className="archive-photo object-cover"
 							/>
-							<AvatarFallback className="rounded-none bg-field-stage font-field-display text-[10px] font-black text-field-ink">
+							<AvatarFallback className="rounded-none bg-field-stage font-display text-[10px] font-black text-field-ink">
 								{getInitials(comment.author.username)}
 							</AvatarFallback>
 						</Avatar>
@@ -59,11 +59,11 @@ export function CommentCard({
 						<div className="flex flex-wrap items-center gap-3">
 							<Link
 								href={`/profil/${comment.author.id}`}
-								className="font-field-mono text-field-ink transition hover:text-field-accent-blue"
+								className="font-mono text-field-ink transition hover:text-field-accent-blue"
 							>
 								@{comment.author.username}
 							</Link>
-							<span className="font-field-mono text-[15px] text-field-label">
+							<span className="font-mono text-[15px] text-field-label">
 								@{comment.author.username.toLowerCase()}
 							</span>
 						</div>
@@ -73,7 +73,7 @@ export function CommentCard({
 				<div className="flex shrink-0 items-center gap-3">
 					<RelativeTime
 						dateString={comment.createdAt}
-						className="font-field-mono text-[10px] uppercase tracking-[0.16em] text-field-label"
+						className="font-mono text-[10px] uppercase tracking-[0.16em] text-field-label"
 					/>
 
 					{isOwner ? (
@@ -90,7 +90,7 @@ export function CommentCard({
 				</div>
 			</div>
 
-			<p className="font-field-display text-m leading-7 text-field-ink/85">
+			<p className="font-display text-m leading-7 text-field-ink/85">
 				{comment.content}
 			</p>
 

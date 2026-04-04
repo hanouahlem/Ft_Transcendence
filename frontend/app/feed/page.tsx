@@ -741,7 +741,7 @@ export default function FeedPage() {
 
                 {message && (
                   <section className="rotate-[-1deg] border border-field-accent/25 bg-field-paper px-5 py-4 text-sm text-field-ink shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-                    <p className="font-field-mono text-[11px] uppercase tracking-[0.16em] text-field-accent">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-field-accent">
                       Notice
                     </p>
                     <p className="mt-2">{message}</p>
@@ -750,7 +750,7 @@ export default function FeedPage() {
 
                 {error && (
                   <section className="rotate-[1deg] border border-red-400/35 bg-[#fff3ef] px-5 py-4 text-sm text-red-700 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-                    <p className="font-field-mono text-[11px] uppercase tracking-[0.16em]">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.16em]">
                       Error
                     </p>
                     <p className="mt-2">{error}</p>
@@ -759,13 +759,13 @@ export default function FeedPage() {
 
                 {loading ? (
                   <section className="border border-black/10 bg-field-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-                    <p className="font-field-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
                       Loading feed archive...
                     </p>
                   </section>
                 ) : posts.length === 0 ? (
                   <section className="border border-black/10 bg-field-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-                    <p className="font-field-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
                       No posts have been recorded yet.
                     </p>
                   </section>
@@ -789,7 +789,7 @@ export default function FeedPage() {
                   </div>
                 )}
 
-                <div className="border-t border-dashed border-field-label py-8 text-center font-field-mono text-sm text-field-label">
+                <div className="border-t border-dashed border-field-label py-8 text-center font-mono text-sm text-field-label">
                   --- END OF RECENT LOGS ---
                 </div>
               </div>

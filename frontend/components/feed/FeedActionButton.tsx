@@ -61,7 +61,7 @@ export function FeedActionButton({
     return (
       <div
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-field-mono text-sm transition-all duration-200",
+          "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-sm transition-all duration-200",
           active ? palette.active : `${palette.idle} bg-transparent`
         )}
         title={label}
@@ -78,7 +78,7 @@ export function FeedActionButton({
       onMouseDown={onMouseDown}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-field-mono text-sm transition-all duration-200 disabled:cursor-not-allowed",
+        "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-sm transition-all duration-200 disabled:cursor-not-allowed",
         active ? palette.active : palette.idle
       )}
       title={label}

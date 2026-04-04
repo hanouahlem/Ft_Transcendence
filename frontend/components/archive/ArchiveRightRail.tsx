@@ -69,16 +69,16 @@ export function ArchiveRightRail({
 							value={query}
 							onChange={(event) => setQuery(event.target.value)}
 							placeholder="Search archives..."
-							className="archive-input w-full rounded-lg border-0 bg-field-paper-muted py-2.5 pl-11 pr-9 font-field-mono text-sm shadow-inner"
+							className="archive-input w-full rounded-lg border-0 bg-field-paper-muted py-2.5 pl-11 pr-9 font-mono text-sm shadow-inner"
 						/>
-						<span className="absolute right-3 top-2.5 font-field-mono text-sm text-field-label">
+						<span className="absolute right-3 top-2.5 font-mono text-sm text-field-label">
 							/
 						</span>
 					</section>
 
 					<section className="relative">
 						<div className="mb-6 inline-block -rotate-1 bg-field-ink px-4 py-1 text-field-paper">
-							<span className="font-field-display text-lg font-bold uppercase tracking-[0.08em]">
+							<span className="font-display text-lg font-bold uppercase tracking-[0.08em]">
 								Current Trends
 							</span>
 						</div>
@@ -97,20 +97,20 @@ export function ArchiveRightRail({
 										index === 2 && "-rotate-2",
 									)}
 								>
-									<span className="border-r border-black/15 pr-3 font-field-mono text-xs text-field-label">
+									<span className="border-r border-black/15 pr-3 font-mono text-xs text-field-label">
 										{trend.rank}
 									</span>
 									<div className="min-w-0 flex-1">
 										<p className="truncate text-base font-bold leading-none text-field-ink">
 											{trend.title}
 										</p>
-										<p className="mt-1 font-field-mono text-[10px] text-field-label">
+										<p className="mt-1 font-mono text-[10px] text-field-label">
 											{trend.meta}
 										</p>
 									</div>
 									<button
 										type="button"
-										className="font-field-mono text-xs text-field-label transition-colors hover:text-field-ink"
+										className="font-mono text-xs text-field-label transition-colors hover:text-field-ink"
 										aria-label={`Track ${trend.title}`}
 									>
 										[+]
@@ -121,13 +121,13 @@ export function ArchiveRightRail({
 					</section>
 
 					<section className="relative rotate-1 border border-black/10 bg-field-paper-muted px-6 py-6 shadow-sm">
-						<div className="mb-4 border-b-2 border-field-ink pb-2 font-field-mono text-xs uppercase tracking-[0.28em] text-field-label">
+						<div className="mb-4 border-b-2 border-field-ink pb-2 font-mono text-xs uppercase tracking-[0.28em] text-field-label">
 							Fellow Observers
 						</div>
 
 						<div className="space-y-4">
 							{filteredSuggestions.length === 0 ? (
-								<p className="font-field-mono text-[11px] uppercase tracking-[0.16em] text-field-label">
+								<p className="font-mono text-[11px] uppercase tracking-[0.16em] text-field-label">
 									No fellows match this search yet.
 								</p>
 							) : (
@@ -158,7 +158,7 @@ export function ArchiveRightRail({
 										>
 											<div
 												className={cn(
-													"flex h-9 w-9 items-center justify-center border-2 border-field-label font-field-display text-sm font-bold",
+													"flex h-9 w-9 items-center justify-center border-2 border-field-label font-display text-sm font-bold",
 													tileClasses[
 														author.id %
 															tileClasses.length
@@ -172,7 +172,7 @@ export function ArchiveRightRail({
 												<p className="truncate text-sm font-bold text-field-ink">
 													{author.username}
 												</p>
-												<p className="truncate font-field-mono text-[10px] text-field-label">
+												<p className="truncate font-mono text-[10px] text-field-label">
 													@
 													{author.username.toLowerCase()}
 												</p>
@@ -224,7 +224,7 @@ export function ArchiveRightRail({
 						</div>
 					</section>
 
-					<footer className="mt-auto pb-2 font-field-mono text-[10px] leading-relaxed text-field-label">
+					<footer className="mt-auto pb-2 font-mono text-[10px] leading-relaxed text-field-label">
 						<p>Terms of Service · Privacy Policy · Cookie Policy</p>
 						<p>
 							{totalPosts} logs · {totalLikes} likes ·{" "}

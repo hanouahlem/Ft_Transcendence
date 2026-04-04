@@ -11,7 +11,7 @@ export function MonoText({
   return (
     <span
       className={cn(
-        "font-field-mono text-[10px] uppercase tracking-[0.28em]",
+        "font-mono text-[10px] uppercase tracking-[0.28em]",
         className,
       )}
     >
@@ -92,7 +92,7 @@ export function AccentBeads({
 
 export function WaxSeal() {
   return (
-    <div className="relative -mt-4 mr-2 flex h-12 w-12 rotate-15 items-center justify-center rounded-full bg-field-wax font-field-display text-base font-bold shadow-[inset_2px_2px_6px_rgba(0,0,0,0.5),2px_3px_5px_rgba(0,0,0,0.3)] sm:h-14 sm:w-14 sm:text-2xl">
+    <div className="relative -mt-4 mr-2 flex h-12 w-12 rotate-15 items-center justify-center rounded-full bg-field-wax font-display text-base font-bold shadow-[inset_2px_2px_6px_rgba(0,0,0,0.5),2px_3px_5px_rgba(0,0,0,0.3)] sm:h-14 sm:w-14 sm:text-2xl">
       <span
         className="text-field-wax/70"
         style={{

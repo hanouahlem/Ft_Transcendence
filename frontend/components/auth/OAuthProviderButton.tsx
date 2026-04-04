@@ -10,7 +10,7 @@ type OAuthProviderButtonProps = {
 };
 
 const baseClassName =
-  "flex flex-1 items-center justify-center gap-3 border border-field-label/30 bg-white px-4 py-3 font-field-mono text-[11px] uppercase tracking-[0.12em] text-field-ink transition-all";
+  "flex flex-1 items-center justify-center gap-3 border border-field-label/30 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-field-ink transition-all";
 
 export default function OAuthProviderButton({
   label,

@@ -74,13 +74,13 @@ export default function FortyTwoHandoffPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-field-stage px-6 text-field-ink">
       <div className="w-full max-w-md border border-field-label/20 bg-field-paper px-8 py-10 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
-        <p className="font-field-mono text-[11px] uppercase tracking-[0.24em] text-field-label">
+        <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-field-label">
           42 Authentication
         </p>
-        <h1 className="mt-4 font-field-display text-3xl font-black uppercase tracking-[-0.03em]">
+        <h1 className="mt-4 font-display text-3xl font-black uppercase tracking-[-0.03em]">
           Completing sign-in
         </h1>
-        <p className="mt-4 font-field-mono text-sm leading-6 text-field-label">
+        <p className="mt-4 font-mono text-sm leading-6 text-field-label">
           We are finalizing your 42 login and loading your account.
         </p>
       </div>

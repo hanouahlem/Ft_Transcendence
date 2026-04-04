@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 export const archiveButtonVariants = cva(
-	"inline-flex items-center justify-center gap-2 rounded-none border text-center font-field-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-all outline-none focus-visible:ring-4 focus-visible:ring-field-accent/20 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+	"inline-flex items-center justify-center gap-2 rounded-none border text-center font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-all outline-none focus-visible:ring-4 focus-visible:ring-field-accent/20 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 	{
 		variants: {
 			variant: {

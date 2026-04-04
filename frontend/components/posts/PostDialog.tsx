@@ -136,7 +136,7 @@ export function PostDialog({
 														}
 														className="archive-photo object-cover"
 													/>
-													<AvatarFallback className="rounded-none bg-field-stage font-field-display text-xs font-black text-field-ink">
+													<AvatarFallback className="rounded-none bg-field-stage font-display text-xs font-black text-field-ink">
 														{getInitials(
 															post.author
 																.username,
@@ -153,7 +153,7 @@ export function PostDialog({
 													>
 														{post.author.username}
 													</Link>
-													<span className="font-field-mono text-xs text-field-label">
+													<span className="font-mono text-xs text-field-label">
 														@
 														{post.author.username.toLowerCase()}
 													</span>
@@ -164,7 +164,7 @@ export function PostDialog({
 										<div className="flex shrink-0 items-center gap-3">
 											<RelativeTime
 												dateString={post.createdAt}
-												className="font-field-mono text-[10px] text-field-label"
+												className="font-mono text-[10px] text-field-label"
 											/>
 											{isOwner ? (
 												<ArchiveButton
@@ -186,7 +186,7 @@ export function PostDialog({
 									</div>
 
 									{post.content ? (
-										<p className="font-field-display text-lg leading-8 text-field-ink">
+										<p className="font-display text-lg leading-8 text-field-ink">
 											{post.content}
 										</p>
 									) : null}
@@ -198,7 +198,7 @@ export function PostDialog({
 												alt="Post media"
 												className="archive-photo max-h-[420px] w-full border border-field-label/20 object-cover"
 											/>
-											<div className="absolute bottom-2 right-3 font-field-mono text-[10px] text-field-label">
+											<div className="absolute bottom-2 right-3 font-mono text-[10px] text-field-label">
 												FILM ROLL 42 - EXP {post.id}
 											</div>
 										</div>

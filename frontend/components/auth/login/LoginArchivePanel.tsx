@@ -30,7 +30,7 @@ export default function LoginArchivePanel() {
             <div className="h-px flex-1 bg-white/30" />
           </div>
 
-          <h1 className="font-field-display text-8xl font-black uppercase leading-[0.85] tracking-[-0.05em] text-field-paper mix-blend-overlay">
+          <h1 className="font-display text-8xl font-black uppercase leading-[0.85] tracking-[-0.05em] text-field-paper mix-blend-overlay">
             Field
             <br />
             Notes
