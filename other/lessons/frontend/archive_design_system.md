@@ -59,12 +59,14 @@ Meaning:
 Also defined globally:
 
 ```css
+--font-archive-inter: var(--font-archive-inter-source);
 --font-field-display: var(--font-field-display-source);
 --font-field-mono: var(--font-field-mono-source);
 ```
 
 Usage rule:
 
+- `font-archive-inter` for neutral sans text inside the archive UI when the display or mono faces are too stylized
 - `font-field-display` for editorial content, titles, strong readable UI text
 - `font-field-mono` for metadata, timestamps, counters, labels, system language
 
