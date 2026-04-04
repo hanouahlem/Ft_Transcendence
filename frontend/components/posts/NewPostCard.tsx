@@ -47,7 +47,7 @@ export function NewPostCard({
 				/>
 
 				{previewUrl ? (
-					<div className="relative mt-6 w-[92%] rotate-[-2deg] bg-white p-2 pb-8 shadow-lg">
+					<div className="relative mt-6 w-[25%] rotate-[-2deg] bg-white p-2 pb-8 shadow-lg">
 						<img
 							src={previewUrl}
 							alt="Selected upload preview"

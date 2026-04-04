@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { RelativeTime } from "@/components/ui/relative-time";
 import { getInitials } from "@/components/archive/archiveUtils";
 import { ArchiveButton } from "@/components/archive/ArchiveButton";
 import { FeedActionButton } from "@/components/feed/FeedActionButton";
-import { formatFeedTime } from "@/components/feed/feedUtils";
 import type { FeedPost } from "@/components/feed/types";
 import { cn } from "@/lib/utils";
 
@@ -37,11 +37,12 @@ const POST_VARIANTS = [
 		wrapper: "-rotate-1",
 		article: "relative bg-field-paper-muted p-6 pb-10",
 		tape: "right-8 top-[-12px] h-5 w-16 -rotate-2 bg-field-accent",
-		imageFrame: "",
+		imageFrame:
+			"relative mx-auto w-[90%] rotate-2 bg-white p-2 pb-8 shadow-lg",
 		imageMaxHeight: "max-h-[320px]",
 		headerBorder: "border-field-label",
 		contentClass: "text-lg leading-relaxed",
-		actionJustify: "justify-between",
+		actionJustify: "justify-start gap-8",
 	},
 	{
 		wrapper: "rotate-1 ml-4",
@@ -57,14 +58,14 @@ const POST_VARIANTS = [
 	},
 	{
 		wrapper: "-rotate-1",
-		article: "relative border-2 border-field-label/40 bg-field-stage p-6",
+		article: "relative border-2 border-field-label/40 bg-field-paper p-6",
 		tape: "left-4 top-[-12px] h-5 w-20 rotate-3 bg-field-accent",
 		imageFrame: "",
 		imageMaxHeight: "max-h-[300px]",
 		headerBorder: "border-dashed border-field-ink/20",
 		contentClass:
 			"text-2xl font-bold italic leading-snug text-center py-4 opacity-90",
-		actionJustify: "justify-between",
+		actionJustify: "justify-start gap-8",
 		star: true,
 	},
 	{
@@ -73,7 +74,7 @@ const POST_VARIANTS = [
 			"bg-field-paper-muted border-2 border-field-label/30 p-6 relative",
 		tape: "right-12 top-[-12px] h-6 w-24 -rotate-2 bg-field-accent-green",
 		imageFrame:
-			"relative rotate-1 border border-field-ink bg-field-paper-muted p-4",
+			"relative mx-auto w-[90%] rotate-1 bg-white p-2 pb-8 shadow-lg",
 		imageMaxHeight: "max-h-[320px]",
 		headerBorder: "border-dashed border-field-label/40",
 		contentClass: "text-lg leading-relaxed",
@@ -233,13 +234,14 @@ export function PostCard({
 					</div>
 
 					<div className="flex items-center gap-3">
-						<span className="shrink-0 font-field-mono text-[10px] text-field-label">
-							{formatFeedTime(post.createdAt)}
-						</span>
+						<RelativeTime
+							dateString={post.createdAt}
+							className="shrink-0 font-field-mono text-[10px] text-field-label"
+						/>
 						{isOwner ? (
 							<ArchiveButton
 								type="button"
-								variant="stamp"
+								variant="delete"
 								size="sm"
 								onClick={() => onDelete(post.id)}
 								disabled={isDeleting}
@@ -259,17 +261,6 @@ export function PostCard({
 						<div>
 							{renderBody(post, variantKey, variant.contentClass)}
 						</div>
-
-						{variantKey === 2 ? (
-							<div className="my-4 rotate-[-1deg] border border-field-ink/20 bg-field-stage p-3 font-field-mono text-xs">
-								<div className="mb-1 border-b border-dashed border-field-label pb-1 text-field-accent">
-									DATA EXCERPT_
-								</div>
-								<div>COMMENTS: {post.commentsCount}</div>
-								<div>LIKES: {post.likesCount}</div>
-								<div>FAVORITES: {post.favoritesCount}</div>
-							</div>
-						) : null}
 
 						{post.media.length > 0 ? (
 							<div className={variant.imageFrame || ""}>
@@ -336,7 +327,6 @@ export function PostCard({
 					</div>
 				</div>
 			</article>
-
 		</div>
 	);
 }

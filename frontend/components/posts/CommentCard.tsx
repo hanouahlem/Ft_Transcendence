@@ -2,120 +2,118 @@
 
 import Link from "next/link";
 import { Bookmark, Heart, Trash2 } from "lucide-react";
+import { getInitials } from "@/components/archive/archiveUtils";
 import { ArchiveButton } from "@/components/archive/ArchiveButton";
 import { FeedActionButton } from "@/components/feed/FeedActionButton";
-import { formatFeedTime } from "@/components/feed/feedUtils";
 import type { FeedComment } from "@/components/feed/types";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { RelativeTime } from "@/components/ui/relative-time";
 
 type CommentCardProps = {
-  comment: FeedComment;
-  currentUserId: number | undefined;
-  index: number;
-  onDeleteComment: (commentId: number) => Promise<void>;
-  onToggleCommentLike: (comment: FeedComment) => Promise<void>;
-  onToggleCommentFavorite: (comment: FeedComment) => Promise<void>;
-  deletingCommentId: number | null;
-  likingCommentId: number | null;
-  favoritingCommentId: number | null;
+	comment: FeedComment;
+	currentUserId: number | undefined;
+	onDeleteComment: (commentId: number) => Promise<void>;
+	onToggleCommentLike: (comment: FeedComment) => Promise<void>;
+	onToggleCommentFavorite: (comment: FeedComment) => Promise<void>;
+	deletingCommentId: number | null;
+	likingCommentId: number | null;
+	favoritingCommentId: number | null;
 };
 
 export function CommentCard({
-  comment,
-  currentUserId,
-  index,
-  onDeleteComment,
-  onToggleCommentLike,
-  onToggleCommentFavorite,
-  deletingCommentId,
-  likingCommentId,
-  favoritingCommentId,
+	comment,
+	currentUserId,
+	onDeleteComment,
+	onToggleCommentLike,
+	onToggleCommentFavorite,
+	deletingCommentId,
+	likingCommentId,
+	favoritingCommentId,
 }: CommentCardProps) {
-  const isOwner = comment.author.id === currentUserId;
-  const isDeleting = deletingCommentId === comment.id;
-  const isLiking = likingCommentId === comment.id;
-  const isFavoriting = favoritingCommentId === comment.id;
-  const tapeColors = [
-    "bg-field-accent-blue",
-    "bg-field-accent-green",
-    "bg-field-accent",
-  ];
+	const isOwner = comment.author.id === currentUserId;
+	const isDeleting = deletingCommentId === comment.id;
+	const isLiking = likingCommentId === comment.id;
+	const isFavoriting = favoritingCommentId === comment.id;
 
-  return (
-    <div className="relative overflow-hidden border border-black/10 bg-field-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
-      <div
-        className={cn(
-          "archive-tape absolute -top-2 left-5 h-4 w-16 -rotate-2",
-          tapeColors[index % tapeColors.length]
-        )}
-      />
+	return (
+		<div className="relative overflow-hidden border border-black/10 bg-field-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
+			<div className="flex items-start justify-between gap-3">
+				<div className="flex min-w-0 items-center gap-3">
+					<Link
+						href={`/profil/${comment.author.id}`}
+						className="shrink-0"
+					>
+						<Avatar className="h-8 w-8 overflow-hidden rounded-none border border-field-label bg-field-stage p-0.5 -rotate-2">
+							<AvatarImage
+								src={comment.author.avatar || ""}
+								alt={comment.author.username}
+								className="archive-photo object-cover"
+							/>
+							<AvatarFallback className="rounded-none bg-field-stage font-field-display text-[10px] font-black text-field-ink">
+								{getInitials(comment.author.username)}
+							</AvatarFallback>
+						</Avatar>
+					</Link>
 
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href={`/profil/${comment.author.id}`}
-              className="font-semibold text-field-ink transition hover:text-field-accent-blue"
-            >
-              {comment.author.username}
-            </Link>
-            <span className="font-field-mono text-[11px] text-field-label">
-              @{comment.author.username.toLowerCase()}
-            </span>
-          </div>
-          <p className="mt-1 font-field-mono text-[10px] uppercase tracking-[0.16em] text-field-label">
-            {formatFeedTime(comment.createdAt)}
-          </p>
-        </div>
+					<div className="min-w-0">
+						<div className="flex flex-wrap items-center gap-3">
+							<Link
+								href={`/profil/${comment.author.id}`}
+								className="font-field-mono text-field-ink transition hover:text-field-accent-blue"
+							>
+								@{comment.author.username}
+							</Link>
+							<span className="font-field-mono text-[15px] text-field-label">
+								@{comment.author.username.toLowerCase()}
+							</span>
+						</div>
+					</div>
+				</div>
 
-        {isOwner ? (
-          <ArchiveButton
-            type="button"
-            variant="stamp"
-            size="sm"
-            onClick={() => onDeleteComment(comment.id)}
-            disabled={isDeleting}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            {isDeleting ? "Deleting" : "Delete"}
-          </ArchiveButton>
-        ) : null}
-      </div>
+				<div className="flex shrink-0 items-center gap-3">
+					<RelativeTime
+						dateString={comment.createdAt}
+						className="font-field-mono text-[10px] uppercase tracking-[0.16em] text-field-label"
+					/>
 
-      <p className="font-field-display text-sm leading-7 text-field-ink/85">
-        {comment.content}
-      </p>
+					{isOwner ? (
+						<ArchiveButton
+							type="button"
+							variant="delete"
+							size="sm"
+							onClick={() => onDeleteComment(comment.id)}
+							disabled={isDeleting}
+						>
+							<Trash2 className="h-3.5 w-3.5" />
+						</ArchiveButton>
+					) : null}
+				</div>
+			</div>
 
-      {comment.media.length > 0 ? (
-        <div className="mt-4 overflow-hidden border border-black/10 bg-field-stage/70">
-          <img
-            src={comment.media[0]}
-            alt="Comment media"
-            className="archive-photo max-h-[280px] w-full object-cover"
-          />
-        </div>
-      ) : null}
+			<p className="font-field-display text-m leading-7 text-field-ink/85">
+				{comment.content}
+			</p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <FeedActionButton
-          icon={Heart}
-          label="Like comment"
-          count={comment.likesCount}
-          accent="orange"
-          active={comment.likedByCurrentUser}
-          disabled={isLiking}
-          onClick={() => onToggleCommentLike(comment)}
-        />
-        <FeedActionButton
-          icon={Bookmark}
-          label="Favorite comment"
-          count={comment.favoritesCount}
-          accent="green"
-          active={comment.favoritedByCurrentUser}
-          disabled={isFavoriting}
-          onClick={() => onToggleCommentFavorite(comment)}
-        />
-      </div>
-    </div>
-  );
+			<div className="mt-2 flex flex-wrap items-center gap-2">
+				<FeedActionButton
+					icon={Heart}
+					label="Like comment"
+					count={comment.likesCount}
+					accent="orange"
+					active={comment.likedByCurrentUser}
+					disabled={isLiking}
+					onClick={() => onToggleCommentLike(comment)}
+				/>
+				<FeedActionButton
+					icon={Bookmark}
+					label="Favorite comment"
+					count={comment.favoritesCount}
+					accent="green"
+					active={comment.favoritedByCurrentUser}
+					disabled={isFavoriting}
+					onClick={() => onToggleCommentFavorite(comment)}
+				/>
+			</div>
+		</div>
+	);
 }

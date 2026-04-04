@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Trash2, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { RelativeTime } from "@/components/ui/relative-time";
 import {
 	Dialog,
 	DialogClose,
@@ -16,7 +17,6 @@ import { ArchiveButton } from "@/components/archive/ArchiveButton";
 import { FeedActionButton } from "@/components/feed/FeedActionButton";
 import { CommentCard } from "@/components/posts/CommentCard";
 import { CommentComposer } from "@/components/posts/CommentComposer";
-import { formatFeedTime } from "@/components/feed/feedUtils";
 import type { FeedComment, FeedPost } from "@/components/feed/types";
 
 type PostDialogProps = {
@@ -106,26 +106,17 @@ export function PostDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			{post ? (
 				<DialogContent className="max-h-[90vh] overflow-hidden p-0">
-					<article className="relative max-h-[90vh] overflow-auto border border-black/10 bg-field-stage rounded-xl p-0">
+					<DialogClose asChild>
+						<button
+							type="button"
+							className="rounded-full border border-black/10 bg-field-paper p-2 text-field-label transition hover:bg-field-paper-muted"
+							aria-label="Close post dialog"
+						>
+							<X className="h-5 w-5" />
+						</button>
+					</DialogClose>
+					<article className="relative max-h-[90vh] overflow-auto border border-black/10 bg-field-stage rounded-none p-0">
 						<div className="px-5 py-6 sm:px-8 sm:py-8">
-							<div className="mb-6 flex items-start justify-between gap-4 border-b border-dashed border-black/20 pb-4">
-								<div>
-									<DialogTitle className="mt-2 font-field-display text-4xl font-black tracking-[-0.04em] text-field-ink">
-										{post.author.username}&apos;s Post
-									</DialogTitle>
-								</div>
-
-								<DialogClose asChild>
-									<button
-										type="button"
-										className="rounded-full border border-black/10 bg-field-paper p-2 text-field-label transition hover:bg-field-paper-muted"
-										aria-label="Close post dialog"
-									>
-										<X className="h-5 w-5" />
-									</button>
-								</DialogClose>
-							</div>
-
 							<div className="space-y-6">
 								<section className="archive-paper relative overflow-hidden border border-black/10 bg-field-paper px-5 py-5">
 									<div className="mb-5 flex items-start justify-between gap-4 border-b border-dashed border-black/20 pb-4">
@@ -167,30 +158,31 @@ export function PostDialog({
 														{post.author.username.toLowerCase()}
 													</span>
 												</div>
-												<span className="font-field-mono text-[10px] text-field-label">
-													{formatFeedTime(
-														post.createdAt,
-													)}
-												</span>
 											</div>
 										</div>
 
-										{isOwner ? (
-											<ArchiveButton
-												type="button"
-												variant="stamp"
-												size="sm"
-												onClick={() =>
-													onDelete(post.id)
-												}
-												disabled={isDeleting}
-											>
-												<Trash2 className="h-3.5 w-3.5" />
-												{isDeleting
-													? "Deleting"
-													: "Delete"}
-											</ArchiveButton>
-										) : null}
+										<div className="flex shrink-0 items-center gap-3">
+											<RelativeTime
+												dateString={post.createdAt}
+												className="font-field-mono text-[10px] text-field-label"
+											/>
+											{isOwner ? (
+												<ArchiveButton
+													type="button"
+													variant="stamp"
+													size="sm"
+													onClick={() =>
+														onDelete(post.id)
+													}
+													disabled={isDeleting}
+												>
+													<Trash2 className="h-3.5 w-3.5" />
+													{isDeleting
+														? "Deleting"
+														: "Delete"}
+												</ArchiveButton>
+											) : null}
+										</div>
 									</div>
 
 									{post.content ? (
@@ -252,48 +244,28 @@ export function PostDialog({
 									</div>
 								</section>
 
-								<section className="space-y-4 rounded-sm bg-field-stage/45 px-3 py-3">
-									<div className="flex items-center justify-between gap-3 border-b border-dashed border-black/20 pb-2">
-										<p className="font-field-display text-2xl font-bold text-field-ink">
-											Comment Archive
-										</p>
-										<span className="font-field-mono text-[11px] uppercase tracking-[0.16em] text-field-label">
-											{post.commentsCount} notes
-										</span>
-									</div>
-
-									{post.comments.length > 0 ? (
-										post.comments.map((comment, index) => (
-											<CommentCard
-												key={comment.id}
-												comment={comment}
-												currentUserId={currentUserId}
-												index={index}
-												onDeleteComment={
-													onDeleteComment
-												}
-												onToggleCommentLike={
-													onToggleCommentLike
-												}
-												onToggleCommentFavorite={
-													onToggleCommentFavorite
-												}
-												deletingCommentId={
-													deletingCommentId
-												}
-												likingCommentId={
-													likingCommentId
-												}
-												favoritingCommentId={
-													favoritingCommentId
-												}
-											/>
-										))
-									) : (
-										<p className="font-field-mono text-[11px] uppercase tracking-[0.16em] text-field-label">
-											No comments archived yet.
-										</p>
-									)}
+								<section className="space-y-4 rounded-sm bg-field-stage/45 px-0 py-0">
+									{post.comments.map((comment) => (
+										<CommentCard
+											key={comment.id}
+											comment={comment}
+											currentUserId={currentUserId}
+											onDeleteComment={onDeleteComment}
+											onToggleCommentLike={
+												onToggleCommentLike
+											}
+											onToggleCommentFavorite={
+												onToggleCommentFavorite
+											}
+											deletingCommentId={
+												deletingCommentId
+											}
+											likingCommentId={likingCommentId}
+											favoritingCommentId={
+												favoritingCommentId
+											}
+										/>
+									))}
 								</section>
 
 								<CommentComposer
