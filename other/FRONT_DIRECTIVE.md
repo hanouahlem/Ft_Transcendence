@@ -69,17 +69,20 @@ Rules:
 
 Use the archive font variables already wired globally:
 
+- `--font-archive-inter-source`
 - `--font-field-display-source`
 - `--font-field-mono-source`
 
 Mapped theme fonts already available:
 
+- `font-archive-inter`
 - `font-field-display`
 - `font-field-mono`
 
 Rules:
 
 - display text, titles, and editorial content should use the archive display font
+- use `font-archive-inter` when a cleaner modern sans face is needed inside the archive system
 - metadata, labels, counters, timestamps, and system text should use the archive mono font
 - do not fall back to generic UI typography for new archive pages unless there is a specific accessibility reason
 

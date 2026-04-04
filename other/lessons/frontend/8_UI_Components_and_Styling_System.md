@@ -120,6 +120,24 @@ So the rule to remember is:
 - route file = real fetch and mutation logic
 - feed components = reusable presentation blocks
 
+## Relative Time Formatting
+
+Post and comment timestamps now use Ark UI's relative-time utility through:
+
+- `frontend/components/ui/relative-time.tsx`
+
+Real code:
+
+```tsx
+<Format.RelativeTime value={date} numeric="auto" style="short" />
+```
+
+Why this matters:
+
+- posts and comments now share one time-formatting component
+- the UI shows relative time like "2 min ago" instead of fixed date strings
+- the exact timestamp is still preserved in the `title` attribute for hover inspection
+
 ## One Small Type Fix That Matters
 
 The backend current-user route already returns `avatar`, so the frontend type in:
