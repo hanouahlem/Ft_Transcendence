@@ -133,27 +133,36 @@ This shows a real system rule:
 - buttons are not defined page by page anymore
 - they have named semantic variants tied to the archive language
 
-### Feed-Level Components
+### Post and Feed Components
 
-Folder:
+Folders:
 
+- `frontend/components/posts`
 - `frontend/components/feed`
 
-These are not global design-system primitives, but they are proof that the archive language can be applied consistently to a real feature:
+These are not global design-system primitives, but they are proof that the archive language can be applied consistently to a real feature.
 
-- `FeedPostCard.tsx`
-- `FeedPostDialog.tsx`
-- `FeedCommentCard.tsx`
-- `FeedCommentComposer.tsx`
+Reusable post-domain UI now lives in `frontend/components/posts`:
+
+- `PostCard.tsx`
+- `PostDialog.tsx`
+- `CommentCard.tsx`
+- `CommentComposer.tsx`
 - `NewPostCard.tsx`
 - `NewPostDialog.tsx`
+
+Feed-specific helpers still stay in `frontend/components/feed`:
+
+- `FeedActionButton.tsx`
+- `feedUtils.ts`
+- `types.ts`
 
 This matters because a design system is only useful if real feature components can be built from it.
 
 Real implementation detail:
 
-- `frontend/components/feed/NewPostDialog.tsx` now acts as a thin dialog wrapper
-- `frontend/components/feed/NewPostCard.tsx` is the actual new-post UI
+- `frontend/components/posts/NewPostDialog.tsx` now acts as a thin dialog wrapper
+- `frontend/components/posts/NewPostCard.tsx` is the actual new-post UI
 
 Why this split is useful:
 

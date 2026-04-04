@@ -61,12 +61,12 @@ The route file is still:
 
 But the archive UI is now composed from:
 
-- `Frontend/components/feed/ArchiveSidebar.tsx`
-- `Frontend/components/feed/FeedPostCard.tsx`
-- `Frontend/components/feed/NewPostDialog.tsx`
-- `Frontend/components/feed/FeedRightRail.tsx`
+- `Frontend/components/archive/ArchiveSidebar.tsx`
+- `Frontend/components/posts/PostCard.tsx`
+- `Frontend/components/posts/NewPostDialog.tsx`
+- `Frontend/components/archive/ArchiveRightRail.tsx`
 - `Frontend/components/feed/FeedActionButton.tsx`
-- `Frontend/components/feed/ArchiveButton.tsx`
+- `Frontend/components/archive/ArchiveButton.tsx`
 
 Example from the page:
 
@@ -77,8 +77,7 @@ Example from the page:
   onLogout={logout}
 />
 
-<FeedRightRail
-  user={user}
+<ArchiveRightRail
   totalPosts={posts.length}
   totalLikes={totalLikes}
   totalComments={totalComments}
@@ -102,7 +101,7 @@ The redesign is not mock-only.
 For example, the page still fetches real posts and passes real handlers into the post card:
 
 ```tsx
-<FeedPostCard
+<PostCard
   post={post}
   currentUserId={user?.id}
   onDelete={handleDelete}
@@ -153,5 +152,5 @@ Before evaluation, each teammate should be able to explain:
 
 1. why archive styling moved into `Frontend/app/globals.css`
 2. why `Frontend/app/feed/page.tsx` still owns the fetch/mutation logic
-3. what `ArchiveSidebar`, `FeedPostCard`, `NewPostDialog`, and `FeedRightRail` each do
+3. what `ArchiveSidebar`, `PostCard`, `NewPostDialog`, and `ArchiveRightRail` each do
 4. how real actions like publish, like, favorite, comment, and friend request still work after the redesign

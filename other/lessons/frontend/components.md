@@ -10,7 +10,7 @@ The feed route is split into:
 
 - one page file that owns data fetching and mutations
 - archive-level reusable layout components
-- feed-specific components for posts, composer, and dialogs
+- reusable post components plus feed-specific helpers
 
 Current files:
 
@@ -22,14 +22,14 @@ Current files:
 - `frontend/components/archive/NatureCanvas.tsx`
 - `frontend/components/archive/archiveUtils.ts`
 - `frontend/components/feed/FeedActionButton.tsx`
-- `frontend/components/feed/FeedCommentCard.tsx`
-- `frontend/components/feed/FeedCommentComposer.tsx`
-- `frontend/components/feed/NewPostCard.tsx`
-- `frontend/components/feed/FeedPostDialog.tsx`
-- `frontend/components/feed/FeedPostCard.tsx`
-- `frontend/components/feed/NewPostDialog.tsx`
 - `frontend/components/feed/feedUtils.ts`
 - `frontend/components/feed/types.ts`
+- `frontend/components/posts/CommentCard.tsx`
+- `frontend/components/posts/CommentComposer.tsx`
+- `frontend/components/posts/NewPostCard.tsx`
+- `frontend/components/posts/PostDialog.tsx`
+- `frontend/components/posts/PostCard.tsx`
+- `frontend/components/posts/NewPostDialog.tsx`
 - `frontend/components/ui/dialog.tsx`
 
 The important rule is:
@@ -479,7 +479,7 @@ Explain this clearly:
 - the same data can be reused between the inline composer and dialog if we want to evolve the design later
 - accessibility behavior now comes from Ark instead of custom modal markup
 
-### `FeedPostDialog.tsx`
+### `PostDialog.tsx`
 
 Purpose:
 
@@ -503,15 +503,15 @@ Data it uses:
 
 Important architecture point:
 
-- `FeedPostDialog` coordinates comment components
+- `PostDialog` coordinates comment components
 - `page.tsx` still owns comment state and backend requests
 
 So the split is:
 
-- `FeedPostCard` = preview in the timeline
-- `FeedPostDialog` = detailed interaction surface for comments
+- `PostCard` = preview in the timeline
+- `PostDialog` = detailed interaction surface for comments
 
-### `FeedCommentCard.tsx`
+### `CommentCard.tsx`
 
 Purpose:
 
@@ -535,11 +535,11 @@ What it renders:
 
 Why it is separate:
 
-- comment markup was making `FeedPostDialog` too large
+- comment markup was making `PostDialog` too large
 - a comment is now a clear UI unit with its own actions
 - if we reuse this archive comment style later, extraction is already done
 
-### `FeedCommentComposer.tsx`
+### `CommentComposer.tsx`
 
 Purpose:
 
@@ -556,7 +556,7 @@ Data it uses:
 Important technical detail:
 
 - it uses `forwardRef`
-- this lets `FeedPostDialog` keep programmatic focus control for the textarea
+- this lets `PostDialog` keep programmatic focus control for the textarea
 
 Why it is separate:
 
@@ -564,7 +564,7 @@ Why it is separate:
 - extracting it keeps dialog orchestration readable
 - state still stays in `page.tsx`, so we improved structure without moving business logic
 
-### `FeedPostCard.tsx`
+### `PostCard.tsx`
 
 Purpose:
 
@@ -601,7 +601,7 @@ const variant = POST_VARIANTS[variantKey];
 
 Important evaluation point:
 
-- `FeedPostCard` still does not own the real backend mutations
+- `PostCard` still does not own the real backend mutations
 - it receives callbacks like `onToggleLike(post)` and `onOpenPost(post.id)`
 - the page remains the source of truth
 
@@ -632,7 +632,7 @@ Why this is separate:
 2. `useEffect` calls `fetchPosts()`
 3. `fetchPosts()` requests `GET /posts`
 4. the result is stored in `posts`
-5. `posts.map(...)` renders one `FeedPostCard` per post
+5. `posts.map(...)` renders one `PostCard` per post
 
 ### Publish a post
 
@@ -649,7 +649,7 @@ Why this is separate:
 ### Add a comment
 
 1. user opens a post dialog from the post body or the comment button
-2. user types in the reply textarea inside `FeedPostDialog`
+2. user types in the reply textarea inside `PostDialog`
 3. component calls `onCommentChange(post.id, value)`
 4. page stores the text in `commentInputs[postId]`
 5. user clicks comment
@@ -660,12 +660,12 @@ Why this is separate:
 
 ### Open a post
 
-1. user clicks the post body or comment action in `FeedPostCard`
-2. `FeedPostCard` calls `onOpenPost(post.id, focusCommentInput?)`
+1. user clicks the post body or comment action in `PostCard`
+2. `PostCard` calls `onOpenPost(post.id, focusCommentInput?)`
 3. `page.tsx` stores that id in `activePostId`
 4. if the comment action was used, `page.tsx` also sets a flag to focus the reply textarea
 5. `activePost` is derived from `posts.find(...)`
-6. `FeedPostDialog` receives the selected post and opens
+6. `PostDialog` receives the selected post and opens
 
 ### Follow from right rail
 
@@ -710,7 +710,7 @@ Because it owns all backend communication and page state. We extracted rendering
 
 ### Why separate `archive` and `feed` folders?
 
-Because some components are visual shell primitives that can be reused on other pages (`ArchiveSidebar`, `ArchiveButton`, `NatureCanvas`), while others are tied to feed entities like posts and comments (`FeedPostCard`, `NewPostCard`).
+Because some components are visual shell primitives that can be reused on other pages (`ArchiveSidebar`, `ArchiveButton`, `NatureCanvas`), while reusable post UI now lives in `frontend/components/posts` (`PostCard`, `PostDialog`, `CommentCard`, `CommentComposer`, `NewPostCard`, `NewPostDialog`). Feed-only helpers stay in `frontend/components/feed`.
 
 ### Why does the right rail not fetch its own data?
 
