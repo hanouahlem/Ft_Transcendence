@@ -6,11 +6,11 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { ArchiveRightRail } from "@/components/archive/ArchiveRightRail";
 import { ArchiveSidebar } from "@/components/archive/ArchiveSidebar";
 import { NatureCanvas } from "@/components/archive/NatureCanvas";
-import { FeedPostDialog } from "@/components/feed/FeedPostDialog";
-import { FeedPostCard } from "@/components/feed/FeedPostCard";
-import { NewPostCard } from "@/components/feed/NewPostCard";
-import { NewPostDialog } from "@/components/feed/NewPostDialog";
 import type { FeedComment, FeedPost } from "@/components/feed/types";
+import { NewPostCard } from "@/components/posts/NewPostCard";
+import { NewPostDialog } from "@/components/posts/NewPostDialog";
+import { PostCard } from "@/components/posts/PostCard";
+import { PostDialog } from "@/components/posts/PostDialog";
 import { useAuth } from "@/context/AuthContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -772,7 +772,7 @@ export default function FeedPage() {
                 ) : (
                   <div className="flex flex-col gap-10">
                     {posts.map((post, index) => (
-                      <FeedPostCard
+                      <PostCard
                         key={post.id}
                         post={post}
                         currentUserId={user?.id}
@@ -837,7 +837,7 @@ export default function FeedPage() {
           className="hidden"
         />
 
-        <FeedPostDialog
+        <PostDialog
           open={postDialogOpen}
           post={activePost}
           focusCommentInput={focusCommentInput}

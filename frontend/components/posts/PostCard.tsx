@@ -8,7 +8,7 @@ import { formatFeedTime } from "@/components/feed/feedUtils";
 import type { FeedPost } from "@/components/feed/types";
 import { cn } from "@/lib/utils";
 
-type FeedPostCardProps = {
+type PostCardProps = {
 	post: FeedPost;
 	currentUserId: number | undefined;
 	variantIndex: number;
@@ -141,7 +141,7 @@ function renderBody(
 	return <p className={cn(contentClass, "font-field-display")}>{content}</p>;
 }
 
-export function FeedPostCard({
+export function PostCard({
 	post,
 	currentUserId,
 	variantIndex,
@@ -152,7 +152,7 @@ export function FeedPostCard({
 	deletingPostId,
 	likingPostId,
 	favoritingPostId,
-}: FeedPostCardProps) {
+}: PostCardProps) {
 	const variantKey = variantIndex % POST_VARIANTS.length;
 	const variant = POST_VARIANTS[variantKey];
 	const isOwner = post.author.id === currentUserId;

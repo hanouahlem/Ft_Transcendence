@@ -6,7 +6,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { NewPostCard } from "@/components/feed/NewPostCard";
+import { NewPostCard } from "@/components/posts/NewPostCard";
 
 type NewPostDialogProps = {
   open: boolean;
