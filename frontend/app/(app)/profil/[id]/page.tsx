@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -273,8 +272,7 @@ export default function PublicProfilePage() {
   );
 
   return (
-    <ProtectedRoute>
-      <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
+    <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
         <section className="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.16),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(216,207,184,0.32),transparent_30%)]" />
 
@@ -489,6 +487,5 @@ export default function PublicProfilePage() {
           </div>
         </section>
       </main>
-    </ProtectedRoute>
   );
 }

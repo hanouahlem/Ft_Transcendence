@@ -4,21 +4,6 @@ import localFont from "next/font/local";
 import { AuthProvider } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
-const baseSans = localFont({
-  src: [
-    {
-      path: "../public/fonts/inter/Inter-VariableFont_opsz,wght.ttf",
-      style: "normal",
-      weight: "100 900",
-    },
-    {
-      path: "../public/fonts/inter/Inter-Italic-VariableFont_opsz,wght.ttf",
-      style: "italic",
-      weight: "100 900",
-    },
-  ],
-  variable: "--font-sans-source",
-});
 const displaySerif = localFont({
   src: [
     {
@@ -81,15 +66,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="fr"
-      className={cn(
-        "font-sans",
-        baseSans.variable,
-        displaySerif.variable,
-        monoFont.variable,
-      )}
-    >
+    <html lang="fr" className={cn(displaySerif.variable, monoFont.variable)}>
       <body className="min-h-screen bg-neutral-950 text-white">
         <AuthProvider>
           {children}

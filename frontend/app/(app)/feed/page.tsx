@@ -2,10 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Plus } from "lucide-react";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { ArchiveRightRail } from "@/components/archive/ArchiveRightRail";
-import { ArchiveSidebar } from "@/components/archive/ArchiveSidebar";
-import { NatureCanvas } from "@/components/archive/NatureCanvas";
 import type { FeedComment, FeedPost } from "@/components/feed/types";
 import { NewPostCard } from "@/components/posts/NewPostCard";
 import { NewPostDialog } from "@/components/posts/NewPostDialog";
@@ -16,7 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function FeedPage() {
-  const { user, token, logout } = useAuth();
+  const { user, token } = useAuth();
 
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [postContent, setPostContent] = useState("");
@@ -714,153 +711,141 @@ export default function FeedPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <main className="archive-page relative min-h-screen overflow-x-hidden text-field-ink">
-        <NatureCanvas />
-
-        <div className="relative z-10 min-h-screen lg:pl-[76px]">
-          <ArchiveSidebar
-            user={user}
-            onCreatePost={() => setCreateOpen(true)}
-            onLogout={logout}
-          />
-
-          <div className="mx-auto flex w-full max-w-[1132px] items-start justify-start gap-8 xl:gap-10">
-            <section className="min-w-0 w-full max-w-[800px] px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
-              <div className="flex flex-col gap-8 lg:gap-12">
-                <NewPostCard
-                  content={postContent}
-                  previewUrl={previewUrl}
-                  selectedFileName={selectedFile?.name || ""}
-                  publishing={publishing}
-                  onPublish={handlePublish}
-                  onContentChange={setPostContent}
-                  onOpenFilePicker={handleOpenFilePicker}
-                  onRemoveFile={handleRemoveFile}
-                />
-
-                {message && (
-                  <section className="rotate-[-1deg] border border-field-accent/25 bg-field-paper px-5 py-4 text-sm text-field-ink shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-                    <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-field-accent">
-                      Notice
-                    </p>
-                    <p className="mt-2">{message}</p>
-                  </section>
-                )}
-
-                {error && (
-                  <section className="rotate-[1deg] border border-red-400/35 bg-[#fff3ef] px-5 py-4 text-sm text-red-700 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-                    <p className="font-mono text-[11px] uppercase tracking-[0.16em]">
-                      Error
-                    </p>
-                    <p className="mt-2">{error}</p>
-                  </section>
-                )}
-
-                {loading ? (
-                  <section className="border border-black/10 bg-field-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
-                      Loading feed archive...
-                    </p>
-                  </section>
-                ) : posts.length === 0 ? (
-                  <section className="border border-black/10 bg-field-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
-                      No posts have been recorded yet.
-                    </p>
-                  </section>
-                ) : (
-                  <div className="flex flex-col gap-10">
-                    {posts.map((post, index) => (
-                      <PostCard
-                        key={post.id}
-                        post={post}
-                        currentUserId={user?.id}
-                        variantIndex={index}
-                        onOpenPost={handleOpenPost}
-                        onDelete={handleDelete}
-                        onToggleLike={handleToggleLike}
-                        onToggleFavorite={handleToggleFavorite}
-                        deletingPostId={deletingPostId}
-                        likingPostId={likingPostId}
-                        favoritingPostId={favoritingPostId}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <div className="border-t border-dashed border-field-label py-8 text-center font-mono text-sm text-field-label">
-                  --- END OF RECENT LOGS ---
-                </div>
-              </div>
-            </section>
-
-            <ArchiveRightRail
-              totalPosts={posts.length}
-              totalLikes={totalLikes}
-              totalComments={totalComments}
-              suggestions={suggestions}
-              sentRequests={sentRequests}
-              sendingFriendId={sendingFriendId}
-              onAddFriend={handleAddFriend}
+    <>
+      <div className="flex items-start justify-start gap-8 xl:gap-10">
+        <section className="min-w-0 w-full max-w-[800px]">
+          <div className="flex flex-col gap-8 lg:gap-12">
+            <NewPostCard
+              content={postContent}
+              previewUrl={previewUrl}
+              selectedFileName={selectedFile?.name || ""}
+              publishing={publishing}
+              onPublish={handlePublish}
+              onContentChange={setPostContent}
+              onOpenFilePicker={handleOpenFilePicker}
+              onRemoveFile={handleRemoveFile}
             />
+
+            {message && (
+              <section className="rotate-[-1deg] border border-field-accent/25 bg-field-paper px-5 py-4 text-sm text-field-ink shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-field-accent">
+                  Notice
+                </p>
+                <p className="mt-2">{message}</p>
+              </section>
+            )}
+
+            {error && (
+              <section className="rotate-[1deg] border border-red-400/35 bg-[#fff3ef] px-5 py-4 text-sm text-red-700 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em]">
+                  Error
+                </p>
+                <p className="mt-2">{error}</p>
+              </section>
+            )}
+
+            {loading ? (
+              <section className="border border-black/10 bg-field-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
+                  Loading feed archive...
+                </p>
+              </section>
+            ) : posts.length === 0 ? (
+              <section className="border border-black/10 bg-field-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
+                  No posts have been recorded yet.
+                </p>
+              </section>
+            ) : (
+              <div className="flex flex-col gap-10">
+                {posts.map((post, index) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    currentUserId={user?.id}
+                    variantIndex={index}
+                    onOpenPost={handleOpenPost}
+                    onDelete={handleDelete}
+                    onToggleLike={handleToggleLike}
+                    onToggleFavorite={handleToggleFavorite}
+                    deletingPostId={deletingPostId}
+                    likingPostId={likingPostId}
+                    favoritingPostId={favoritingPostId}
+                  />
+                ))}
+              </div>
+            )}
+
+            <div className="border-t border-dashed border-field-label py-8 text-center font-mono text-sm text-field-label">
+              --- END OF RECENT LOGS ---
+            </div>
           </div>
-        </div>
+        </section>
 
-        <button
-          type="button"
-          onClick={() => setCreateOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-field-ink bg-field-ink text-field-paper shadow-[3px_6px_0_#ff4a1c] transition hover:scale-105 lg:hidden"
-          aria-label="Create a new post"
-        >
-          <Plus className="h-6 w-6" />
-        </button>
-
-        <NewPostDialog
-          open={createOpen}
-          content={postContent}
-          previewUrl={previewUrl}
-          selectedFileName={selectedFile?.name || ""}
-          publishing={publishing}
-          onClose={resetComposer}
-          onPublish={handlePublish}
-          onContentChange={setPostContent}
-          onOpenFilePicker={handleOpenFilePicker}
-          onRemoveFile={handleRemoveFile}
+        <ArchiveRightRail
+          totalPosts={posts.length}
+          totalLikes={totalLikes}
+          totalComments={totalComments}
+          suggestions={suggestions}
+          sentRequests={sentRequests}
+          sendingFriendId={sendingFriendId}
+          onAddFriend={handleAddFriend}
         />
+      </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
-        />
+      <button
+        type="button"
+        onClick={() => setCreateOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-field-ink bg-field-ink text-field-paper shadow-[3px_6px_0_#ff4a1c] transition hover:scale-105 lg:hidden"
+        aria-label="Create a new post"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
 
-        <PostDialog
-          open={postDialogOpen}
-          post={activePost}
-          focusCommentInput={focusCommentInput}
-          currentUserId={user?.id}
-          onOpenChange={handlePostDialogChange}
-          onDelete={handleDelete}
-          onDeleteComment={handleDeleteComment}
-          onToggleLike={handleToggleLike}
-          onToggleFavorite={handleToggleFavorite}
-          onToggleCommentLike={handleToggleCommentLike}
-          onToggleCommentFavorite={handleToggleCommentFavorite}
-          onCommentChange={handleCommentChange}
-          onAddComment={handleAddComment}
-          commentValue={dialogPostId ? commentInputs[dialogPostId] || "" : ""}
-          deletingPostId={deletingPostId}
-          deletingCommentId={deletingCommentId}
-          likingPostId={likingPostId}
-          favoritingPostId={favoritingPostId}
-          likingCommentId={likingCommentId}
-          favoritingCommentId={favoritingCommentId}
-          commentingPostId={commentingPostId}
-        />
-      </main>
-    </ProtectedRoute>
+      <NewPostDialog
+        open={createOpen}
+        content={postContent}
+        previewUrl={previewUrl}
+        selectedFileName={selectedFile?.name || ""}
+        publishing={publishing}
+        onClose={resetComposer}
+        onPublish={handlePublish}
+        onContentChange={setPostContent}
+        onOpenFilePicker={handleOpenFilePicker}
+        onRemoveFile={handleRemoveFile}
+      />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      <PostDialog
+        open={postDialogOpen}
+        post={activePost}
+        focusCommentInput={focusCommentInput}
+        currentUserId={user?.id}
+        onOpenChange={handlePostDialogChange}
+        onDelete={handleDelete}
+        onDeleteComment={handleDeleteComment}
+        onToggleLike={handleToggleLike}
+        onToggleFavorite={handleToggleFavorite}
+        onToggleCommentLike={handleToggleCommentLike}
+        onToggleCommentFavorite={handleToggleCommentFavorite}
+        onCommentChange={handleCommentChange}
+        onAddComment={handleAddComment}
+        commentValue={dialogPostId ? commentInputs[dialogPostId] || "" : ""}
+        deletingPostId={deletingPostId}
+        deletingCommentId={deletingCommentId}
+        likingPostId={likingPostId}
+        favoritingPostId={favoritingPostId}
+        likingCommentId={likingCommentId}
+        favoritingCommentId={favoritingCommentId}
+        commentingPostId={commentingPostId}
+      />
+    </>
   );
 }

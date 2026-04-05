@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import Navbar from "@/components/layout/Navbar";
 import {
   ArrowLeft,
   Shield,
@@ -98,9 +96,7 @@ export default function SettingsSecurityPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <Navbar />
-      <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
+    <main className="min-h-screen bg-[#f6f1e8] text-[#2f3a32]">
         <section className="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,148,112,0.16),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(216,207,184,0.32),transparent_30%)]" />
 
@@ -362,6 +358,5 @@ export default function SettingsSecurityPage() {
           </div>
         </section>
       </main>
-    </ProtectedRoute>
   );
 }
