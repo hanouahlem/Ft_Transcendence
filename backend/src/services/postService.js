@@ -116,6 +116,9 @@ export const deletePost = async (postId, userId) => {
     where: {
       id: Number(postId),
     },
+    include: {
+      comments: true,
+    },
   });
 
   if (!post) {
@@ -125,6 +128,7 @@ export const deletePost = async (postId, userId) => {
   if (post.authorId !== Number(userId)) {
     throw new Error("You are not allowed to delete this post");
   }
+
 
   if (post.image) {
     try {
@@ -142,17 +146,37 @@ export const deletePost = async (postId, userId) => {
     }
   }
 
-  await prisma.favorite.deleteMany({
-  where: {
-    postId: Number(postId),
-  },
-});
 
-  await prisma.like.deleteMany({
-    where: {
-      postId: Number(postId),
-    },
-  });
+  for (const comment of post.comments) {
+    if (comment.image) {
+      try {
+        const filename = comment.image.split("/uploads/")[1];
+
+        if (filename) {
+          const filePath = path.resolve("uploads", filename);
+
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        }
+      } catch (error) {
+        console.error("Erreur suppression image commentaire :", error);
+      }
+    }
+
+  
+    await prisma.commentLike.deleteMany({
+      where: {
+        commentId: comment.id,
+      },
+    });
+
+    await prisma.commentFavorite.deleteMany({
+      where: {
+        commentId: comment.id,
+      },
+    });
+  }
 
   await prisma.comment.deleteMany({
     where: {
@@ -160,11 +184,23 @@ export const deletePost = async (postId, userId) => {
     },
   });
 
+  await prisma.like.deleteMany({
+    where: {
+      postId: Number(postId),
+    },
+  });
+
+  await prisma.favorite.deleteMany({
+    where: {
+      postId: Number(postId),
+    },
+  });
+
   await prisma.repost.deleteMany({
-  where: {
-    postId: Number(postId),
-  },
-});
+    where: {
+      postId: Number(postId),
+    },
+  });
 
   await prisma.post.delete({
     where: {

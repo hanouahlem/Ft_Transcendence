@@ -61,7 +61,6 @@ router.post("/comments/:id/like", authMiddleware, post.likeCommentHandler);
 router.delete("/comments/:id/like", authMiddleware, post.unlikeCommentHandler);
 router.post("/comments/:id/favorite", authMiddleware, post.favoriteCommentHandler);
 router.delete("/comments/:id/favorite", authMiddleware, post.unfavoriteCommentHandler);
-
 router.post("/posts/:id/comments", authMiddleware,  post.createCommentHandler);
 
 
