@@ -2,7 +2,7 @@ import { useId, useState, type ChangeEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type FieldInputProps = {
-  type: "email" | "password";
+  type: "text" | "email" | "password";
   label: string;
   placeholder: string;
   value: string;

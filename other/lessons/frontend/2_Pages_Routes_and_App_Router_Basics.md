@@ -25,8 +25,8 @@ Current route files include:
 
 ```text
 frontend/app/page.tsx
-frontend/app/login/page.tsx
-frontend/app/register/page.tsx
+frontend/app/(auth)/login/page.tsx
+frontend/app/(auth)/register/page.tsx
 frontend/app/feed/page.tsx
 frontend/app/friends/page.tsx
 frontend/app/notifications/page.tsx
@@ -80,8 +80,8 @@ So `/` behaves like:
 
 These files:
 
-- `frontend/app/login/page.tsx`
-- `frontend/app/register/page.tsx`
+- `frontend/app/(auth)/login/page.tsx`
+- `frontend/app/(auth)/register/page.tsx`
 
 map to:
 
@@ -168,7 +168,7 @@ Examples in this repo:
 
 - route files:
   - `frontend/app/feed/page.tsx`
-  - `frontend/app/login/page.tsx`
+  - `frontend/app/(auth)/login/page.tsx`
 - shared components:
   - `frontend/components/layout/AppSidebarShell.tsx`
   - `frontend/components/auth/ProtectedRoute.tsx`

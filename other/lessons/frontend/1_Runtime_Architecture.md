@@ -132,8 +132,8 @@ By default, App Router files are server components unless they use:
 You can see this in many page files, for example:
 
 - `frontend/app/page.tsx`
-- `frontend/app/login/page.tsx`
-- `frontend/app/register/page.tsx`
+- `frontend/app/(auth)/login/page.tsx`
+- `frontend/app/(auth)/register/page.tsx`
 
 They need `"use client"` because they use browser-only React features such as:
 
@@ -207,8 +207,8 @@ Then route files inside `frontend/app/` provide the page content.
 Examples:
 
 - `frontend/app/page.tsx`
-- `frontend/app/login/page.tsx`
-- `frontend/app/register/page.tsx`
+- `frontend/app/(auth)/login/page.tsx`
+- `frontend/app/(auth)/register/page.tsx`
 - `frontend/app/feed/page.tsx`
 - `frontend/app/friends/page.tsx`
 

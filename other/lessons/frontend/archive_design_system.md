@@ -12,6 +12,7 @@ Real reference implementations:
 
 - `frontend/app/feed/page.tsx`
 - `frontend/components/auth/login/*`
+- `frontend/components/auth/register/*`
 - `frontend/app/globals.css`
 
 This means:
@@ -167,13 +168,14 @@ These matter because the login page no longer hides its form primitives inside `
 
 There is now also an auth-scoped shared shell in:
 
+- `frontend/components/auth/shared/AuthPageShell.tsx`
 - `frontend/components/auth/shared/AuthPaperCard.tsx`
 - `frontend/components/auth/shared/AuthGreenPanel.tsx`
 - `frontend/components/auth/shared/AuthCardHeader.tsx`
 - `frontend/components/auth/shared/AuthFormMeta.tsx`
 - `frontend/components/auth/shared/AuthProvidersRow.tsx`
 
-This keeps the paper card frame, green side panel, card header, form metadata block, and provider row reusable for login and register without pretending the full login form is generic.
+This keeps the page shell, paper card frame, green side panel, card header, form metadata block, and provider row reusable for login and register without pretending the full login form is generic.
 
 ### Post and Feed Components
 
@@ -230,6 +232,7 @@ Why it matters:
 - shared decorative pieces used by login now live in `frontend/components/decor`
 - the archive micro-label text primitive now lives in `frontend/components/typography/MonoText.tsx`
 - the card now composes reusable `FieldInput`, `StampButton`, and `ArchiveTape` primitives instead of embedding them privately
+- the page-level auth layout now comes from `frontend/components/auth/shared/AuthPageShell.tsx`
 - the outer paper frame now comes from `frontend/components/auth/shared/AuthPaperCard.tsx`
 - the green side panel now comes from `frontend/components/auth/shared/AuthGreenPanel.tsx` with an alignment variant for login/register reuse
 - the login card now also composes shared auth pieces for the header, document meta block, and OAuth provider row
@@ -246,6 +249,22 @@ Real example:
 ```
 
 This is a real archive form pattern, not just a visual mockup.
+
+### Register Components
+
+Folder:
+
+- `frontend/components/auth/register`
+
+Important reference:
+
+- `RegisterPaperCard.tsx`
+
+Why it matters:
+
+- it reuses the same auth shell pieces as login instead of duplicating page structure
+- it proves the shared auth layer is now usable for a second real route
+- it keeps the old registration behavior while switching the presentation to the archive system
 
 ## 5. What Is Still Provisional
 

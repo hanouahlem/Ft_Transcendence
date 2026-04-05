@@ -85,8 +85,8 @@ Study file:
 
 Goal: understand the current auth pages and how they connect to the backend.
 
-- `frontend/app/login/page.tsx`
-- `frontend/app/register/page.tsx`
+- `frontend/app/(auth)/login/page.tsx`
+- `frontend/app/(auth)/register/page.tsx`
 - form submission flow
 - login response -> `AuthContext.login(...)`
 - current OAuth UI placeholders on the login page
