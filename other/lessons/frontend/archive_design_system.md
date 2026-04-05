@@ -165,6 +165,7 @@ Additional reusable archive controls also live in `frontend/components/ui`:
 - `StampButton.tsx`
 
 These matter because the login page no longer hides its form primitives inside `LoginPaperCard.tsx`.
+`FieldInput.tsx` is now Ark Field-backed, so label, input, and error text stay grouped semantically while preserving the archive styling.
 
 There is now also an auth-scoped shared shell in:
 
@@ -236,6 +237,8 @@ Why it matters:
 - the outer paper frame now comes from `frontend/components/auth/shared/AuthPaperCard.tsx`
 - the green side panel now comes from `frontend/components/auth/shared/AuthGreenPanel.tsx` with an alignment variant for login/register reuse
 - the login card now also composes shared auth pieces for the header, document meta block, and OAuth provider row
+- auth errors no longer use a full-width feedback block under the fields; field-level errors now sit in the top-right label area
+- login/register now validate empty fields before the request, and backend auth responses can return field-level errors for username/email/password mapping
 
 Real example:
 
