@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { loginUser } from "@/lib/api";
+import AuthGreenPanel from "@/components/auth/shared/AuthGreenPanel";
 import AccentBeads from "@/components/decor/AccentBeads";
 import ArchiveFilters from "@/components/decor/ArchiveFilters";
-import LoginGreenPanel from "@/components/auth/login/LoginGreenPanel";
 import LoginPaperCard from "@/components/auth/login/LoginPaperCard";
 import { useAuth } from "@/context/AuthContext";
 
@@ -95,7 +95,7 @@ export default function LoginPage() {
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[69rem] items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
         <div className="relative flex w-full flex-col gap-6 lg:h-[700px] lg:justify-center">
-          <LoginGreenPanel />
+          <AuthGreenPanel align="right" />
 
           <LoginPaperCard
             email={identifier}

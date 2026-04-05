@@ -165,6 +165,16 @@ Additional reusable archive controls also live in `frontend/components/ui`:
 
 These matter because the login page no longer hides its form primitives inside `LoginPaperCard.tsx`.
 
+There is now also an auth-scoped shared shell in:
+
+- `frontend/components/auth/shared/AuthPaperCard.tsx`
+- `frontend/components/auth/shared/AuthGreenPanel.tsx`
+- `frontend/components/auth/shared/AuthCardHeader.tsx`
+- `frontend/components/auth/shared/AuthFormMeta.tsx`
+- `frontend/components/auth/shared/AuthProvidersRow.tsx`
+
+This keeps the paper card frame, green side panel, card header, form metadata block, and provider row reusable for login and register without pretending the full login form is generic.
+
 ### Post and Feed Components
 
 Folders:
@@ -220,6 +230,9 @@ Why it matters:
 - shared decorative pieces used by login now live in `frontend/components/decor`
 - the archive micro-label text primitive now lives in `frontend/components/typography/MonoText.tsx`
 - the card now composes reusable `FieldInput`, `StampButton`, and `ArchiveTape` primitives instead of embedding them privately
+- the outer paper frame now comes from `frontend/components/auth/shared/AuthPaperCard.tsx`
+- the green side panel now comes from `frontend/components/auth/shared/AuthGreenPanel.tsx` with an alignment variant for login/register reuse
+- the login card now also composes shared auth pieces for the header, document meta block, and OAuth provider row
 
 Real example:
 
