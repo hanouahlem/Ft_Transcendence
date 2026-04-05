@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { AuthProvider } from "@/context/AuthContext";
+import { AppToaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 
 const displaySerif = localFont({
@@ -70,6 +71,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-neutral-950 text-white">
         <AuthProvider>
           {children}
+          <AppToaster />
         </AuthProvider>
       </body>
     </html>
