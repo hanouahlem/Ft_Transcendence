@@ -33,25 +33,26 @@ The main archive tokens live in `frontend/app/globals.css`.
 Real code:
 
 ```css
---color-field-stage: #d4c9b3;
---color-field-paper: #f5f2eb;
---color-field-paper-muted: #e8e1d5;
---color-field-ink: #1a1a1a;
---color-field-label: #5a564c;
---color-field-accent: #ff4a1c;
---color-field-accent-blue: #3a698a;
---color-field-accent-green: #285a35;
+--color-stage: #d4c9b3;
+--color-paper: #f5f2eb;
+--color-paper-muted: #e8e1d5;
+--color-ink: #1a1a1a;
+--color-label: #5a564c;
+--color-accent-orange: #ff4a1c;
+--color-accent-red: #d32f2f;
+--color-accent-blue: #3a698a;
+--color-accent-green: #285a35;
 ```
 
 These are already stable enough to reuse across pages.
 
 Meaning:
 
-- `field-stage`: page background / table / wall / environment
-- `field-paper`: main card or paper surface
-- `field-paper-muted`: secondary paper surface
-- `field-ink`: main readable text
-- `field-label`: metadata and quieter labels
+- `stage`: page background / table / wall / environment
+- `paper`: main card or paper surface
+- `paper-muted`: secondary paper surface
+- `ink`: main readable text
+- `label`: metadata and quieter labels
 - accents: tape, buttons, highlights, active states
 
 ### Global Font Roles
@@ -123,10 +124,10 @@ Real example from `frontend/components/ui/button.tsx`:
 
 ```tsx
 variant: {
-  default: "border-field-ink bg-field-ink text-field-paper ...",
-  outline: "border-field-label/25 bg-field-paper text-field-ink ...",
-  secondary: "border-black/10 bg-black/5 text-field-label ...",
-  stamp: "border-field-accent bg-transparent text-field-accent ...",
+  default: "border-ink bg-ink text-paper ...",
+  outline: "border-label/25 bg-paper text-ink ...",
+  secondary: "border-black/10 bg-black/5 text-label ...",
+  stamp: "border-accent-orange bg-transparent text-accent-orange ...",
 }
 ```
 
@@ -134,6 +135,35 @@ This shows a real system rule:
 
 - buttons are not defined page by page anymore
 - the stable app-level button import now carries the archive language directly
+
+### Shared Decor And Typography
+
+Folders:
+
+- `frontend/components/decor`
+- `frontend/components/typography`
+
+Current stable pieces:
+
+- `AccentBeads.tsx`
+- `ArchiveTape.tsx`
+- `ArchiveFilters.tsx`
+- `WaxSeal.tsx`
+- `MonoText.tsx`
+
+Why this matters:
+
+- decorative primitives are no longer trapped inside the login page folder
+- login can consume them, but other pages can reuse them without another move later
+- typography helpers and visual ornaments now have separate responsibilities
+- small paper details like the orange tape strips are now reusable components instead of one-off `<div>` blocks
+
+Additional reusable archive controls also live in `frontend/components/ui`:
+
+- `FieldInput.tsx`
+- `StampButton.tsx`
+
+These matter because the login page no longer hides its form primitives inside `LoginPaperCard.tsx`.
 
 ### Post and Feed Components
 
@@ -186,14 +216,18 @@ Why it matters:
 
 - it already shows archive form styling
 - it demonstrates how labels, inputs, metadata, stamps, and paper surfaces can work together
+- the login layout values are now written directly where they are used instead of being hidden behind a `loginTheme.ts` config file
+- shared decorative pieces used by login now live in `frontend/components/decor`
+- the archive micro-label text primitive now lives in `frontend/components/typography/MonoText.tsx`
+- the card now composes reusable `FieldInput`, `StampButton`, and `ArchiveTape` primitives instead of embedding them privately
 
 Real example:
 
 ```tsx
 <label
   className={cn(
-    "bg-field-paper px-1 font-field-mono text-[11px] uppercase tracking-[0.12em] ...",
-    focused ? "text-field-accent" : "text-field-label",
+    "bg-paper px-1 font-field-mono text-[11px] uppercase tracking-[0.12em] ...",
+    focused ? "text-accent-orange" : "text-label",
   )}
 >
 ```

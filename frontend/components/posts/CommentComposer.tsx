@@ -21,7 +21,7 @@ export const CommentComposer = forwardRef<
 	ref,
 ) {
 	return (
-		<section className="relative overflow-hidden border border-black/10 bg-field-paper-muted px-3 py-3">
+		<section className="relative overflow-hidden border border-black/10 bg-paper-muted px-3 py-3">
 			<div className="archive-thread hidden sm:block" />
 			<div className="flex items-end gap-3 sm:pl-8">
 				<Field.Root className="flex-1">
@@ -36,7 +36,7 @@ export const CommentComposer = forwardRef<
 							onChange(postId, event.target.value)
 						}
 						placeholder="Add a comment..."
-						className="archive-input archive-lines min-h-11 w-full resize-none border-0 bg-transparent p-0 text-sm leading-6 text-field-ink"
+						className="archive-input archive-lines min-h-11 w-full resize-none border-0 bg-transparent p-0 text-sm leading-6 text-ink"
 					/>
 				</Field.Root>
 

@@ -25,15 +25,15 @@ export function NavButton({
       className={cn(
         "flex items-center gap-4 rounded-xl px-3 py-3 transition-all duration-200",
         active
-          ? "bg-black/5 text-field-ink"
-          : "text-field-label hover:bg-black/5 hover:text-field-ink"
+          ? "bg-black/5 text-ink"
+          : "text-label hover:bg-black/5 hover:text-ink"
       )}
     >
       <div className="relative shrink-0">
         <Icon className="h-7 w-7" strokeWidth={1.6} />
 
         {typeof badge === "number" && badge > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-field-paper-muted bg-field-accent px-1 text-[10px] font-bold text-field-paper">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-paper-muted bg-accent-orange px-1 text-[10px] font-bold text-paper">
             {badge}
           </span>
         )}

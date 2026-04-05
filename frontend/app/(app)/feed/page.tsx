@@ -804,14 +804,14 @@ export default function FeedPage() {
 						/>
 
 						{loading ? (
-							<section className="border border-black/10 bg-field-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-								<p className="font-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
+							<section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
+								<p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
 									Loading feed archive...
 								</p>
 							</section>
 						) : posts.length === 0 ? (
-							<section className="border border-black/10 bg-field-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-								<p className="font-mono text-[11px] uppercase tracking-[0.18em] text-field-label">
+							<section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
+								<p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
 									No posts have been recorded yet.
 								</p>
 							</section>
@@ -835,7 +835,7 @@ export default function FeedPage() {
 							</div>
 						)}
 
-						<div className="border-t border-dashed border-field-label py-8 text-center font-mono text-sm text-field-label">
+						<div className="border-t border-dashed border-label py-8 text-center font-mono text-sm text-label">
 							--- END OF RECENT LOGS ---
 						</div>
 					</div>
@@ -855,7 +855,7 @@ export default function FeedPage() {
 			<button
 				type="button"
 				onClick={() => window.dispatchEvent(new Event("archive:create-post"))}
-				className="fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-field-ink bg-field-ink text-field-paper shadow-[3px_6px_0_#ff4a1c] transition hover:scale-105 lg:hidden"
+				className="fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-ink bg-ink text-paper shadow-[3px_6px_0_#ff4a1c] transition hover:scale-105 lg:hidden"
 				aria-label="Create a new post"
 			>
 				<Plus className="h-6 w-6" />

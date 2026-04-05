@@ -43,7 +43,7 @@ export function Sidebar({
 
 	return (
 		<aside
-			className="fixed inset-y-0 z-30 hidden flex-col overflow-hidden border-r border-black/10 bg-field-paper-muted px-3 py-8 lg:flex"
+			className="fixed inset-y-0 z-30 hidden flex-col overflow-hidden border-r border-black/10 bg-paper-muted px-3 py-8 lg:flex"
 			style={{
 				left: 0,
 				width: expanded ? "240px" : "76px",
@@ -55,7 +55,7 @@ export function Sidebar({
 			<Link href="/feed" className="mb-10 flex items-center gap-4 px-2">
 				<div className="flex h-8 w-8 shrink-0 items-center justify-center -rotate-6">
 					<svg
-						className="h-8 w-8 text-field-ink"
+						className="h-8 w-8 text-ink"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -70,7 +70,7 @@ export function Sidebar({
 				</div>
 
 				<span
-					className="whitespace-nowrap font-display text-[1.7rem] font-black tracking-[-0.05em] text-field-ink transition-opacity duration-150"
+					className="whitespace-nowrap font-display text-[1.7rem] font-black tracking-[-0.05em] text-ink transition-opacity duration-150"
 					style={{ opacity: expanded ? 1 : 0 }}
 				>
 					Field Notes
@@ -131,7 +131,7 @@ export function Sidebar({
 					href="/profil"
 					className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-black/5"
 				>
-					<div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-field-stage font-display text-sm font-black text-field-ink -rotate-3">
+					<div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-stage font-display text-sm font-black text-ink -rotate-3">
 						{user?.avatar ? (
 							<img
 								src={user.avatar}
@@ -147,10 +147,10 @@ export function Sidebar({
 						className="min-w-0 whitespace-nowrap transition-opacity duration-150"
 						style={{ opacity: expanded ? 1 : 0 }}
 					>
-						<p className="truncate text-sm font-semibold text-field-ink">
+						<p className="truncate text-sm font-semibold text-ink">
 							{user?.username || "Field User"}
 						</p>
-						<p className="truncate font-mono text-[11px] uppercase tracking-[0.16em] text-field-label">
+						<p className="truncate font-mono text-[11px] uppercase tracking-[0.16em] text-label">
 							@{(user?.username || "observer").toLowerCase()}
 						</p>
 					</div>

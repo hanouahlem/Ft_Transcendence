@@ -36,13 +36,13 @@ export function Tooltip({
         <ArkTooltip.Positioner className="fixed z-[2147483647]">
           <ArkTooltip.Content
             className={cn(
-              "pointer-events-none relative z-[2147483647] rounded-none border border-field-ink/20 bg-field-paper px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-field-ink shadow-[4px_6px_18px_rgba(26,26,26,0.16)]",
+              "pointer-events-none relative z-[2147483647] rounded-none border border-ink/20 bg-paper px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-ink shadow-[4px_6px_18px_rgba(26,26,26,0.16)]",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
               contentClassName
             )}
           >
-            <ArkTooltip.Arrow className="h-2 w-2 [--arrow-background:var(--color-field-paper)]">
-              <ArkTooltip.ArrowTip className="border-r border-b border-field-ink/20 bg-field-paper" />
+            <ArkTooltip.Arrow className="h-2 w-2 [--arrow-background:var(--color-paper)]">
+              <ArkTooltip.ArrowTip className="border-r border-b border-ink/20 bg-paper" />
             </ArkTooltip.Arrow>
             {content}
           </ArkTooltip.Content>

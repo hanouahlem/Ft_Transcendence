@@ -37,45 +37,45 @@ type PostVariant = {
 const POST_VARIANTS: PostVariant[] = [
 	{
 		wrapper: "",
-		article: "bg-field-paper border-2 border-field-label/30 p-6 relative",
-		tape: "left-6 top-[-12px] h-5 w-20 rotate-2 bg-field-accent-green",
+		article: "bg-paper border-2 border-label/30 p-6 relative",
+		tape: "left-6 top-[-12px] h-5 w-20 rotate-2 bg-accent-green",
 		imageFrame:
 			"relative mx-auto w-[90%] -rotate-2 bg-white p-2 pb-8 shadow-lg",
 		imageMaxHeight: "max-h-[360px]",
-		headerBorder: "border-dashed border-field-label/40",
+		headerBorder: "border-dashed border-label/40",
 		contentClass: "text-lg leading-relaxed text-justify",
 		actionJustify: "justify-between",
 	},
 	{
 		wrapper: "-rotate-1",
-		article: "relative bg-field-paper-muted p-6 pb-10",
-		tape: "right-8 top-[-12px] h-5 w-16 -rotate-2 bg-field-accent",
+		article: "relative bg-paper-muted p-6 pb-10",
+		tape: "right-8 top-[-12px] h-5 w-16 -rotate-2 bg-accent-orange",
 		imageFrame:
 			"relative mx-auto w-[90%] rotate-2 bg-white p-2 pb-8 shadow-lg",
 		imageMaxHeight: "max-h-[320px]",
-		headerBorder: "border-field-label",
+		headerBorder: "border-label",
 		contentClass: "text-lg leading-relaxed",
 		actionJustify: "justify-start gap-8",
 	},
 	{
 		wrapper: "rotate-1 ml-4",
 		article:
-			"relative border-l-4 border-field-accent-blue bg-field-paper p-6",
-		tape: "left-1/2 top-[-12px] h-5 w-16 -translate-x-1/2 -rotate-1 bg-field-accent-blue",
+			"relative border-l-4 border-accent-blue bg-paper p-6",
+		tape: "left-1/2 top-[-12px] h-5 w-16 -translate-x-1/2 -rotate-1 bg-accent-blue",
 		imageFrame: "",
 		imageMaxHeight: "max-h-[260px]",
 		headerBorder: "",
-		contentClass: "text-base leading-relaxed text-field-label",
+		contentClass: "text-base leading-relaxed text-label",
 		actionJustify: "justify-start gap-8",
 		accentDot: true,
 	},
 	{
 		wrapper: "-rotate-1",
-		article: "relative border-2 border-field-label/40 bg-field-paper p-6",
-		tape: "left-4 top-[-12px] h-5 w-20 rotate-3 bg-field-accent",
+		article: "relative border-2 border-label/40 bg-paper p-6",
+		tape: "left-4 top-[-12px] h-5 w-20 rotate-3 bg-accent-orange",
 		imageFrame: "",
 		imageMaxHeight: "max-h-[300px]",
-		headerBorder: "border-dashed border-field-ink/20",
+		headerBorder: "border-dashed border-ink/20",
 		contentClass:
 			"text-2xl font-bold italic leading-snug text-center py-4 opacity-90",
 		actionJustify: "justify-start gap-8",
@@ -84,12 +84,12 @@ const POST_VARIANTS: PostVariant[] = [
 	{
 		wrapper: "",
 		article:
-			"bg-field-paper-muted border-2 border-field-label/30 p-6 relative",
-		tape: "right-12 top-[-12px] h-6 w-24 -rotate-2 bg-field-accent-green",
+			"bg-paper-muted border-2 border-label/30 p-6 relative",
+		tape: "right-12 top-[-12px] h-6 w-24 -rotate-2 bg-accent-green",
 		imageFrame:
 			"relative mx-auto w-[90%] rotate-1 bg-white p-2 pb-8 shadow-lg",
 		imageMaxHeight: "max-h-[320px]",
-		headerBorder: "border-dashed border-field-label/40",
+		headerBorder: "border-dashed border-label/40",
 		contentClass: "text-lg leading-relaxed",
 		actionJustify: "justify-between",
 	},
@@ -99,7 +99,7 @@ function OrangeStar() {
 	return (
 		<svg
 			viewBox="0 0 50 50"
-			className="h-full w-full fill-none stroke-field-accent"
+			className="h-full w-full fill-none stroke-accent"
 			strokeWidth="1.5"
 			strokeLinecap="round"
 			strokeLinejoin="round"
@@ -128,7 +128,7 @@ function renderBody(
 
 		return (
 			<p className={cn(contentClass, "font-display")}>
-				<span className="float-left mr-2 text-4xl leading-none font-black text-field-accent">
+				<span className="float-left mr-2 text-4xl leading-none font-black text-accent-orange">
 					{firstCharacter}
 				</span>
 				{rest}
@@ -146,7 +146,7 @@ function renderBody(
 
 	if (variantIndex === 3) {
 		return (
-			<p className="font-display text-lg leading-relaxed text-field-ink">
+			<p className="font-display text-lg leading-relaxed text-ink">
 				{content}
 			</p>
 		);
@@ -185,7 +185,7 @@ export function PostCard({
 				/>
 
 				{variant.accentDot ? (
-					<div className="absolute -left-5 top-8 h-2 w-2 rounded-full bg-field-label" />
+					<div className="absolute -left-5 top-8 h-2 w-2 rounded-full bg-label" />
 				) : null}
 
 				{variant.star ? (
@@ -209,7 +209,7 @@ export function PostCard({
 						>
 							<Avatar
 								className={cn(
-									"overflow-hidden rounded-none border border-field-label bg-field-stage p-0.5",
+									"overflow-hidden rounded-none border border-label bg-stage p-0.5",
 									variantKey === 2
 										? "h-8 w-8 rotate-1"
 										: "h-10 w-10 -rotate-2",
@@ -220,7 +220,7 @@ export function PostCard({
 									alt={post.author.username}
 									className="archive-photo object-cover"
 								/>
-								<AvatarFallback className="rounded-none bg-field-stage font-display text-xs font-black text-field-ink">
+								<AvatarFallback className="rounded-none bg-stage font-display text-xs font-black text-ink">
 									{getInitials(post.author.username)}
 								</AvatarFallback>
 							</Avatar>
@@ -231,7 +231,7 @@ export function PostCard({
 								<Link
 									href={`/profil/${post.author.id}`}
 									className={cn(
-										"truncate font-bold uppercase tracking-wide text-field-ink",
+										"truncate font-bold uppercase tracking-wide text-ink",
 										variantKey === 2
 											? "text-base"
 											: "text-lg",
@@ -239,7 +239,7 @@ export function PostCard({
 								>
 									{post.author.username}
 								</Link>
-								<span className="font-mono text-xs text-field-label">
+								<span className="font-mono text-xs text-label">
 									@{post.author.username.toLowerCase()}
 								</span>
 							</div>
@@ -249,7 +249,7 @@ export function PostCard({
 					<div className="flex items-center gap-3">
 						<RelativeTime
 							dateString={post.createdAt}
-							className="shrink-0 font-mono text-[10px] text-field-label"
+							className="shrink-0 font-mono text-[10px] text-label"
 						/>
 						{isOwner ? (
 							<Button
@@ -281,7 +281,7 @@ export function PostCard({
 									src={post.media[0]}
 									alt="Post media"
 									className={cn(
-										"archive-photo w-full object-cover border border-field-label/20",
+										"archive-photo w-full object-cover border border-label/20",
 										variant.imageMaxHeight,
 									)}
 									style={
@@ -291,7 +291,7 @@ export function PostCard({
 									}
 								/>
 								{variant.imageFrame ? (
-									<div className="absolute bottom-2 right-3 font-mono text-[10px] text-field-label">
+									<div className="absolute bottom-2 right-3 font-mono text-[10px] text-label">
 										FILM ROLL 42 - EXP {post.id}
 									</div>
 								) : null}
@@ -305,7 +305,7 @@ export function PostCard({
 					</div>
 				</button>
 
-				<div className="mt-6 border-t border-field-ink/10 pt-4">
+				<div className="mt-6 border-t border-ink/10 pt-4">
 					<div
 						className={cn(
 							"flex items-center",

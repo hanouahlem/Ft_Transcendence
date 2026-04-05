@@ -60,21 +60,21 @@ export function RightRail({
 			>
 				<div className="flex h-full w-full flex-col gap-10 overflow-y-auto pr-1">
 					<section className="relative">
-						<Search className="pointer-events-none absolute left-4 top-3 h-4 w-4 text-field-label" />
+						<Search className="pointer-events-none absolute left-4 top-3 h-4 w-4 text-label" />
 						<input
 							type="text"
 							value={query}
 							onChange={(event) => setQuery(event.target.value)}
 							placeholder="Search archives..."
-							className="archive-input w-full rounded-lg border-0 bg-field-paper-muted py-2.5 pl-11 pr-9 font-mono text-sm shadow-inner"
+							className="archive-input w-full rounded-lg border-0 bg-paper-muted py-2.5 pl-11 pr-9 font-mono text-sm shadow-inner"
 						/>
-						<span className="absolute right-3 top-2.5 font-mono text-sm text-field-label">
+						<span className="absolute right-3 top-2.5 font-mono text-sm text-label">
 							/
 						</span>
 					</section>
 
 					<section className="relative">
-						<div className="mb-6 inline-block -rotate-1 bg-field-ink px-4 py-1 text-field-paper">
+						<div className="mb-6 inline-block -rotate-1 bg-ink px-4 py-1 text-paper">
 							<span className="font-display text-lg font-bold uppercase tracking-[0.08em]">
 								Current Trends
 							</span>
@@ -87,27 +87,27 @@ export function RightRail({
 									className={cn(
 										"flex items-center gap-3 border border-black/10 px-3 py-3 shadow-sm",
 										index % 2 === 0
-											? "bg-field-paper"
-											: "bg-field-paper-muted",
+											? "bg-paper"
+											: "bg-paper-muted",
 										index === 0 && "-rotate-1",
 										index === 1 && "rotate-1",
 										index === 2 && "-rotate-2",
 									)}
 								>
-									<span className="border-r border-black/15 pr-3 font-mono text-xs text-field-label">
+									<span className="border-r border-black/15 pr-3 font-mono text-xs text-label">
 										{trend.rank}
 									</span>
 									<div className="min-w-0 flex-1">
-										<p className="truncate text-base font-bold leading-none text-field-ink">
+										<p className="truncate text-base font-bold leading-none text-ink">
 											{trend.title}
 										</p>
-										<p className="mt-1 font-mono text-[10px] text-field-label">
+										<p className="mt-1 font-mono text-[10px] text-label">
 											{trend.meta}
 										</p>
 									</div>
 									<button
 										type="button"
-										className="font-mono text-xs text-field-label transition-colors hover:text-field-ink"
+										className="font-mono text-xs text-label transition-colors hover:text-ink"
 										aria-label={`Track ${trend.title}`}
 									>
 										[+]
@@ -117,14 +117,14 @@ export function RightRail({
 						</div>
 					</section>
 
-					<section className="relative rotate-1 border border-black/10 bg-field-paper-muted px-6 py-6 shadow-sm">
-						<div className="mb-4 border-b-2 border-field-ink pb-2 font-mono text-xs uppercase tracking-[0.28em] text-field-label">
+					<section className="relative rotate-1 border border-black/10 bg-paper-muted px-6 py-6 shadow-sm">
+						<div className="mb-4 border-b-2 border-ink pb-2 font-mono text-xs uppercase tracking-[0.28em] text-label">
 							Fellow Observers
 						</div>
 
 						<div className="space-y-4">
 							{filteredSuggestions.length === 0 ? (
-								<p className="font-mono text-[11px] uppercase tracking-[0.16em] text-field-label">
+								<p className="font-mono text-[11px] uppercase tracking-[0.16em] text-label">
 									No fellows match this search yet.
 								</p>
 							) : (
@@ -143,9 +143,9 @@ export function RightRail({
 										.join("")
 										.slice(0, 2);
 									const tileClasses = [
-										"-rotate-2 bg-field-stage text-field-ink",
-										"rotate-1 bg-field-accent-green text-field-paper",
-										"-rotate-1 bg-field-accent-blue text-field-paper",
+										"-rotate-2 bg-stage text-ink",
+										"rotate-1 bg-accent-green text-paper",
+										"-rotate-1 bg-accent-blue text-paper",
 									];
 
 									return (
@@ -155,7 +155,7 @@ export function RightRail({
 										>
 											<div
 												className={cn(
-													"flex h-9 w-9 items-center justify-center border-2 border-field-label font-display text-sm font-bold",
+													"flex h-9 w-9 items-center justify-center border-2 border-label font-display text-sm font-bold",
 													tileClasses[
 														author.id %
 															tileClasses.length
@@ -166,10 +166,10 @@ export function RightRail({
 											</div>
 
 											<div className="min-w-0 flex-1">
-												<p className="truncate text-sm font-bold text-field-ink">
+												<p className="truncate text-sm font-bold text-ink">
 													{author.username}
 												</p>
-												<p className="truncate font-mono text-[10px] text-field-label">
+												<p className="truncate font-mono text-[10px] text-label">
 													@
 													{author.username.toLowerCase()}
 												</p>
@@ -204,7 +204,7 @@ export function RightRail({
 													onClick={() =>
 														onAddFriend(author.id)
 													}
-													className="rounded-md border-field-ink/20 bg-field-stage/80 px-3 py-1.5 text-[10px] tracking-[0.16em] text-field-ink shadow-none hover:-rotate-1 hover:bg-field-stage"
+													className="rounded-md border-ink/20 bg-stage/80 px-3 py-1.5 text-[10px] tracking-[0.16em] text-ink shadow-none hover:-rotate-1 hover:bg-stage"
 												>
 													{sendingFriendId ===
 													author.id
@@ -221,7 +221,7 @@ export function RightRail({
 						</div>
 					</section>
 
-					<footer className="mt-auto pb-2 font-mono text-[10px] leading-relaxed text-field-label">
+					<footer className="mt-auto pb-2 font-mono text-[10px] leading-relaxed text-label">
 						<p>Terms of Service · Privacy Policy · Cookie Policy</p>
 						<p>
 							{totalPosts} logs · {totalLikes} likes ·{" "}

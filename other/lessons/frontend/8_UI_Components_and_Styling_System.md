@@ -46,7 +46,7 @@ Real code:
 }
 
 .archive-page {
-  background-color: var(--color-field-stage);
+  background-color: var(--color-stage);
   background-image:
     linear-gradient(rgba(26, 26, 26, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(26, 26, 26, 0.05) 1px, transparent 1px);
@@ -54,7 +54,7 @@ Real code:
 }
 
 .archive-paper {
-  background: var(--color-field-paper);
+  background: var(--color-paper);
   box-shadow: 8px 12px 30px rgba(26, 26, 26, 0.12);
 }
 ```

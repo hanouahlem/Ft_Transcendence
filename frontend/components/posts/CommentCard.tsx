@@ -36,20 +36,20 @@ export function CommentCard({
 	const isFavoriting = favoritingCommentId === comment.id;
 
 	return (
-		<div className="relative overflow-hidden border border-black/10 bg-field-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
+		<div className="relative overflow-hidden border border-black/10 bg-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
 			<div className="flex items-start justify-between gap-3">
 				<div className="flex min-w-0 items-center gap-3">
 					<Link
 						href={`/profil/${comment.author.id}`}
 						className="shrink-0"
 					>
-						<Avatar className="h-8 w-8 overflow-hidden rounded-none border border-field-label bg-field-stage p-0.5 -rotate-2">
+						<Avatar className="h-8 w-8 overflow-hidden rounded-none border border-label bg-stage p-0.5 -rotate-2">
 							<AvatarImage
 								src={comment.author.avatar || ""}
 								alt={comment.author.username}
 								className="archive-photo object-cover"
 							/>
-							<AvatarFallback className="rounded-none bg-field-stage font-display text-[10px] font-black text-field-ink">
+							<AvatarFallback className="rounded-none bg-stage font-display text-[10px] font-black text-ink">
 								{getInitials(comment.author.username)}
 							</AvatarFallback>
 						</Avatar>
@@ -59,11 +59,11 @@ export function CommentCard({
 						<div className="flex flex-wrap items-center gap-3">
 							<Link
 								href={`/profil/${comment.author.id}`}
-								className="font-mono text-field-ink transition hover:text-field-accent-blue"
+								className="font-mono text-ink transition hover:text-accent-blue"
 							>
 								@{comment.author.username}
 							</Link>
-							<span className="font-mono text-[15px] text-field-label">
+							<span className="font-mono text-[15px] text-label">
 								@{comment.author.username.toLowerCase()}
 							</span>
 						</div>
@@ -73,7 +73,7 @@ export function CommentCard({
 				<div className="flex shrink-0 items-center gap-3">
 					<RelativeTime
 						dateString={comment.createdAt}
-						className="font-mono text-[10px] uppercase tracking-[0.16em] text-field-label"
+						className="font-mono text-[10px] uppercase tracking-[0.16em] text-label"
 					/>
 
 					{isOwner ? (
@@ -90,7 +90,7 @@ export function CommentCard({
 				</div>
 			</div>
 
-			<p className="font-display text-m leading-7 text-field-ink/85">
+			<p className="font-display text-m leading-7 text-ink/85">
 				{comment.content}
 			</p>
 

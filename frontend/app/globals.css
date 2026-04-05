@@ -2,6 +2,12 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@font-face {
+  font-family: "font-stamp";
+  src: url("/fonts/stamped/stamped.ttf") format("truetype");
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -10,18 +16,17 @@
   --font-sans: var(--font-sans-source);
   --font-display: var(--font-display-source);
   --font-mono: var(--font-mono-source);
-  --color-field-stage: #d4c9b3;
-  --color-field-paper: #f5f2eb;
-  --color-field-paper-muted: #e8e1d5;
-  --color-field-ink: #1a1a1a;
-  --color-field-label: #5a564c;
-  --color-field-olive: #285a35;
-  --color-field-accent: #ff4a1c;
-  --color-field-accent-blue: #3a698a;
-  --color-field-accent-green: #285a35;
-  --color-field-accent-orange: #ff4a1c;
-  --color-field-stamp: #d32f2f;
-  --color-field-wax: #a52a2a;
+  --font-stamp: "font-stamp";
+  --color-stage: #d4c9b3;
+  --color-paper: #f5f2eb;
+  --color-paper-muted: #e8e1d5;
+  --color-ink: #1a1a1a;
+  --color-label: #5a564c;
+  --color-olive: #285a35;
+  --color-accent-red: #d32f2f;
+  --color-accent-blue: #3a698a;
+  --color-accent-green: #285a35;
+  --color-accent-orange: #ff4a1c;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -140,18 +145,18 @@
 
 @layer components {
   .archive-page {
-    background-color: var(--color-field-stage);
+    background-color: var(--color-stage);
     background-image:
       linear-gradient(rgba(26, 26, 26, 0.05) 1px, transparent 1px),
       linear-gradient(90deg, rgba(26, 26, 26, 0.05) 1px, transparent 1px);
     background-size: 40px 40px;
-    color: var(--color-field-ink);
+    color: var(--color-ink);
     font-family: var(--font-display);
     -webkit-font-smoothing: antialiased;
   }
 
   .archive-paper {
-    background: var(--color-field-paper);
+    background: var(--color-paper);
     box-shadow: 8px 12px 30px rgba(26, 26, 26, 0.12);
   }
 
@@ -187,7 +192,7 @@
   }
 
   .archive-input {
-    color: var(--color-field-ink);
+    color: var(--color-ink);
     outline: none;
   }
 
@@ -201,6 +206,20 @@
 
   .archive-photo {
     filter: grayscale(100%) contrast(1.18) sepia(0.22);
+  }
+}
+
+@layer utilities {
+  .bg-accent-red {
+    background-color: var(--color-accent-red);
+  }
+
+  .text-accent-red {
+    color: var(--color-accent-red);
+  }
+
+  .border-accent-red {
+    border-color: var(--color-accent-red);
   }
 }
 
@@ -221,8 +240,8 @@
   align-items: flex-start;
   gap: 0.875rem;
   border: 1px solid rgb(26 26 26 / 0.12);
-  background: var(--color-field-paper);
-  color: var(--color-field-ink);
+  background: var(--color-paper);
+  color: var(--color-ink);
   box-shadow: 6px 8px 25px rgba(26, 26, 26, 0.12);
   padding: 0.9rem 1rem;
   pointer-events: auto;
@@ -256,12 +275,12 @@
 }
 
 [data-scope="toast"][data-part="root"][data-type="error"] {
-  border-color: color-mix(in srgb, var(--color-field-stamp) 65%, black 8%);
-  background: var(--color-field-stamp);
-  color: var(--color-field-paper);
+  border-color: color-mix(in srgb, var(--color-accent-red) 65%, black 8%);
+  background: var(--color-accent-red);
+  color: var(--color-paper);
   box-shadow:
     6px 8px 25px rgba(26, 26, 26, 0.12),
-    3px 4px 0 color-mix(in srgb, var(--color-field-stamp) 42%, transparent);
+    3px 4px 0 color-mix(in srgb, var(--color-accent-red) 42%, transparent);
 }
 
 [data-scope="toast"][data-part="root"][data-type="info"] {
@@ -283,11 +302,11 @@
   line-height: 1.6;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-field-label);
+  color: var(--color-label);
 }
 
 [data-scope="toast"][data-part="root"][data-type="error"] [data-scope="toast"][data-part="description"] {
-  color: color-mix(in srgb, var(--color-field-paper) 78%, transparent);
+  color: color-mix(in srgb, var(--color-paper) 78%, transparent);
 }
 
 [data-scope="toast"][data-part="close-trigger"] {
@@ -301,24 +320,24 @@
   line-height: 1;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-field-label);
+  color: var(--color-label);
   transition: background-color 150ms, color 150ms;
 }
 
 [data-scope="toast"][data-part="close-trigger"]:hover {
   background: rgb(26 26 26 / 0.1);
-  color: var(--color-field-ink);
+  color: var(--color-ink);
 }
 
 [data-scope="toast"][data-part="root"][data-type="error"] [data-scope="toast"][data-part="close-trigger"] {
-  border-color: color-mix(in srgb, var(--color-field-paper) 22%, transparent);
+  border-color: color-mix(in srgb, var(--color-paper) 22%, transparent);
   background: rgb(255 255 255 / 0.08);
-  color: var(--color-field-paper);
+  color: var(--color-paper);
 }
 
 [data-scope="toast"][data-part="root"][data-type="error"] [data-scope="toast"][data-part="close-trigger"]:hover {
   background: rgb(255 255 255 / 0.16);
-  color: var(--color-field-paper);
+  color: var(--color-paper);
 }
 
 @media (max-width: 640px) {

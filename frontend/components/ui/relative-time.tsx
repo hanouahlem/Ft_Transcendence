@@ -19,7 +19,7 @@ export function RelativeTime({ dateString, className }: RelativeTimeProps) {
 			<time
 				dateTime={date.toISOString()}
 				className={cn(
-					"inline-flex items-center bg-field-stage px-1.5 py-0.5",
+					"inline-flex items-center bg-stage px-1.5 py-0.5",
 					className,
 				)}
 			>

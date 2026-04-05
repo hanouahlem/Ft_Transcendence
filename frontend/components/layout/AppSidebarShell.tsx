@@ -160,7 +160,7 @@ export default function AppSidebarShell({
 
   return (
     <ProtectedRoute>
-      <main className="archive-page relative min-h-screen overflow-x-hidden text-field-ink">
+      <main className="archive-page relative min-h-screen overflow-x-hidden text-ink">
         <NatureCanvas />
 
         <div className="relative z-10 min-h-screen lg:pl-[76px]">

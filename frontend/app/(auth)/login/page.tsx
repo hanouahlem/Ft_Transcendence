@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { loginUser } from "@/lib/api";
-import LoginArchivePanel from "@/components/auth/login/LoginArchivePanel";
-import { AccentBeads, SvgDefinitions } from "@/components/auth/login/LoginDecor";
+import AccentBeads from "@/components/decor/AccentBeads";
+import ArchiveFilters from "@/components/decor/ArchiveFilters";
+import LoginGreenPanel from "@/components/auth/login/LoginGreenPanel";
 import LoginPaperCard from "@/components/auth/login/LoginPaperCard";
-import { LOGIN_LAYOUT_VARS } from "@/components/auth/login/loginTheme";
 import { useAuth } from "@/context/AuthContext";
 
 const GITHUB_OAUTH_URL =
@@ -84,21 +84,18 @@ export default function LoginPage() {
 
   return (
     <div
-      className="relative min-h-screen overflow-hidden bg-field-stage antialiased"
+      className="relative min-h-screen overflow-hidden bg-stage antialiased"
       style={{
         backgroundImage:
           "linear-gradient(rgba(26,26,26,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(26,26,26,0.05) 1px, transparent 1px)",
         backgroundSize: "40px 40px",
       }}
     >
-      <SvgDefinitions />
+      <ArchiveFilters />
 
-      <div
-        className="relative z-10 mx-auto flex min-h-screen w-full max-w-[var(--login-stage-max-width)] items-center justify-center px-4 py-10 sm:px-6 lg:px-8"
-        style={LOGIN_LAYOUT_VARS}
-      >
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[69rem] items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
         <div className="relative flex w-full flex-col gap-6 lg:h-[700px] lg:justify-center">
-          <LoginArchivePanel />
+          <LoginGreenPanel />
 
           <LoginPaperCard
             email={identifier}
@@ -114,16 +111,16 @@ export default function LoginPage() {
           />
 
           <AccentBeads
-            className="absolute z-30 hidden lg:flex lg:left-[var(--login-beads-left)] lg:top-[var(--login-beads-top)] lg:translate-x-[var(--login-beads-shift-x)]"
+            className="absolute z-30 hidden lg:left-0 lg:top-[20%] lg:flex lg:translate-x-1/2"
             vertical
           />
 
-          <div className="text-center lg:absolute lg:bottom-[var(--login-signup-bottom)] lg:left-0 lg:right-0">
-            <p className="inline-block border border-field-label/20 bg-field-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-field-ink/65">
+          <div className="text-center lg:absolute lg:-bottom-16 lg:left-0 lg:right-0">
+            <p className="inline-block border border-label/20 bg-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-ink/65">
               Not a member?
               <Link
                 href="/register"
-                className="ml-2 font-bold text-field-accent underline decoration-dotted underline-offset-4"
+                className="ml-2 font-bold text-accent-orange underline decoration-dotted underline-offset-4"
               >
                 Apply for credentials
               </Link>

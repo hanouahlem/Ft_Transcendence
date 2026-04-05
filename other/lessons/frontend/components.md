@@ -201,10 +201,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-field-ink bg-field-ink text-field-paper ...",
-        outline: "border-field-label/25 bg-field-paper text-field-ink ...",
-        secondary: "border-black/10 bg-black/5 text-field-label ...",
-        stamp: "border-field-accent bg-transparent text-field-accent ...",
+        default: "border-ink bg-ink text-paper ...",
+        outline: "border-label/25 bg-paper text-ink ...",
+        secondary: "border-black/10 bg-black/5 text-label ...",
+        stamp: "border-accent-orange bg-transparent text-accent-orange ...",
       },
 ```
 

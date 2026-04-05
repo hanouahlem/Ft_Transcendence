@@ -107,23 +107,23 @@ export function PostDialog({
 					<DialogClose asChild>
 						<button
 							type="button"
-							className="rounded-full border border-black/10 bg-field-paper p-2 text-field-label transition hover:bg-field-paper-muted"
+							className="rounded-full border border-black/10 bg-paper p-2 text-label transition hover:bg-paper-muted"
 							aria-label="Close post dialog"
 						>
 							<X className="h-5 w-5" />
 						</button>
 					</DialogClose>
-					<article className="relative max-h-[90vh] overflow-auto border border-black/10 bg-field-stage rounded-none p-0">
+					<article className="relative max-h-[90vh] overflow-auto border border-black/10 bg-stage rounded-none p-0">
 						<div className="px-5 py-6 sm:px-8 sm:py-8">
 							<div className="space-y-6">
-								<section className="archive-paper relative overflow-hidden border border-black/10 bg-field-paper px-5 py-5">
+								<section className="archive-paper relative overflow-hidden border border-black/10 bg-paper px-5 py-5">
 									<div className="mb-5 flex items-start justify-between gap-4 border-b border-dashed border-black/20 pb-4">
 										<div className="flex min-w-0 items-center gap-3">
 											<Link
 												href={`/profil/${post.author.id}`}
 												className="shrink-0"
 											>
-												<Avatar className="h-11 w-11 overflow-hidden rounded-none border border-field-label bg-field-stage p-0.5 -rotate-2">
+												<Avatar className="h-11 w-11 overflow-hidden rounded-none border border-label bg-stage p-0.5 -rotate-2">
 													<AvatarImage
 														src={
 															post.author
@@ -134,7 +134,7 @@ export function PostDialog({
 														}
 														className="archive-photo object-cover"
 													/>
-													<AvatarFallback className="rounded-none bg-field-stage font-display text-xs font-black text-field-ink">
+													<AvatarFallback className="rounded-none bg-stage font-display text-xs font-black text-ink">
 														{getInitials(
 															post.author
 																.username,
@@ -147,11 +147,11 @@ export function PostDialog({
 												<div className="flex flex-wrap items-center gap-3">
 													<Link
 														href={`/profil/${post.author.id}`}
-														className="truncate text-lg font-bold uppercase tracking-wide text-field-ink"
+														className="truncate text-lg font-bold uppercase tracking-wide text-ink"
 													>
 														{post.author.username}
 													</Link>
-													<span className="font-mono text-xs text-field-label">
+													<span className="font-mono text-xs text-label">
 														@
 														{post.author.username.toLowerCase()}
 													</span>
@@ -162,7 +162,7 @@ export function PostDialog({
 										<div className="flex shrink-0 items-center gap-3">
 											<RelativeTime
 												dateString={post.createdAt}
-												className="font-mono text-[10px] text-field-label"
+												className="font-mono text-[10px] text-label"
 											/>
 											{isOwner ? (
 												<Button
@@ -184,7 +184,7 @@ export function PostDialog({
 									</div>
 
 									{post.content ? (
-										<p className="font-display text-lg leading-8 text-field-ink">
+										<p className="font-display text-lg leading-8 text-ink">
 											{post.content}
 										</p>
 									) : null}
@@ -194,15 +194,15 @@ export function PostDialog({
 											<img
 												src={post.media[0]}
 												alt="Post media"
-												className="archive-photo max-h-[420px] w-full border border-field-label/20 object-cover"
+												className="archive-photo max-h-[420px] w-full border border-label/20 object-cover"
 											/>
-											<div className="absolute bottom-2 right-3 font-mono text-[10px] text-field-label">
+											<div className="absolute bottom-2 right-3 font-mono text-[10px] text-label">
 												FILM ROLL 42 - EXP {post.id}
 											</div>
 										</div>
 									) : null}
 
-									<div className="mt-6 border-t border-field-ink/10 pt-4">
+									<div className="mt-6 border-t border-ink/10 pt-4">
 										<div className="flex flex-wrap items-center gap-2 sm:gap-4">
 											<SocialToggle
 												icon={MessageCircle}
@@ -242,7 +242,7 @@ export function PostDialog({
 									</div>
 								</section>
 
-								<section className="space-y-4 rounded-sm bg-field-stage/45 px-0 py-0">
+								<section className="space-y-4 rounded-sm bg-stage/45 px-0 py-0">
 									{post.comments.map((comment) => (
 										<CommentCard
 											key={comment.id}

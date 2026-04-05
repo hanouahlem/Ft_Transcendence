@@ -24,20 +24,20 @@ const TOGGLE_STYLES: Record<
 > = {
   blue: {
     idle:
-      "text-field-accent-blue hover:bg-field-accent-blue hover:text-field-paper",
-    active: "bg-field-accent-blue text-field-paper",
-    iconActive: "fill-current text-field-paper",
+      "text-accent-blue hover:bg-accent-blue hover:text-paper",
+    active: "bg-accent-blue text-paper",
+    iconActive: "fill-current text-paper",
   },
   green: {
     idle:
-      "text-field-accent-green hover:bg-field-accent-green hover:text-field-paper",
-    active: "bg-field-accent-green text-field-paper",
-    iconActive: "fill-current text-field-paper",
+      "text-accent-green hover:bg-accent-green hover:text-paper",
+    active: "bg-accent-green text-paper",
+    iconActive: "fill-current text-paper",
   },
   orange: {
-    idle: "text-field-accent hover:bg-field-accent hover:text-field-paper",
-    active: "bg-field-accent text-field-paper",
-    iconActive: "fill-current text-field-paper",
+    idle: "text-accent-orange hover:bg-accent-orange hover:text-paper",
+    active: "bg-accent-orange text-paper",
+    iconActive: "fill-current text-paper",
   },
 };
 
