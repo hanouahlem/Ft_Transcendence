@@ -49,7 +49,7 @@ const POST_VARIANTS: PostVariant[] = [
 	{
 		wrapper: "-rotate-1",
 		article: "relative bg-paper-muted p-6 pb-10",
-		tape: "right-8 top-[-12px] h-5 w-16 -rotate-2 bg-accent-orange",
+		tape: "right-8 top-[-12px] h-5 w-16 -rotate-2 bg-accent-red",
 		imageFrame:
 			"relative mx-auto w-[90%] rotate-2 bg-white p-2 pb-8 shadow-lg",
 		imageMaxHeight: "max-h-[320px]",
@@ -72,7 +72,7 @@ const POST_VARIANTS: PostVariant[] = [
 	{
 		wrapper: "-rotate-1",
 		article: "relative border-2 border-label/40 bg-paper p-6",
-		tape: "left-4 top-[-12px] h-5 w-20 rotate-3 bg-accent-orange",
+		tape: "left-4 top-[-12px] h-5 w-20 rotate-3 bg-accent-red",
 		imageFrame: "",
 		imageMaxHeight: "max-h-[300px]",
 		headerBorder: "border-dashed border-ink/20",
@@ -128,7 +128,7 @@ function renderBody(
 
 		return (
 			<p className={cn(contentClass, "font-display")}>
-				<span className="float-left mr-2 text-4xl leading-none font-black text-accent-orange">
+				<span className="float-left mr-2 text-4xl leading-none font-black text-accent-red">
 					{firstCharacter}
 				</span>
 				{rest}
@@ -332,7 +332,7 @@ export function PostCard({
 							icon={Heart}
 							label="Like post"
 							count={post.likesCount}
-							accent="orange"
+							accent="red"
 							pressed={post.likedByCurrentUser}
 							disabled={isLiking}
 							onClick={() => onToggleLike(post)}

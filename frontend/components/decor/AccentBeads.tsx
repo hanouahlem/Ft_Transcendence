@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 const ACCENT_BEAD_COLORS = [
   "var(--color-accent-blue)",
   "var(--color-accent-green)",
-  "var(--color-accent-orange)",
+  "var(--color-accent-red)",
 ];
 
 function Bead({ color, className }: { color: string; className?: string }) {

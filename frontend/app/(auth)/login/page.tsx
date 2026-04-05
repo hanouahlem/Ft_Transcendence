@@ -134,7 +134,7 @@ export default function LoginPage() {
 					Not a member?
 					<Link
 						href="/register"
-						className="ml-2 font-bold text-accent-orange underline decoration-dotted underline-offset-4"
+						className="ml-2 font-bold text-accent-red underline decoration-dotted underline-offset-4"
 					>
 						Register
 					</Link>

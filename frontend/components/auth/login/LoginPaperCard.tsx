@@ -76,7 +76,7 @@ export default function LoginPaperCard({
 						!passwordError ? (
 							<button
 								type="button"
-								className="bg-paper px-1 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-orange underline decoration-dotted underline-offset-4"
+								className="bg-paper px-1 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-red underline decoration-dotted underline-offset-4"
 							>
 								Forgot Password?
 							</button>

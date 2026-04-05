@@ -20,7 +20,7 @@ const PARTICLE_COLORS = [
   "rgba(40, 90, 53, 0.2)",
   "rgba(58, 105, 138, 0.2)",
   "rgba(26, 26, 26, 0.1)",
-  "rgba(255, 74, 28, 0.1)",
+  "rgba(211, 47, 47, 0.1)",
 ];
 
 function createParticle(

@@ -119,7 +119,7 @@ export default function RegisterPage() {
 					Have an account?
 					<Link
 						href="/login"
-						className="ml-2 font-bold text-accent-orange underline decoration-dotted underline-offset-4"
+						className="ml-2 font-bold text-accent-red underline decoration-dotted underline-offset-4"
 					>
 						Login
 					</Link>

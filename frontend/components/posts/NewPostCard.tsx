@@ -29,7 +29,7 @@ export function NewPostCard({
 			className="relative border border-white/20 bg-white p-6 pb-6 rotate-1"
 			style={{ boxShadow: "8px 12px 30px rgba(26,26,26,0.12)" }}
 		>
-			<div className="archive-tape absolute -top-3 left-8 h-6 w-24 rotate-1 bg-accent-orange" />
+			<div className="archive-tape absolute -top-3 left-8 h-6 w-24 rotate-1 bg-accent-red" />
 			<div className="archive-thread" />
 
 			<div className="pl-10">
@@ -81,7 +81,7 @@ export function NewPostCard({
 						variant="stamp"
 						onClick={onPublish}
 						disabled={publishing}
-						className="-rotate-2 border-accent-orange px-4 py-1 text-sm"
+						className="-rotate-2 border-accent-red px-4 py-1 text-sm"
 					>
 						{publishing ? "RECORDING..." : "RECORD ->"}
 					</Button>

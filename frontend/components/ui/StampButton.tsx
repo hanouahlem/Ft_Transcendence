@@ -22,14 +22,16 @@ export default function StampButton({
 		>
 			<span
 				className={cn(
-					"flex items-center justify-center rounded-xl border-4 border-accent-red bg-transparent px-4 py-2 font-display text-3xl font-black uppercase tracking-[0.2em] text-accent-red",
+					"relative inline-flex items-center justify-center rounded-xl bg-transparent px-4 py-2 font-stamp text-4xl font-black uppercase tracking-[0.2em] text-accent-red",
 					stampClassName,
 				)}
-				style={{
-					filter: "url(#ink-texture)",
-					transform: "rotate(-6deg)",
-				}}
+				style={{ transform: "rotate(-6deg)" }}
 			>
+				<span
+					aria-hidden="true"
+					className="pointer-events-none absolute inset-0 rounded-xl border-4 border-accent-red"
+					style={{ filter: "url(#ink-texture)" }}
+				/>
 				{children}
 			</span>
 		</button>

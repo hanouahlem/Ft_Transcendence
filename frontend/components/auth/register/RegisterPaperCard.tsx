@@ -109,7 +109,7 @@ export default function RegisterPaperCard({
 
 					<AuthProvidersRow>
 						<OAuthProviderButton
-							label="42"
+							label="Intra"
 							icon={<FortyTwoIcon className="h-4 w-4" />}
 							href={fortyTwoHref}
 						/>

@@ -99,7 +99,7 @@ export function CommentCard({
 					icon={Heart}
 					label="Like comment"
 					count={comment.likesCount}
-					accent="orange"
+					accent="red"
 					pressed={comment.likedByCurrentUser}
 					disabled={isLiking}
 					onClick={() => onToggleCommentLike(comment)}

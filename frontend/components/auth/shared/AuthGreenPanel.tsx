@@ -11,11 +11,6 @@ const PANEL_MAIN_TONES = {
 } as const;
 
 const PANEL_ACCENT_TONES = {
-  "accent-orange": {
-    border: "border-accent-orange/50",
-    rail:
-      "bg-[repeating-linear-gradient(to_bottom,var(--color-accent-orange)_0,var(--color-accent-orange)_8px,transparent_8px,transparent_16px)]",
-  },
   "accent-red": {
     border: "border-accent-red/50",
     rail:
@@ -32,7 +27,7 @@ type AuthGreenPanelProps = {
 export default function AuthGreenPanel({
   align = "right",
   mainTone = "olive",
-  accentTone = "accent-orange",
+  accentTone = "accent-red",
 }: AuthGreenPanelProps) {
   const isRightAligned = align === "right";
   const mainToneClasses = PANEL_MAIN_TONES[mainTone];

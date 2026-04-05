@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 
 const TAPE_TONES = {
-  "accent-orange": "bg-accent-orange",
   "accent-red": "bg-accent-red",
   "paper-muted": "bg-paper-muted",
   stage: "bg-stage",
@@ -14,7 +13,7 @@ type ArchiveTapeProps = {
 
 export default function ArchiveTape({
   className,
-  tone = "accent-orange",
+  tone = "accent-red",
 }: ArchiveTapeProps) {
   return (
     <div

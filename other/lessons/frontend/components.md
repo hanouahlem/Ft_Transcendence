@@ -204,7 +204,7 @@ const buttonVariants = cva(
         default: "border-ink bg-ink text-paper ...",
         outline: "border-label/25 bg-paper text-ink ...",
         secondary: "border-black/10 bg-black/5 text-label ...",
-        stamp: "border-accent-orange bg-transparent text-accent-orange ...",
+        stamp: "border-accent-red bg-transparent text-accent-red ...",
       },
 ```
 

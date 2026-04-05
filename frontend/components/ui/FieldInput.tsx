@@ -66,7 +66,7 @@ export default function FieldInput({
             invalid
               ? "text-accent-red"
               : focused
-                ? "text-accent-orange"
+                ? "text-accent-red"
                 : "text-label",
           )}
         >
@@ -81,7 +81,7 @@ export default function FieldInput({
           invalid
             ? "border-accent-red/50"
             : focused
-              ? "border-accent-orange/50"
+              ? "border-accent-red/50"
               : "border-label/30",
         )}
       >
@@ -94,7 +94,7 @@ export default function FieldInput({
           required={required}
           {...inputProps}
           className={cn(
-            "archive-input w-full border-0 border-b-2 border-dotted border-label bg-transparent px-1 pt-3 pb-1 font-mono text-lg text-ink transition-colors placeholder:text-label/40 focus:border-accent-orange focus:bg-accent-orange/[0.02]",
+            "archive-input w-full border-0 border-b-2 border-dotted border-label bg-transparent px-1 pt-3 pb-1 font-mono text-lg text-ink transition-colors placeholder:text-label/40 focus:border-accent-red focus:bg-accent-red/[0.02]",
             invalid &&
               "border-accent-red placeholder:text-accent-red/45 focus:border-accent-red focus:bg-accent-red/[0.02]",
             type === "password" && "tracking-[0.1em]",

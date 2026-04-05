@@ -201,7 +201,7 @@
   }
 
   .archive-input:focus {
-    box-shadow: inset 0 -2px 0 rgba(255, 74, 28, 0.4);
+    box-shadow: inset 0 -2px 0 rgba(211, 47, 47, 0.4);
   }
 
   .archive-photo {

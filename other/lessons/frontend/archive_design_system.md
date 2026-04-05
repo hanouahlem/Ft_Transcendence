@@ -39,7 +39,7 @@ Real code:
 --color-paper-muted: #e8e1d5;
 --color-ink: #1a1a1a;
 --color-label: #5a564c;
---color-accent-orange: #ff4a1c;
+--color-accent-red: #d32f2f;
 --color-accent-red: #d32f2f;
 --color-accent-blue: #3a698a;
 --color-accent-green: #285a35;
@@ -128,7 +128,7 @@ variant: {
   default: "border-ink bg-ink text-paper ...",
   outline: "border-label/25 bg-paper text-ink ...",
   secondary: "border-black/10 bg-black/5 text-label ...",
-  stamp: "border-accent-orange bg-transparent text-accent-orange ...",
+  stamp: "border-accent-red bg-transparent text-accent-red ...",
 }
 ```
 
@@ -157,7 +157,7 @@ Why this matters:
 - decorative primitives are no longer trapped inside the login page folder
 - login can consume them, but other pages can reuse them without another move later
 - typography helpers and visual ornaments now have separate responsibilities
-- small paper details like the orange tape strips are now reusable components instead of one-off `<div>` blocks
+- small paper details like the red tape strips are now reusable components instead of one-off `<div>` blocks
 
 Additional reusable archive controls also live in `frontend/components/ui`:
 
@@ -247,7 +247,7 @@ Real example:
 <label
   className={cn(
     "bg-paper px-1 font-field-mono text-[11px] uppercase tracking-[0.12em] ...",
-    focused ? "text-accent-orange" : "text-label",
+    focused ? "text-accent-red" : "text-label",
   )}
 >
 ```

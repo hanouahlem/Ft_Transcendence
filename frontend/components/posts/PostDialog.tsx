@@ -231,7 +231,7 @@ export function PostDialog({
 												icon={Heart}
 												label="Like post"
 												count={post.likesCount}
-												accent="orange"
+												accent="red"
 												pressed={post.likedByCurrentUser}
 												disabled={isLiking}
 												onClick={() =>

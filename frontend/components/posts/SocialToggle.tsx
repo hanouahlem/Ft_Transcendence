@@ -5,7 +5,7 @@ import { Toggle } from "@ark-ui/react/toggle";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type AccentTone = "blue" | "green" | "orange";
+type AccentTone = "blue" | "green" | "red";
 
 type SocialToggleProps = {
   icon: LucideIcon;
@@ -34,9 +34,9 @@ const TOGGLE_STYLES: Record<
     active: "bg-accent-green text-paper",
     iconActive: "fill-current text-paper",
   },
-  orange: {
-    idle: "text-accent-orange hover:bg-accent-orange hover:text-paper",
-    active: "bg-accent-orange text-paper",
+  red: {
+    idle: "text-accent-red hover:bg-accent-red hover:text-paper",
+    active: "bg-accent-red text-paper",
     iconActive: "fill-current text-paper",
   },
 };
