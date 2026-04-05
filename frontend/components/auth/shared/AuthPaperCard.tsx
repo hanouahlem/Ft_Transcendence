@@ -8,6 +8,7 @@ type AuthPaperCardProps = {
   contentClassName?: string;
   topTapeClassName?: string;
   bottomTapeClassName?: string;
+  tapeTone?: "accent-orange" | "accent-red" | "paper-muted" | "stage";
 };
 
 export default function AuthPaperCard({
@@ -16,6 +17,7 @@ export default function AuthPaperCard({
   contentClassName,
   topTapeClassName = "-top-3 left-[24%] h-8 w-32 -rotate-3",
   bottomTapeClassName = "-bottom-2 right-[24%] h-6 w-24 rotate-2",
+  tapeTone = "accent-orange",
 }: AuthPaperCardProps) {
   return (
     <section
@@ -33,8 +35,8 @@ export default function AuthPaperCard({
         }}
       />
 
-      <ArchiveTape className={topTapeClassName} />
-      <ArchiveTape className={bottomTapeClassName} />
+      <ArchiveTape className={topTapeClassName} tone={tapeTone} />
+      <ArchiveTape className={bottomTapeClassName} tone={tapeTone} />
 
       <div className={cn("relative flex h-full flex-col", contentClassName)}>
         {children}

@@ -1,19 +1,48 @@
 import MonoText from "@/components/typography/MonoText";
 import { cn } from "@/lib/utils";
 
+const PANEL_MAIN_TONES = {
+  olive: {
+    background: "bg-olive",
+  },
+  "accent-blue": {
+    background: "bg-accent-blue",
+  },
+} as const;
+
+const PANEL_ACCENT_TONES = {
+  "accent-orange": {
+    border: "border-accent-orange/50",
+    rail:
+      "bg-[repeating-linear-gradient(to_bottom,var(--color-accent-orange)_0,var(--color-accent-orange)_8px,transparent_8px,transparent_16px)]",
+  },
+  "accent-red": {
+    border: "border-accent-red/50",
+    rail:
+      "bg-[repeating-linear-gradient(to_bottom,var(--color-accent-red)_0,var(--color-accent-red)_8px,transparent_8px,transparent_16px)]",
+  },
+} as const;
+
 type AuthGreenPanelProps = {
   align?: "left" | "right";
+  mainTone?: keyof typeof PANEL_MAIN_TONES;
+  accentTone?: keyof typeof PANEL_ACCENT_TONES;
 };
 
 export default function AuthGreenPanel({
   align = "right",
+  mainTone = "olive",
+  accentTone = "accent-orange",
 }: AuthGreenPanelProps) {
   const isRightAligned = align === "right";
+  const mainToneClasses = PANEL_MAIN_TONES[mainTone];
+  const accentToneClasses = PANEL_ACCENT_TONES[accentTone];
 
   return (
     <section
       className={cn(
-        "relative overflow-hidden border border-black/20 bg-olive px-6 py-8 text-paper shadow-[15px_15px_30px_rgba(0,0,0,0.2)] sm:px-8 sm:py-10 lg:absolute lg:top-10 lg:bottom-10 lg:w-[65%] lg:px-10 lg:py-10",
+        "relative overflow-hidden border border-black/20 px-6 py-8 text-paper shadow-[15px_15px_30px_rgba(0,0,0,0.2)] sm:px-8 sm:py-10 lg:absolute lg:top-10 lg:bottom-10 lg:w-[65%] lg:px-10 lg:py-10",
+        mainToneClasses.background,
         isRightAligned ? "lg:right-4" : "lg:left-4",
       )}
     >
@@ -29,8 +58,18 @@ export default function AuthGreenPanel({
       </svg>
 
       <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/20 to-transparent" />
-      <div className="absolute inset-y-0 left-3 w-px bg-[repeating-linear-gradient(to_bottom,var(--color-accent-orange)_0,var(--color-accent-orange)_8px,transparent_8px,transparent_16px)]" />
-      <div className="absolute inset-y-0 left-[18px] w-px bg-[repeating-linear-gradient(to_bottom,var(--color-accent-orange)_0,var(--color-accent-orange)_8px,transparent_8px,transparent_16px)]" />
+      <div
+        className={cn(
+          "absolute inset-y-0 left-3 w-px",
+          accentToneClasses.rail,
+        )}
+      />
+      <div
+        className={cn(
+          "absolute inset-y-0 left-[18px] w-px",
+          accentToneClasses.rail,
+        )}
+      />
 
       <div className="relative z-10 flex h-full flex-col justify-between gap-10">
         <div
@@ -77,7 +116,8 @@ export default function AuthGreenPanel({
 
         <div
           className={cn(
-            "max-w-sm border-accent-orange/50 text-[inherit]",
+            "max-w-sm text-[inherit]",
+            accentToneClasses.border,
             isRightAligned
               ? "ml-auto border-r-2 pr-4 text-right"
               : "mr-auto border-l-2 pl-4 text-left",

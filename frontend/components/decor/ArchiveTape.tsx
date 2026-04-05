@@ -1,14 +1,25 @@
 import { cn } from "@/lib/utils";
 
+const TAPE_TONES = {
+  "accent-orange": "bg-accent-orange",
+  "accent-red": "bg-accent-red",
+  "paper-muted": "bg-paper-muted",
+  stage: "bg-stage",
+} as const;
+
 type ArchiveTapeProps = {
   className?: string;
+  tone?: keyof typeof TAPE_TONES;
 };
 
-export default function ArchiveTape({ className }: ArchiveTapeProps) {
+export default function ArchiveTape({
+  className,
+  tone = "accent-orange",
+}: ArchiveTapeProps) {
   return (
     <div
       aria-hidden="true"
-      className={cn("absolute bg-accent-orange archive-tape", className)}
+      className={cn("absolute archive-tape", TAPE_TONES[tone], className)}
     />
   );
 }

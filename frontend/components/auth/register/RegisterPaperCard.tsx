@@ -46,6 +46,7 @@ export default function RegisterPaperCard({
 		<AuthPaperCard
 			className="lg:absolute lg:inset-y-0 lg:right-12 lg:w-1/2 lg:rotate-2"
 			contentClassName="px-6 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-12"
+			tapeTone="accent-red"
 		>
 			<AuthCardHeader
 				eyebrow="Form 4B - Credential Application"

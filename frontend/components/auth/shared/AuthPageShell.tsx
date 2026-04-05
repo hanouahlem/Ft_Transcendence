@@ -8,6 +8,8 @@ type AuthPageShellProps = {
   children: ReactNode;
   footer?: ReactNode;
   panelAlign?: "left" | "right";
+  panelMainTone?: "olive" | "accent-blue";
+  panelAccentTone?: "accent-orange" | "accent-red";
   showBeads?: boolean;
   footerClassName?: string;
   containerClassName?: string;
@@ -17,6 +19,8 @@ export default function AuthPageShell({
   children,
   footer,
   panelAlign = "right",
+  panelMainTone = "olive",
+  panelAccentTone = "accent-orange",
   showBeads = true,
   footerClassName,
   containerClassName,
@@ -41,7 +45,11 @@ export default function AuthPageShell({
             containerClassName,
           )}
         >
-          <AuthGreenPanel align={panelAlign} />
+          <AuthGreenPanel
+            align={panelAlign}
+            mainTone={panelMainTone}
+            accentTone={panelAccentTone}
+          />
 
           {children}
 

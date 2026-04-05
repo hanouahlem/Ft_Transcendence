@@ -112,6 +112,8 @@ export default function RegisterPage() {
 	return (
 		<AuthPageShell
 			panelAlign="left"
+			panelMainTone="accent-blue"
+			panelAccentTone="accent-red"
 			footer={
 				<p className="inline-block border border-label/20 bg-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-ink/65">
 					Have an account?

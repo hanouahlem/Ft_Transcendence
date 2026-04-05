@@ -235,7 +235,8 @@ Why it matters:
 - the card now composes reusable `FieldInput`, `StampButton`, and `ArchiveTape` primitives instead of embedding them privately
 - the page-level auth layout now comes from `frontend/components/auth/shared/AuthPageShell.tsx`
 - the outer paper frame now comes from `frontend/components/auth/shared/AuthPaperCard.tsx`
-- the green side panel now comes from `frontend/components/auth/shared/AuthGreenPanel.tsx` with an alignment variant for login/register reuse
+- `AuthPaperCard.tsx` can now also vary its tape color, so auth pages can reuse the same card shell with different tape treatments
+- the green side panel now comes from `frontend/components/auth/shared/AuthGreenPanel.tsx` with alignment and tone variants so login/register can reuse the same shell with different panel colors
 - the login card now also composes shared auth pieces for the header, document meta block, and OAuth provider row
 - auth errors no longer use a full-width feedback block under the fields; field-level errors now sit in the top-right label area
 - login/register now validate empty fields before the request, and backend auth responses can return field-level errors for username/email/password mapping
