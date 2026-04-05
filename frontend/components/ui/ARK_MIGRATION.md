@@ -35,7 +35,7 @@ rg -n '@/components/ui/(avatar|badge|button|dialog|label|separator|switch|tabs)\
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Avatar | `frontend/components/ui/avatar.tsx` | `radix-ui` Avatar | feed, profile, friends, settings, home | `ark` | High | `audit` | Live on feed; likely needed by future archive pages |
 | Badge | `frontend/components/ui/badge.tsx` | `radix-ui` Slot | old profile, old notifications | `ark` | Low | `audit` | Not used by final login/feed pages |
-| Button | `frontend/components/ui/button.tsx` | `radix-ui` Slot | old home, old profile/settings/notifications | `ark` | Low | `audit` | Not used by final login/feed pages |
+| Button | `frontend/components/ui/button.tsx` | native React | feed shell, feed posts, old home, old profile/settings/notifications | `native` | Low | `radix-free` | Canonical project button now carries the archive style directly; old `ArchiveButton` wrapper was removed |
 | Dialog | `frontend/components/ui/dialog.tsx` | `@ark-ui/react` Dialog | feed dialogs | `ark` | Highest | `radix-free` | Rewritten as a thin Ark wrapper with shared classes and a boolean `onOpenChange` adapter |
 | Label | `frontend/components/ui/label.tsx` | `radix-ui` Label | only local demo/helper usage | `ark` | Low | `audit` | No final-page dependency right now |
 | Separator | `frontend/components/ui/separator.tsx` | `radix-ui` Separator | old settings pages | `ark` | Low | `audit` | No final-page dependency right now |

@@ -60,7 +60,6 @@ Goal: understand how the frontend blocks unauthenticated access and moves users 
 
 - `ProtectedRoute` in `frontend/components/auth/ProtectedRoute.tsx`
 - redirect to `/login` when user is not authenticated
-- navbar behavior in `frontend/components/layout/Navbar.tsx`
 - login/logout flow from the frontend point of view
 - page-level auth expectations
 
@@ -114,7 +113,7 @@ Study file:
 
 Goal: understand how the frontend builds pages from shared pieces.
 
-- layout components like `Navbar`
+- layout shell components like `Sidebar`, `RightRail`, and `NatureCanvas`
 - shared UI in `frontend/components/ui/`
 - utility helpers in `frontend/lib/utils.ts`
 - Tailwind usage in this repo

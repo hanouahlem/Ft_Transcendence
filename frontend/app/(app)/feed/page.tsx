@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Plus } from "lucide-react";
-import { ArchiveRightRail } from "@/components/archive/ArchiveRightRail";
-import type { FeedComment, FeedPost } from "@/components/feed/types";
+import type { FeedComment, FeedPost } from "@/lib/feed-types";
+import { RightRail } from "@/components/layout/RightRail";
 import { NewPostCard } from "@/components/posts/NewPostCard";
-import { NewPostDialog } from "@/components/posts/NewPostDialog";
 import { PostCard } from "@/components/posts/PostCard";
 import { PostDialog } from "@/components/posts/PostDialog";
 import { archiveToaster } from "@/components/ui/toaster";
@@ -22,7 +21,6 @@ export default function FeedPage() {
 	const [previewUrl, setPreviewUrl] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [publishing, setPublishing] = useState(false);
-	const [createOpen, setCreateOpen] = useState(false);
 	const [sentRequests, setSentRequests] = useState<number[]>([]);
 	const [sendingFriendId, setSendingFriendId] = useState<number | null>(null);
 
@@ -118,6 +116,27 @@ export default function FeedPage() {
 	}, [token, user?.id]);
 
 	useEffect(() => {
+		const handlePostCreated = (event: Event) => {
+			const customEvent = event as CustomEvent<FeedPost | undefined>;
+			const createdPost = customEvent.detail;
+
+			if (!createdPost) {
+				return;
+			}
+
+			setPosts((prevPosts) => [
+				createdPost,
+				...prevPosts.filter((post) => post.id !== createdPost.id),
+			]);
+		};
+
+		window.addEventListener("archive:post-created", handlePostCreated);
+		return () => {
+			window.removeEventListener("archive:post-created", handlePostCreated);
+		};
+	}, []);
+
+	useEffect(() => {
 		if (dialogPostId === null) {
 			return;
 		}
@@ -134,7 +153,6 @@ export default function FeedPage() {
 	const resetComposer = () => {
 		setPostContent("");
 		handleRemoveFile();
-		setCreateOpen(false);
 	};
 
 	const fetchPosts = async () => {
@@ -823,7 +841,7 @@ export default function FeedPage() {
 					</div>
 				</section>
 
-				<ArchiveRightRail
+				<RightRail
 					totalPosts={posts.length}
 					totalLikes={totalLikes}
 					totalComments={totalComments}
@@ -836,25 +854,12 @@ export default function FeedPage() {
 
 			<button
 				type="button"
-				onClick={() => setCreateOpen(true)}
+				onClick={() => window.dispatchEvent(new Event("archive:create-post"))}
 				className="fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-field-ink bg-field-ink text-field-paper shadow-[3px_6px_0_#ff4a1c] transition hover:scale-105 lg:hidden"
 				aria-label="Create a new post"
 			>
 				<Plus className="h-6 w-6" />
 			</button>
-
-			<NewPostDialog
-				open={createOpen}
-				content={postContent}
-				previewUrl={previewUrl}
-				selectedFileName={selectedFile?.name || ""}
-				publishing={publishing}
-				onClose={resetComposer}
-				onPublish={handlePublish}
-				onContentChange={setPostContent}
-				onOpenFilePicker={handleOpenFilePicker}
-				onRemoveFile={handleRemoveFile}
-			/>
 
 			<input
 				ref={fileInputRef}

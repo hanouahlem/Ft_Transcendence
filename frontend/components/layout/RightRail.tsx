@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import {
-	ArchiveButton,
-	archiveButtonVariants,
-} from "@/components/archive/ArchiveButton";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type ArchiveObserver = {
@@ -16,7 +13,7 @@ type ArchiveObserver = {
 	avatar?: string | null;
 };
 
-type ArchiveRightRailProps = {
+type RightRailProps = {
 	totalPosts: number;
 	totalLikes: number;
 	totalComments: number;
@@ -32,7 +29,7 @@ const TRENDS = [
 	{ rank: "03", title: "Retro Layouts", meta: "Design / 41 mentions" },
 ];
 
-export function ArchiveRightRail({
+export function RightRail({
 	totalPosts,
 	totalLikes,
 	totalComments,
@@ -40,7 +37,7 @@ export function ArchiveRightRail({
 	sentRequests,
 	sendingFriendId,
 	onAddFriend,
-}: ArchiveRightRailProps) {
+}: RightRailProps) {
 	const [query, setQuery] = useState("");
 
 	const filteredSuggestions = useMemo(() => {
@@ -181,9 +178,9 @@ export function ArchiveRightRail({
 											<div className="flex items-center gap-2">
 												<Link
 													href={`/profil/${author.id}`}
-													className={archiveButtonVariants(
+													className={buttonVariants(
 														{
-															variant: "paper",
+															variant: "outline",
 															size: "sm",
 														},
 													)}
@@ -191,7 +188,7 @@ export function ArchiveRightRail({
 													View
 												</Link>
 
-												<ArchiveButton
+												<Button
 													type="button"
 													variant={
 														sent
@@ -215,7 +212,7 @@ export function ArchiveRightRail({
 														: sent
 															? "Sent"
 															: "Follow"}
-												</ArchiveButton>
+												</Button>
 											</div>
 										</div>
 									);

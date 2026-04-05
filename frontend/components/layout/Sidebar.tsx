@@ -13,12 +13,12 @@ import {
 	UserRound,
 } from "lucide-react";
 import type { CurrentUser } from "@/lib/api";
+import { getInitials } from "@/lib/user-utils";
 import { cn } from "@/lib/utils";
-import { ArchiveButton } from "@/components/archive/ArchiveButton";
-import { ArchiveNavButton } from "@/components/archive/ArchiveNavButton";
-import { getInitials } from "@/components/archive/archiveUtils";
+import { NavButton } from "@/components/layout/NavButton";
+import { Button } from "@/components/ui/button";
 
-type ArchiveSidebarProps = {
+type SidebarProps = {
 	user: CurrentUser | null;
 	onCreatePost: () => void;
 	onLogout: () => void;
@@ -33,11 +33,11 @@ const NAV_ITEMS = [
 	{ href: "/profil", label: "Profile", icon: UserRound },
 ];
 
-export function ArchiveSidebar({
+export function Sidebar({
 	user,
 	onCreatePost,
 	onLogout,
-}: ArchiveSidebarProps) {
+}: SidebarProps) {
 	const pathname = usePathname();
 	const [expanded, setExpanded] = useState(false);
 
@@ -79,7 +79,7 @@ export function ArchiveSidebar({
 
 			<nav className="flex flex-1 flex-col justify-center gap-1">
 				{NAV_ITEMS.map((item) => (
-					<ArchiveNavButton
+					<NavButton
 						key={item.href}
 						href={item.href}
 						label={item.label}
@@ -90,7 +90,7 @@ export function ArchiveSidebar({
 					/>
 				))}
 
-				<ArchiveButton
+				<Button
 					type="button"
 					variant="black"
 					className={cn(
@@ -123,7 +123,7 @@ export function ArchiveSidebar({
 					>
 						Log Entry
 					</span>
-				</ArchiveButton>
+				</Button>
 			</nav>
 
 			<div className="mt-auto space-y-3">
@@ -156,7 +156,7 @@ export function ArchiveSidebar({
 					</div>
 				</Link>
 
-				<ArchiveButton
+				<Button
 					type="button"
 					variant="subtle"
 					className={cn(
@@ -177,7 +177,7 @@ export function ArchiveSidebar({
 					>
 						Logout
 					</span>
-				</ArchiveButton>
+				</Button>
 			</div>
 		</aside>
 	);

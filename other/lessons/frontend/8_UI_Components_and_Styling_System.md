@@ -30,9 +30,21 @@ now contains archive-style utility classes such as:
 - `.archive-input`
 - `.archive-photo`
 
+It also registers custom font families (for example the stamp font) so Tailwind utilities can use them from one place.
+
 Real code:
 
 ```css
+@font-face {
+  font-family: "font-stamp";
+  src: url("/fonts/stamped/stamped.ttf") format("truetype");
+  font-display: swap;
+}
+
+@theme inline {
+  --font-stamp: "font-stamp";
+}
+
 .archive-page {
   background-color: var(--color-field-stage);
   background-image:
@@ -61,23 +73,23 @@ The route file is still:
 
 But the archive UI is now composed from:
 
-- `Frontend/components/archive/ArchiveSidebar.tsx`
+- `Frontend/components/layout/Sidebar.tsx`
 - `Frontend/components/posts/PostCard.tsx`
 - `Frontend/components/posts/NewPostDialog.tsx`
-- `Frontend/components/archive/ArchiveRightRail.tsx`
-- `Frontend/components/feed/FeedActionButton.tsx`
-- `Frontend/components/archive/ArchiveButton.tsx`
+- `Frontend/components/layout/RightRail.tsx`
+- `Frontend/components/posts/SocialToggle.tsx`
+- `Frontend/components/ui/button.tsx`
 
 Example from the page:
 
 ```tsx
-<ArchiveSidebar
+<Sidebar
   user={user}
   onCreatePost={() => setCreateOpen(true)}
   onLogout={logout}
 />
 
-<ArchiveRightRail
+<RightRail
   totalPosts={posts.length}
   totalLikes={totalLikes}
   totalComments={totalComments}
@@ -125,18 +137,23 @@ So the rule to remember is:
 Post and comment timestamps now use Ark UI's relative-time utility through:
 
 - `frontend/components/ui/relative-time.tsx`
+- `frontend/components/ui/tooltip.tsx`
 
 Real code:
 
 ```tsx
-<Format.RelativeTime value={date} numeric="auto" style="short" />
+<Tooltip content={absoluteTime}>
+  <time dateTime={date.toISOString()}>
+    <Format.RelativeTime value={date} numeric="auto" style="short" />
+  </time>
+</Tooltip>
 ```
 
 Why this matters:
 
 - posts and comments now share one time-formatting component
 - the UI shows relative time like "2 min ago" instead of fixed date strings
-- the exact timestamp is still preserved in the `title` attribute for hover inspection
+- the exact timestamp is shown through an archive-styled Ark tooltip instead of the native browser `title`
 
 ## One Small Type Fix That Matters
 
@@ -170,5 +187,5 @@ Before evaluation, each teammate should be able to explain:
 
 1. why archive styling moved into `Frontend/app/globals.css`
 2. why `Frontend/app/feed/page.tsx` still owns the fetch/mutation logic
-3. what `ArchiveSidebar`, `PostCard`, `NewPostDialog`, and `ArchiveRightRail` each do
+3. what `Sidebar`, `PostCard`, `NewPostDialog`, and `RightRail` each do
 4. how real actions like publish, like, favorite, comment, and friend request still work after the redesign

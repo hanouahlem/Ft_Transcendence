@@ -170,7 +170,7 @@ Examples in this repo:
   - `frontend/app/feed/page.tsx`
   - `frontend/app/login/page.tsx`
 - shared components:
-  - `frontend/components/layout/Navbar.tsx`
+  - `frontend/components/layout/AppSidebarShell.tsx`
   - `frontend/components/auth/ProtectedRoute.tsx`
   - files in `frontend/components/ui/`
 

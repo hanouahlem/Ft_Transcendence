@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { Bookmark, Heart, Trash2 } from "lucide-react";
-import { getInitials } from "@/components/archive/archiveUtils";
-import { ArchiveButton } from "@/components/archive/ArchiveButton";
-import { FeedActionButton } from "@/components/feed/FeedActionButton";
-import type { FeedComment } from "@/components/feed/types";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RelativeTime } from "@/components/ui/relative-time";
+import { getInitials } from "@/lib/user-utils";
+import type { FeedComment } from "@/lib/feed-types";
+import { SocialToggle } from "@/components/posts/SocialToggle";
 
 type CommentCardProps = {
 	comment: FeedComment;
@@ -77,7 +77,7 @@ export function CommentCard({
 					/>
 
 					{isOwner ? (
-						<ArchiveButton
+						<Button
 							type="button"
 							variant="delete"
 							size="sm"
@@ -85,7 +85,7 @@ export function CommentCard({
 							disabled={isDeleting}
 						>
 							<Trash2 className="h-3.5 w-3.5" />
-						</ArchiveButton>
+						</Button>
 					) : null}
 				</div>
 			</div>
@@ -95,21 +95,21 @@ export function CommentCard({
 			</p>
 
 			<div className="mt-2 flex flex-wrap items-center gap-2">
-				<FeedActionButton
+				<SocialToggle
 					icon={Heart}
 					label="Like comment"
 					count={comment.likesCount}
 					accent="orange"
-					active={comment.likedByCurrentUser}
+					pressed={comment.likedByCurrentUser}
 					disabled={isLiking}
 					onClick={() => onToggleCommentLike(comment)}
 				/>
-				<FeedActionButton
+				<SocialToggle
 					icon={Bookmark}
 					label="Favorite comment"
 					count={comment.favoritesCount}
 					accent="green"
-					active={comment.favoritedByCurrentUser}
+					pressed={comment.favoritedByCurrentUser}
 					disabled={isFavoriting}
 					onClick={() => onToggleCommentFavorite(comment)}
 				/>

@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Trash2 } from "lucide-react";
+import { getInitials } from "@/lib/user-utils";
+import type { FeedPost } from "@/lib/feed-types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/ui/relative-time";
-import { getInitials } from "@/components/archive/archiveUtils";
-import { ArchiveButton } from "@/components/archive/ArchiveButton";
-import { FeedActionButton } from "@/components/feed/FeedActionButton";
-import type { FeedPost } from "@/components/feed/types";
 import { cn } from "@/lib/utils";
+import { SocialToggle } from "@/components/posts/SocialToggle";
 
 type PostCardProps = {
 	post: FeedPost;
@@ -21,7 +21,20 @@ type PostCardProps = {
 	favoritingPostId: number | null;
 };
 
-const POST_VARIANTS = [
+type PostVariant = {
+	wrapper: string;
+	article: string;
+	tape: string;
+	imageFrame: string;
+	imageMaxHeight: string;
+	headerBorder: string;
+	contentClass: string;
+	actionJustify: string;
+	accentDot?: boolean;
+	star?: boolean;
+};
+
+const POST_VARIANTS: PostVariant[] = [
 	{
 		wrapper: "",
 		article: "bg-field-paper border-2 border-field-label/30 p-6 relative",
@@ -80,7 +93,7 @@ const POST_VARIANTS = [
 		contentClass: "text-lg leading-relaxed",
 		actionJustify: "justify-between",
 	},
-] as const;
+];
 
 function OrangeStar() {
 	return (
@@ -239,7 +252,7 @@ export function PostCard({
 							className="shrink-0 font-mono text-[10px] text-field-label"
 						/>
 						{isOwner ? (
-							<ArchiveButton
+							<Button
 								type="button"
 								variant="delete"
 								size="sm"
@@ -247,7 +260,7 @@ export function PostCard({
 								disabled={isDeleting}
 							>
 								<Trash2 className="h-3.5 w-3.5" />
-							</ArchiveButton>
+							</Button>
 						) : null}
 					</div>
 				</div>
@@ -299,28 +312,28 @@ export function PostCard({
 							variant.actionJustify,
 						)}
 					>
-						<FeedActionButton
+						<SocialToggle
 							icon={MessageCircle}
 							label="Comment count"
 							count={post.commentsCount}
 							accent="blue"
 							onClick={() => onOpenPost(post.id, true)}
 						/>
-						<FeedActionButton
+						<SocialToggle
 							icon={Bookmark}
 							label="Favorite post"
 							count={post.favoritesCount}
 							accent="green"
-							active={post.favoritedByCurrentUser}
+							pressed={post.favoritedByCurrentUser}
 							disabled={isFavoriting}
 							onClick={() => onToggleFavorite(post)}
 						/>
-						<FeedActionButton
+						<SocialToggle
 							icon={Heart}
 							label="Like post"
 							count={post.likesCount}
 							accent="orange"
-							active={post.likedByCurrentUser}
+							pressed={post.likedByCurrentUser}
 							disabled={isLiking}
 							onClick={() => onToggleLike(post)}
 						/>

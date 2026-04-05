@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import { Field } from "@ark-ui/react/field";
 import { ArrowRight } from "lucide-react";
-import { ArchiveButton } from "@/components/archive/ArchiveButton";
+import { Button } from "@/components/ui/button";
 
 type CommentComposerProps = {
 	postId: number;
@@ -41,7 +41,7 @@ export const CommentComposer = forwardRef<
 				</Field.Root>
 
 				<div className="shrink-0">
-					<ArchiveButton
+					<Button
 						type="button"
 						variant="bluesh"
 						onClick={() => onSubmit(postId)}
@@ -51,7 +51,7 @@ export const CommentComposer = forwardRef<
 						}
 					>
 						<ArrowRight className="h-4 w-4" />
-					</ArchiveButton>
+					</Button>
 				</div>
 			</div>
 		</section>

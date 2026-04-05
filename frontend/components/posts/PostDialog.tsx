@@ -3,21 +3,19 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Trash2, X } from "lucide-react";
+import type { FeedComment, FeedPost } from "@/lib/feed-types";
+import { getInitials } from "@/lib/user-utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RelativeTime } from "@/components/ui/relative-time";
 import {
 	Dialog,
 	DialogClose,
 	DialogContent,
-	DialogDescription,
-	DialogTitle,
 } from "@/components/ui/dialog";
-import { getInitials } from "@/components/archive/archiveUtils";
-import { ArchiveButton } from "@/components/archive/ArchiveButton";
-import { FeedActionButton } from "@/components/feed/FeedActionButton";
 import { CommentCard } from "@/components/posts/CommentCard";
 import { CommentComposer } from "@/components/posts/CommentComposer";
-import type { FeedComment, FeedPost } from "@/components/feed/types";
+import { SocialToggle } from "@/components/posts/SocialToggle";
+import { Button } from "@/components/ui/button";
 
 type PostDialogProps = {
 	open: boolean;
@@ -167,7 +165,7 @@ export function PostDialog({
 												className="font-mono text-[10px] text-field-label"
 											/>
 											{isOwner ? (
-												<ArchiveButton
+												<Button
 													type="button"
 													variant="stamp"
 													size="sm"
@@ -180,7 +178,7 @@ export function PostDialog({
 													{isDeleting
 														? "Deleting"
 														: "Delete"}
-												</ArchiveButton>
+												</Button>
 											) : null}
 										</div>
 									</div>
@@ -206,7 +204,7 @@ export function PostDialog({
 
 									<div className="mt-6 border-t border-field-ink/10 pt-4">
 										<div className="flex flex-wrap items-center gap-2 sm:gap-4">
-											<FeedActionButton
+											<SocialToggle
 												icon={MessageCircle}
 												label="Comment count"
 												count={post.commentsCount}
@@ -216,12 +214,12 @@ export function PostDialog({
 												}
 												onClick={queueReplyFocus}
 											/>
-											<FeedActionButton
+											<SocialToggle
 												icon={Bookmark}
 												label="Favorite post"
 												count={post.favoritesCount}
 												accent="green"
-												active={
+												pressed={
 													post.favoritedByCurrentUser
 												}
 												disabled={isFavoriting}
@@ -229,12 +227,12 @@ export function PostDialog({
 													onToggleFavorite(post)
 												}
 											/>
-											<FeedActionButton
+											<SocialToggle
 												icon={Heart}
 												label="Like post"
 												count={post.likesCount}
 												accent="orange"
-												active={post.likedByCurrentUser}
+												pressed={post.likedByCurrentUser}
 												disabled={isLiking}
 												onClick={() =>
 													onToggleLike(post)

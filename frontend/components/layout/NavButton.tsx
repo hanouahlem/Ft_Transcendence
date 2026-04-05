@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ArchiveNavButtonProps = {
+type NavButtonProps = {
   href: string;
   label: string;
   icon: LucideIcon;
@@ -11,14 +11,14 @@ type ArchiveNavButtonProps = {
   badge?: number;
 };
 
-export function ArchiveNavButton({
+export function NavButton({
   href,
   label,
   icon: Icon,
   active = false,
   expanded,
   badge,
-}: ArchiveNavButtonProps) {
+}: NavButtonProps) {
   return (
     <Link
       href={href}

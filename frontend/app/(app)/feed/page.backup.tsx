@@ -3,7 +3,6 @@
 import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useEffect, useMemo, useRef, useState } from "react";
-import Navbar from "@/components/layout/Navbar";
 import { useAuth } from "@/context/AuthContext";
 import {
   MessageCircle,
@@ -934,7 +933,6 @@ const handleAddFriend = async (receiverId: number) => {
 
   return (
     <ProtectedRoute>
-      <Navbar />
       <main className="min-h-screen bg-gradient-to-br from-[#EAF1E6] via-[#dbe7d2] to-[#9CAF88] text-black">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="mb-8">

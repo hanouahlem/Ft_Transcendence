@@ -103,44 +103,44 @@ These are good examples of a lightweight design system:
 
 ## 4. Stable Components
 
-### Archive-Level Components
+### Shell Components
 
 Folder:
 
-- `frontend/components/archive`
+- `frontend/components/layout`
 
 Current stable pieces:
 
-- `ArchiveButton.tsx`
-- `ArchiveNavButton.tsx`
-- `ArchiveSidebar.tsx`
-- `ArchiveRightRail.tsx`
+- `frontend/components/ui/button.tsx`
+- `NavButton.tsx`
+- `Sidebar.tsx`
+- `RightRail.tsx`
 - `NatureCanvas.tsx`
 
 These are not business-specific. They are archive UI building blocks.
 
-Real example from `frontend/components/archive/ArchiveButton.tsx`:
+Real example from `frontend/components/ui/button.tsx`:
 
 ```tsx
 variant: {
-  ink: "border-field-ink bg-field-ink text-field-paper ...",
-  paper: "border-field-label/25 bg-field-paper text-field-ink ...",
+  default: "border-field-ink bg-field-ink text-field-paper ...",
+  outline: "border-field-label/25 bg-field-paper text-field-ink ...",
+  secondary: "border-black/10 bg-black/5 text-field-label ...",
   stamp: "border-field-accent bg-transparent text-field-accent ...",
-  subtle: "border-black/10 bg-black/5 text-field-label ...",
 }
 ```
 
 This shows a real system rule:
 
 - buttons are not defined page by page anymore
-- they have named semantic variants tied to the archive language
+- the stable app-level button import now carries the archive language directly
 
 ### Post and Feed Components
 
 Folders:
 
 - `frontend/components/posts`
-- `frontend/components/feed`
+- `frontend/lib`
 
 These are not global design-system primitives, but they are proof that the archive language can be applied consistently to a real feature.
 
@@ -152,12 +152,12 @@ Reusable post-domain UI now lives in `frontend/components/posts`:
 - `CommentComposer.tsx`
 - `NewPostCard.tsx`
 - `NewPostDialog.tsx`
+- `SocialToggle.tsx`
 
-Feed-specific helpers still stay in `frontend/components/feed`:
+Feed-specific helpers and types now live in `frontend/lib`:
 
-- `FeedActionButton.tsx`
-- `feedUtils.ts`
-- `types.ts`
+- `feed-utils.ts`
+- `feed-types.ts`
 
 This matters because a design system is only useful if real feature components can be built from it.
 
@@ -292,4 +292,4 @@ That avoids two problems:
 
 If you need a short explanation:
 
-> Yes, we already have the beginnings of a real archive design system. The stable part lives in `frontend/app/globals.css` with archive tokens and utility classes, and in `frontend/components/archive` with reusable archive components like buttons and shell elements. The system is not fully mature yet because some old pages still use legacy generic UI and some primitive wrappers are still being migrated, but the direction is already explicit and reusable.
+> Yes, we already have the beginnings of a real archive design system. The stable part lives in `frontend/app/globals.css` with archive tokens and utility classes, in `frontend/components/layout` with reusable shell elements, and in `frontend/components/ui/button.tsx` with the shared archive-styled button primitive. The system is not fully mature yet because some old pages still use legacy generic UI and some primitive wrappers are still being migrated, but the direction is already explicit and reusable.

@@ -1,7 +1,7 @@
 "use client";
 
 import { Image as ImageIcon } from "lucide-react";
-import { ArchiveButton } from "@/components/archive/ArchiveButton";
+import { Button } from "@/components/ui/button";
 
 type NewPostCardProps = {
 	content: string;
@@ -56,7 +56,7 @@ export function NewPostCard({
 						<div className="absolute bottom-2 right-3 font-mono text-[10px] text-field-label">
 							{selectedFileName || "FILM ROLL 42"}
 						</div>
-						<ArchiveButton
+						<Button
 							type="button"
 							variant="stamp"
 							size="sm"
@@ -64,7 +64,7 @@ export function NewPostCard({
 							className="absolute left-3 top-3"
 						>
 							Remove
-						</ArchiveButton>
+						</Button>
 					</div>
 				) : null}
 
@@ -76,7 +76,7 @@ export function NewPostCard({
 					>
 						<ImageIcon className="h-4 w-4" />[ ADD SKETCH ]
 					</button>
-					<ArchiveButton
+					<Button
 						type="button"
 						variant="stamp"
 						onClick={onPublish}
@@ -84,7 +84,7 @@ export function NewPostCard({
 						className="-rotate-2 border-field-accent px-4 py-1 text-sm"
 					>
 						{publishing ? "RECORDING..." : "RECORD ->"}
-					</ArchiveButton>
+					</Button>
 				</div>
 			</div>
 		</section>

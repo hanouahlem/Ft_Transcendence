@@ -10,27 +10,29 @@ The feed route is split into:
 
 - one page file that owns data fetching and mutations
 - archive-level reusable layout components
-- reusable post components plus feed-specific helpers
+- shared UI primitives
+- reusable post components plus data/helpers in `frontend/lib`
 
 Current files:
 
 - `frontend/app/feed/page.tsx`
-- `frontend/components/archive/ArchiveButton.tsx`
-- `frontend/components/archive/ArchiveNavButton.tsx`
-- `frontend/components/archive/ArchiveSidebar.tsx`
-- `frontend/components/archive/ArchiveRightRail.tsx`
-- `frontend/components/archive/NatureCanvas.tsx`
-- `frontend/components/archive/archiveUtils.ts`
-- `frontend/components/feed/FeedActionButton.tsx`
-- `frontend/components/feed/feedUtils.ts`
-- `frontend/components/feed/types.ts`
+- `frontend/components/layout/NavButton.tsx`
+- `frontend/components/layout/Sidebar.tsx`
+- `frontend/components/layout/RightRail.tsx`
+- `frontend/components/layout/NatureCanvas.tsx`
 - `frontend/components/posts/CommentCard.tsx`
 - `frontend/components/posts/CommentComposer.tsx`
 - `frontend/components/posts/NewPostCard.tsx`
 - `frontend/components/posts/PostDialog.tsx`
 - `frontend/components/posts/PostCard.tsx`
 - `frontend/components/posts/NewPostDialog.tsx`
+- `frontend/components/posts/SocialToggle.tsx`
+- `frontend/components/ui/button.tsx`
 - `frontend/components/ui/dialog.tsx`
+- `frontend/components/ui/tooltip.tsx`
+- `frontend/lib/feed-types.ts`
+- `frontend/lib/feed-utils.ts`
+- `frontend/lib/user-utils.ts`
 
 The important rule is:
 
@@ -40,7 +42,7 @@ The important rule is:
 Real code:
 
 ```tsx
-<ArchiveSidebar
+<Sidebar
   user={user}
   onCreatePost={() => setCreateOpen(true)}
   onLogout={logout}
@@ -129,7 +131,7 @@ The page calls backend routes directly with `fetch`, for example:
 
 File:
 
-- `frontend/components/feed/types.ts`
+- `frontend/lib/feed-types.ts`
 
 These types define the shape expected by the UI:
 
@@ -173,44 +175,47 @@ export type CurrentUser = {
 
 We added `avatar` because the archive sidebar and modal display the current user image.
 
-## 4. Archive-Level Components
+## 4. Archive Shell And Shared UI Primitives
 
-These are reusable layout primitives, not feed-specific business components.
+These are reusable layout or primitive components, not feed-specific business components.
 
-### `ArchiveButton.tsx`
+### `frontend/components/ui/button.tsx`
 
 Purpose:
 
-- create one reusable button system for archive UI
+- create one reusable button system for the whole archive-style frontend
 
 How it works:
 
 - uses `class-variance-authority` (`cva`)
-- exposes variants: `ink`, `paper`, `stamp`, `subtle`
-- exposes sizes: `sm`, `md`, `icon`
+- keeps the stable import path `@/components/ui/button`
+- uses archive visual classes as the real button language
+- exposes both standard app variants (`default`, `outline`, `secondary`, `destructive`) and archive-specific aliases (`paper`, `stamp`, `subtle`, `delete`, `black`, `bluesh`)
+- exposes sizes like `sm`, `default`, `lg`, `icon`
 
 Real code:
 
 ```tsx
-export const archiveButtonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-xl border ...",
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 rounded-none border ...",
   {
     variants: {
       variant: {
-        ink: "border-field-ink bg-field-ink text-field-paper ...",
-        paper: "border-field-label/25 bg-field-paper text-field-ink ...",
+        default: "border-field-ink bg-field-ink text-field-paper ...",
+        outline: "border-field-label/25 bg-field-paper text-field-ink ...",
+        secondary: "border-black/10 bg-black/5 text-field-label ...",
         stamp: "border-field-accent bg-transparent text-field-accent ...",
-        subtle: "border-black/10 bg-black/5 text-field-label ...",
       },
 ```
 
 Explain it like this:
 
-- `ArchiveButton` is not a feed action
-- it is a style system for normal buttons in the archive theme
+- `Button` is not a feed action
+- it is the canonical button primitive for the project
+- the archive style is now the default button language instead of a separate wrapper
 - business meaning comes from the parent through props like `onClick` and `disabled`
 
-### `ArchiveNavButton.tsx`
+### `frontend/components/layout/NavButton.tsx`
 
 Purpose:
 
@@ -230,7 +235,7 @@ Important behavior:
 - `expanded` only affects label visibility
 - the sidebar owns hover state; the button just reacts to it
 
-### `ArchiveSidebar.tsx`
+### `frontend/components/layout/Sidebar.tsx`
 
 Purpose:
 
@@ -266,10 +271,52 @@ const NAV_ITEMS = [
 Explain during evaluation:
 
 - the sidebar owns navigation configuration in `NAV_ITEMS`
-- `ArchiveNavButton` is the row renderer
-- `ArchiveButton` is reused for “Log Entry” and “Logout”
+- `NavButton` is the row renderer
+- `Button` from `frontend/components/ui/button.tsx` is reused for “Log Entry” and “Logout”
 
-### `ArchiveRightRail.tsx`
+### Sidebar "Log Entry" -> `NewPostDialog` Flow
+
+What this does:
+
+- makes the post dialog available from any app page because the sidebar is app-wide
+
+Why it's needed:
+
+- the sidebar is rendered in `AppSidebarShell`, not inside `feed/page.tsx`
+- owning dialog state in the same shell avoids route-coupled behavior
+
+How it works:
+
+```tsx
+// frontend/components/layout/AppSidebarShell.tsx
+const [createOpen, setCreateOpen] = useState(false);
+
+<Sidebar onCreatePost={() => setCreateOpen(true)} ... />
+<NewPostDialog open={createOpen} ... />
+```
+
+```tsx
+// frontend/app/(app)/feed/page.tsx
+useEffect(() => {
+  const handlePostCreated = (event: Event) => {
+    const createdPost = (event as CustomEvent<FeedPost | undefined>).detail;
+    if (!createdPost) return;
+    setPosts((prev) => [createdPost, ...prev.filter((p) => p.id !== createdPost.id)]);
+  };
+
+  window.addEventListener("archive:post-created", handlePostCreated);
+  return () =>
+    window.removeEventListener("archive:post-created", handlePostCreated);
+}, []);
+```
+
+Key terms an evaluator may ask:
+
+- app-level UI ownership: placing shared UI state in the layout shell
+- controlled dialog: `NewPostDialog` opens/closes from `AppSidebarShell` state
+- event sync: feed listens to `archive:post-created` so timeline updates instantly after dialog publish
+
+### `frontend/components/layout/RightRail.tsx`
 
 Purpose:
 
@@ -311,7 +358,7 @@ Key point:
 - observer suggestions are real data coming from `page.tsx`
 - “Follow” is a real action because it calls `onAddFriend(author.id)`
 
-### `NatureCanvas.tsx`
+### `frontend/components/layout/NatureCanvas.tsx`
 
 Purpose:
 
@@ -331,11 +378,11 @@ How it works:
 
 This component does not receive data from the backend.
 
-### `archiveUtils.ts`
+### `frontend/lib/user-utils.ts`
 
 Purpose:
 
-- keep archive-level helpers out of feed-specific files
+- keep generic user display helpers out of component folders
 
 Current helper:
 
@@ -394,11 +441,11 @@ function DialogContent({
 }
 ```
 
-### `FeedActionButton.tsx`
+### `frontend/components/posts/SocialToggle.tsx`
 
 Purpose:
 
-- render the small counters for comments, favorites, and likes
+- render the small social action chips for comments, favorites, and likes
 
 Props:
 
@@ -406,20 +453,21 @@ Props:
 - `label`
 - `count`
 - `accent`
-- `active`
+- `pressed`
 - `disabled`
 - `onClick`
 
 Important behavior:
 
-- if `onClick` is missing, it renders a non-interactive `<div>`
-- if `onClick` exists, it renders a real `<button>`
+- it uses Ark UI `Toggle.Root`
+- it is controlled by the parent through `pressed`
+- the parent still decides what the click means
 
 Why:
 
-- comment count is display-only
-- like and favorite are interactive
-- one component covers both cases
+- like and favorite are true toggled states
+- comment count uses the same visual treatment so the action row stays consistent
+- the component now lives with the post UI instead of a fake `feed` components folder
 
 ### `NewPostCard.tsx`
 
@@ -605,7 +653,7 @@ Important evaluation point:
 - it receives callbacks like `onToggleLike(post)` and `onOpenPost(post.id)`
 - the page remains the source of truth
 
-### `feedUtils.ts`
+### `frontend/lib/feed-utils.ts`
 
 Current helper:
 
@@ -623,6 +671,7 @@ export function formatFeedTime(dateString: string) {
 Why this is separate:
 
 - date formatting logic should not be duplicated inside post and comment rendering
+- it is not a component, so it belongs in `frontend/lib`
 
 ## 6. Data Flow You Should Be Able To Explain
 
@@ -670,7 +719,7 @@ Why this is separate:
 ### Follow from right rail
 
 1. page derives `suggestions` from existing feed authors
-2. `ArchiveRightRail` filters them locally with `query`
+2. `RightRail` filters them locally with `query`
 3. clicking Follow calls `onAddFriend(author.id)`
 4. page sends `POST /friends`
 5. page updates `sentRequests`
@@ -708,9 +757,9 @@ This is why components can stay mostly focused on structure and props instead of
 
 Because it owns all backend communication and page state. We extracted rendering and interaction boundaries, but not the actual business logic.
 
-### Why separate `archive` and `feed` folders?
+### Why separate `layout`, `ui`, `posts`, and `lib`?
 
-Because some components are visual shell primitives that can be reused on other pages (`ArchiveSidebar`, `ArchiveButton`, `NatureCanvas`), while reusable post UI now lives in `frontend/components/posts` (`PostCard`, `PostDialog`, `CommentCard`, `CommentComposer`, `NewPostCard`, `NewPostDialog`). Feed-only helpers stay in `frontend/components/feed`.
+Because shell components now live in `frontend/components/layout` (`Sidebar`, `RightRail`, `NatureCanvas`, `NavButton`), shared primitives live in `frontend/components/ui` (`button`, `dialog`, `tooltip`), post interaction UI lives in `frontend/components/posts` (`PostCard`, `PostDialog`, `CommentCard`, `CommentComposer`, `NewPostCard`, `NewPostDialog`, `SocialToggle`), and non-component helpers/types live in `frontend/lib` (`feed-types`, `feed-utils`, `user-utils`).
 
 ### Why does the right rail not fetch its own data?
 
@@ -747,4 +796,4 @@ That means:
 
 If you need a 30-second explanation:
 
-> The feed page is controlled by `frontend/app/feed/page.tsx`. It fetches posts, stores all UI state, and owns every backend mutation. Archive components in `frontend/components/archive` provide the reusable shell and styling primitives. Feed components in `frontend/components/feed` render feed-specific UI like the composer, preview post cards, and the post detail dialog. Data always flows from the page into components through props, and user actions flow back up through callbacks.
+> The feed page is controlled by `frontend/app/feed/page.tsx`. It fetches posts, stores all UI state, and owns every backend mutation. Shell components in `frontend/components/layout` provide the reusable page frame, shared primitives live in `frontend/components/ui`, post UI lives in `frontend/components/posts`, and non-component helpers/types live in `frontend/lib`. Data always flows from the page into components through props, and user actions flow back up through callbacks.
