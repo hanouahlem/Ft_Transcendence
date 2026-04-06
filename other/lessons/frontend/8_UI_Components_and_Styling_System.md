@@ -93,8 +93,9 @@ Example from the page:
   totalPosts={posts.length}
   totalLikes={totalLikes}
   totalComments={totalComments}
+  sectionTitle={getRightRailTitle({})}
   suggestions={suggestions}
-  sentRequests={sentRequests}
+  sentRequests={rightRailSentRequests}
   sendingFriendId={sendingFriendId}
   onAddFriend={handleAddFriend}
 />

@@ -4,23 +4,20 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { getInitials } from "@/lib/user-utils";
 import { cn } from "@/lib/utils";
-
-type ArchiveObserver = {
-	id: number;
-	username: string;
-	email: string;
-	avatar?: string | null;
-};
+import type { RightRailSuggestion } from "@/lib/right-rail";
 
 type RightRailProps = {
 	totalPosts: number;
 	totalLikes: number;
 	totalComments: number;
-	suggestions: ArchiveObserver[];
+	sectionTitle: string;
+	suggestions: RightRailSuggestion[];
 	sentRequests: number[];
 	sendingFriendId: number | null;
 	onAddFriend: (receiverId: number) => Promise<void>;
+	allowFollow?: boolean;
 };
 
 const TRENDS = [
@@ -33,10 +30,12 @@ export function RightRail({
 	totalPosts,
 	totalLikes,
 	totalComments,
+	sectionTitle,
 	suggestions,
 	sentRequests,
 	sendingFriendId,
 	onAddFriend,
+	allowFollow = true,
 }: RightRailProps) {
 	const [query, setQuery] = useState("");
 
@@ -48,7 +47,7 @@ export function RightRail({
 		}
 
 		return suggestions.filter((author) =>
-			`${author.username} ${author.email}`.toLowerCase().includes(term),
+			author.username.toLowerCase().includes(term),
 		);
 	}, [query, suggestions]);
 
@@ -119,7 +118,7 @@ export function RightRail({
 
 					<section className="relative rotate-1 border border-black/10 bg-paper-muted px-6 py-6 shadow-sm">
 						<div className="mb-4 border-b-2 border-ink pb-2 font-mono text-xs uppercase tracking-[0.28em] text-label">
-							Fellow Observers
+							{sectionTitle}
 						</div>
 
 						<div className="space-y-4">
@@ -129,19 +128,8 @@ export function RightRail({
 								</p>
 							) : (
 								filteredSuggestions.map((author) => {
-									const sent = sentRequests.includes(
-										author.id,
-									);
-									const initials = author.username
-										.split(/\s+/)
-										.filter(Boolean)
-										.slice(0, 2)
-										.map(
-											(part) =>
-												part[0]?.toUpperCase() || "",
-										)
-										.join("")
-										.slice(0, 2);
+									const sent = sentRequests.includes(author.id);
+									const initials = getInitials(author.username);
 									const tileClasses = [
 										"-rotate-2 bg-stage text-ink",
 										"rotate-1 bg-accent-green text-paper",
@@ -156,10 +144,7 @@ export function RightRail({
 											<div
 												className={cn(
 													"flex h-9 w-9 items-center justify-center border-2 border-label font-display text-sm font-bold",
-													tileClasses[
-														author.id %
-															tileClasses.length
-													],
+													tileClasses[author.id % tileClasses.length],
 												)}
 											>
 												{initials}
@@ -170,49 +155,37 @@ export function RightRail({
 													{author.username}
 												</p>
 												<p className="truncate font-mono text-[10px] text-label">
-													@
-													{author.username.toLowerCase()}
+													@{author.username.toLowerCase()}
 												</p>
 											</div>
 
 											<div className="flex items-center gap-2">
 												<Link
 													href={`/profil/${author.id}`}
-													className={buttonVariants(
-														{
-															variant: "outline",
-															size: "sm",
-														},
-													)}
+													className={buttonVariants({
+														variant: "outline",
+														size: "sm",
+													})}
 												>
 													View
 												</Link>
 
-												<Button
-													type="button"
-													variant={
-														sent
-															? "subtle"
-															: "paper"
-													}
-													size="sm"
-													disabled={
-														sent ||
-														sendingFriendId ===
-															author.id
-													}
-													onClick={() =>
-														onAddFriend(author.id)
-													}
-													className="rounded-md border-ink/20 bg-stage/80 px-3 py-1.5 text-[10px] tracking-[0.16em] text-ink shadow-none hover:-rotate-1 hover:bg-stage"
-												>
-													{sendingFriendId ===
-													author.id
-														? "Sending"
-														: sent
-															? "Sent"
-															: "Follow"}
-												</Button>
+												{allowFollow ? (
+													<Button
+														type="button"
+														variant={sent ? "subtle" : "paper"}
+														size="sm"
+														disabled={sent || sendingFriendId === author.id}
+														onClick={() => onAddFriend(author.id)}
+														className="rounded-md border-ink/20 bg-stage/80 px-3 py-1.5 text-[10px] tracking-[0.16em] text-ink shadow-none hover:-rotate-1 hover:bg-stage"
+													>
+														{sendingFriendId === author.id
+															? "Sending"
+															: sent
+																? "Sent"
+																: "Follow"}
+													</Button>
+												) : null}
 											</div>
 										</div>
 									);
@@ -224,7 +197,7 @@ export function RightRail({
 					<footer className="mt-auto pb-2 font-mono text-[10px] leading-relaxed text-label">
 						<p>Terms of Service · Privacy Policy · Cookie Policy</p>
 						<p>
-							{totalPosts} logs · {totalLikes} likes ·{" "}
+							{totalPosts} logs · {totalLikes} likes · {" "}
 							{totalComments} notes
 						</p>
 					</footer>

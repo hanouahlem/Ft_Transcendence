@@ -88,23 +88,25 @@ Important derived data:
 
 ```tsx
 const suggestions = useMemo(() => {
-  const unique = posts.filter(
-    (post, index, array) =>
-      array.findIndex((item) => item.author.id === post.author.id) === index
-  );
+  if (!user?.id) {
+    return [];
+  }
 
-  return unique
-    .filter((post) => post.author.id !== user?.id)
-    .slice(0, 5)
-    .map((post) => post.author);
-}, [posts, user?.id]);
+  return buildFeedSuggestions({
+    allUsers,
+    currentUserId: user.id,
+    connectedUserIds,
+    friendNetworks,
+  });
+}, [allUsers, connectedUserIds, friendNetworks, user?.id]);
 ```
 
 Explain this during evaluation:
 
 - the right rail does not fetch its own data
-- it reuses already-fetched post authors to build suggestions
-- this keeps the number of requests lower and the page logic centralized
+- the page fetches the network data and computes the recommendation list
+- feed suggestions rank users by mutual-friend overlap first, then fill remaining slots with other users
+- this keeps the page as the source of truth while `RightRail` stays presentational
 - the page also controls both dialogs: `createOpen` for publishing and `activePostId` for opened post details
 
 API base:
@@ -214,6 +216,64 @@ Explain it like this:
 - it is the canonical button primitive for the project
 - the archive style is now the default button language instead of a separate wrapper
 - business meaning comes from the parent through props like `onClick` and `disabled`
+
+## 5. Profile Archive View
+
+The profile routes now reuse the same shell and post components as the feed instead of maintaining a second UI stack.
+
+Current files:
+
+- `frontend/app/(app)/profil/page.tsx`
+- `frontend/app/(app)/profil/[id]/page.tsx`
+- `frontend/components/profile/ProfileView.tsx`
+- `frontend/components/layout/RightRail.tsx`
+- `frontend/components/posts/PostCard.tsx`
+- `frontend/components/posts/PostDialog.tsx`
+
+How it works:
+
+- both routes render the same client component: `ProfileView`
+- `/profil` resolves the current authenticated user from `useAuth()`
+- `/profil/[id]` parses the dynamic route parameter and passes it into `ProfileView`
+- `ProfileView` fetches:
+  - `GET /users/:id` for the profile metadata
+  - `GET /users/:id/posts` for the archive entries
+  - `GET /users/:id/friends` for the right-rail suggestions and the fellows count
+
+Important design rule:
+
+- the profile page does not recreate post cards, likes, favorites, or comments
+- it reuses `PostCard` and `PostDialog`
+- this keeps interaction logic consistent between feed and profile
+
+Real route composition:
+
+```tsx
+<ProfileView profileId={profileId} />
+```
+
+Real post reuse:
+
+```tsx
+{posts.map((post, index) => (
+  <PostCard
+    key={post.id}
+    post={post}
+    currentUserId={user?.id}
+    variantIndex={index}
+    onOpenPost={handleOpenPost}
+    onDelete={handleDelete}
+    onToggleLike={handleToggleLike}
+    onToggleFavorite={handleToggleFavorite}
+  />
+))}
+```
+
+Explain it during evaluation like this:
+
+- the app shell is shared by the `(app)` layout through `AppSidebarShell`
+- the profile page only owns profile-specific data loading and hero/stats layout
+- the actual post interaction system remains the same components already used in the feed
 
 ### `frontend/components/layout/NavButton.tsx`
 
@@ -327,10 +387,12 @@ Props:
 - `totalPosts`
 - `totalLikes`
 - `totalComments`
+- `sectionTitle`
 - `suggestions`
 - `sentRequests`
 - `sendingFriendId`
 - `onAddFriend`
+- `allowFollow`
 
 Local state:
 
@@ -347,7 +409,7 @@ const filteredSuggestions = useMemo(() => {
     return suggestions;
   }
   return suggestions.filter((author) =>
-    `${author.username} ${author.email}`.toLowerCase().includes(term)
+    author.username.toLowerCase().includes(term)
   );
 }, [query, suggestions]);
 ```
@@ -356,6 +418,11 @@ Key point:
 
 - trends are static presentation data
 - observer suggestions are real data coming from `page.tsx`
+- the component only needs `id`, `username`, and optional `avatar`, not full user records
+- `sectionTitle` changes by route:
+  - `You Might Know` on feed
+  - `My Friends` on your own profile
+  - `Alice's Friends` on another user profile
 - “Follow” is a real action because it calls `onAddFriend(author.id)`
 
 ### `frontend/components/layout/NatureCanvas.tsx`
