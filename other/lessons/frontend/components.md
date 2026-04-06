@@ -41,7 +41,7 @@ The important rule is:
 
 - `page.tsx` owns page-specific fetching and composition
 - `useArchiveToasts()` owns the archive success/error toast pattern
-- `useFriendRequests()` owns the shared friend-request action state
+- `useFriendRequests()` owns the shared friend-request action state and pending-request hydration
 - `usePostInteractions()` owns shared post/comment interaction state and mutations
 - components receive props and render UI
 
@@ -83,9 +83,13 @@ Real shared hooks:
 
 ```tsx
 const { notifyError, notifySuccess } = useArchiveToasts();
-const { sentRequests, sendingFriendId, handleAddFriend } = useFriendRequests({
-  token,
-});
+const {
+  sentRequests,
+  incomingRequestIdsBySender,
+  sendingFriendId,
+  handleAddFriend,
+  handleAcceptFriend,
+} = useFriendRequests({ token });
 const { posts, setPosts, handleToggleLike, handleAddComment, ... } =
   usePostInteractions({ token });
 ```
@@ -115,6 +119,7 @@ Explain this during evaluation:
 - the backend computes mutual-friend recommendations and fallback users
 - this keeps the page as the source of truth while `RightRail` stays presentational
 - `useFriendRequests()` keeps the follow/request behavior consistent between feed and profile
+- `useFriendRequests()` reloads outgoing pending requests so `Sent` survives a refresh
 - post/comment interaction logic is shared with the profile page through `usePostInteractions()`
 
 API base:
@@ -393,7 +398,15 @@ Key terms an evaluator may ask:
 
 Purpose:
 
-- render the search box, trends stack, observer suggestions, and small footer stats
+- compose the right-side shell from smaller layout pieces
+- render the search box, trends stack, observer suggestions, and small footer stats through dedicated subcomponents
+
+Files:
+
+- `frontend/components/layout/RightRail.tsx`
+- `frontend/components/layout/RightRailSearch.tsx`
+- `frontend/components/layout/RightRailTrends.tsx`
+- `frontend/components/layout/RightRailSuggestions.tsx`
 
 Props:
 
@@ -403,8 +416,10 @@ Props:
 - `sectionTitle`
 - `suggestions`
 - `sentRequests`
+- `incomingRequestIdsBySender`
 - `sendingFriendId`
 - `onAddFriend`
+- `onAcceptFriend`
 - `allowFollow`
 
 Local state:
@@ -428,8 +443,11 @@ const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
 
 Key point:
 
-- trends are static presentation data
-- observer suggestions are real data coming from `page.tsx`
+- `RightRail` is now mostly shell composition
+- `RightRailSearch` owns future search-route navigation
+- `RightRailTrends` owns static trend links
+- `RightRailSuggestions` owns the observer/friends UI and follow action rendering
+- observer suggestions are still real data coming from `page.tsx`
 - the component only needs `id`, `username`, and optional `avatar`, not full user records
 - the search bar does not filter suggestions locally
 - the search bar is a route-navigation control for the future `/search` page
@@ -443,7 +461,10 @@ Key point:
   - feed: no recommendations yet
   - own profile: no accepted friends recorded yet
   - other profile: no visible fellows listed yet
-- “Follow” is a real action because it calls `onAddFriend(author.id)`
+- the suggestion action is one button only:
+  - `Add` for no existing request
+  - `Accept` for incoming pending requests
+  - `Sent` for outgoing pending requests
 
 ### `frontend/components/layout/NatureCanvas.tsx`
 

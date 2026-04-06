@@ -238,6 +238,30 @@ export async function getFriendRequests(req, res) {
     }
 }
 
+export async function getSentFriendRequests(req, res) {
+    try {
+        const userId = req.user.id;
+        if (!userId) {
+            return res.status(400).json({ message: "userId is required" });
+        }
+
+        const requests = await prisma.friends.findMany({
+            where: {
+                senderId: userId,
+                status: "pending"
+            },
+            include: {
+                receiver: { select: { id: true, username: true, avatar: true } }
+            }
+        });
+
+        return res.status(200).json(requests);
+    } catch (error) {
+        console.error("getSentFriendRequests error:", error);
+        return res.status(500).json({ message: "Failed to get sent friend requests" });
+    }
+}
+
 export async function getUserFriends(req, res) {
     try {
         const targetUserId = parseInt(req.params.id);
@@ -362,4 +386,5 @@ export default {
     acceptFriend,
     deleteFriend,
     getFriendRequests,
+    getSentFriendRequests,
 };

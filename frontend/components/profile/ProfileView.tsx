@@ -83,8 +83,17 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
   const [pageError, setPageError] = useState<string | null>(null);
 
   const [connectedUserIds, setConnectedUserIds] = useState<number[]>([]);
-  const { sentRequests, sendingFriendId, handleAddFriend } = useFriendRequests({
+  const {
+    sentRequests,
+    incomingRequestIdsBySender,
+    sendingFriendId,
+    handleAddFriend,
+    handleAcceptFriend,
+  } = useFriendRequests({
     token,
+    onFriendAccepted: (userId) => {
+      setConnectedUserIds((prev) => (prev.includes(userId) ? prev : [...prev, userId]));
+    },
   });
 
   const {
@@ -484,9 +493,11 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
           totalComments={totalComments}
           sectionTitle={rightRailTitle}
           suggestions={rightRailSuggestions}
-          sentRequests={Array.from(new Set([...sentRequests, ...connectedUserIds]))}
+          sentRequests={sentRequests}
+          incomingRequestIdsBySender={incomingRequestIdsBySender}
           sendingFriendId={sendingFriendId}
           onAddFriend={handleAddFriend}
+          onAcceptFriend={handleAcceptFriend}
           allowFollow={!isOwnProfile}
         />
       </div>

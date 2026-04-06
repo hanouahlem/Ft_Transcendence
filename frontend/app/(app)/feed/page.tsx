@@ -25,10 +25,20 @@ export default function FeedPage() {
 	const [loading, setLoading] = useState(true);
 	const [publishing, setPublishing] = useState(false);
 	const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
-	const [connectedUserIds, setConnectedUserIds] = useState<number[]>([]);
 
-	const { sentRequests, sendingFriendId, handleAddFriend } = useFriendRequests({
+	const {
+		sentRequests,
+		incomingRequestIdsBySender,
+		sendingFriendId,
+		handleAddFriend,
+		handleAcceptFriend,
+	} = useFriendRequests({
 		token,
+		onFriendAccepted: (userId) => {
+			setSuggestions((prev) =>
+				prev.filter((suggestion) => suggestion.id !== userId),
+			);
+		},
 	});
 
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -58,11 +68,6 @@ export default function FeedPage() {
 		handleToggleCommentLike,
 		handleToggleCommentFavorite,
 	} = usePostInteractions({ token });
-
-	const rightRailSentRequests = useMemo(
-		() => Array.from(new Set([...sentRequests, ...connectedUserIds])),
-		[sentRequests, connectedUserIds],
-	);
 
 	const totalLikes = useMemo(
 		() => posts.reduce((sum, post) => sum + post.likesCount, 0),
@@ -187,14 +192,7 @@ export default function FeedPage() {
 						}))
 				: [];
 
-			const normalizedConnectedIds = Array.isArray(data?.connectedUserIds)
-				? data.connectedUserIds.filter(
-						(id: unknown): id is number => typeof id === "number",
-					)
-				: [];
-
 			setSuggestions(normalizedSuggestions);
-			setConnectedUserIds(normalizedConnectedIds);
 		} catch (err) {
 			console.error("Erreur suggestions right rail :", err);
 		}
@@ -345,9 +343,11 @@ export default function FeedPage() {
 					totalComments={totalComments}
 					sectionTitle={getRightRailTitle({})}
 					suggestions={suggestions}
-					sentRequests={rightRailSentRequests}
+					sentRequests={sentRequests}
+					incomingRequestIdsBySender={incomingRequestIdsBySender}
 					sendingFriendId={sendingFriendId}
 					onAddFriend={handleAddFriend}
+					onAcceptFriend={handleAcceptFriend}
 				/>
 			</div>
 
