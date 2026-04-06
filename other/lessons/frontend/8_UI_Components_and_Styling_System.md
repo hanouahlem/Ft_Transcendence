@@ -32,6 +32,12 @@ now contains archive-style utility classes such as:
 
 It also registers custom font families (for example the stamp font) so Tailwind utilities can use them from one place.
 
+The app-only sans font is loaded separately in:
+
+- `Frontend/app/(app)/layout.tsx`
+
+and uses `preload: false` because the archive app shell does not need the browser to preload an italic Inter face on first paint. This avoids noisy preload warnings while keeping `font-sans` available for the few UI elements that still use it.
+
 Real code:
 
 ```css

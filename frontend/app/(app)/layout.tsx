@@ -10,13 +10,9 @@ const appSans = localFont({
       style: "normal",
       weight: "100 900",
     },
-    {
-      path: "../../public/fonts/inter/Inter-Italic-VariableFont_opsz,wght.ttf",
-      style: "italic",
-      weight: "100 900",
-    },
   ],
   variable: "--font-sans-source",
+  preload: false,
 });
 
 export default function AppLayout({ children }: { children: ReactNode }) {
