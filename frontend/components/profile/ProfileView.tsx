@@ -302,23 +302,17 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 					) : (
 						<div className="flex flex-col gap-10 lg:gap-12">
 							<section className="relative mt-3">
-								<div className="relative h-[260px] overflow-hidden border border-black/10 bg-paper-muted shadow-[8px_12px_30px_rgba(26,26,26,0.12)] sm:h-[300px]">
+								<div className="rotate-2 relative h-[260px] overflow-hidden border border-black/10 bg-paper-muted shadow-[8px_12px_30px_rgba(26,26,26,0.12)] sm:h-[300px]">
 									<ProfileBanner
 										name={profile.username}
 										className="h-full w-full"
 									/>
 
 									<div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/6 to-black/45" />
-
-									<div className="absolute right-4 top-4 rotate-2 border border-black/15 bg-paper/90 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-ink shadow-sm">
-										{profile.location
-											? `Loc: ${profile.location}`
-											: "Loc: Archive Record"}
-									</div>
 								</div>
 
-								<div className="archive-tape absolute -top-2 left-[14%] h-5 w-28 -rotate-2 bg-accent-green" />
-								<div className="archive-tape absolute -top-2 right-[10%] h-5 w-36 rotate-3 bg-accent-blue" />
+								<div className="absolute -top-4 -left-5 h-5 w-28 -rotate-20 bg-paper-muted/70" />
+								<div className="absolute -top-1 right-[5%] h-5 w-16 rotate-89 bg-paper-muted/70" />
 							</section>
 
 							<section className="relative -mt-33 px-4 sm:px-8">
@@ -472,11 +466,11 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 								<div className="grid grid-cols-2 gap-4 md:grid-cols-5">
 									{[
 										{
-											label: "Observations",
+											label: "Posts",
 											value: formatCompactCount(
 												posts.length,
 											),
-											tone: "text-ink",
+											tone: "text-ink text-6xl",
 											tape: "bg-accent-green",
 											rotate: "rotate-1",
 										},
@@ -485,24 +479,24 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 											value: formatCompactCount(
 												totalLikes,
 											),
-											tone: "text-accent-red",
+											tone: "text-accent-red text-6xl",
 											rotate: "-rotate-1",
 										},
 										{
-											label: "Notes",
+											label: "Comments",
 											value: formatCompactCount(
 												totalComments,
 											),
-											tone: "text-accent-blue",
+											tone: "text-accent-blue text-6xl",
 											rotate: "rotate-2",
 											star: true,
 										},
 										{
-											label: "Fellows",
+											label: "Friends",
 											value: formatCompactCount(
 												friends.length,
 											),
-											tone: "text-ink",
+											tone: "text-ink text-6xl",
 											rotate: "-rotate-2",
 											tape: "bg-accent-red",
 										},
@@ -511,7 +505,7 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 											value: formatJoinedDate(
 												profile.createdAt,
 											),
-											tone: "text-ink",
+											tone: "text-ink text-4xl",
 											rotate: "rotate-1",
 										},
 									].map((item, index) => (
