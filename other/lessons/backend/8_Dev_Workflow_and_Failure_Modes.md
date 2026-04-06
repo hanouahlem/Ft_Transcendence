@@ -136,6 +136,45 @@ Cause:
 
 - Multer rejects non-image files
 
+### Seeded comments bypass moderation
+
+Symptoms:
+
+- `make seed` needs to create comments even when the normal moderation path is enabled
+
+How it works:
+
+- backend reads optional `SEED_SCRIPT_KEY` through [`backend/src/env.js`](/Users/curtis/Desktop/DEV/last_jeune/backend/src/env.js)
+- the generator wrapper [`other/superseed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/superseed.sh) reads the same value from `backend/.env` and passes it to [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/seed.mjs)
+- seeded comment requests send `x-seed-script-key`
+- [`backend/src/controllers/postController.js`](/Users/curtis/Desktop/DEV/last_jeune/backend/src/controllers/postController.js) only sets `skipModeration` when the header matches the env value
+- [`backend/src/services/postService.js`](/Users/curtis/Desktop/DEV/last_jeune/backend/src/services/postService.js) skips `checkComment()` only for that local seed path
+
+Why this matters:
+
+- `commentChecker.js` stays untouched, which is better for teammate ownership
+- the bypass only applies to seeded comments created by the local generator
+- ordinary user comments still use the normal moderation path
+
+## Current Seed Flow
+
+The large social dataset is no longer embedded directly in the shell script.
+
+Current flow:
+
+- [`other/seed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/seed.sh) remains the older small scripted seed
+- [`other/superseed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/superseed.sh) is the thin launcher for the large deterministic dataset
+- [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/seed.mjs) loads curated JSON config from [`other/seed/config/roster.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/roster.json), [`other/seed/config/clusters.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/clusters.json), [`other/seed/config/themes.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/themes.json), [`other/seed/config/relationships.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/relationships.json), and [`other/seed/config/showcase-users.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/showcase-users.json)
+- the generator builds deterministic user budgets, friendship plans, post plans, likes, favorites, and comment plans from that small curated input
+- all real data creation still happens through the existing HTTP routes: register, login, profile update, friends, posts, likes, favorites, comments
+
+Why this version is easier to explain in evaluation:
+
+- the larger seed keeps shell responsibilities small and obvious
+- the backend remains the source of truth because the seed still uses the public route layer
+- the dataset is scalable without pasting hundreds of hardcoded posts into Bash
+- `node other/seed/seed.mjs --plan-only` gives a non-mutating shape check before touching the database
+
 ## What To Check First When Something Breaks
 
 1. Is Docker Compose up?
@@ -162,3 +201,4 @@ If you identify which area failed first, debugging gets much easier.
 - What is the purpose of `validateEnv()`?
 - What problem does `/health` solve?
 - If a protected route returns `401`, what are the first two things you should check?
+- Why does the seed workflow use `SEED_SCRIPT_KEY` instead of modifying `commentChecker.js`?

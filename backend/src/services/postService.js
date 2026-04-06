@@ -249,10 +249,12 @@ export const createComment = async (input) => {
     throw new Error("Post not found");
   }
 
-  const allowed = await checkComment(input.content);
-  
-  if (!allowed) {
-    throw new Error("This comment contains inappropriate content.");
+  if (!input.skipModeration) {
+    const allowed = await checkComment(input.content);
+
+    if (!allowed) {
+      throw new Error("This comment contains inappropriate content.");
+    }
   }
   const user = await prisma.user.findUnique({
     where: {

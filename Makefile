@@ -45,6 +45,15 @@ backend:
 db:
 	$(COMPOSE) up -d postgres
 
+db-clean:
+	$(COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate reset --force'
+
+seed: db-clean
+	bash other/seed.sh
+
+superseed: db-clean
+	bash other/superseed.sh
+
 prisma-generate:
 	$(COMPOSE) exec backend npx prisma generate
 
@@ -76,4 +85,4 @@ dc-clean: dc-stop dc-rm dc-rmi
 	-docker volume rm transcendance-backend-node-modules transcendance-frontend-node-modules
 	docker builder prune -f
 
-.PHONY: up up-build down restart build rebuild logs ps clean fclean re frontend backend db prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean
+.PHONY: up up-build down restart build rebuild logs ps clean fclean re frontend backend db db-clean seed prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean
