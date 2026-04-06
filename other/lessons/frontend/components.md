@@ -104,25 +104,15 @@ const { posts, setPosts, handleToggleLike, handleAddComment, ... } =
 Important derived data:
 
 ```tsx
-const suggestions = useMemo(() => {
-  if (!user?.id) {
-    return [];
-  }
-
-  return buildFeedSuggestions({
-    allUsers,
-    currentUserId: user.id,
-    connectedUserIds,
-    friendNetworks,
-  });
-}, [allUsers, connectedUserIds, friendNetworks, user?.id]);
+const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
+const [connectedUserIds, setConnectedUserIds] = useState<number[]>([]);
 ```
 
 Explain this during evaluation:
 
 - the right rail does not fetch its own data
-- the page fetches the network data and computes the recommendation list
-- feed suggestions rank users by mutual-friend overlap first, then fill remaining slots with other users
+- the feed page calls `GET /friends/suggestions`
+- the backend computes mutual-friend recommendations and fallback users
 - this keeps the page as the source of truth while `RightRail` stays presentational
 - `useFriendRequests()` keeps the follow/request behavior consistent between feed and profile
 - post/comment interaction logic is shared with the profile page through `usePostInteractions()`
@@ -145,6 +135,7 @@ The page calls backend routes directly with `fetch`, for example:
 - `POST` or `DELETE /comments/:id/like`
 - `POST` or `DELETE /comments/:id/favorite`
 - `GET /friends`
+- `GET /friends/suggestions`
 - `POST /friends`
 
 ## 3. Shared Data Types
@@ -422,18 +413,17 @@ Local state:
 const [query, setQuery] = useState("");
 ```
 
-Derived data:
+Search navigation:
 
 ```tsx
-const filteredSuggestions = useMemo(() => {
-  const term = query.trim().toLowerCase();
-  if (!term) {
-    return suggestions;
-  }
-  return suggestions.filter((author) =>
-    author.username.toLowerCase().includes(term)
-  );
-}, [query, suggestions]);
+const searchHref = trimmedQuery
+  ? `/search?q=${encodeURIComponent(trimmedQuery)}`
+  : "/search";
+
+const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  router.push(searchHref);
+};
 ```
 
 Key point:
@@ -441,10 +431,18 @@ Key point:
 - trends are static presentation data
 - observer suggestions are real data coming from `page.tsx`
 - the component only needs `id`, `username`, and optional `avatar`, not full user records
+- the search bar does not filter suggestions locally
+- the search bar is a route-navigation control for the future `/search` page
+- trend chips also link to the future search route with a prefilled query
 - `sectionTitle` changes by route:
   - `You Might Know` on feed
   - `My Friends` on your own profile
   - `Alice's Friends` on another user profile
+- empty-state copy also changes by context:
+  - active search: no search matches
+  - feed: no recommendations yet
+  - own profile: no accepted friends recorded yet
+  - other profile: no visible fellows listed yet
 - “Follow” is a real action because it calls `onAddFriend(author.id)`
 
 ### `frontend/components/layout/NatureCanvas.tsx`

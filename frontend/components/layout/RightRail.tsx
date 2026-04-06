@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getInitials } from "@/lib/user-utils";
 import { cn } from "@/lib/utils";
 import type { RightRailSuggestion } from "@/lib/right-rail";
+
+const SEARCH_ROUTE = "/search";
 
 type RightRailProps = {
 	totalPosts: number;
@@ -37,19 +40,36 @@ export function RightRail({
 	onAddFriend,
 	allowFollow = true,
 }: RightRailProps) {
+	const router = useRouter();
 	const [query, setQuery] = useState("");
+	const trimmedQuery = query.trim();
 
-	const filteredSuggestions = useMemo(() => {
-		const term = query.trim().toLowerCase();
-
-		if (!term) {
-			return suggestions;
+	const emptyState = useMemo(() => {
+		if (sectionTitle === "My Friends") {
+			return {
+				title: "You have no friend..",
+			};
 		}
 
-		return suggestions.filter((author) =>
-			author.username.toLowerCase().includes(term),
-		);
-	}, [query, suggestions]);
+		if (sectionTitle === "You Might Know") {
+			return {
+				title: "You are on your own..",
+			};
+		}
+
+		return {
+			title: "No Friend",
+		};
+	}, [sectionTitle]);
+
+	const searchHref = trimmedQuery
+		? `${SEARCH_ROUTE}?q=${encodeURIComponent(trimmedQuery)}`
+		: SEARCH_ROUTE;
+
+	const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		router.push(searchHref);
+	};
 
 	return (
 		<aside className="hidden w-73 shrink-0 xl:block">
@@ -58,7 +78,7 @@ export function RightRail({
 				style={{ right: "max(0px, calc(50vw - 604px))" }}
 			>
 				<div className="flex h-full w-full flex-col gap-10 overflow-y-auto pr-1">
-					<section className="relative">
+					<form className="relative" onSubmit={handleSearchSubmit}>
 						<Search className="pointer-events-none absolute left-4 top-3 h-4 w-4 text-label" />
 						<input
 							type="text"
@@ -67,10 +87,14 @@ export function RightRail({
 							placeholder="Search archives..."
 							className="archive-input w-full rounded-lg border-0 bg-paper-muted py-2.5 pl-11 pr-9 font-mono text-sm shadow-inner"
 						/>
-						<span className="absolute right-3 top-2.5 font-mono text-sm text-label">
+						<button
+							type="submit"
+							className="absolute right-3 top-2.5 font-mono text-sm text-label transition-colors hover:text-ink"
+							aria-label="Search archive"
+						>
 							/
-						</span>
-					</section>
+						</button>
+					</form>
 
 					<section className="relative">
 						<div className="mb-6 inline-block -rotate-1 bg-ink px-4 py-1 text-paper">
@@ -81,10 +105,11 @@ export function RightRail({
 
 						<div className="flex flex-col">
 							{TRENDS.map((trend, index) => (
-								<article
+								<Link
 									key={trend.rank}
+									href={`${SEARCH_ROUTE}?q=${encodeURIComponent(trend.title)}`}
 									className={cn(
-										"flex items-center gap-3 border border-black/10 px-3 py-3 shadow-sm",
+										"group flex items-center gap-3 border border-black/10 px-3 py-3 shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md",
 										index % 2 === 0
 											? "bg-paper"
 											: "bg-paper-muted",
@@ -92,6 +117,7 @@ export function RightRail({
 										index === 1 && "rotate-1",
 										index === 2 && "-rotate-2",
 									)}
+									aria-label={`Search for ${trend.title}`}
 								>
 									<span className="border-r border-black/15 pr-3 font-mono text-xs text-label">
 										{trend.rank}
@@ -104,14 +130,10 @@ export function RightRail({
 											{trend.meta}
 										</p>
 									</div>
-									<button
-										type="button"
-										className="font-mono text-xs text-label transition-colors hover:text-ink"
-										aria-label={`Track ${trend.title}`}
-									>
+									<span className="font-mono text-xs text-label transition-colors group-hover:text-ink">
 										[+]
-									</button>
-								</article>
+									</span>
+								</Link>
 							))}
 						</div>
 					</section>
@@ -122,14 +144,20 @@ export function RightRail({
 						</div>
 
 						<div className="space-y-4">
-							{filteredSuggestions.length === 0 ? (
-								<p className="font-mono text-[11px] uppercase tracking-[0.16em] text-label">
-									No fellows match this search yet.
-								</p>
+							{suggestions.length === 0 ? (
+								<div className="border border-dashed border-black/15 bg-paper/70 px-4 py-4 text-center">
+									<p className="font-mono text-xs uppercase tracking-[0.24em] text-label">
+										{emptyState.title}
+									</p>
+								</div>
 							) : (
-								filteredSuggestions.map((author) => {
-									const sent = sentRequests.includes(author.id);
-									const initials = getInitials(author.username);
+								suggestions.map((author) => {
+									const sent = sentRequests.includes(
+										author.id,
+									);
+									const initials = getInitials(
+										author.username,
+									);
 									const tileClasses = [
 										"-rotate-2 bg-stage text-ink",
 										"rotate-1 bg-accent-green text-paper",
@@ -144,7 +172,10 @@ export function RightRail({
 											<div
 												className={cn(
 													"flex h-9 w-9 items-center justify-center border-2 border-label font-display text-sm font-bold",
-													tileClasses[author.id % tileClasses.length],
+													tileClasses[
+														author.id %
+															tileClasses.length
+													],
 												)}
 											>
 												{initials}
@@ -155,7 +186,8 @@ export function RightRail({
 													{author.username}
 												</p>
 												<p className="truncate font-mono text-[10px] text-label">
-													@{author.username.toLowerCase()}
+													@
+													{author.username.toLowerCase()}
 												</p>
 											</div>
 
@@ -173,13 +205,26 @@ export function RightRail({
 												{allowFollow ? (
 													<Button
 														type="button"
-														variant={sent ? "subtle" : "paper"}
+														variant={
+															sent
+																? "subtle"
+																: "paper"
+														}
 														size="sm"
-														disabled={sent || sendingFriendId === author.id}
-														onClick={() => onAddFriend(author.id)}
+														disabled={
+															sent ||
+															sendingFriendId ===
+																author.id
+														}
+														onClick={() =>
+															onAddFriend(
+																author.id,
+															)
+														}
 														className="rounded-md border-ink/20 bg-stage/80 px-3 py-1.5 text-[10px] tracking-[0.16em] text-ink shadow-none hover:-rotate-1 hover:bg-stage"
 													>
-														{sendingFriendId === author.id
+														{sendingFriendId ===
+														author.id
 															? "Sending"
 															: sent
 																? "Sent"
@@ -197,8 +242,7 @@ export function RightRail({
 					<footer className="mt-auto pb-2 font-mono text-[10px] leading-relaxed text-label">
 						<p>Terms of Service · Privacy Policy · Cookie Policy</p>
 						<p>
-							{totalPosts} logs · {totalLikes} likes · {" "}
-							{totalComments} notes
+							{totalPosts} logs · {totalLikes} likes · {totalComments} notes
 						</p>
 					</footer>
 				</div>

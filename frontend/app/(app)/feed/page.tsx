@@ -7,11 +7,7 @@ import { RightRail } from "@/components/layout/RightRail";
 import { NewPostCard } from "@/components/posts/NewPostCard";
 import { PostCard } from "@/components/posts/PostCard";
 import { PostDialog } from "@/components/posts/PostDialog";
-import {
-	buildFeedSuggestions,
-	getRightRailTitle,
-	type RightRailSuggestion,
-} from "@/lib/right-rail";
+import { getRightRailTitle, type RightRailSuggestion } from "@/lib/right-rail";
 import { useAuth } from "@/context/AuthContext";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
 import { useFriendRequests } from "@/hooks/useFriendRequests";
@@ -28,13 +24,8 @@ export default function FeedPage() {
 	const [previewUrl, setPreviewUrl] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [publishing, setPublishing] = useState(false);
-	const [allUsers, setAllUsers] = useState<RightRailSuggestion[]>([]);
-	const [connectedUsers, setConnectedUsers] = useState<RightRailSuggestion[]>(
-		[],
-	);
-	const [friendNetworks, setFriendNetworks] = useState<
-		RightRailSuggestion[][]
-	>([]);
+	const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
+	const [connectedUserIds, setConnectedUserIds] = useState<number[]>([]);
 
 	const { sentRequests, sendingFriendId, handleAddFriend } = useFriendRequests({
 		token,
@@ -67,24 +58,6 @@ export default function FeedPage() {
 		handleToggleCommentLike,
 		handleToggleCommentFavorite,
 	} = usePostInteractions({ token });
-
-	const connectedUserIds = useMemo(
-		() => connectedUsers.map((observer) => observer.id),
-		[connectedUsers],
-	);
-
-	const suggestions = useMemo(() => {
-		if (!user?.id) {
-			return [];
-		}
-
-		return buildFeedSuggestions({
-			allUsers,
-			currentUserId: user.id,
-			connectedUserIds,
-			friendNetworks,
-		});
-	}, [allUsers, connectedUserIds, friendNetworks, user?.id]);
 
 	const rightRailSentRequests = useMemo(
 		() => Array.from(new Set([...sentRequests, ...connectedUserIds])),
@@ -179,112 +152,49 @@ export default function FeedPage() {
 	};
 
 	const fetchRightRailSuggestions = async () => {
-		if (!token || !user?.id) return;
+		if (!token) return;
 
 		try {
-			const [friendsRes, usersRes] = await Promise.all([
-				fetch(`${API_URL}/friends`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				}),
-				fetch(`${API_URL}/users`),
-			]);
+			const res = await fetch(`${API_URL}/friends/suggestions`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
-			const [friendsData, usersData] = await Promise.all([
-				friendsRes.json(),
-				usersRes.json(),
-			]);
+			const data = await res.json();
 
-			if (!friendsRes.ok) {
+			if (!res.ok) {
 				throw new Error(
-					friendsData.message ||
-						"Unable to fetch friend relations.",
+					data.message || "Unable to fetch right-rail suggestions.",
 				);
 			}
 
-			if (!usersRes.ok) {
-				throw new Error(
-					usersData.message ||
-						"Unable to fetch users for suggestions.",
-				);
-			}
-
-			const normalizedFriends = Array.isArray(friendsData)
-				? friendsData
+			const normalizedSuggestions = Array.isArray(data?.suggestions)
+				? data.suggestions
 						.filter(
-							(item): item is RightRailSuggestion =>
-								typeof item?.id === "number" &&
-								typeof item?.username === "string",
+							(item: unknown): item is RightRailSuggestion =>
+								typeof item === "object" &&
+								item !== null &&
+								"id" in item &&
+								"username" in item &&
+								typeof item.id === "number" &&
+								typeof item.username === "string",
 						)
-						.map((item) => ({
+						.map((item: RightRailSuggestion) => ({
 							id: item.id,
 							username: item.username,
 							avatar: item.avatar || null,
 						}))
 				: [];
 
-			const normalizedUsers = Array.isArray(usersData)
-				? usersData
-						.filter(
-							(item): item is RightRailSuggestion =>
-								typeof item?.id === "number" &&
-								typeof item?.username === "string",
-						)
-						.map((item) => ({
-							id: item.id,
-							username: item.username,
-							avatar: item.avatar || null,
-						}))
+			const normalizedConnectedIds = Array.isArray(data?.connectedUserIds)
+				? data.connectedUserIds.filter(
+						(id: unknown): id is number => typeof id === "number",
+					)
 				: [];
 
-			setConnectedUsers(normalizedFriends);
-			setAllUsers(normalizedUsers);
-
-			if (normalizedFriends.length === 0) {
-				setFriendNetworks([]);
-				return;
-			}
-
-			const networkResponses = await Promise.all(
-				normalizedFriends.map(async (friend) => {
-					try {
-						const res = await fetch(
-							`${API_URL}/users/${friend.id}/friends`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
-							},
-						);
-						const data = await res.json();
-
-						if (!res.ok || !Array.isArray(data)) {
-							return [];
-						}
-
-						return data
-							.filter(
-								(item): item is RightRailSuggestion =>
-									typeof item?.id === "number" &&
-									typeof item?.username === "string",
-							)
-							.map((item) => ({
-								id: item.id,
-								username: item.username,
-								avatar: item.avatar || null,
-							}));
-					} catch (error) {
-						console.error(
-							`Failed to fetch network for user ${friend.id}:`,
-							error,
-						);
-						return [];
-					}
-				}),
-			);
-
-			setFriendNetworks(networkResponses);
+			setSuggestions(normalizedSuggestions);
+			setConnectedUserIds(normalizedConnectedIds);
 		} catch (err) {
 			console.error("Erreur suggestions right rail :", err);
 		}

@@ -1,5 +1,45 @@
 import prisma from "../prisma.js";
-import jwt from 'jsonwebtoken';
+
+function toFriendPreview(user) {
+    return {
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar ?? null,
+    };
+}
+
+function buildMutualFriendSuggestions({ currentUserId, connectedUserIds, networkRelations, limit }) {
+    const connectedSet = new Set(connectedUserIds);
+    const candidateMap = new Map();
+    const mutualCounts = new Map();
+
+    for (const relation of networkRelations) {
+        const sender = toFriendPreview(relation.sender);
+        const receiver = toFriendPreview(relation.receiver);
+        const participants = [sender, receiver];
+
+        for (const participant of participants) {
+            if (participant.id === currentUserId || connectedSet.has(participant.id)) {
+                continue;
+            }
+
+            candidateMap.set(participant.id, participant);
+            mutualCounts.set(participant.id, (mutualCounts.get(participant.id) ?? 0) + 1);
+        }
+    }
+
+    return [...candidateMap.values()]
+        .sort((left, right) => {
+            const mutualDiff = (mutualCounts.get(right.id) ?? 0) - (mutualCounts.get(left.id) ?? 0);
+
+            if (mutualDiff !== 0) {
+                return mutualDiff;
+            }
+
+            return left.username.localeCompare(right.username);
+        })
+        .slice(0, limit);
+}
 
 
 export async function addFriend(req, res) {
@@ -228,4 +268,98 @@ export async function getUserFriends(req, res) {
     }
 }
 
-export default { addFriend, getFriends, getUserFriends, acceptFriend, deleteFriend, getFriendRequests };
+export async function getFriendSuggestions(req, res) {
+    try {
+        const userId = req.user.id;
+        const requestedLimit = Number.parseInt(String(req.query.limit ?? ""), 10);
+        const limit = Number.isNaN(requestedLimit) ? 5 : Math.max(1, Math.min(requestedLimit, 12));
+
+        if (!userId) {
+            return res.status(400).json({ message: "userId is required" });
+        }
+
+        const directRelations = await prisma.friends.findMany({
+            where: {
+                status: "accepted",
+                OR: [{ senderId: userId }, { receiverId: userId }],
+            },
+            include: {
+                sender: { select: { id: true, username: true, avatar: true } },
+                receiver: { select: { id: true, username: true, avatar: true } },
+            },
+        });
+
+        const connectedUsers = directRelations.map((relation) =>
+            relation.senderId === userId ? toFriendPreview(relation.receiver) : toFriendPreview(relation.sender)
+        );
+        const connectedUserIds = connectedUsers.map((friend) => friend.id);
+
+        let rankedSuggestions = [];
+
+        if (connectedUserIds.length > 0) {
+            const networkRelations = await prisma.friends.findMany({
+                where: {
+                    status: "accepted",
+                    OR: [
+                        { senderId: { in: connectedUserIds } },
+                        { receiverId: { in: connectedUserIds } },
+                    ],
+                },
+                include: {
+                    sender: { select: { id: true, username: true, avatar: true } },
+                    receiver: { select: { id: true, username: true, avatar: true } },
+                },
+            });
+
+            rankedSuggestions = buildMutualFriendSuggestions({
+                currentUserId: userId,
+                connectedUserIds,
+                networkRelations,
+                limit,
+            });
+        }
+
+        if (rankedSuggestions.length >= limit) {
+            return res.status(200).json({
+                connectedUserIds,
+                suggestions: rankedSuggestions,
+            });
+        }
+
+        const excludedIds = [userId, ...connectedUserIds, ...rankedSuggestions.map((user) => user.id)];
+        const fallbackUsers = await prisma.user.findMany({
+            where: {
+                id: {
+                    notIn: excludedIds,
+                },
+            },
+            select: {
+                id: true,
+                username: true,
+                avatar: true,
+            },
+            orderBy: {
+                username: "asc",
+            },
+            take: limit - rankedSuggestions.length,
+        });
+
+        return res.status(200).json({
+            connectedUserIds,
+            suggestions: [...rankedSuggestions, ...fallbackUsers.map(toFriendPreview)],
+        });
+    } catch (error) {
+        console.error("getFriendSuggestions error:", error);
+        return res.status(500).json({ message: "Failed to get friend suggestions" });
+    }
+}
+
+export default {
+    addFriend,
+    getFriends,
+    getUserFriends,
+    getFriendSuggestions,
+    acceptFriend,
+    deleteFriend,
+    getFriendRequests,
+};
