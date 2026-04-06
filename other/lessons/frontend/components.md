@@ -30,13 +30,19 @@ Current files:
 - `frontend/components/ui/button.tsx`
 - `frontend/components/ui/dialog.tsx`
 - `frontend/components/ui/tooltip.tsx`
+- `frontend/hooks/useArchiveToasts.ts`
+- `frontend/hooks/useFriendRequests.ts`
+- `frontend/hooks/usePostInteractions.ts`
 - `frontend/lib/feed-types.ts`
 - `frontend/lib/feed-utils.ts`
 - `frontend/lib/user-utils.ts`
 
 The important rule is:
 
-- `page.tsx` owns state and backend calls
+- `page.tsx` owns page-specific fetching and composition
+- `useArchiveToasts()` owns the archive success/error toast pattern
+- `useFriendRequests()` owns the shared friend-request action state
+- `usePostInteractions()` owns shared post/comment interaction state and mutations
 - components receive props and render UI
 
 Real code:
@@ -67,21 +73,32 @@ This is the controller for the page.
 It owns:
 
 - authenticated user access through `useAuth()`
-- all page state with `useState`
+- composer state with `useState`
 - derived values with `useMemo`
 - data loading with `fetchPosts()` and `fetchExistingFriendRelations()`
-- mutation handlers for publish, delete, like, favorite, comment, and friend request
+- publish and friend-request mutations
+- the shared post/comment mutation hook: `usePostInteractions()`
+
+Real shared hooks:
+
+```tsx
+const { notifyError, notifySuccess } = useArchiveToasts();
+const { sentRequests, sendingFriendId, handleAddFriend } = useFriendRequests({
+  token,
+});
+const { posts, setPosts, handleToggleLike, handleAddComment, ... } =
+  usePostInteractions({ token });
+```
 
 Main state:
 
 ```tsx
-const [posts, setPosts] = useState<FeedPost[]>([]);
 const [postContent, setPostContent] = useState("");
 const [selectedFile, setSelectedFile] = useState<File | null>(null);
 const [previewUrl, setPreviewUrl] = useState("");
-const [createOpen, setCreateOpen] = useState(false);
-const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
-const [activePostId, setActivePostId] = useState<number | null>(null);
+
+const { posts, setPosts, handleToggleLike, handleAddComment, ... } =
+  usePostInteractions({ token });
 ```
 
 Important derived data:
@@ -107,7 +124,8 @@ Explain this during evaluation:
 - the page fetches the network data and computes the recommendation list
 - feed suggestions rank users by mutual-friend overlap first, then fill remaining slots with other users
 - this keeps the page as the source of truth while `RightRail` stays presentational
-- the page also controls both dialogs: `createOpen` for publishing and `activePostId` for opened post details
+- `useFriendRequests()` keeps the follow/request behavior consistent between feed and profile
+- post/comment interaction logic is shared with the profile page through `usePostInteractions()`
 
 API base:
 
@@ -229,6 +247,8 @@ Current files:
 - `frontend/components/layout/RightRail.tsx`
 - `frontend/components/posts/PostCard.tsx`
 - `frontend/components/posts/PostDialog.tsx`
+- `frontend/hooks/useFriendRequests.ts`
+- `frontend/hooks/usePostInteractions.ts`
 
 How it works:
 
@@ -237,8 +257,10 @@ How it works:
 - `/profil/[id]` parses the dynamic route parameter and passes it into `ProfileView`
 - `ProfileView` fetches:
   - `GET /users/:id` for the profile metadata
-  - `GET /users/:id/posts` for the archive entries
-  - `GET /users/:id/friends` for the right-rail suggestions and the fellows count
+- `GET /users/:id/posts` for the archive entries
+- `GET /users/:id/friends` for the right-rail suggestions and the fellows count
+- `ProfileView` reuses `useFriendRequests()` for follow/request state and mutations
+- `ProfileView` reuses `usePostInteractions()` for delete, like, favorite, comment, and post-dialog state
 
 Important design rule:
 
@@ -273,7 +295,7 @@ Explain it during evaluation like this:
 
 - the app shell is shared by the `(app)` layout through `AppSidebarShell`
 - the profile page only owns profile-specific data loading and hero/stats layout
-- the actual post interaction system remains the same components already used in the feed
+- the actual post interaction system is the same shared hook and components already used in the feed
 
 ### `frontend/components/layout/NavButton.tsx`
 

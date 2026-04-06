@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Plus } from "lucide-react";
-import type { FeedComment, FeedPost } from "@/lib/feed-types";
+import type { FeedPost } from "@/lib/feed-types";
 import { RightRail } from "@/components/layout/RightRail";
 import { NewPostCard } from "@/components/posts/NewPostCard";
 import { PostCard } from "@/components/posts/PostCard";
@@ -12,22 +12,22 @@ import {
 	getRightRailTitle,
 	type RightRailSuggestion,
 } from "@/lib/right-rail";
-import { archiveToaster } from "@/components/ui/toaster";
 import { useAuth } from "@/context/AuthContext";
+import { useArchiveToasts } from "@/hooks/useArchiveToasts";
+import { useFriendRequests } from "@/hooks/useFriendRequests";
+import { usePostInteractions } from "@/hooks/usePostInteractions";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function FeedPage() {
 	const { user, token } = useAuth();
+	const { notifyError, notifySuccess } = useArchiveToasts();
 
-	const [posts, setPosts] = useState<FeedPost[]>([]);
 	const [postContent, setPostContent] = useState("");
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [previewUrl, setPreviewUrl] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [publishing, setPublishing] = useState(false);
-	const [sentRequests, setSentRequests] = useState<number[]>([]);
-	const [sendingFriendId, setSendingFriendId] = useState<number | null>(null);
 	const [allUsers, setAllUsers] = useState<RightRailSuggestion[]>([]);
 	const [connectedUsers, setConnectedUsers] = useState<RightRailSuggestion[]>(
 		[],
@@ -36,32 +36,37 @@ export default function FeedPage() {
 		RightRailSuggestion[][]
 	>([]);
 
-	const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
-	const [deletingCommentId, setDeletingCommentId] = useState<number | null>(
-		null,
-	);
-	const [likingPostId, setLikingPostId] = useState<number | null>(null);
-	const [favoritingPostId, setFavoritingPostId] = useState<number | null>(
-		null,
-	);
-	const [likingCommentId, setLikingCommentId] = useState<number | null>(null);
-	const [favoritingCommentId, setFavoritingCommentId] = useState<
-		number | null
-	>(null);
-
-	const [commentInputs, setCommentInputs] = useState<Record<number, string>>(
-		{},
-	);
-	const [commentingPostId, setCommentingPostId] = useState<number | null>(
-		null,
-	);
-	const [dialogPostId, setDialogPostId] = useState<number | null>(null);
-	const [dialogPostSnapshot, setDialogPostSnapshot] =
-		useState<FeedPost | null>(null);
-	const [postDialogOpen, setPostDialogOpen] = useState(false);
-	const [focusCommentInput, setFocusCommentInput] = useState(false);
+	const { sentRequests, sendingFriendId, handleAddFriend } = useFriendRequests({
+		token,
+	});
 
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+	const {
+		posts,
+		setPosts,
+		activePost,
+		postDialogOpen,
+		focusCommentInput,
+		commentValue,
+		deletingPostId,
+		deletingCommentId,
+		likingPostId,
+		favoritingPostId,
+		likingCommentId,
+		favoritingCommentId,
+		commentingPostId,
+		handleCommentChange,
+		handleOpenPost,
+		handlePostDialogChange,
+		handleDeleteComment,
+		handleAddComment,
+		handleDelete,
+		handleToggleLike,
+		handleToggleFavorite,
+		handleToggleCommentLike,
+		handleToggleCommentFavorite,
+	} = usePostInteractions({ token });
 
 	const connectedUserIds = useMemo(
 		() => connectedUsers.map((observer) => observer.id),
@@ -95,29 +100,6 @@ export default function FeedPage() {
 		() => posts.reduce((sum, post) => sum + post.commentsCount, 0),
 		[posts],
 	);
-
-	const activePost = useMemo(
-		() =>
-			posts.find((post) => post.id === dialogPostId) ??
-			dialogPostSnapshot ??
-			null,
-		[posts, dialogPostId, dialogPostSnapshot],
-	);
-
-	const notifyError = (description: string) => {
-		archiveToaster.error({
-			title: "Error",
-			description,
-			duration: 6000,
-		});
-	};
-
-	const notifySuccess = (description: string) => {
-		archiveToaster.success({
-			title: "Field Notice",
-			description,
-		});
-	};
 
 	useEffect(() => {
 		return () => {
@@ -156,21 +138,7 @@ export default function FeedPage() {
 		return () => {
 			window.removeEventListener("archive:post-created", handlePostCreated);
 		};
-	}, []);
-
-	useEffect(() => {
-		if (dialogPostId === null) {
-			return;
-		}
-
-		const nextPost =
-			posts.find((post) => post.id === dialogPostId) ??
-			dialogPostSnapshot;
-
-		if (nextPost) {
-			setDialogPostSnapshot(nextPost);
-		}
-	}, [posts, dialogPostId, dialogPostSnapshot]);
+	}, [setPosts]);
 
 	const resetComposer = () => {
 		setPostContent("");
@@ -322,177 +290,6 @@ export default function FeedPage() {
 		}
 	};
 
-	const handleCommentChange = (postId: number, value: string) => {
-		setCommentInputs((prev) => ({
-			...prev,
-			[postId]: value,
-		}));
-	};
-
-	const updatePostInState = (
-		postId: number,
-		updater: (post: FeedPost) => FeedPost,
-	) => {
-		setPosts((prevPosts) =>
-			prevPosts.map((post) =>
-				post.id === postId ? updater(post) : post,
-			),
-		);
-	};
-
-	const updateCommentInState = (
-		commentId: number,
-		updater: (comment: FeedComment) => FeedComment,
-	) => {
-		setPosts((prevPosts) =>
-			prevPosts.map((post) => {
-				const hasComment = post.comments.some(
-					(comment) => comment.id === commentId,
-				);
-
-				if (!hasComment) {
-					return post;
-				}
-
-				return {
-					...post,
-					comments: post.comments.map((comment) =>
-						comment.id === commentId ? updater(comment) : comment,
-					),
-				};
-			}),
-		);
-	};
-
-	const handleOpenPost = (
-		postId: number,
-		shouldFocusCommentInput = false,
-	) => {
-		const post = posts.find((item) => item.id === postId) ?? null;
-
-		setDialogPostId(postId);
-		setDialogPostSnapshot(post);
-		setPostDialogOpen(true);
-		setFocusCommentInput(shouldFocusCommentInput);
-	};
-
-	const handlePostDialogChange = (open: boolean) => {
-		setPostDialogOpen(open);
-
-		if (!open) {
-			setFocusCommentInput(false);
-		}
-	};
-
-	const handleDeleteComment = async (commentId: number) => {
-		if (!token) {
-			notifyError("You must be logged in to delete a comment.");
-			return;
-		}
-
-		try {
-			setDeletingCommentId(commentId);
-
-			const response = await fetch(`${API_URL}/comments/${commentId}`, {
-				method: "DELETE",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(
-					data.message ||
-						"Failed to delete the comment.",
-				);
-			}
-
-			setPosts((prevPosts) =>
-				prevPosts.map((post) => {
-					const hasComment = post.comments.some(
-						(comment) => comment.id === commentId,
-					);
-
-					if (!hasComment) {
-						return post;
-					}
-
-					return {
-						...post,
-						comments: post.comments.filter(
-							(comment) => comment.id !== commentId,
-						),
-						commentsCount: Math.max(0, post.commentsCount - 1),
-					};
-				}),
-			);
-
-			notifySuccess("Comment deleted successfully.");
-		} catch (error) {
-			console.error(error);
-			notifyError(
-				error instanceof Error ? error.message : "Unknown error.",
-			);
-		} finally {
-			setDeletingCommentId(null);
-		}
-	};
-
-	const handleAddComment = async (postId: number) => {
-		if (!token) {
-			notifyError("You must be logged in to comment.");
-			return;
-		}
-
-		const content = commentInputs[postId]?.trim() || "";
-
-		if (!content) {
-			notifyError("You need to write a comment.");
-			return;
-		}
-
-		try {
-			setCommentingPostId(postId);
-
-			const formData = new FormData();
-			formData.append("content", content);
-
-			const res = await fetch(`${API_URL}/posts/${postId}/comments`, {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				throw new Error(
-					data.message || "Unable to add the comment.",
-				);
-			}
-
-			setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
-			if (data.comment) {
-				updatePostInState(postId, (post) => ({
-					...post,
-					comments: [...post.comments, data.comment],
-					commentsCount: post.commentsCount + 1,
-				}));
-			}
-		} catch (err) {
-			notifyError(
-				err instanceof Error
-					? err.message
-					: "Failed to add the comment.",
-			);
-		} finally {
-			setCommentingPostId(null);
-		}
-	};
 
 	const handleOpenFilePicker = () => {
 		fileInputRef.current?.click();
@@ -575,294 +372,6 @@ export default function FeedPage() {
 			);
 		} finally {
 			setPublishing(false);
-		}
-	};
-
-	const handleDelete = async (postId: number) => {
-		if (!token) {
-			notifyError("You must be logged in to delete a post.");
-			return;
-		}
-
-		try {
-			setDeletingPostId(postId);
-
-			const res = await fetch(`${API_URL}/posts/${postId}`, {
-				method: "DELETE",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				throw new Error(
-					data.message || "Unable to delete the post.",
-				);
-			}
-
-			notifySuccess("Post deleted successfully.");
-			setPosts((prevPosts) =>
-				prevPosts.filter((post) => post.id !== postId),
-			);
-			setPostDialogOpen((prevOpen) =>
-				prevOpen && dialogPostId === postId ? false : prevOpen,
-			);
-		} catch (err) {
-			console.error("Erreur suppression post :", err);
-			notifyError(
-				err instanceof Error
-					? err.message
-					: "Failed to delete the post.",
-			);
-		} finally {
-			setDeletingPostId(null);
-		}
-	};
-
-	const handleToggleLike = async (post: FeedPost) => {
-		if (!token) {
-			notifyError("You must be logged in to like a post.");
-			return;
-		}
-
-		try {
-			setLikingPostId(post.id);
-
-			const method = post.likedByCurrentUser ? "DELETE" : "POST";
-
-			const res = await fetch(`${API_URL}/posts/${post.id}/like`, {
-				method,
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				throw new Error(
-					data.message || "Unable to update the like.",
-				);
-			}
-
-			updatePostInState(post.id, (currentPost) => ({
-				...currentPost,
-				likedByCurrentUser: !currentPost.likedByCurrentUser,
-				likesCount: Math.max(
-					0,
-					currentPost.likesCount +
-						(currentPost.likedByCurrentUser ? -1 : 1),
-				),
-			}));
-		} catch (err) {
-			console.error("Erreur like post :", err);
-			notifyError(
-				err instanceof Error ? err.message : "Failed to update the like.",
-			);
-		} finally {
-			setLikingPostId(null);
-		}
-	};
-
-	const handleToggleFavorite = async (post: FeedPost) => {
-		if (!token) {
-			notifyError("You must be logged in to manage favorites.");
-			return;
-		}
-
-		try {
-			setFavoritingPostId(post.id);
-
-			const method = post.favoritedByCurrentUser ? "DELETE" : "POST";
-
-			const res = await fetch(`${API_URL}/posts/${post.id}/favorite`, {
-				method,
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				throw new Error(
-					data.message || "Unable to update the favorite.",
-				);
-			}
-
-			updatePostInState(post.id, (currentPost) => ({
-				...currentPost,
-				favoritedByCurrentUser: !currentPost.favoritedByCurrentUser,
-				favoritesCount: Math.max(
-					0,
-					currentPost.favoritesCount +
-						(currentPost.favoritedByCurrentUser ? -1 : 1),
-				),
-			}));
-		} catch (err) {
-			console.error("Erreur favorite post :", err);
-			notifyError(
-				err instanceof Error ? err.message : "Failed to update the favorite.",
-			);
-		} finally {
-			setFavoritingPostId(null);
-		}
-	};
-
-	const handleAddFriend = async (receiverId: number) => {
-		if (!token) {
-			notifyError(
-				"You must be logged in to send a friend request.",
-			);
-			return;
-		}
-
-		try {
-			setSendingFriendId(receiverId);
-
-			const res = await fetch(`${API_URL}/friends`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({ receiverId }),
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				if (data.message === "Friend request already exists") {
-					setSentRequests((prev) =>
-						prev.includes(receiverId)
-							? prev
-							: [...prev, receiverId],
-					);
-					notifySuccess("Friend request already sent.");
-					return;
-				}
-
-				throw new Error(
-					data.message || "Unable to send the friend request.",
-				);
-			}
-
-			setSentRequests((prev) =>
-				prev.includes(receiverId) ? prev : [...prev, receiverId],
-			);
-			notifySuccess(data.message || "Friend request sent.");
-		} catch (err) {
-			console.error("Erreur demande d'ami :", err);
-			notifyError(
-				err instanceof Error
-					? err.message
-					: "Failed to send the friend request.",
-			);
-		} finally {
-			setSendingFriendId(null);
-		}
-	};
-
-	const handleToggleCommentLike = async (comment: FeedComment) => {
-		if (!token) {
-			notifyError("You must be logged in to like a comment.");
-			return;
-		}
-
-		try {
-			setLikingCommentId(comment.id);
-
-			const method = comment.likedByCurrentUser ? "DELETE" : "POST";
-
-			const res = await fetch(`${API_URL}/comments/${comment.id}/like`, {
-				method,
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				throw new Error(
-					data.message ||
-						"Unable to update the comment like.",
-				);
-			}
-
-			updateCommentInState(comment.id, (currentComment) => ({
-				...currentComment,
-				likedByCurrentUser: !currentComment.likedByCurrentUser,
-				likesCount: Math.max(
-					0,
-					currentComment.likesCount +
-						(currentComment.likedByCurrentUser ? -1 : 1),
-				),
-			}));
-		} catch (err) {
-			console.error("Erreur like commentaire :", err);
-			notifyError(
-				err instanceof Error
-					? err.message
-					: "Failed to update the comment like.",
-			);
-		} finally {
-			setLikingCommentId(null);
-		}
-	};
-
-	const handleToggleCommentFavorite = async (comment: FeedComment) => {
-		if (!token) {
-			notifyError(
-				"You must be logged in to manage comment favorites.",
-			);
-			return;
-		}
-
-		try {
-			setFavoritingCommentId(comment.id);
-
-			const method = comment.favoritedByCurrentUser ? "DELETE" : "POST";
-
-			const res = await fetch(
-				`${API_URL}/comments/${comment.id}/favorite`,
-				{
-					method,
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			);
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				throw new Error(
-					data.message ||
-						"Unable to update the comment favorite.",
-				);
-			}
-
-			updateCommentInState(comment.id, (currentComment) => ({
-				...currentComment,
-				favoritedByCurrentUser: !currentComment.favoritedByCurrentUser,
-				favoritesCount: Math.max(
-					0,
-					currentComment.favoritesCount +
-						(currentComment.favoritedByCurrentUser ? -1 : 1),
-				),
-			}));
-		} catch (err) {
-			console.error("Erreur favori commentaire :", err);
-			notifyError(
-				err instanceof Error
-					? err.message
-					: "Failed to update the comment favorite.",
-			);
-		} finally {
-			setFavoritingCommentId(null);
 		}
 	};
 
@@ -963,9 +472,7 @@ export default function FeedPage() {
 				onToggleCommentFavorite={handleToggleCommentFavorite}
 				onCommentChange={handleCommentChange}
 				onAddComment={handleAddComment}
-				commentValue={
-					dialogPostId ? commentInputs[dialogPostId] || "" : ""
-				}
+				commentValue={commentValue}
 				deletingPostId={deletingPostId}
 				deletingCommentId={deletingCommentId}
 				likingPostId={likingPostId}
