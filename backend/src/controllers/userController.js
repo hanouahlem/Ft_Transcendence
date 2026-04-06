@@ -45,23 +45,43 @@ export async function  getUser(req, res) {
 
 export async function registerUser(req, res) {
     try {
-        const { username, email, password } = req.body;
+        const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+        const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+        const password = typeof req.body.password === "string" ? req.body.password : "";
 
-        if (!username || !email || !password) {
-            return res.status(400).json({ message: 'Missing required fields' });
+        const fieldErrors = {};
+
+        if (!username) fieldErrors.username = "Required";
+        if (!email) fieldErrors.email = "Required";
+        if (!password) fieldErrors.password = "Required";
+
+        if (Object.keys(fieldErrors).length > 0) {
+            return res.status(400).json({
+                message: "Missing required fields",
+                fieldErrors,
+            });
         }
 
-        const userExisting = await prisma.user.findFirst({
-            where: {
-                OR: [
-                    {email},
-                    {username}
-                ]
-            }
-        });
-        
-        if(userExisting){
-            return res.status(400).json({message: "Email or username already exists" });
+        const [emailExisting, usernameExisting] = await Promise.all([
+            prisma.user.findFirst({
+                where: { email },
+                select: { id: true },
+            }),
+            prisma.user.findFirst({
+                where: { username },
+                select: { id: true },
+            }),
+        ]);
+
+        const duplicateFieldErrors = {};
+        if (emailExisting) duplicateFieldErrors.email = "Email already exists";
+        if (usernameExisting) duplicateFieldErrors.username = "Username already exists";
+
+        if (Object.keys(duplicateFieldErrors).length > 0) {
+            return res.status(400).json({
+                message: "Registration failed",
+                fieldErrors: duplicateFieldErrors,
+            });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -97,9 +117,23 @@ export const loginUser = async (req, res) => {
         : typeof email === "string"
           ? email.trim()
           : "";
+    const passwordValue = typeof password === "string" ? password : "";
 
-    if (!loginValue || !password) {
-      return res.status(400).json({ message: "Login credentials are required." });
+    if (!loginValue || !passwordValue) {
+      const fieldErrors = {};
+
+      if (!loginValue) {
+        fieldErrors.identifier = "Login credentials are required.";
+      }
+
+      if (!passwordValue) {
+        fieldErrors.password = "Login credentials are required.";
+      }
+
+      return res.status(400).json({
+        message: "Login credentials are required.",
+        fieldErrors,
+      });
     }
 
     const user = await prisma.user.findFirst({
@@ -109,19 +143,32 @@ export const loginUser = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({message: "Username/email or password is incorrect.",});
+      return res.status(401).json({
+        message: "Username/email or password is incorrect.",
+        fieldErrors: {
+          password: "Username/email or password is incorrect.",
+        },
+      });
     }
 
     if (!user.password) {
       return res.status(401).json({
         message: "Username/email or password is incorrect.",
+        fieldErrors: {
+          password: "Username/email or password is incorrect.",
+        },
       });
     }
 
-    const passwordOk = await bcrypt.compare(password, user.password);
+    const passwordOk = await bcrypt.compare(passwordValue, user.password);
 
     if (!passwordOk) {
-      return res.status(401).json({message: "Username/email or password is incorrect.",});
+      return res.status(401).json({
+        message: "Username/email or password is incorrect.",
+        fieldErrors: {
+          password: "Username/email or password is incorrect.",
+        },
+      });
     }
 
     const token = jwt.sign(

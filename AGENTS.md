@@ -26,10 +26,10 @@ The file `other/transcendance.md` is the **official project subject** from 42. A
 - `frontend/lib/api.ts` — all frontend API calls
 - `frontend/context/AuthContext.tsx` — auth state (token, user, login/logout)
 - `frontend/context/SocketContext.tsx` — WebSocket connection and online users
-- `fackend/src/controllers/controller.js` — all route handlers
-- `fackend/src/routes/routes.js` — route definitions
-- `fackend/src/middleware/auth.js` — JWT verification middleware
-- `fackend/prisma/schema.prisma` — database schema
+- `backend/src/controllers/controller.js` — all route handlers
+- `backend/src/routes/routes.js` — route definitions
+- `backend/src/middleware/auth.js` — JWT verification middleware
+- `backend/prisma/schema.prisma` — database schema
 
 ## Updating Team Lessons
 
@@ -50,12 +50,12 @@ The file `other/transcendance.md` is the **official project subject** from 42. A
 
 ```
 Ft_Transcendence/
-├── Frontend/          # Next.js app (port 3000)
+├── frontend/          # Next.js app (port 3000)
 │   ├── app/           # Pages and layouts (App Router)
 │   ├── components/    # UI components (shadcn + custom ft_ components)
 │   ├── context/       # AuthContext, SocketContext
 │   └── lib/           # API helpers, utilities
-├── Backend/           # Express.js API (port 3001)
+├── backend/           # Express.js API (port 3001)
 │   ├── src/
 │   │   ├── controllers/
 │   │   ├── routes/

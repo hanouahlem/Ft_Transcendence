@@ -73,6 +73,9 @@ Main responsibilities:
 
 - send friend request
 - list accepted friends
+- build mutual-friend suggestions for the right rail
+- list incoming pending requests
+- list outgoing pending requests
 - accept a pending request
 - delete a friend relation
 - list pending friend requests
@@ -88,6 +91,7 @@ Examples:
 - cannot add yourself
 - cannot accept someone else’s request
 - cannot accept a request already handled
+- recommendation logic excludes the current user and already accepted friends, then fills empty slots with other users
 
 ## Post Logic
 

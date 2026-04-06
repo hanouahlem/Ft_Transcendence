@@ -1,19 +1,59 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { AuthProvider } from "@/context/AuthContext";
-import { Courier_Prime, Geist, Noto_Serif_SC } from "next/font/google";
+import { AppToaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
-const loginDisplay = Noto_Serif_SC({
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  variable: "--font-field-display-source",
+const displaySerif = localFont({
+  src: [
+    {
+      path: "../public/fonts/source-serif-pro/webfonts/source-serif-pro-latin-400-normal.woff2",
+      style: "normal",
+      weight: "400",
+    },
+    {
+      path: "../public/fonts/source-serif-pro/webfonts/source-serif-pro-latin-400-italic.woff2",
+      style: "italic",
+      weight: "400",
+    },
+    {
+      path: "../public/fonts/source-serif-pro/webfonts/source-serif-pro-latin-600-normal.woff2",
+      style: "normal",
+      weight: "600 900",
+    },
+    {
+      path: "../public/fonts/source-serif-pro/webfonts/source-serif-pro-latin-600-italic.woff2",
+      style: "italic",
+      weight: "600 900",
+    },
+  ],
+  variable: "--font-display-source",
 });
-const loginMono = Courier_Prime({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-field-mono-source",
+const monoFont = localFont({
+  src: [
+    {
+      path: "../public/fonts/courier-prime/Courier Prime.ttf",
+      style: "normal",
+      weight: "400",
+    },
+    {
+      path: "../public/fonts/courier-prime/Courier Prime Italic.ttf",
+      style: "italic",
+      weight: "400",
+    },
+    {
+      path: "../public/fonts/courier-prime/Courier Prime Bold.ttf",
+      style: "normal",
+      weight: "700",
+    },
+    {
+      path: "../public/fonts/courier-prime/Courier Prime Bold Italic.ttf",
+      style: "italic",
+      weight: "700",
+    },
+  ],
+  variable: "--font-mono-source",
 });
 
 export const metadata: Metadata = {
@@ -27,18 +67,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="fr"
-      className={cn(
-        "font-sans",
-        geist.variable,
-        loginDisplay.variable,
-        loginMono.variable,
-      )}
-    >
+    <html lang="fr" className={cn(displaySerif.variable, monoFont.variable)}>
       <body className="min-h-screen bg-neutral-950 text-white">
         <AuthProvider>
           {children}
+          <AppToaster />
         </AuthProvider>
       </body>
     </html>

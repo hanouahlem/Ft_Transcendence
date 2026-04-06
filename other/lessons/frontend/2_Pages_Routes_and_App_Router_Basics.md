@@ -25,12 +25,13 @@ Current route files include:
 
 ```text
 frontend/app/page.tsx
-frontend/app/login/page.tsx
-frontend/app/register/page.tsx
+frontend/app/(auth)/login/page.tsx
+frontend/app/(auth)/register/page.tsx
 frontend/app/feed/page.tsx
 frontend/app/friends/page.tsx
 frontend/app/notifications/page.tsx
 frontend/app/profil/page.tsx
+frontend/app/profil/[id]/page.tsx
 frontend/app/settings/profile/page.tsx
 frontend/app/settings/security/page.tsx
 frontend/app/settings/notifications/page.tsx
@@ -45,6 +46,7 @@ That means the current frontend URLs are:
 - `/friends`
 - `/notifications`
 - `/profil`
+- `/profil/:id`
 - `/settings/profile`
 - `/settings/security`
 - `/settings/notifications`
@@ -80,8 +82,8 @@ So `/` behaves like:
 
 These files:
 
-- `frontend/app/login/page.tsx`
-- `frontend/app/register/page.tsx`
+- `frontend/app/(auth)/login/page.tsx`
+- `frontend/app/(auth)/register/page.tsx`
 
 map to:
 
@@ -102,6 +104,7 @@ Several pages are intended for logged-in users:
 - `frontend/app/friends/page.tsx`
 - `frontend/app/notifications/page.tsx`
 - `frontend/app/profil/page.tsx`
+- `frontend/app/profil/[id]/page.tsx`
 
 These pages usually wrap their content with `ProtectedRoute`.
 
@@ -168,9 +171,9 @@ Examples in this repo:
 
 - route files:
   - `frontend/app/feed/page.tsx`
-  - `frontend/app/login/page.tsx`
+  - `frontend/app/(auth)/login/page.tsx`
 - shared components:
-  - `frontend/components/layout/Navbar.tsx`
+  - `frontend/components/layout/AppSidebarShell.tsx`
   - `frontend/components/auth/ProtectedRoute.tsx`
   - files in `frontend/components/ui/`
 
@@ -199,9 +202,13 @@ The route structure is clean, but page completeness varies.
 Examples:
 
 - `/feed` is connected to real backend post routes
+- `/profil` and `/profil/:id` now render the archive profile view with real backend data:
+  - `GET /users/:id`
+  - `GET /users/:id/posts`
+  - `GET /users/:id/friends`
 - `/friends` has real UI but incomplete backend wiring in places
 - `/notifications` is currently mostly mock/demo UI
-- `/profil` and some settings pages still contain placeholder/demo data
+- some settings pages still contain placeholder/demo data
 
 So understanding routes is not enough by itself. You also need to know how complete each page is.
 

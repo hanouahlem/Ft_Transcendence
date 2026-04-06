@@ -2,6 +2,9 @@ COMPOSE = docker compose
 DB_URL = DATABASE_URL=postgresql://$$POSTGRES_USER:$$POSTGRES_PASSWORD@postgres:5432/$$POSTGRES_DB
 
 up:
+	$(COMPOSE) up
+
+up-build:
 	$(COMPOSE) up --build
 
 down:
@@ -9,10 +12,14 @@ down:
 
 restart:
 	$(COMPOSE) down
-	$(COMPOSE) up --build
+	$(COMPOSE) up
 
 build:
 	$(COMPOSE) build
+
+rebuild:
+	$(COMPOSE) build
+	$(COMPOSE) up
 
 logs:
 	$(COMPOSE) logs -f
@@ -69,4 +76,4 @@ dc-clean: dc-stop dc-rm dc-rmi
 	-docker volume rm transcendance-backend-node-modules transcendance-frontend-node-modules
 	docker builder prune -f
 
-.PHONY: up down restart build logs ps clean fclean re frontend backend db prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean
+.PHONY: up up-build down restart build rebuild logs ps clean fclean re frontend backend db prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean

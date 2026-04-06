@@ -92,6 +92,9 @@ Examples from this project:
 - `POST /login`
 - `GET /user`
 - `GET /friends`
+- `GET /friends/suggestions`
+- `GET /friends/requests`
+- `GET /friends/requests/sent`
 - `POST /posts`
 
 These are all declared in `backend/src/routes/routes.js`.

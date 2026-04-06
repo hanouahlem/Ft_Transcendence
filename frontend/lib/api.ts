@@ -21,6 +21,7 @@ export type CurrentUser = {
   id: number;
   username: string;
   email: string;
+  avatar?: string | null;
 };
 
 export type ApiSuccess<T> = {
@@ -31,6 +32,7 @@ export type ApiSuccess<T> = {
 export type ApiFailure = {
   ok: false;
   message: string;
+  fieldErrors?: Partial<Record<string, string>>;
 };
 
 export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
@@ -42,6 +44,7 @@ async function handleResponse<T>(response: Response): Promise<ApiResult<T>> {
     return {
       ok: false,
       message: data.message || "Request failed",
+      fieldErrors: data.fieldErrors,
     };
   }
 

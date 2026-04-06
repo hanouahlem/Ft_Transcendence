@@ -40,6 +40,8 @@ router.delete("/notifications/:id", authMiddleware, notif.deleteNotif);
 // friends
 router.post("/friends", authMiddleware, friend.addFriend);
 router.get("/friends", authMiddleware, friend.getFriends);
+router.get("/friends/suggestions", authMiddleware, friend.getFriendSuggestions);
+router.get("/friends/requests/sent", authMiddleware, friend.getSentFriendRequests);
 router.put("/friends/:id", authMiddleware, friend.acceptFriend);
 router.delete("/friends/:id", authMiddleware, friend.deleteFriend);
 router.get("/friends/requests", authMiddleware, friend.getFriendRequests);

@@ -252,7 +252,7 @@ export const createComment = async (input) => {
   const allowed = await checkComment(input.content);
   
   if (!allowed) {
-    throw new Error('Ce commentaire contient du contenu inapproprié.');
+    throw new Error("This comment contains inappropriate content.");
   }
   const user = await prisma.user.findUnique({
     where: {
@@ -560,4 +560,3 @@ export const unfavoriteComment = async (commentId, userId) => {
 
   return true;
 };
-
