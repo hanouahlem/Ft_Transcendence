@@ -1,6 +1,6 @@
 # 7. File Uploads and Static Media
 
-Goal: understand how image uploads are received, stored, and served back by the backend.
+Goal: understand how image uploads are received, stored, served back by the backend, and now seeded without committing image assets into git.
 
 ## Big Picture
 
@@ -10,6 +10,8 @@ That involves two separate things:
 
 - receiving the uploaded file
 - serving the stored file later over HTTP
+
+The seed script now uses that same real upload flow for post images, while profile avatars stay simple remote URLs.
 
 ## Multer
 
@@ -71,7 +73,7 @@ If the uploaded file is not an image:
 The upload middleware is used in:
 
 ```js
-router.post("/posts", authMiddleware, upload.single("media"), createPostHandler);
+router.post("/posts", authMiddleware, upload.single("media"), post.createPostHandler);
 ```
 
 Meaning:
@@ -122,16 +124,72 @@ When a post is deleted, `postService.js` tries to:
 
 That keeps orphaned files from accumulating for deleted posts.
 
-## Important Distinction
+## Avatar URLs vs Post Uploads
 
-The database does **not** store the actual image bytes.
+The new seed flow uses two different media strategies on purpose.
 
-Instead:
+Profile avatars are plain URLs stored on the user record through `PUT /users/:id`.
 
-- database stores metadata / URL reference
-- filesystem stores the real file
+Real code from `other/seed.sh`:
 
-That is a common and normal design.
+```js
+avatar: `https://i.pravatar.cc/300?img=${avatarId}`,
+
+await apiRequest(`/users/${currentUser.id}`, {
+  method: "PUT",
+  token,
+  json: {
+    username: user.username,
+    avatar: user.avatar,
+    bio: user.bio,
+    status: user.status,
+    location: user.location,
+    website: user.website,
+  },
+});
+```
+
+That means avatar images are not uploaded into backend storage.
+
+Post images still go through the real upload pipeline.
+
+Real code from `other/seed.sh`:
+
+```js
+const response = await fetch(spec.url);
+const mimeType = response.headers.get("content-type") || "image/jpeg";
+const buffer = Buffer.from(await response.arrayBuffer());
+
+formData.set("media", new Blob([buffer], { type: mimeType }), upload.filename);
+await apiRequest("/posts", {
+  method: "POST",
+  token: TOKENS.get(entry.user.username),
+  formData,
+});
+```
+
+Why this split is useful:
+
+- avatars stay lightweight and do not add files to the repo
+- posts still exercise the real Multer upload path
+- the seed can use deterministic remote providers like `pravatar` and `picsum`
+- seeded post media still ends up in backend `/uploads`, exactly like a normal user upload
+
+## Deterministic Seed Media
+
+The seed script now creates media with stable external inputs instead of committed assets.
+
+For post images it builds URLs like:
+
+```js
+url: `https://picsum.photos/seed/${encodeURIComponent(seed)}/${width}/${height}`,
+```
+
+Important details:
+
+- the `seed` keeps the image deterministic across reruns
+- width and height vary so the feed gets landscape, portrait, and square-ish posts
+- only some posts receive media, which makes the feed look more believable than “image on every post”
 
 ## Current Project Tradeoff
 
@@ -143,9 +201,13 @@ So runtime-generated files are currently written into the repo working tree.
 
 That is convenient for dev, but not the cleanest long-term storage strategy.
 
+The seed script now avoids checking source images into git, but uploaded post media still lands in that runtime folder because that is how the current backend is designed.
+
 ## Self-Check Questions
 
 - What does Multer do in this project?
 - Why does the route use `upload.single("media")`?
 - Where is the actual uploaded file stored?
 - What is stored in the database: the file bytes or the file URL/path?
+- Why are avatars seeded as URLs while post images are still uploaded through the backend?
+- Why does the seed script use deterministic `picsum` seeds and varying dimensions?
