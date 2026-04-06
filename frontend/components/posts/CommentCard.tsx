@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { Bookmark, Heart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RelativeTime } from "@/components/ui/relative-time";
-import { getInitials } from "@/lib/user-utils";
 import type { FeedComment } from "@/lib/feed-types";
 import { SocialToggle } from "@/components/posts/SocialToggle";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
 
 type CommentCardProps = {
 	comment: FeedComment;
@@ -43,16 +42,12 @@ export function CommentCard({
 						href={`/profil/${comment.author.id}`}
 						className="shrink-0"
 					>
-						<Avatar className="h-8 w-8 overflow-hidden rounded-none border border-label bg-stage p-0.5 -rotate-2">
-							<AvatarImage
-								src={comment.author.avatar || ""}
-								alt={comment.author.username}
-								className="archive-photo object-cover"
-							/>
-							<AvatarFallback className="rounded-none bg-stage font-display text-[10px] font-black text-ink">
-								{getInitials(comment.author.username)}
-							</AvatarFallback>
-						</Avatar>
+						<ProfilePicture
+							name={comment.author.username}
+							src={comment.author.avatar}
+							alt={comment.author.username}
+							className="h-8 w-8 -rotate-2"
+						/>
 					</Link>
 
 					<div className="min-w-0">

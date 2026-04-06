@@ -1,61 +1,112 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Avatar as AvatarPrimitive } from "radix-ui"
+import BoringAvatar from "boring-avatars";
+import * as React from "react";
+import { Avatar as AvatarPrimitive } from "@ark-ui/react/avatar";
+import { ARCHIVE_IDENTITY_COLORS } from "@/lib/identity-art";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
+type AvatarSize = "default" | "sm" | "lg";
 
-function Avatar({
-  className,
-  size = "default",
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
-  size?: "default" | "sm" | "lg"
-}) {
-  return (
-    <AvatarPrimitive.Root
-      data-slot="avatar"
-      data-size={size}
-      className={cn(
-        "group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+type ArchiveAvatarContextValue = {
+  name?: string;
+};
 
-function AvatarImage({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+const ArchiveAvatarContext = React.createContext<ArchiveAvatarContextValue>({});
+
+type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root> & {
+  size?: AvatarSize;
+  name?: string;
+};
+
+const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
+  ({ className, size = "default", name, ...props }, ref) => {
+    return (
+      <ArchiveAvatarContext.Provider value={{ name }}>
+        <AvatarPrimitive.Root
+          ref={ref}
+          data-slot="avatar"
+          data-size={size}
+          className={cn(
+            "group/avatar relative flex size-8 shrink-0 select-none overflow-hidden rounded-full after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
+            className,
+          )}
+          {...props}
+        />
+      </ArchiveAvatarContext.Provider>
+    );
+  },
+);
+
+Avatar.displayName = "Avatar";
+
+const AvatarImage = React.forwardRef<
+  HTMLImageElement,
+  React.ComponentProps<typeof AvatarPrimitive.Image>
+>(({ className, ...props }, ref) => {
+  const normalizedSrc =
+    typeof props.src === "string" && props.src.trim() === ""
+      ? undefined
+      : props.src;
+
+  if (!normalizedSrc) {
+    return null;
+  }
+
   return (
     <AvatarPrimitive.Image
+      ref={ref}
       data-slot="avatar-image"
       className={cn(
-        "aspect-square size-full rounded-full object-cover",
-        className
+        "aspect-square size-full rounded-[inherit] object-cover",
+        className,
       )}
       {...props}
+      src={normalizedSrc}
     />
-  )
-}
+  );
+});
 
-function AvatarFallback({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
-  return (
-    <AvatarPrimitive.Fallback
-      data-slot="avatar-fallback"
-      className={cn(
-        "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+AvatarImage.displayName = "AvatarImage";
+
+type AvatarFallbackProps = React.ComponentProps<typeof AvatarPrimitive.Fallback> & {
+  name?: string;
+};
+
+const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarFallbackProps>(
+  ({ className, children, name, ...props }, ref) => {
+    const context = React.useContext(ArchiveAvatarContext);
+    const fallbackSeed =
+      name ??
+      context.name ??
+      (typeof children === "string" ? children : "Archive avatar");
+
+    return (
+      <AvatarPrimitive.Fallback
+        ref={ref}
+        data-slot="avatar-fallback"
+        className={cn(
+          "relative flex size-full items-center justify-center overflow-hidden rounded-[inherit] bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
+          className,
+        )}
+        {...props}
+      >
+        <BoringAvatar
+          name={fallbackSeed}
+          variant="beam"
+          colors={ARCHIVE_IDENTITY_COLORS}
+          size="100%"
+          square
+          className="size-full"
+          aria-hidden="true"
+        />
+        {children ? <span className="sr-only">{children}</span> : null}
+      </AvatarPrimitive.Fallback>
+    );
+  },
+);
+
+AvatarFallback.displayName = "AvatarFallback";
 
 function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   return (
@@ -66,11 +117,11 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
         "group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden",
         "group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2",
         "group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
@@ -79,11 +130,11 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="avatar-group"
       className={cn(
         "group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AvatarGroupCount({
@@ -95,11 +146,11 @@ function AvatarGroupCount({
       data-slot="avatar-group-count"
       className={cn(
         "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -109,4 +160,4 @@ export {
   AvatarGroup,
   AvatarGroupCount,
   AvatarBadge,
-}
+};

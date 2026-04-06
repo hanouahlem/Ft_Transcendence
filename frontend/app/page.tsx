@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
 
 export default function HomePage() {
 	const router = useRouter();
@@ -144,12 +144,11 @@ export default function HomePage() {
 									<div className="h-56 bg-gradient-to-br from-[#a8c49a] via-[#c4d9b8] to-[#7B9270]" />
 									<CardContent className="space-y-5 p-5">
 										<div className="flex items-center gap-3">
-											<Avatar className="h-10 w-10 border-2 border-[#d8e3d1]">
-												<AvatarImage src="https://i.pravatar.cc/100?img=32" />
-												<AvatarFallback className="bg-[#EAF1E6] text-[#4A6440]">
-													EM
-												</AvatarFallback>
-											</Avatar>
+											<ProfilePicture
+												name="emma.journal"
+												src="https://i.pravatar.cc/100?img=32"
+												className="h-10 w-10"
+											/>
 											<div>
 												<p className="text-sm font-semibold text-[#33412c]">
 													@emma.journal
@@ -222,13 +221,10 @@ export default function HomePage() {
 														className="flex items-center justify-between"
 													>
 														<div className="flex items-center gap-3">
-															<Avatar className="h-9 w-9">
-																<AvatarFallback className="bg-[#EAF1E6] text-[#4A6440]">
-																	{
-																		user.fallback
-																	}
-																</AvatarFallback>
-															</Avatar>
+															<ProfilePicture
+																name={user.name}
+																className="h-9 w-9"
+															/>
 
 															<div>
 																<p className="text-sm font-medium text-[#33412c]">

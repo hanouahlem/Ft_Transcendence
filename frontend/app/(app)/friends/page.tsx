@@ -16,8 +16,7 @@ import {
 
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getFriendRequests } from "@/lib/api";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
 
 type UserItem = {
   id: number;
@@ -215,7 +214,7 @@ export default function FriendsPage() {
               </h1>
 
               <p className="mt-3 max-w-2xl text-base leading-7 text-[#51604b]">
-                Découvre des profils, envoie des demandes d'amis et développe
+                Découvre des profils, envoie des demandes d&apos;amis et développe
                 ton réseau dans une interface plus douce et plus lisible.
               </p>
             </div>
@@ -305,12 +304,10 @@ export default function FriendsPage() {
                             className="flex flex-col gap-4 rounded-[1.5rem] bg-[#fbfdf9] p-4 shadow-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
                           >
                             <div className="flex items-center gap-4">
-                              <Avatar className="h-14 w-14 border border-[#d8e3d1]">
-                                <AvatarImage src="" alt={u.username} />
-                                <AvatarFallback className="bg-[#EAF1E6] font-bold text-[#4A6440]">
-                                  {u.username.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
+                              <ProfilePicture
+                                name={u.username}
+                                className="h-14 w-14"
+                              />
                               <div>
                                 <p className="text-base font-semibold text-[#33412c]">{u.username}</p>
                                 <p className="text-sm text-[#71806c]">{u.email}</p>
@@ -375,12 +372,11 @@ export default function FriendsPage() {
                                 className="rounded-[1.5rem] bg-[#fbfdf9] p-4 shadow-sm"
                               >
                                 <div className="mb-4 flex items-center gap-3">
-                                  <Avatar className="h-12 w-12 border border-[#d8e3d1]">
-                                    <AvatarImage src={request.sender.avatar || ""} alt={request.sender.username} />
-                                    <AvatarFallback className="bg-[#EAF1E6] font-semibold text-[#4A6440]">
-                                      {request.sender.username.slice(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
+                                  <ProfilePicture
+                                    name={request.sender.username}
+                                    src={request.sender.avatar}
+                                    className="h-12 w-12"
+                                  />
                                   <div>
                                     <p className="font-medium text-[#33412c]">{request.sender.username}</p>
                                     <p className="text-sm text-[#71806c]">Wants to connect</p>

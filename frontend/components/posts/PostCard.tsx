@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Trash2 } from "lucide-react";
-import { getInitials } from "@/lib/user-utils";
 import type { FeedPost } from "@/lib/feed-types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { cn } from "@/lib/utils";
 import { SocialToggle } from "@/components/posts/SocialToggle";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
 
 type PostCardProps = {
 	post: FeedPost;
@@ -207,23 +206,16 @@ export function PostCard({
 							href={`/profil/${post.author.id}`}
 							className="shrink-0"
 						>
-							<Avatar
+							<ProfilePicture
+								name={post.author.username}
+								src={post.author.avatar}
+								alt={post.author.username}
 								className={cn(
-									"overflow-hidden rounded-none border border-label bg-stage p-0.5",
 									variantKey === 2
 										? "h-8 w-8 rotate-1"
 										: "h-10 w-10 -rotate-2",
 								)}
-							>
-								<AvatarImage
-									src={post.author.avatar || ""}
-									alt={post.author.username}
-									className="archive-photo object-cover"
-								/>
-								<AvatarFallback className="rounded-none bg-stage font-display text-xs font-black text-ink">
-									{getInitials(post.author.username)}
-								</AvatarFallback>
-							</Avatar>
+							/>
 						</Link>
 
 						<div className="min-w-0">

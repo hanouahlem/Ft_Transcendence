@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getInitials } from "@/lib/user-utils";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { cn } from "@/lib/utils";
 import type { RightRailSuggestion } from "@/lib/right-rail";
 
@@ -55,28 +55,24 @@ export function RightRailSuggestions({
 						const sent = sentRequests.includes(author.id);
 						const incomingRequestId =
 							incomingRequestIdsBySender[author.id];
-						const initials = getInitials(author.username);
-						const tileClasses = [
-							"-rotate-2 bg-stage text-ink",
-							"rotate-1 bg-accent-green text-paper",
-							"-rotate-1 bg-accent-blue text-paper",
-						];
+						const tileClasses = ["-rotate-2", "rotate-1", "-rotate-1"];
 
 						return (
 							<div
 								key={author.id}
 								className="flex items-center gap-3 border-b border-dashed border-black/15 pb-4 last:border-b-0 last:pb-0"
 							>
-								<div
+								<ProfilePicture
+									name={author.username}
+									src={author.avatar}
+									alt={author.username}
 									className={cn(
-										"flex h-9 w-9 items-center justify-center border-2 border-label font-display text-sm font-bold",
+										"h-9 w-9",
 										tileClasses[
 											author.id % tileClasses.length
 										],
 									)}
-								>
-									{initials}
-								</div>
+								/>
 
 								<div className="min-w-0 flex-1">
 									<Link

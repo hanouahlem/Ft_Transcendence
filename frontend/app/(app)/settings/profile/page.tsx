@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { Separator } from "@/components/ui/separator";
 
 export default function SettingsProfilePage() {
@@ -199,12 +199,11 @@ const handleSave = async () => {
               <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center text-center">
-                    <Avatar className="h-28 w-28 border-4 border-[#fffaf2] shadow-md">
-                      <AvatarImage src={avatarUrl} alt="Avatar utilisateur" />
-                      <AvatarFallback>
-                        {(user?.username || "U").slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <ProfilePicture
+                      name={username || user?.username || "User"}
+                      src={avatarUrl}
+                      className="h-28 w-28 shadow-md"
+                    />
 
                     <h2 className="mt-4 text-xl font-bold text-[#2f3a32]">
                       {username || "Utilisateur"}

@@ -27,7 +27,9 @@ Current files:
 - `frontend/components/posts/PostCard.tsx`
 - `frontend/components/posts/NewPostDialog.tsx`
 - `frontend/components/posts/SocialToggle.tsx`
+- `frontend/components/profile/ProfileBanner.tsx`
 - `frontend/components/ui/button.tsx`
+- `frontend/components/ui/ProfilePicture.tsx`
 - `frontend/components/ui/dialog.tsx`
 - `frontend/components/ui/tooltip.tsx`
 - `frontend/hooks/useArchiveToasts.ts`
@@ -208,6 +210,80 @@ How it works:
 - uses archive visual classes as the real button language
 - exposes both standard app variants (`default`, `outline`, `secondary`, `destructive`) and archive-specific aliases (`paper`, `stamp`, `subtle`, `delete`, `black`, `bluesh`)
 - exposes sizes like `sm`, `default`, `lg`, `icon`
+
+### `frontend/components/ui/avatar.tsx`
+
+Purpose:
+
+- keep one stable avatar wrapper API while removing the old `radix-ui` backing
+
+How it works now:
+
+- uses Ark UI Avatar internally
+- keeps the same public imports:
+  - `Avatar`
+  - `AvatarImage`
+  - `AvatarFallback`
+- supports an optional `name` prop on `Avatar`
+- when the image is missing or fails, `AvatarFallback` renders a deterministic `boring-avatars` SVG seeded from that `name`
+- the generated fallback palette comes from shared CSS variable tokens in `frontend/lib/identity-art.ts`
+
+Why this matters:
+
+- active archive pages still import the same local wrapper
+- fallback avatars are no longer just raw initials text
+- the wrapper moved one more shared primitive away from `radix-ui`
+
+### `frontend/components/ui/ProfilePicture.tsx`
+
+Purpose:
+
+- provide the app-wide person-image component on top of the lower-level Avatar wrapper
+
+How it works:
+
+- wraps `@/components/ui/avatar`
+- applies the archive image treatment by default
+- is intentionally square-only for the current design system
+- uses one shared paper frame instead of page-specific border colors
+- accepts normal Tailwind size classes through `className`, so pages can render it at any scale
+- accepts optional `frameClassName` when one screen needs a thicker paper border around the same shared picture component
+- enables a subtle paper-frame shadow by default so white-framed pictures still read against white cards; pages can disable it with `withShadow={false}`
+
+Real usage:
+
+```tsx
+<ProfilePicture
+  name={post.author.username}
+  src={post.author.avatar}
+  className="h-10 w-10 -rotate-2"
+/>
+```
+
+Why this matters:
+
+- post cards, post dialogs, comment cards, sidebar, right rail, and profile hero no longer duplicate avatar styling
+- the lower-level Avatar wrapper stays focused on behavior and fallback rendering
+- `ProfilePicture` becomes the actual archive-facing reusable component for people across the app
+
+### `frontend/components/profile/ProfileBanner.tsx`
+
+Purpose:
+
+- render the profile-page banner as a deterministic generated graphic instead of ad hoc media selection
+
+How it works:
+
+- uses `boring-avatars`
+- uses the `marble` variant
+- seeds the SVG with the profile username
+- reuses the shared CSS-token archive palette from `frontend/lib/identity-art.ts`
+
+Why this matters:
+
+- the profile hero no longer depends on finding a post image or falling back to the avatar
+- banner rendering is predictable and reusable
+- the visual language stays tied to the same generated identity system as avatar fallbacks
 
 Real code:
 

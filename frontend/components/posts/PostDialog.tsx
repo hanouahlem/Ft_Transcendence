@@ -4,18 +4,13 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Trash2, X } from "lucide-react";
 import type { FeedComment, FeedPost } from "@/lib/feed-types";
-import { getInitials } from "@/lib/user-utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RelativeTime } from "@/components/ui/relative-time";
-import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-} from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
 import { CommentCard } from "@/components/posts/CommentCard";
 import { CommentComposer } from "@/components/posts/CommentComposer";
 import { SocialToggle } from "@/components/posts/SocialToggle";
 import { Button } from "@/components/ui/button";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
 
 type PostDialogProps = {
 	open: boolean;
@@ -113,7 +108,7 @@ export function PostDialog({
 							<X className="h-5 w-5" />
 						</button>
 					</DialogClose>
-					<article className="relative max-h-[90vh] overflow-auto border border-black/10 bg-stage rounded-none p-0">
+					<article className="relative max-h-[90vh] overflow-auto border border-black/0 bg-stage/0 rounded-none p-0">
 						<div className="px-5 py-6 sm:px-8 sm:py-8">
 							<div className="space-y-6">
 								<section className="archive-paper relative overflow-hidden border border-black/10 bg-paper px-5 py-5">
@@ -123,24 +118,12 @@ export function PostDialog({
 												href={`/profil/${post.author.id}`}
 												className="shrink-0"
 											>
-												<Avatar className="h-11 w-11 overflow-hidden rounded-none border border-label bg-stage p-0.5 -rotate-2">
-													<AvatarImage
-														src={
-															post.author
-																.avatar || ""
-														}
-														alt={
-															post.author.username
-														}
-														className="archive-photo object-cover"
-													/>
-													<AvatarFallback className="rounded-none bg-stage font-display text-xs font-black text-ink">
-														{getInitials(
-															post.author
-																.username,
-														)}
-													</AvatarFallback>
-												</Avatar>
+												<ProfilePicture
+													name={post.author.username}
+													src={post.author.avatar}
+													alt={post.author.username}
+													className="h-11 w-11 -rotate-2"
+												/>
 											</Link>
 
 											<div className="min-w-0">
@@ -232,7 +215,9 @@ export function PostDialog({
 												label="Like post"
 												count={post.likesCount}
 												accent="red"
-												pressed={post.likedByCurrentUser}
+												pressed={
+													post.likedByCurrentUser
+												}
 												disabled={isLiking}
 												onClick={() =>
 													onToggleLike(post)

@@ -13,10 +13,10 @@ import {
 	UserRound,
 } from "lucide-react";
 import type { CurrentUser } from "@/lib/api";
-import { getInitials } from "@/lib/user-utils";
 import { cn } from "@/lib/utils";
 import { NavButton } from "@/components/layout/NavButton";
 import { Button } from "@/components/ui/button";
+import { ProfilePicture } from "@/components/ui/ProfilePicture";
 
 type SidebarProps = {
 	user: CurrentUser | null;
@@ -131,17 +131,12 @@ export function Sidebar({
 					href="/profil"
 					className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-black/5"
 				>
-					<div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-stage font-display text-sm font-black text-ink -rotate-3">
-						{user?.avatar ? (
-							<img
-								src={user.avatar}
-								alt={user.username}
-								className="h-full w-full object-cover archive-photo"
-							/>
-						) : (
-							getInitials(user?.username || "Field User")
-						)}
-					</div>
+					<ProfilePicture
+						name={user?.username || "Field User"}
+						src={user?.avatar}
+						alt={user?.username || "Field User"}
+						className="h-8 w-8 shrink-0 -rotate-3"
+					/>
 
 					<div
 						className="min-w-0 whitespace-nowrap transition-opacity duration-150"
