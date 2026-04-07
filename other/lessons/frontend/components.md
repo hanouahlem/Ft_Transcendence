@@ -349,12 +349,11 @@ Real route composition:
 Real post reuse:
 
 ```tsx
-{posts.map((post, index) => (
+{posts.map((post) => (
   <PostCard
     key={post.id}
     post={post}
     currentUserId={user?.id}
-    variantIndex={index}
     onOpenPost={handleOpenPost}
     onDelete={handleDelete}
     onToggleLike={handleToggleLike}
@@ -368,6 +367,17 @@ Explain it during evaluation like this:
 - the app shell is shared by the `(app)` layout through `AppSidebarShell`
 - the profile page only owns profile-specific data loading and hero/stats layout
 - the actual post interaction system is the same shared hook and components already used in the feed
+
+Real hero-layout detail from `frontend/components/profile/ProfileView.tsx`:
+
+- the location chip and the profile action buttons are rendered inside one shared flex row with `justify-between`
+- this keeps metadata on the left and actions on the right instead of stacking them as unrelated blocks
+- `flex-wrap` is still enabled so the row can break safely on narrower screens
+- the main friendship button is state-driven:
+- `Add` when no relation exists yet
+- `Accept` when the other user sent the pending request
+- `Pending` when the current user already sent the request
+- `Remove` when the friendship is already accepted
 
 ### `frontend/components/layout/NavButton.tsx`
 
@@ -737,6 +747,14 @@ Important architecture point:
 
 - `PostDialog` coordinates comment components
 - `page.tsx` still owns comment state and backend requests
+- on larger screens the dialog is split into two columns with the post on the left and discussion on the right
+- on smaller screens it still stacks vertically
+- the left post column stays at its natural content height and is vertically centered beside the discussion panel
+- the comment list uses a nested Ark scroll area so long comment threads stay bounded inside their own panel
+- the custom scrollbar only expands into view when Ark reports real overflow on that axis
+- the viewport does not reserve a permanent right gutter, so comments are not pushed left when the scrollbar is hidden
+- the scroll area expands to fill the remaining discussion-column height on large screens instead of staying capped at the mobile viewport height
+- `CommentComposer` stays outside that scroll area as a normal shrink-0 footer so the reply box remains visible without creating fake empty space above it
 
 So the split is:
 
@@ -769,6 +787,7 @@ Why it is separate:
 
 - comment markup was making `PostDialog` too large
 - a comment is now a clear UI unit with its own actions
+- the card is width-constrained with truncation on author labels and forced wrapping on comment text so it cannot blow out the discussion column
 - if we reuse this archive comment style later, extraction is already done
 
 ### `CommentComposer.tsx`
@@ -813,21 +832,21 @@ Props:
 
 - `post`
 - `currentUserId`
-- `variantIndex`
 - `onOpenPost`
 - post-level mutation callbacks
 - post-level loading flags
 
-Why `variantIndex` exists:
+Why the visual variant is stable:
 
 - the component cycles through `POST_VARIANTS`
 - this avoids every post looking identical
-- the example design uses different card shapes, borders, rotations, and image framing
+- the variant is derived from `post.id`, not from list order
+- this keeps the same post visually consistent even if new posts are inserted above it or the same post appears on another page
 
 Real code:
 
 ```tsx
-const variantKey = variantIndex % POST_VARIANTS.length;
+const variantKey = post.id % POST_VARIANTS.length;
 const variant = POST_VARIANTS[variantKey];
 ```
 

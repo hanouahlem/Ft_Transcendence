@@ -313,15 +313,14 @@ export default function FeedPage() {
 							</section>
 						) : (
 							<div className="flex flex-col gap-10">
-								{posts.map((post, index) => (
-									<PostCard
-										key={post.id}
-										post={post}
-										currentUserId={user?.id}
-										variantIndex={index}
-										onOpenPost={handleOpenPost}
-										onDelete={handleDelete}
-										onToggleLike={handleToggleLike}
+									{posts.map((post) => (
+										<PostCard
+											key={post.id}
+											post={post}
+											currentUserId={user?.id}
+											onOpenPost={handleOpenPost}
+											onDelete={handleDelete}
+											onToggleLike={handleToggleLike}
 										onToggleFavorite={handleToggleFavorite}
 										deletingPostId={deletingPostId}
 										likingPostId={likingPostId}

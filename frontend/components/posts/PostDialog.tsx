@@ -2,15 +2,23 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { Bookmark, Heart, MessageCircle, Trash2, X } from "lucide-react";
+import { Bookmark, Heart, MessageCircle, Trash2 } from "lucide-react";
 import type { FeedComment, FeedPost } from "@/lib/feed-types";
 import { RelativeTime } from "@/components/ui/relative-time";
-import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CommentCard } from "@/components/posts/CommentCard";
 import { CommentComposer } from "@/components/posts/CommentComposer";
 import { SocialToggle } from "@/components/posts/SocialToggle";
 import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import {
+	ScrollArea,
+	ScrollAreaContent,
+	ScrollAreaCorner,
+	ScrollAreaScrollbar,
+	ScrollAreaThumb,
+	ScrollAreaViewport,
+} from "@/components/ui/scroll-area";
 
 type PostDialogProps = {
 	open: boolean;
@@ -98,168 +106,166 @@ export function PostDialog({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			{post ? (
-				<DialogContent className="max-h-[90vh] overflow-hidden p-0">
-					<DialogClose asChild>
-						<button
-							type="button"
-							className="rounded-full border border-black/10 bg-paper p-2 text-label transition hover:bg-paper-muted"
-							aria-label="Close post dialog"
-						>
-							<X className="h-5 w-5" />
-						</button>
-					</DialogClose>
+				<DialogContent className="max-h-[90vh] max-w-[1120px] overflow-hidden p-0">
 					<article className="relative max-h-[90vh] overflow-auto border border-black/0 bg-stage/0 rounded-none p-0">
-						<div className="px-5 py-6 sm:px-8 sm:py-8">
-							<div className="space-y-6">
-								<section className="archive-paper relative overflow-hidden border border-black/10 bg-paper px-5 py-5">
-									<div className="mb-5 flex items-start justify-between gap-4 border-b border-dashed border-black/20 pb-4">
-										<div className="flex min-w-0 items-center gap-3">
-											<Link
-												href={`/profil/${post.author.id}`}
-												className="shrink-0"
-											>
-												<ProfilePicture
-													name={post.author.username}
-													src={post.author.avatar}
-													alt={post.author.username}
-													className="h-11 w-11 -rotate-2"
-												/>
-											</Link>
-
-											<div className="min-w-0">
-												<div className="flex flex-wrap items-center gap-3">
-													<Link
-														href={`/profil/${post.author.id}`}
-														className="truncate text-lg font-bold uppercase tracking-wide text-ink"
-													>
-														{post.author.username}
-													</Link>
-													<span className="font-mono text-xs text-label">
-														@
-														{post.author.username.toLowerCase()}
-													</span>
-												</div>
-											</div>
-										</div>
-
-										<div className="flex shrink-0 items-center gap-3">
-											<RelativeTime
-												dateString={post.createdAt}
-												className="font-mono text-[10px] text-label"
+						<div className="grid gap-6 px-5 py-6 sm:px-8 sm:py-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:gap-8">
+							<section className="-rotate-1 archive-paper relative overflow-hidden border border-black/10 bg-paper px-5 py-5 lg:self-center">
+								<div className="mb-5 flex items-start justify-between gap-4 border-b border-dashed border-black/20 pb-4">
+									<div className="flex min-w-0 items-center gap-3">
+										<Link
+											href={`/profil/${post.author.id}`}
+											className="shrink-0"
+										>
+											<ProfilePicture
+												name={post.author.username}
+												src={post.author.avatar}
+												alt={post.author.username}
+												className="h-11 w-11 -rotate-2"
 											/>
-											{isOwner ? (
-												<Button
-													type="button"
-													variant="stamp"
-													size="sm"
-													onClick={() =>
-														onDelete(post.id)
-													}
-													disabled={isDeleting}
+										</Link>
+
+										<div className="min-w-0">
+											<div className="flex flex-wrap items-center gap-3">
+												<Link
+													href={`/profil/${post.author.id}`}
+													className="truncate text-lg font-display uppercase tracking-wide text-ink"
 												>
-													<Trash2 className="h-3.5 w-3.5" />
-													{isDeleting
-														? "Deleting"
-														: "Delete"}
-												</Button>
-											) : null}
-										</div>
-									</div>
-
-									{post.content ? (
-										<p className="font-display text-lg leading-8 text-ink">
-											{post.content}
-										</p>
-									) : null}
-
-									{post.media.length > 0 ? (
-										<div className="relative mt-6 w-full rotate-[-1deg] bg-white p-2 pb-8 shadow-lg">
-											<img
-												src={post.media[0]}
-												alt="Post media"
-												className="archive-photo max-h-[420px] w-full border border-label/20 object-cover"
-											/>
-											<div className="absolute bottom-2 right-3 font-mono text-[10px] text-label">
-												FILM ROLL 42 - EXP {post.id}
+													{post.author.username}
+												</Link>
+												<span className="font-mono text-xs text-label">
+													@{post.author.username.toLowerCase()}
+												</span>
 											</div>
 										</div>
-									) : null}
+									</div>
 
-									<div className="mt-6 border-t border-ink/10 pt-4">
-										<div className="flex flex-wrap items-center gap-2 sm:gap-4">
-											<SocialToggle
-												icon={MessageCircle}
-												label="Comment count"
-												count={post.commentsCount}
-												accent="blue"
-												onMouseDown={(event) =>
-													event.preventDefault()
-												}
-												onClick={queueReplyFocus}
-											/>
-											<SocialToggle
-												icon={Bookmark}
-												label="Favorite post"
-												count={post.favoritesCount}
-												accent="green"
-												pressed={
-													post.favoritedByCurrentUser
-												}
-												disabled={isFavoriting}
-												onClick={() =>
-													onToggleFavorite(post)
-												}
-											/>
-											<SocialToggle
-												icon={Heart}
-												label="Like post"
-												count={post.likesCount}
-												accent="red"
-												pressed={
-													post.likedByCurrentUser
-												}
-												disabled={isLiking}
-												onClick={() =>
-													onToggleLike(post)
-												}
-											/>
+									<div className="flex shrink-0 items-center gap-3">
+										<RelativeTime
+											dateString={post.createdAt}
+											className="font-mono text-[10px] text-label"
+										/>
+										{isOwner ? (
+											<Button
+												type="button"
+												variant="stamp"
+												size="sm"
+												onClick={() => onDelete(post.id)}
+												disabled={isDeleting}
+											>
+												<Trash2 className="h-3.5 w-3.5" />
+												{isDeleting ? "Deleting" : "Delete"}
+											</Button>
+										) : null}
+									</div>
+								</div>
+
+								{post.content ? (
+									<p className="font-display text-lg leading-8 text-ink">
+										{post.content}
+									</p>
+								) : null}
+
+								{post.media.length > 0 ? (
+									<div className="relative mt-6 w-full rotate-[-1deg] bg-white p-2 pb-8 shadow-lg">
+										<img
+											src={post.media[0]}
+											alt="Post media"
+											className="archive-photo max-h-[420px] w-full border border-label/20 object-cover"
+										/>
+										<div className="absolute bottom-2 right-3 font-mono text-[10px] text-label">
+											FILM ROLL 42 - EXP {post.id}
 										</div>
 									</div>
-								</section>
+								) : null}
 
-								<section className="space-y-4 rounded-sm bg-stage/45 px-0 py-0">
-									{post.comments.map((comment) => (
-										<CommentCard
-											key={comment.id}
-											comment={comment}
-											currentUserId={currentUserId}
-											onDeleteComment={onDeleteComment}
-											onToggleCommentLike={
-												onToggleCommentLike
+								<div className="mt-6 border-t border-ink/10 pt-4">
+									<div className="flex flex-wrap items-center gap-2 sm:gap-4">
+										<SocialToggle
+											icon={MessageCircle}
+											label="Comment count"
+											count={post.commentsCount}
+											accent="blue"
+											onMouseDown={(event) =>
+												event.preventDefault()
 											}
-											onToggleCommentFavorite={
-												onToggleCommentFavorite
-											}
-											deletingCommentId={
-												deletingCommentId
-											}
-											likingCommentId={likingCommentId}
-											favoritingCommentId={
-												favoritingCommentId
-											}
+											onClick={queueReplyFocus}
 										/>
-									))}
-								</section>
+										<SocialToggle
+											icon={Bookmark}
+											label="Favorite post"
+											count={post.favoritesCount}
+											accent="green"
+											pressed={post.favoritedByCurrentUser}
+											disabled={isFavoriting}
+											onClick={() => onToggleFavorite(post)}
+										/>
+										<SocialToggle
+											icon={Heart}
+											label="Like post"
+											count={post.likesCount}
+											accent="red"
+											pressed={post.likedByCurrentUser}
+											disabled={isLiking}
+											onClick={() => onToggleLike(post)}
+										/>
+									</div>
+								</div>
+							</section>
 
-								<CommentComposer
-									ref={commentInputRef}
-									postId={post.id}
-									value={commentValue}
-									submitting={isCommenting}
-									onChange={onCommentChange}
-									onSubmit={onAddComment}
-								/>
-							</div>
+							<section className="rotate-1 max-h-[80vh] border border-black/10 bg-stage lg:flex lg:self-stretch lg:flex-col">
+								<div className="border-b border-dashed border-black/10 px-5 py-4 sm:px-6">
+									<p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
+										Discussion
+									</p>
+								</div>
+
+								<div className="px-2 py-2 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
+									<ScrollArea className="max-h-[38vh] lg:min-h-0 lg:max-h-none lg:flex-1">
+										<ScrollAreaViewport className="max-h-[38vh] lg:h-full lg:max-h-none">
+											<ScrollAreaContent className="pb-1">
+											<section className="space-y-4">
+												{post.comments.map((comment) => (
+													<CommentCard
+														key={comment.id}
+														comment={comment}
+														currentUserId={currentUserId}
+														onDeleteComment={onDeleteComment}
+														onToggleCommentLike={
+															onToggleCommentLike
+														}
+														onToggleCommentFavorite={
+															onToggleCommentFavorite
+														}
+														deletingCommentId={
+															deletingCommentId
+														}
+														likingCommentId={likingCommentId}
+														favoritingCommentId={
+															favoritingCommentId
+														}
+													/>
+												))}
+											</section>
+										</ScrollAreaContent>
+									</ScrollAreaViewport>
+									<ScrollAreaScrollbar orientation="vertical">
+										<ScrollAreaThumb />
+									</ScrollAreaScrollbar>
+									<ScrollAreaCorner />
+									</ScrollArea>
+
+									<div className="mt-4 shrink-0 border-t border-dashed border-black/10 pt-4">
+										<CommentComposer
+											ref={commentInputRef}
+											postId={post.id}
+											value={commentValue}
+											submitting={isCommenting}
+											onChange={onCommentChange}
+											onSubmit={onAddComment}
+										/>
+									</div>
+								</div>
+							</section>
 						</div>
 					</article>
 				</DialogContent>
