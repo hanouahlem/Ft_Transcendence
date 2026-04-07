@@ -129,7 +129,12 @@ export async function getFriends(req , res){
             });
 
         const friendsList = friends.map(f => {
-            return f.senderId === userId ? f.receiver : f.sender;
+            const otherUser = f.senderId === userId ? f.receiver : f.sender;
+
+            return {
+                ...otherUser,
+                friendshipId: f.id,
+            };
         });
 
         if (friends.length === 0) {

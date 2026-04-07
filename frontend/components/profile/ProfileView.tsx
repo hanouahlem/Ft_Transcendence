@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ExternalLink, MapPin, MessageCircle } from "lucide-react";
+import { MapPin, MessageCircle } from "lucide-react";
 import type { CurrentUser } from "@/lib/api";
 import { RightRail } from "@/components/layout/RightRail";
 import { PostCard } from "@/components/posts/PostCard";
@@ -84,21 +84,25 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 	const [loading, setLoading] = useState(true);
 	const [pageError, setPageError] = useState<string | null>(null);
 
-	const [connectedUserIds, setConnectedUserIds] = useState<number[]>([]);
 	const {
 		sentRequests,
 		incomingRequestIdsBySender,
+		connectedFriendshipIdsByUser,
 		sendingFriendId,
 		handleAddFriend,
 		handleAcceptFriend,
+		handleRemoveFriend,
 	} = useFriendRequests({
 		token,
-		onFriendAccepted: (userId) => {
-			setConnectedUserIds((prev) =>
-				prev.includes(userId) ? prev : [...prev, userId],
-			);
-		},
 	});
+
+	const connectedUserIds = useMemo(
+		() =>
+			Object.keys(connectedFriendshipIdsByUser).map((id) =>
+				Number.parseInt(id, 10),
+			),
+		[connectedFriendshipIdsByUser],
+	);
 
 	const {
 		posts,
@@ -158,38 +162,6 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 			}),
 		[friends, user?.id, connectedUserIds, isOwnProfile],
 	);
-
-	useEffect(() => {
-		if (!token || !user?.id) {
-			return;
-		}
-
-		const fetchConnections = async () => {
-			try {
-				const res = await fetch(`${API_URL}/friends`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-
-				const data = await res.json();
-
-				if (!res.ok || !Array.isArray(data)) {
-					return;
-				}
-
-				setConnectedUserIds(
-					data
-						.map((friend) => friend.id)
-						.filter((id): id is number => typeof id === "number"),
-				);
-			} catch (error) {
-				console.error("fetchConnections error:", error);
-			}
-		};
-
-		fetchConnections();
-	}, [token, user?.id]);
 
 	useEffect(() => {
 		if (!token) {
@@ -279,8 +251,14 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 	const profileSent = resolvedProfileId
 		? sentRequests.includes(resolvedProfileId)
 		: false;
+	const profileIncomingRequestId = resolvedProfileId
+		? incomingRequestIdsBySender[resolvedProfileId]
+		: undefined;
+	const profileFriendshipId = resolvedProfileId
+		? connectedFriendshipIdsByUser[resolvedProfileId]
+		: undefined;
 	const profileConnected = resolvedProfileId
-		? connectedUserIds.includes(resolvedProfileId)
+		? typeof profileFriendshipId === "number"
 		: false;
 
 	return (
@@ -300,9 +278,9 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 							</p>
 						</section>
 					) : (
-						<div className="flex flex-col gap-10 lg:gap-12">
+						<div className="flex flex-col gap-2 lg:gap-4">
 							<section className="relative mt-3">
-								<div className="rotate-2 relative h-[260px] overflow-hidden border border-black/10 bg-paper-muted shadow-[8px_12px_30px_rgba(26,26,26,0.12)] sm:h-[300px]">
+								<div className="rotate-2 relative h-[260px] overflow-hidden border border-paper border-8 bg-paper-muted shadow-[8px_12px_30px_rgba(26,26,26,0.12)] sm:h-[300px]">
 									<ProfileBanner
 										name={profile.username}
 										className="h-full w-full"
@@ -315,8 +293,8 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 								<div className="absolute -top-1 right-[5%] h-5 w-16 rotate-89 bg-paper-muted/70" />
 							</section>
 
-							<section className="relative -mt-33 px-4 sm:px-8">
-								<div className="flex flex-col items-start gap-6 md:flex-row md:items-end">
+							<section className="relative -mt-23 px-4 sm:px-8">
+								<div className="flex flex-col items-start gap-6 md:flex-row md:items-start">
 									<div className="relative shrink-0 shadow-xl -rotate-3">
 										<ProfilePicture
 											name={profile.username}
@@ -324,7 +302,7 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 											alt={profile.username}
 											withShadow={false}
 											frameClassName="p-2.5"
-											className="h-32 w-32 md:h-44 md:w-44"
+											className="h-32 w-32 md:h-44 md:w-44 mt-5"
 										/>
 
 										<div className="absolute -bottom-3 -right-3 h-8 w-8 rotate-12 md:h-10 md:w-10">
@@ -343,12 +321,6 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 														@
 														{profile.username.toLowerCase()}
 													</span>
-													{profile.status ? (
-														<span>
-															State:{" "}
-															{profile.status}
-														</span>
-													) : null}
 												</div>
 											</div>
 
@@ -363,92 +335,113 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 													"Field observer cataloguing fragments, patterns, and quiet evidence from the archive."}
 											</p>
 
-											<div className="flex flex-wrap items-center gap-3 text-sm text-paper/90">
-												{profile.location ? (
-													<span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em]">
-														<MapPin className="h-3.5 w-3.5" />
-														{profile.location}
-													</span>
-												) : null}
-												{profile.website ? (
-													<a
-														href={profile.website}
-														target="_blank"
-														rel="noreferrer"
-														className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] underline underline-offset-4"
-													>
-														<ExternalLink className="h-3.5 w-3.5" />
-														Website
-													</a>
-												) : null}
-											</div>
+											<div className="flex flex-wrap items-center justify-between gap-3 text-sm text-paper/90">
+												<div className="flex flex-wrap items-center gap-3">
+													{profile.location ? (
+														<span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] bg-ink p-1">
+															<MapPin className="h-3.5 w-3.5" />
+															{profile.location}
+														</span>
+													) : null}
+												</div>
 
 											<div className="flex flex-wrap gap-3 md:justify-end">
-												{isOwnProfile ? (
-													<>
-														<Button
-															asChild
-															variant="bluesh"
-															size="lg"
-														>
-															<Link href="/settings/profile">
-																Edit Record
-															</Link>
-														</Button>
-														<Button
-															asChild
-															variant="paper"
-															size="lg"
-														>
-															<Link href="/friends">
-																Fellow Observers
-															</Link>
-														</Button>
-													</>
-												) : (
-													<>
-														<Button
-															type="button"
-															variant={
-																profileConnected
-																	? "paper"
-																	: "bluesh"
-															}
-															size="lg"
-															disabled={
-																profileConnected ||
-																profileSent ||
-																sendingFriendId ===
-																	resolvedProfileId
-															}
-															onClick={() =>
-																resolvedProfileId &&
-																handleAddFriend(
-																	resolvedProfileId,
-																)
-															}
-														>
-															{sendingFriendId ===
-															resolvedProfileId
-																? "Sending"
-																: profileConnected
-																	? "Following"
-																	: profileSent
-																		? "Requested"
-																		: "Follow"}
-														</Button>
-														<Button
-															asChild
-															variant="paper"
-															size="lg"
-														>
-															<Link href="/friends">
-																<MessageCircle className="h-4 w-4" />
-																Network
-															</Link>
-														</Button>
-													</>
-												)}
+													{isOwnProfile ? (
+														<>
+															<Button
+																asChild
+																variant="bluesh"
+																size="lg"
+															>
+																<Link href="/settings/profile">
+																	Edit Profile
+																</Link>
+															</Button>
+															<Button
+																asChild
+																variant="paper"
+																size="lg"
+															>
+																<Link href="/friends">
+																	My Friends
+																</Link>
+															</Button>
+														</>
+													) : (
+														<>
+															<Button
+																type="button"
+																variant={
+																	profileConnected
+																		? "destructive"
+																		: profileIncomingRequestId
+																			? "bluesh"
+																			: profileSent
+																				? "subtle"
+																				: "default"
+																}
+																size="lg"
+																disabled={
+																	profileSent ||
+																	sendingFriendId ===
+																		resolvedProfileId
+																}
+																onClick={() => {
+																	if (!resolvedProfileId) {
+																		return;
+																	}
+
+																	if (profileConnected) {
+																		handleRemoveFriend(
+																			resolvedProfileId,
+																		);
+																		return;
+																	}
+
+																	if (
+																		profileIncomingRequestId
+																	) {
+																		handleAcceptFriend(
+																			resolvedProfileId,
+																		);
+																		return;
+																	}
+
+																	if (!profileSent) {
+																		handleAddFriend(
+																			resolvedProfileId,
+																		);
+																	}
+																}}
+															>
+																{sendingFriendId ===
+																resolvedProfileId
+																	? profileConnected
+																		? "Removing"
+																		: profileIncomingRequestId
+																			? "Accepting"
+																			: "Adding"
+																	: profileConnected
+																		? "Remove"
+																		: profileIncomingRequestId
+																			? "Accept"
+																			: profileSent
+																				? "Pending"
+																				: "Add"}
+															</Button>
+															<Button
+																asChild
+																variant="paper"
+																size="lg"
+															>
+																<Link href="/friends">
+																	<MessageCircle className="h-4 w-4" />
+																	Network
+																</Link>
+															</Button>
+														</>
+													)}
+												</div>
 											</div>
 										</div>
 									</div>
@@ -565,15 +558,14 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 									</section>
 								) : (
 									<div className="flex flex-col gap-10">
-										{posts.map((post, index) => (
-											<PostCard
-												key={post.id}
-												post={post}
-												currentUserId={user?.id}
-												variantIndex={index}
-												onOpenPost={handleOpenPost}
-												onDelete={handleDelete}
-												onToggleLike={handleToggleLike}
+											{posts.map((post) => (
+												<PostCard
+													key={post.id}
+													post={post}
+													currentUserId={user?.id}
+													onOpenPost={handleOpenPost}
+													onDelete={handleDelete}
+													onToggleLike={handleToggleLike}
 												onToggleFavorite={
 													handleToggleFavorite
 												}
