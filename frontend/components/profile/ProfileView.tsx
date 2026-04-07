@@ -315,7 +315,7 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 								<div className="absolute -top-1 right-[5%] h-5 w-16 rotate-89 bg-paper-muted/70" />
 							</section>
 
-							<section className="relative -mt-33 px-4 sm:px-8">
+							<section className="relative -mt-80 px-4 sm:px-8"> // jai change la position de la photo et du texte
 								<div className="flex flex-col items-start gap-6 md:flex-row md:items-end">
 									<div className="relative shrink-0 shadow-xl -rotate-3">
 										<ProfilePicture
@@ -353,7 +353,7 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 											</div>
 
 											<p
-												className="max-w-2xl text-xl italic leading-relaxed text-accent-blue"
+												className="max-w-2xl text-xl italic leading-relaxed text-white" // jai change la couleur du texte en blanc
 												style={{
 													fontFamily:
 														"var(--font-display)",

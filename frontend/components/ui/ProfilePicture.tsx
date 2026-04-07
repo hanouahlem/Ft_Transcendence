@@ -40,7 +40,7 @@ export function ProfilePicture({
       <AvatarImage
         src={src ?? undefined}
         alt={alt ?? name}
-        className={cn("archive-photo object-cover", imageClassName)}
+        className={cn("object-cover", imageClassName)} //jai enleve la classe archive-photo
       />
       <AvatarFallback
         name={name}

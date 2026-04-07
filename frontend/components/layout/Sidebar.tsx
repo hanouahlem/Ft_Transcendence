@@ -11,6 +11,7 @@ import {
 	MessageCircle,
 	Search,
 	UserRound,
+	Settings,
 } from "lucide-react";
 import type { CurrentUser } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,8 @@ const NAV_ITEMS = [
 	{ href: "/feed", label: "Timeline", icon: Home },
 	{ href: "/friends", label: "Discoveries", icon: Search },
 	{ href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
-	{ href: "/settings/notifications", label: "Messages", icon: MessageCircle },
+	{ href: "/settings/notifications", label: "Settings", icon: Settings },
+	{ href: "/message", label: "Message", icon: MessageCircle },
 	{ href: "/settings/profile", label: "Bookmarks", icon: Bookmark },
 	{ href: "/profil", label: "Profile", icon: UserRound },
 ];
