@@ -12,6 +12,7 @@ import {
 	Search,
 	UserRound,
 	Settings,
+	Handshake,
 } from "lucide-react";
 import type { CurrentUser } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -27,7 +28,8 @@ type SidebarProps = {
 
 const NAV_ITEMS = [
 	{ href: "/feed", label: "Timeline", icon: Home },
-	{ href: "/friends", label: "Discoveries", icon: Search },
+	// { href: "/friends", label: "Discoveries", icon: Search },
+	{ href: "/friends", label: "Friends", icon: Handshake },
 	{ href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
 	{ href: "/settings/notifications", label: "Settings", icon: Settings },
 	{ href: "/message", label: "Message", icon: MessageCircle },
