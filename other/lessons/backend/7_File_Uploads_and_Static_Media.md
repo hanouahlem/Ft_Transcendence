@@ -128,18 +128,26 @@ That keeps orphaned files from accumulating for deleted posts.
 
 The new seed flow uses two different media strategies on purpose.
 
-Profile avatars are plain URLs stored on the user record through `PUT /users/:id`.
+Profile media and identity fields are stored through `PUT /users/:id`.
 
 Real code from `other/seed.sh`:
 
 ```js
-avatar: `https://i.pravatar.cc/300?img=${avatarId}`,
+user.displayName = titleCaseUsername(user.username);
+user.avatar = USERS_WITH_AVATARS.has(user.username)
+  ? `https://i.pravatar.cc/300?img=${user.avatarId}`
+  : null;
+user.banner = USERS_WITH_BANNERS.has(user.username)
+  ? `https://picsum.photos/seed/${encodeURIComponent(`banner-${user.username}`)}/1400/420`
+  : null;
 
 await apiRequest(`/users/${currentUser.id}`, {
   method: "PUT",
   token,
   json: {
     username: user.username,
+    displayName: user.displayName,
+    banner: user.banner,
     avatar: user.avatar,
     bio: user.bio,
     status: user.status,
@@ -149,7 +157,12 @@ await apiRequest(`/users/${currentUser.id}`, {
 });
 ```
 
-That means avatar images are not uploaded into backend storage.
+What this means:
+
+- every seeded user gets a `displayName`
+- only a deterministic subset gets avatar URLs
+- only a deterministic subset gets banner URLs
+- avatar and banner images are still remote URLs, not uploaded files
 
 Post images still go through the real upload pipeline.
 
@@ -170,7 +183,7 @@ await apiRequest("/posts", {
 
 Why this split is useful:
 
-- avatars stay lightweight and do not add files to the repo
+- profile avatars and banners stay lightweight and do not add files to the repo
 - posts still exercise the real Multer upload path
 - the seed can use deterministic remote providers like `pravatar` and `picsum`
 - seeded post media still ends up in backend `/uploads`, exactly like a normal user upload

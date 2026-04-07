@@ -55,7 +55,6 @@ function makeUser({
     username,
     email: `${username}@test.com`,
     avatarId,
-    avatar: `https://i.pravatar.cc/300?img=${avatarId}`,
     cluster,
     focus,
     ritual,
@@ -84,6 +83,32 @@ function stableNumber(input) {
   }
 
   return hash;
+}
+
+function titleCaseUsername(username) {
+  return username
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((part) => capitalize(part))
+    .join(" ");
+}
+
+function pickSeededSubset(users, count, seedLabel) {
+  return new Set(
+    [...users]
+      .sort((left, right) => {
+        const leftScore = stableNumber(`${seedLabel}:${left.username}`);
+        const rightScore = stableNumber(`${seedLabel}:${right.username}`);
+
+        if (leftScore === rightScore) {
+          return left.username.localeCompare(right.username);
+        }
+
+        return leftScore - rightScore;
+      })
+      .slice(0, Math.min(count, users.length))
+      .map((user) => user.username),
+  );
 }
 
 function pairKey(left, right) {
@@ -348,6 +373,19 @@ const USERS = [
     location: "Dijon, FR",
   }),
 ];
+
+const USERS_WITH_AVATARS = pickSeededSubset(USERS, 10, "profile-avatar");
+const USERS_WITH_BANNERS = pickSeededSubset(USERS, 15, "profile-banner");
+
+for (const user of USERS) {
+  user.displayName = titleCaseUsername(user.username);
+  user.avatar = USERS_WITH_AVATARS.has(user.username)
+    ? `https://i.pravatar.cc/300?img=${user.avatarId}`
+    : null;
+  user.banner = USERS_WITH_BANNERS.has(user.username)
+    ? `https://picsum.photos/seed/${encodeURIComponent(`banner-${user.username}`)}/1400/420`
+    : null;
+}
 
 USERS.forEach((user, index) => {
   user.index = index;
@@ -828,6 +866,8 @@ async function registerUsers() {
       token,
       json: {
         username: user.username,
+        displayName: user.displayName,
+        banner: user.banner,
         avatar: user.avatar,
         bio: user.bio,
         status: user.status,

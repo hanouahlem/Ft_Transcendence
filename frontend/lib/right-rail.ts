@@ -1,6 +1,7 @@
 export type RightRailSuggestion = {
   id: number;
   username: string;
+  displayName?: string | null;
   avatar?: string | null;
 };
 

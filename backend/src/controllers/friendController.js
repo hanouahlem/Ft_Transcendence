@@ -4,6 +4,7 @@ function toFriendPreview(user) {
     return {
         id: user.id,
         username: user.username,
+        displayName: user.displayName ?? null,
         avatar: user.avatar ?? null,
     };
 }
@@ -123,8 +124,8 @@ export async function getFriends(req , res){
                 ]},
             
                include: {
-                            sender: { select: { id: true, username: true, avatar: true } },
-                            receiver: { select: { id: true, username: true, avatar: true } }
+                            sender: { select: { id: true, username: true, displayName: true, avatar: true } },
+                            receiver: { select: { id: true, username: true, displayName: true, avatar: true } }
 }
             });
 
@@ -232,7 +233,7 @@ export async function getFriendRequests(req, res) {
                 status: "pending"
             },
             include: {
-                sender: { select: { id: true, username: true, avatar: true } }
+                sender: { select: { id: true, username: true, displayName: true, avatar: true } }
             }
         });
 
@@ -256,7 +257,7 @@ export async function getSentFriendRequests(req, res) {
                 status: "pending"
             },
             include: {
-                receiver: { select: { id: true, username: true, avatar: true } }
+                receiver: { select: { id: true, username: true, displayName: true, avatar: true } }
             }
         });
 
@@ -281,8 +282,8 @@ export async function getUserFriends(req, res) {
                 OR: [{ senderId: targetUserId }, { receiverId: targetUserId }],
             },
             include: {
-                sender: { select: { id: true, username: true, avatar: true } },
-                receiver: { select: { id: true, username: true, avatar: true } },
+                sender: { select: { id: true, username: true, displayName: true, avatar: true } },
+                receiver: { select: { id: true, username: true, displayName: true, avatar: true } },
             },
         });
 
@@ -313,8 +314,8 @@ export async function getFriendSuggestions(req, res) {
                 OR: [{ senderId: userId }, { receiverId: userId }],
             },
             include: {
-                sender: { select: { id: true, username: true, avatar: true } },
-                receiver: { select: { id: true, username: true, avatar: true } },
+                sender: { select: { id: true, username: true, displayName: true, avatar: true } },
+                receiver: { select: { id: true, username: true, displayName: true, avatar: true } },
             },
         });
 
@@ -335,8 +336,8 @@ export async function getFriendSuggestions(req, res) {
                     ],
                 },
                 include: {
-                    sender: { select: { id: true, username: true, avatar: true } },
-                    receiver: { select: { id: true, username: true, avatar: true } },
+                    sender: { select: { id: true, username: true, displayName: true, avatar: true } },
+                    receiver: { select: { id: true, username: true, displayName: true, avatar: true } },
                 },
             });
 
@@ -365,6 +366,7 @@ export async function getFriendSuggestions(req, res) {
             select: {
                 id: true,
                 username: true,
+                displayName: true,
                 avatar: true,
             },
             orderBy: {

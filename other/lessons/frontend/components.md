@@ -270,20 +270,21 @@ Why this matters:
 
 Purpose:
 
-- render the profile-page banner as a deterministic generated graphic instead of ad hoc media selection
+- render the profile-page banner from a saved user banner URL when one exists, with a deterministic generated fallback
 
 How it works:
 
-- uses `boring-avatars`
-- uses the `marble` variant
-- seeds the SVG with the profile username
+- accepts `src?: string | null`
+- when `src` exists, it renders a decorative `<img>` with `object-cover`
+- otherwise it falls back to `boring-avatars`
+- the fallback still uses the `marble` variant seeded from the profile username
 - reuses the shared CSS-token archive palette from `frontend/lib/identity-art.ts`
 
 Why this matters:
 
-- the profile hero no longer depends on finding a post image or falling back to the avatar
-- banner rendering is predictable and reusable
-- the visual language stays tied to the same generated identity system as avatar fallbacks
+- users can customize a real banner without needing a separate profile-hero component
+- profiles still have a stable visual identity even when no banner URL is saved
+- the same component covers both the editable banner feature and the archive fallback style
 
 Real code:
 
@@ -370,6 +371,8 @@ Explain it during evaluation like this:
 
 Real hero-layout detail from `frontend/components/profile/ProfileView.tsx`:
 
+- the hero now prefers `displayName` for the large title while keeping `@username` as the stable handle
+- the banner component receives `src={profile.banner}` so saved banner URLs render directly in the hero
 - the location chip and the profile action buttons are rendered inside one shared flex row with `justify-between`
 - this keeps metadata on the left and actions on the right instead of stacking them as unrelated blocks
 - `flex-wrap` is still enabled so the row can break safely on narrower screens
@@ -437,6 +440,20 @@ Explain during evaluation:
 - the sidebar owns navigation configuration in `NAV_ITEMS`
 - `NavButton` is the row renderer
 - `Button` from `frontend/components/ui/button.tsx` is reused for “Log Entry” and “Logout”
+- the sidebar now prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
+
+### `frontend/components/layout/RightRailSuggestions.tsx`
+
+Purpose:
+
+- render the compact friend or suggestion cards in the right rail
+
+Important detail:
+
+- the card now prefers `displayName` for the visible name and for the `ProfilePicture` fallback seed
+- it still keeps `@username` as the handle line
+- that keeps generated fallback avatars consistent with post cards, dialogs, comments, profile, and sidebar
+- the feed page must preserve `displayName` when normalizing `/friends/suggestions`; otherwise the right rail falls back to `username` and the generated avatar changes only on the feed screen
 
 ### Sidebar "Log Entry" -> `NewPostDialog` Flow
 

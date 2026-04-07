@@ -188,6 +188,7 @@ export default function FeedPage() {
 						.map((item: RightRailSuggestion) => ({
 							id: item.id,
 							username: item.username,
+							displayName: item.displayName || null,
 							avatar: item.avatar || null,
 						}))
 				: [];
