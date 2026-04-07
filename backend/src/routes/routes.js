@@ -5,9 +5,10 @@ import notif from "../controllers/notifController.js";
 import post from "../controllers/postController.js";
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.js";
-import upload from "../middleware/upload.js";
+import upload, { createImageUpload } from "../middleware/upload.js";
 import twoFa from '../controllers/twoFactorController.js';
 const router = Router();
+const userMediaUpload = createImageUpload("user");
 
 //oauth
 router.get("/auth/github", oauth.startGitHubOAuth);
@@ -30,6 +31,8 @@ router.get("/users/:id", authMiddleware, ctrl.getUserById);
 
 router.put("/users/:id", authMiddleware, ctrl.updateUser);
 router.put("/settings/security", authMiddleware, ctrl.updatePassword);
+router.put("/settings/setpassword", authMiddleware, ctrl.setPassword);
+router.post("/settings/media", authMiddleware, userMediaUpload.single("media"), ctrl.uploadUserMedia);
 
 // notifications
 router.get("/notifications", authMiddleware, notif.getNotif);

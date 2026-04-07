@@ -5,11 +5,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
 	Bell,
-	Bookmark,
 	Home,
 	LogOut,
-	MessageCircle,
 	Search,
+	SlidersHorizontal,
 	UserRound,
 } from "lucide-react";
 import type { CurrentUser } from "@/lib/api";
@@ -28,8 +27,7 @@ const NAV_ITEMS = [
 	{ href: "/feed", label: "Timeline", icon: Home },
 	{ href: "/friends", label: "Discoveries", icon: Search },
 	{ href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
-	{ href: "/settings/notifications", label: "Messages", icon: MessageCircle },
-	{ href: "/settings/profile", label: "Bookmarks", icon: Bookmark },
+	{ href: "/settings", label: "Settings", icon: SlidersHorizontal },
 	{ href: "/profil", label: "Profile", icon: UserRound },
 ];
 

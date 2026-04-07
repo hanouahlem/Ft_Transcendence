@@ -15,7 +15,21 @@ const currentUserSelect = {
   location: true,
   website: true,
   createdAt: true,
+  password: true,
 };
+
+function toSafeCurrentUser(user) {
+  if (!user) {
+    return null;
+  }
+
+  const { password, ...safeUser } = user;
+
+  return {
+    ...safeUser,
+    hasPassword: Boolean(password),
+  };
+}
 
 export async function allUsers(req, res) {
   try {
@@ -42,7 +56,7 @@ export async function  getUser(req, res) {
     if (!user) {
         return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    res.json(toSafeCurrentUser(user));
 };
 
 
@@ -278,22 +292,10 @@ export async function updateUser(req, res) {
         location,
         website,
       },
-      select: {
-        id: true,
-        username: true,
-        displayName: true,
-        email: true,
-        banner: true,
-        avatar: true,
-        bio: true,
-        status: true,
-        location: true,
-        website: true,
-        createdAt: true,
-      },
+      select: currentUserSelect,
     });
 
-    return res.json(updatedUser);
+    return res.json(toSafeCurrentUser(updatedUser));
   } catch (error) {
     console.error("updateUser error:", error);
     return res.status(500).json({
@@ -350,6 +352,60 @@ export async function updatePassword(req, res){
         console.error("updatePassword error:", error);
         res.status(500).json({ message: "Failed to update password" });
     }
+}
+
+export async function setPassword(req, res) {
+  const { newPassword, confirmPassword } = req.body;
+
+  try {
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.password) {
+      return res.status(400).json({
+        message: "This account already has a local password.",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { password: hashedPassword },
+    });
+
+    return res.json({ message: "Password set successfully" });
+  } catch (error) {
+    console.error("setPassword error:", error);
+    return res.status(500).json({ message: "Failed to set password" });
+  }
+}
+
+export async function uploadUserMedia(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ message: "Image file is required." });
+  }
+
+  const mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+  return res.status(201).json({ url: mediaUrl });
 }
 
 const getUserById = async (req, res) => {
@@ -693,4 +749,6 @@ export default {
   searchUser,
   updateUser,
   updatePassword,
+  setPassword,
+  uploadUserMedia,
 };

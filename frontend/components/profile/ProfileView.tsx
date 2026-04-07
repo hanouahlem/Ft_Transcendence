@@ -356,7 +356,7 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 																variant="bluesh"
 																size="lg"
 															>
-																<Link href="/settings/profile">
+																<Link href="/settings">
 																	Edit Profile
 																</Link>
 															</Button>

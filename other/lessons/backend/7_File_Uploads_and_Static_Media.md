@@ -224,3 +224,45 @@ The seed script now avoids checking source images into git, but uploaded post me
 - What is stored in the database: the file bytes or the file URL/path?
 - Why are avatars seeded as URLs while post images are still uploaded through the backend?
 - Why does the seed script use deterministic `picsum` seeds and varying dimensions?
+
+## Settings Media Uploads
+
+The centralized settings page now reuses the same upload pipeline for avatar and banner images.
+
+Files:
+
+- `backend/src/middleware/upload.js`
+- `backend/src/routes/routes.js`
+- `backend/src/controllers/userController.js`
+
+What changed:
+
+- the Multer setup now exposes `createImageUpload(prefix)`
+- posts still use `post-*` filenames
+- settings uploads use `user-*` filenames
+- a new route `POST /settings/media` accepts one image under `media`
+- the controller returns a public URL like `/uploads/user-...`
+
+Real route:
+
+```js
+router.post(
+  "/settings/media",
+  authMiddleware,
+  userMediaUpload.single("media"),
+  ctrl.uploadUserMedia
+);
+```
+
+How the full flow works:
+
+1. frontend sends a local image file with `multipart/form-data`
+2. Multer writes the file into `uploads/`
+3. backend returns the public file URL
+4. frontend saves that URL into `User.avatar` or `User.banner` through `PUT /users/:id`
+
+Why this is a good split:
+
+- upload logic stays small and reusable
+- profile updates still go through the normal user update route
+- the database continues storing a URL, not raw image bytes

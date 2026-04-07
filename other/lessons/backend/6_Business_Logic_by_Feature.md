@@ -196,3 +196,58 @@ Think of feature code like this:
 - Which file handles friend requests?
 - Why do posts use a service layer in addition to a controller?
 - What kind of logic belongs in a controller vs a service?
+
+## Settings Additions
+
+The centralized settings page added three important user/auth behaviors in:
+
+- `backend/src/controllers/userController.js`
+
+### Safe Current User Payload
+
+`getUser` and `updateUser` now return a safe boolean called `hasPassword` instead of exposing the password hash.
+
+Real code:
+
+```js
+function toSafeCurrentUser(user) {
+  const { password, ...safeUser } = user;
+
+  return {
+    ...safeUser,
+    hasPassword: Boolean(password),
+  };
+}
+```
+
+Why this matters:
+
+- the frontend can decide whether to show a first-time `set password` form or the normal 3-field `change password` form
+- the backend still never leaks the real password value
+
+### `setPassword`
+
+What it does:
+
+- handles `PUT /settings/setpassword`
+- only works when the authenticated user currently has `password = NULL`
+- hashes the new password with bcrypt before storing it
+
+Why it matters:
+
+- OAuth-created accounts can later add a local password
+- this stays separate from the normal password-change flow
+
+### `updatePassword`
+
+What it does:
+
+- handles `PUT /settings/security`
+- requires `currentPassword`, `newPassword`, and `confirmPassword`
+- verifies the current password before writing the new one
+- rejects users who do not already have a local password
+
+Why two handlers exist:
+
+- first-time password creation and password rotation are different security checks
+- keeping them separate makes the code easier to explain during evaluation
