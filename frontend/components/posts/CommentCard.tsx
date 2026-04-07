@@ -33,6 +33,8 @@ export function CommentCard({
 	const isDeleting = deletingCommentId === comment.id;
 	const isLiking = likingCommentId === comment.id;
 	const isFavoriting = favoritingCommentId === comment.id;
+	const authorDisplayName =
+		comment.author.displayName?.trim() || comment.author.username;
 
 	return (
 		<div className="relative w-full min-w-0 max-w-full overflow-hidden border border-black/10 bg-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
@@ -43,9 +45,9 @@ export function CommentCard({
 						className="shrink-0"
 					>
 						<ProfilePicture
-							name={comment.author.username}
+							name={authorDisplayName}
 							src={comment.author.avatar}
-							alt={comment.author.username}
+							alt={authorDisplayName}
 							className="h-8 w-8 -rotate-2"
 						/>
 					</Link>
@@ -56,7 +58,7 @@ export function CommentCard({
 								href={`/profil/${comment.author.id}`}
 								className="max-w-full truncate font-mono text-ink transition hover:text-accent-blue"
 							>
-								@{comment.author.username}
+								{authorDisplayName}
 							</Link>
 							<span className="max-w-full truncate font-mono text-[15px] text-label">
 								@{comment.author.username.toLowerCase()}

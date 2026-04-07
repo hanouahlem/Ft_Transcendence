@@ -1,6 +1,7 @@
 export type PostAuthor = {
   id: number;
   username: string;
+  displayName?: string | null;
   email: string;
 };
 

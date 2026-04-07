@@ -6,11 +6,14 @@ import prisma from "../prisma.js";
 const currentUserSelect = {
   id: true,
   username: true,
+  displayName: true,
   email: true,
+  banner: true,
   avatar: true,
   bio: true,
   status: true,
   location: true,
+  website: true,
   createdAt: true,
 };
 
@@ -202,7 +205,7 @@ export async function searchUser(req, res){
                     mode : "insensitive"
                 }
             },
-            select: {id: true, username: true, avatar: true}
+            select: {id: true, username: true, displayName: true, avatar: true}
         });
         return res.status(200).json(users);
     }
@@ -216,7 +219,16 @@ export async function searchUser(req, res){
 export async function updateUser(req, res) {
   const requestId = parseInt(req.params.id);
   const currentUserId = req.user?.id ?? req.user?.userId;
-  const { username, avatar, bio, status, location, website } = req.body;
+  const {
+    username,
+    displayName,
+    banner,
+    avatar,
+    bio,
+    status,
+    location,
+    website,
+  } = req.body;
 
   if (Number.isNaN(requestId) || requestId < 1) {
     return res.status(400).json({
@@ -258,6 +270,8 @@ export async function updateUser(req, res) {
       where: { id: requestId },
       data: {
         username,
+        displayName,
+        banner,
         avatar,
         bio,
         status,
@@ -267,7 +281,9 @@ export async function updateUser(req, res) {
       select: {
         id: true,
         username: true,
+        displayName: true,
         email: true,
+        banner: true,
         avatar: true,
         bio: true,
         status: true,
@@ -353,7 +369,9 @@ const getUserById = async (req, res) => {
       select: {
             id: true,
             username: true,
+            displayName: true,
             email: true,
+            banner: true,
             avatar: true,
             bio: true,
             status: true,
@@ -386,6 +404,7 @@ const formatFeedComment = (comment, currentUserId) => {
     author: {
       id: comment.user.id,
       username: comment.user.username,
+      displayName: comment.user.displayName,
       email: comment.user.email,
       avatar: comment.user.avatar,
     },
@@ -405,6 +424,7 @@ const formatFeedComment = (comment, currentUserId) => {
           author: {
             id: comment.post.author.id,
             username: comment.post.author.username,
+            displayName: comment.post.author.displayName,
           },
         }
       : null,
@@ -419,6 +439,7 @@ const formatFeedPost = (post, currentUserId) => {
     author: {
       id: post.author.id,
       username: post.author.username,
+      displayName: post.author.displayName,
       email: post.author.email,
       avatar: post.author.avatar,
     },

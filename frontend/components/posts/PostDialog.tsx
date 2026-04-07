@@ -102,6 +102,8 @@ export function PostDialog({
 	const isLiking = post ? likingPostId === post.id : false;
 	const isFavoriting = post ? favoritingPostId === post.id : false;
 	const isCommenting = post ? commentingPostId === post.id : false;
+	const authorDisplayName =
+		post?.author.displayName?.trim() || post?.author.username || "Observer";
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,9 +119,9 @@ export function PostDialog({
 											className="shrink-0"
 										>
 											<ProfilePicture
-												name={post.author.username}
+												name={authorDisplayName}
 												src={post.author.avatar}
-												alt={post.author.username}
+												alt={authorDisplayName}
 												className="h-11 w-11 -rotate-2"
 											/>
 										</Link>
@@ -130,7 +132,7 @@ export function PostDialog({
 													href={`/profil/${post.author.id}`}
 													className="truncate text-lg font-display uppercase tracking-wide text-ink"
 												>
-													{post.author.username}
+													{authorDisplayName}
 												</Link>
 												<span className="font-mono text-xs text-label">
 													@{post.author.username.toLowerCase()}

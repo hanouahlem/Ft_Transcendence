@@ -11,6 +11,7 @@ const formatComment = (comment, currentUserId) => {
     author: {
       id: comment.user.id,
       username: comment.user.username,
+      displayName: comment.user.displayName,
       email: comment.user.email,
       avatar: comment.user.avatar,
     },
@@ -34,6 +35,7 @@ const formatPost = (post, currentUserId) => {
     author: {
       id: post.author.id,
       username: post.author.username,
+      displayName: post.author.displayName,
       email: post.author.email,
       avatar: post.author.avatar,
     },

@@ -24,6 +24,7 @@ Main responsibilities:
 - list users
 - log in a user
 - fetch the authenticated user
+- update the authenticated user's profile fields
 - search users by username
 
 ### `registerUser`
@@ -54,6 +55,38 @@ What it does:
 - uses `req.user.id` from auth middleware
 - fetches the current user from DB
 - returns that user
+
+### `updateUser`
+
+What it does:
+
+- only allows `PUT /users/:id` when the token user matches the route id
+- checks username uniqueness before writing
+- updates profile fields such as `username`, `displayName`, `banner`, `avatar`, `bio`, `location`, and `website`
+- returns the updated safe profile payload
+
+Real fields now selected from `backend/src/controllers/userController.js`:
+
+```js
+const currentUserSelect = {
+  id: true,
+  username: true,
+  displayName: true,
+  email: true,
+  banner: true,
+  avatar: true,
+  bio: true,
+  status: true,
+  location: true,
+  website: true,
+  createdAt: true,
+};
+```
+
+Why it matters:
+
+- the frontend profile settings page can fetch and save both a public display name and a banner URL
+- profile reads and updates stay consistent because the same fields are exposed on `/user` and `/users/:id`
 
 ### `searchUser`
 

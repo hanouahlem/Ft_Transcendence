@@ -20,7 +20,9 @@ export type LoginData =
 export type CurrentUser = {
   id: number;
   username: string;
+  displayName?: string | null;
   email: string;
+  banner?: string | null;
   avatar?: string | null;
 };
 

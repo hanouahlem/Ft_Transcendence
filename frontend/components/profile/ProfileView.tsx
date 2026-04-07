@@ -260,6 +260,8 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 	const profileConnected = resolvedProfileId
 		? typeof profileFriendshipId === "number"
 		: false;
+	const profileDisplayName =
+		profile?.displayName?.trim() || profile?.username || "Observer";
 
 	return (
 		<>
@@ -283,6 +285,7 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 								<div className="rotate-2 relative h-[260px] overflow-hidden border border-paper border-8 bg-paper-muted shadow-[8px_12px_30px_rgba(26,26,26,0.12)] sm:h-[300px]">
 									<ProfileBanner
 										name={profile.username}
+										src={profile.banner}
 										className="h-full w-full"
 									/>
 
@@ -293,13 +296,13 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 								<div className="absolute -top-1 right-[5%] h-5 w-16 rotate-89 bg-paper-muted/70" />
 							</section>
 
-							<section className="relative -mt-23 px-4 sm:px-8">
+							<section className="relative -mt-25 px-4 sm:px-8">
 								<div className="flex flex-col items-start gap-6 md:flex-row md:items-start">
 									<div className="relative shrink-0 shadow-xl -rotate-3">
 										<ProfilePicture
-											name={profile.username}
+											name={profileDisplayName}
 											src={profile.avatar}
-											alt={profile.username}
+											alt={profileDisplayName}
 											withShadow={false}
 											frameClassName="p-2.5"
 											className="h-32 w-32 md:h-44 md:w-44 mt-5"
@@ -314,7 +317,7 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
 										<div className="space-y-4">
 											<div>
 												<h1 className="font-display text-4xl font-black uppercase leading-none tracking-[-0.05em] text-paper md:text-5xl">
-													{profile.username}
+													{profileDisplayName}
 												</h1>
 												<div className="flex flex-wrap items-center gap-3 font-mono text-s uppercase tracking-[0.18em] text-paper/80">
 													<span>

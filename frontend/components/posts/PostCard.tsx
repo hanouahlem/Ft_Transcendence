@@ -174,6 +174,8 @@ export function PostCard({
 	const isDeleting = deletingPostId === post.id;
 	const isLiking = likingPostId === post.id;
 	const isFavoriting = favoritingPostId === post.id;
+	const authorDisplayName =
+		post.author.displayName?.trim() || post.author.username;
 
 	return (
 		<div className={variant.wrapper}>
@@ -209,9 +211,9 @@ export function PostCard({
 							className="shrink-0"
 						>
 							<ProfilePicture
-								name={post.author.username}
+								name={authorDisplayName}
 								src={post.author.avatar}
-								alt={post.author.username}
+								alt={authorDisplayName}
 								className={cn(
 									variantKey === 2
 										? "h-8 w-8 rotate-1"
@@ -231,7 +233,7 @@ export function PostCard({
 											: "text-lg",
 									)}
 								>
-									{post.author.username}
+									{authorDisplayName}
 								</Link>
 								<span className="font-mono text-xs text-label">
 									@{post.author.username.toLowerCase()}
