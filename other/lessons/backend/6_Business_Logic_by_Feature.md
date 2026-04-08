@@ -65,7 +65,7 @@ What it does:
 - updates profile fields such as `username`, `displayName`, `banner`, `avatar`, `bio`, `location`, and `website`
 - returns the updated safe profile payload
 
-Real fields now selected from `backend/src/controllers/userController.js`:
+Real fields selected from `backend/src/controllers/userController.js`:
 
 ```js
 const currentUserSelect = {
@@ -205,7 +205,7 @@ The centralized settings page added three important user/auth behaviors in:
 
 ### Safe Current User Payload
 
-`getUser` and `updateUser` now return a safe boolean called `hasPassword` instead of exposing the password hash.
+`getUser` and `updateUser` return a safe boolean called `hasPassword` instead of exposing the password hash.
 
 Real code:
 

@@ -1,10 +1,10 @@
 # Archive Design System
 
-Goal: define the archive-style frontend direction with enough structure to guide future page rewrites, without pretending the system is already fully finished.
+Goal: define the archive-style frontend direction with enough structure to guide future page work, without pretending the system is fully finished.
 
 This document describes the current implementation in the repo. It does not claim that the archive style is required by `other/transcendance.md`. It is our frontend design direction.
 
-## 1. Current Status
+## 1. System Status
 
 The archive design system already exists in a first usable form.
 
@@ -17,13 +17,13 @@ Real reference implementations:
 
 This means:
 
-- the direction is no longer just an idea
-- we already have real tokens, real reusable classes, and real reusable components
-- but the system is not fully mature yet because some old pages still use legacy generic UI
+- the repo already has real tokens, reusable classes, and reusable components
+- the system is usable as a foundation for new pages
+- some older pages still do not follow it consistently
 
 Best way to explain it:
 
-> We already have a design-system foundation, but not a fully complete design system. The stable part is the archive visual language and its core primitives. The unstable part is how many legacy pages still need to be rewritten to use it.
+> We have a design-system foundation, but not a fully complete design system. The stable part is the archive visual language and its core primitives. The less stable part is how consistently every page applies it.
 
 ## 2. Stable Foundations
 
@@ -134,8 +134,8 @@ variant: {
 
 This shows a real system rule:
 
-- buttons are not defined page by page anymore
-- the stable app-level button import now carries the archive language directly
+- buttons should come from shared UI primitives, not be redefined page by page
+- the design language lives in reusable components, not inside one screen
 
 ### Shared Decor And Typography
 
@@ -154,29 +154,28 @@ Current stable pieces:
 
 Why this matters:
 
-- decorative primitives are no longer trapped inside the login page folder
-- login can consume them, but other pages can reuse them without another move later
+- decorative primitives can be reused across screens
 - typography helpers and visual ornaments now have separate responsibilities
-- small paper details like the red tape strips are now reusable components instead of one-off `<div>` blocks
+- small paper details like tape strips are reusable components instead of one-off markup
 
 Additional reusable archive controls also live in `frontend/components/ui`:
 
 - `FieldInput.tsx`
 - `StampButton.tsx`
 
-These matter because the login page no longer hides its form primitives inside `LoginPaperCard.tsx`.
+These matter because form primitives should be shared building blocks, not hidden inside one page component.
 
-Recent `StampButton` detail:
+`StampButton` detail:
 
-- `frontend/components/ui/StampButton.tsx` now exposes separate styling hooks:
+- `frontend/components/ui/StampButton.tsx` exposes separate styling hooks:
   - `textClassName`
   - `paddingClassName`
   - `borderClassName`
 - that lets one auth screen change the stamp size, padding, or border weight without changing the other screen
 - `stampClassName` still exists for broader wrapper overrides when needed
-`FieldInput.tsx` is now Ark Field-backed, so label, input, and error text stay grouped semantically while preserving the archive styling.
+`FieldInput.tsx` is Ark Field-backed, so label, input, and error text stay grouped semantically while preserving the archive styling.
 
-There is now also an auth-scoped shared shell in:
+There is also an auth-scoped shared shell in:
 
 - `frontend/components/auth/shared/AuthPageShell.tsx`
 - `frontend/components/auth/shared/AuthPaperCard.tsx`
@@ -196,7 +195,7 @@ Folders:
 
 These are not global design-system primitives, but they are proof that the archive language can be applied consistently to a real feature.
 
-Reusable post-domain UI now lives in `frontend/components/posts`:
+Reusable post-domain UI lives in `frontend/components/posts`:
 
 - `PostCard.tsx`
 - `PostDialog.tsx`
@@ -206,7 +205,7 @@ Reusable post-domain UI now lives in `frontend/components/posts`:
 - `NewPostDialog.tsx`
 - `SocialToggle.tsx`
 
-Feed-specific helpers and types now live in `frontend/lib`:
+Feed-specific helpers and types live in `frontend/lib`:
 
 - `feed-utils.ts`
 - `feed-types.ts`
@@ -215,7 +214,7 @@ This matters because a design system is only useful if real feature components c
 
 Real implementation detail:
 
-- `frontend/components/posts/NewPostDialog.tsx` now acts as a thin dialog wrapper
+- `frontend/components/posts/NewPostDialog.tsx` acts as a thin dialog wrapper
 - `frontend/components/posts/NewPostCard.tsx` is the actual new-post UI
 
 Why this split is useful:
@@ -238,17 +237,17 @@ Why it matters:
 
 - it already shows archive form styling
 - it demonstrates how labels, inputs, metadata, stamps, and paper surfaces can work together
-- the login layout values are now written directly where they are used instead of being hidden behind a `loginTheme.ts` config file
-- shared decorative pieces used by login now live in `frontend/components/decor`
-- the archive micro-label text primitive now lives in `frontend/components/typography/MonoText.tsx`
-- the card now composes reusable `FieldInput`, `StampButton`, and `ArchiveTape` primitives instead of embedding them privately
-- the page-level auth layout now comes from `frontend/components/auth/shared/AuthPageShell.tsx`
-- the outer paper frame now comes from `frontend/components/auth/shared/AuthPaperCard.tsx`
-- `AuthPaperCard.tsx` can now also vary its tape color, so auth pages can reuse the same card shell with different tape treatments
-- the green side panel now comes from `frontend/components/auth/shared/AuthGreenPanel.tsx` with alignment and tone variants so login/register can reuse the same shell with different panel colors
-- the login card now also composes shared auth pieces for the header, document meta block, and OAuth provider row
-- auth errors no longer use a full-width feedback block under the fields; field-level errors now sit in the top-right label area
-- login/register now validate empty fields before the request, and backend auth responses can return field-level errors for username/email/password mapping
+- layout values are defined close to the login layout where they are used
+- decorative pieces used by login live in `frontend/components/decor`
+- the archive micro-label text primitive lives in `frontend/components/typography/MonoText.tsx`
+- the card composes reusable `FieldInput`, `StampButton`, and `ArchiveTape` primitives
+- the page-level auth layout comes from `frontend/components/auth/shared/AuthPageShell.tsx`
+- the outer paper frame comes from `frontend/components/auth/shared/AuthPaperCard.tsx`
+- `AuthPaperCard.tsx` can vary its tape color for different auth screens
+- the green side panel comes from `frontend/components/auth/shared/AuthGreenPanel.tsx` with alignment and tone variants
+- the login card composes shared auth pieces for the header, document meta block, and OAuth provider row
+- auth errors sit near the related field labels instead of as one generic block below the form
+- login/register validate empty fields before the request, and backend auth responses can map field-level errors
 
 Real example:
 
@@ -275,17 +274,15 @@ Important reference:
 
 Why it matters:
 
-- it reuses the same auth shell pieces as login instead of duplicating page structure
-- it proves the shared auth layer is now usable for a second real route
-- it keeps the old registration behavior while switching the presentation to the archive system
+- it uses the same auth shell pieces as login
+- it shows the shared auth layer works for more than one route
+- it keeps registration behavior consistent while applying the archive presentation
 
 ## 5. What Is Still Provisional
 
 These areas are not mature enough yet to be considered fully stable:
 
-### Primitive Layer Migration
-
-`frontend/components/ui` is still being migrated away from Radix-backed wrappers.
+### Primitive Layer
 
 Tracker:
 
@@ -294,26 +291,26 @@ Tracker:
 Meaning:
 
 - the app-facing primitive layer exists
-- but its internal implementation is still in transition
-- some wrappers are now Ark-backed, others are still Radix-backed
+- its internal implementation is not fully uniform yet
+- some wrappers are Ark-backed, others are Radix-backed
 
 ### Legacy Page Patterns
 
-Many older pages still use deprecated generic UI.
+Not every page uses the archive system consistently yet.
 
-So right now:
+So:
 
 - the archive direction is stable
-- the old page library usage is not
+- page-level adoption is still uneven
 
 ### Spacing and Layout Scale
 
 We have good real examples, but not a fully explicit spacing scale yet.
 
-For now:
+Current guidance:
 
 - page-specific spacing is guided by login/feed references
-- but we have not yet formalized a complete spacing token system
+- a complete spacing token system is not formalized yet
 
 ### Form Primitive Catalog
 

@@ -2,7 +2,7 @@
 
 ## Pages And Features
 
-- [ ] faire la page settings
+- [x] faire la page settings
 - [ ] faire la page notifs (peut etre modif la database pour que cca link a un user/request)
 - [ ] faire la messagerie et ensuite commencer les webhooks
 

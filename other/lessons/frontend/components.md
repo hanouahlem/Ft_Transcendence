@@ -215,9 +215,9 @@ How it works:
 
 Purpose:
 
-- keep one stable avatar wrapper API while removing the old `radix-ui` backing
+- provide one stable avatar wrapper API for the app
 
-How it works now:
+How it works:
 
 - uses Ark UI Avatar internally
 - keeps the same public imports:
@@ -230,9 +230,9 @@ How it works now:
 
 Why this matters:
 
-- active archive pages still import the same local wrapper
-- fallback avatars are no longer just raw initials text
-- the wrapper moved one more shared primitive away from `radix-ui`
+- pages import one local avatar API
+- image fallback behavior stays consistent across the app
+- the visual fallback is deterministic because it is seeded from the user name
 
 ### `frontend/components/ui/ProfilePicture.tsx`
 
@@ -245,7 +245,7 @@ How it works:
 - wraps `@/components/ui/avatar`
 - applies the archive image treatment by default
 - is intentionally square-only for the current design system
-- uses one shared paper frame instead of page-specific border colors
+- uses one shared paper frame
 - accepts normal Tailwind size classes through `className`, so pages can render it at any scale
 - accepts optional `frameClassName` when one screen needs a thicker paper border around the same shared picture component
 - enables a subtle paper-frame shadow by default so white-framed pictures still read against white cards; pages can disable it with `withShadow={false}`
@@ -262,7 +262,7 @@ Real usage:
 
 Why this matters:
 
-- post cards, post dialogs, comment cards, sidebar, right rail, and profile hero no longer duplicate avatar styling
+- post cards, post dialogs, comment cards, sidebar, right rail, and profile hero share one avatar styling rule
 - the lower-level Avatar wrapper stays focused on behavior and fallback rendering
 - `ProfilePicture` becomes the actual archive-facing reusable component for people across the app
 
@@ -305,12 +305,12 @@ Explain it like this:
 
 - `Button` is not a feed action
 - it is the canonical button primitive for the project
-- the archive style is now the default button language instead of a separate wrapper
+- the archive style belongs in the shared button primitive, not in page-specific wrappers
 - business meaning comes from the parent through props like `onClick` and `disabled`
 
-## 5. Profile Archive View
+## 5. Profile View
 
-The profile routes now reuse the same shell and post components as the feed instead of maintaining a second UI stack.
+The profile routes use the same shell and post components as the rest of the app.
 
 Current files:
 
@@ -332,13 +332,13 @@ How it works:
   - `GET /users/:id` for the profile metadata
 - `GET /users/:id/posts` for the archive entries
 - `GET /users/:id/friends` for the right-rail suggestions and the fellows count
-- `ProfileView` reuses `useFriendRequests()` for follow/request state and mutations
-- `ProfileView` reuses `usePostInteractions()` for delete, like, favorite, comment, and post-dialog state
+- `ProfileView` uses `useFriendRequests()` for follow/request state and mutations
+- `ProfileView` uses `usePostInteractions()` for delete, like, favorite, comment, and post-dialog state
 
 Important design rule:
 
 - the profile page does not recreate post cards, likes, favorites, or comments
-- it reuses `PostCard` and `PostDialog`
+- it uses `PostCard` and `PostDialog`
 - this keeps interaction logic consistent between feed and profile
 
 Real route composition:
@@ -347,7 +347,7 @@ Real route composition:
 <ProfileView profileId={profileId} />
 ```
 
-Real post reuse:
+Real post rendering:
 
 ```tsx
 {posts.map((post) => (
@@ -439,8 +439,8 @@ Explain during evaluation:
 
 - the sidebar owns navigation configuration in `NAV_ITEMS`
 - `NavButton` is the row renderer
-- `Button` from `frontend/components/ui/button.tsx` is reused for “Log Entry” and “Logout”
-- the sidebar now prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
+- `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” and “Logout”
+- the sidebar prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
 
 ### `frontend/components/layout/RightRailSuggestions.tsx`
 
@@ -450,7 +450,7 @@ Purpose:
 
 Important detail:
 
-- the card now prefers `displayName` for the visible name and for the `ProfilePicture` fallback seed
+- the card prefers `displayName` for the visible name and for the `ProfilePicture` fallback seed
 - it still keeps `@username` as the handle line
 - that keeps generated fallback avatars consistent with post cards, dialogs, comments, profile, and sidebar
 - the feed page must preserve `displayName` when normalizing `/friends/suggestions`; otherwise the right rail falls back to `username` and the generated avatar changes only on the feed screen
@@ -546,7 +546,7 @@ const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
 
 Key point:
 
-- `RightRail` is now mostly shell composition
+- `RightRail` is mostly shell composition
 - `RightRailSearch` owns future search-route navigation
 - `RightRailTrends` owns static trend links
 - `RightRailSuggestions` owns the observer/friends UI and follow action rendering
@@ -622,12 +622,12 @@ Why we use it:
 - the repo already follows a shadcn-style pattern with local UI wrappers
 - dialogs need focus trapping, escape handling, overlay behavior, and accessibility
 - this is better than hand-writing modal behavior with plain `<div>` elements
-- Ark is now the primitive layer for dialogs, while the app still imports our local wrapper
+- Ark provides the low-level dialog primitive while the app imports one local wrapper API
 
 Important evaluation sentence:
 
 - the app still imports `@/components/ui/dialog`
-- only the hidden implementation backing changed from Radix to Ark
+- the route and feature code stay isolated from the underlying dialog library
 
 Real code:
 
@@ -678,7 +678,7 @@ Why:
 
 - like and favorite are true toggled states
 - comment count uses the same visual treatment so the action row stays consistent
-- the component now lives with the post UI instead of a fake `feed` components folder
+- the component belongs to the post interaction domain
 
 ### `NewPostCard.tsx`
 
@@ -704,7 +704,7 @@ Key detail:
 
 - this component does not upload anything itself
 - it only exposes user actions back to the page
-- the hidden file input now lives once in `frontend/app/feed/page.tsx`
+- the hidden file input lives in `frontend/app/feed/page.tsx`
 
 That means the page still controls:
 
@@ -722,7 +722,7 @@ Important difference from `NewPostCard`:
 
 - the dialog adds `open` and `onClose`
 - it is rendered through the shared dialog wrapper
-- it reuses the exact same `NewPostCard` UI instead of duplicating a second file input
+- it uses the same `NewPostCard` UI so the publishing flow stays consistent
 
 Real code:
 
@@ -735,8 +735,8 @@ Explain this clearly:
 
 - the dialog is controlled by the page
 - it does not own the text/file state
-- the same data can be reused between the inline composer and dialog if we want to evolve the design later
-- accessibility behavior now comes from Ark instead of custom modal markup
+- the same data can be shared between the inline composer and dialog
+- accessibility behavior comes from the shared dialog primitive rather than custom modal markup
 
 ### `PostDialog.tsx`
 
@@ -969,7 +969,7 @@ Meaning:
 - shared input focus/placeholder style
 - desaturated archive photo treatment
 
-This is why components can stay mostly focused on structure and props instead of repeating custom CSS in every file.
+This lets components stay mostly focused on structure and props instead of repeating custom CSS in every file.
 
 ## 8. Questions You Are Likely To Get
 
@@ -979,7 +979,7 @@ Because it owns all backend communication and page state. We extracted rendering
 
 ### Why separate `layout`, `ui`, `posts`, and `lib`?
 
-Because shell components now live in `frontend/components/layout` (`Sidebar`, `RightRail`, `NatureCanvas`, `NavButton`), shared primitives live in `frontend/components/ui` (`button`, `dialog`, `tooltip`), post interaction UI lives in `frontend/components/posts` (`PostCard`, `PostDialog`, `CommentCard`, `CommentComposer`, `NewPostCard`, `NewPostDialog`, `SocialToggle`), and non-component helpers/types live in `frontend/lib` (`feed-types`, `feed-utils`, `user-utils`).
+Because shell components belong in `frontend/components/layout` (`Sidebar`, `RightRail`, `NatureCanvas`, `NavButton`), shared primitives belong in `frontend/components/ui` (`button`, `dialog`, `tooltip`), post interaction UI belongs in `frontend/components/posts` (`PostCard`, `PostDialog`, `CommentCard`, `CommentComposer`, `NewPostCard`, `NewPostDialog`, `SocialToggle`), and non-component helpers/types belong in `frontend/lib` (`feed-types`, `feed-utils`, `user-utils`).
 
 ### Why does the right rail not fetch its own data?
 
@@ -1002,9 +1002,9 @@ Because children should stay reusable and predictable. If every component fetche
 
 Because dialogs are accessibility-heavy primitives and Ark gives us focus handling, dismissal behavior, and keyboard support without forcing the app to import Ark directly. We keep our own wrapper in `frontend/components/ui/dialog.tsx`, so the app stays stable while the primitive layer changes underneath.
 
-### Why do actions feel instant now instead of reloading the feed?
+### Why do actions feel instant?
 
-Because the page no longer refetches all posts after every successful mutation. After actions like like, favorite, publish, add comment, and delete post, `page.tsx` updates `posts` locally with `setPosts(...)`.
+Because `page.tsx` updates `posts` locally with `setPosts(...)` after actions like like, favorite, publish, add comment, and delete post, instead of refetching the whole feed after every mutation.
 
 That means:
 

@@ -197,12 +197,12 @@ So routing gives the path, but the page component still contains behavior.
 
 ## Current Routing Reality In This Repo
 
-The route structure is clean, but page completeness varies.
+In this repo, a route tells you where the page lives, but not how much real backend behavior is wired into it yet.
 
 Examples:
 
 - `/feed` is connected to real backend post routes
-- `/profil` and `/profil/:id` now render the archive profile view with real backend data:
+- `/profil` and `/profil/:id` read profile-related backend data:
   - `GET /users/:id`
   - `GET /users/:id/posts`
   - `GET /users/:id/friends`
@@ -210,7 +210,7 @@ Examples:
 - `/notifications` is currently mostly mock/demo UI
 - some settings pages still contain placeholder/demo data
 
-So understanding routes is not enough by itself. You also need to know how complete each page is.
+So route knowledge is only the first layer. You also need to know whether a page is backed by real API calls, partial wiring, or placeholder UI.
 
 ## Key Terms
 

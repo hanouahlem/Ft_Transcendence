@@ -173,9 +173,101 @@ Think of Prisma as the backend’s database API:
 - generated client gives JS methods to query the DB
 - controllers/services call those methods
 
+## Foreign Keys and Relations
+
+A model is like a struct in C — it defines what fields a row in the database has.
+
+Some fields are **foreign keys (FK)**: they store the ID of a row in another table, creating a link between the two.
+
+Example from the Notification model:
+
+```prisma
+model Notification {
+  id       Int    @id @default(autoincrement())
+  type     String
+
+  userId   Int                                                              // FK value — stored in DB
+  user     User   @relation("recipient", fields: [userId], references: [id]) // pointer — NOT a real column
+
+  actorId  Int                                                              // FK value — stored in DB
+  actor    User   @relation("actor", fields: [actorId], references: [id])   // pointer — NOT a real column
+
+  postId   Int?                                                             // nullable FK (the ? means it can be null)
+  post     Post?  @relation(fields: [postId], references: [id])             // nullable pointer
+}
+```
+
+Each FK is always a pair:
+- The `Int` field (e.g. `actorId`) holds the actual value stored in the database row.
+- The relation line (e.g. `actor User @relation(...)`) tells Prisma how to follow that value to fetch the related record. It does **not** exist as a column in the database.
+
+Think of the `Int` as the raw pointer value in C, and the relation line as the type that tells you how to dereference it.
+
+## Why Store the FK Value Directly?
+
+The `userId Int` field is what makes filtering fast:
+
+```js
+prisma.notification.findMany({ where: { userId: 5 } })
+```
+
+This runs directly on the stored column — no joins needed. If you only had the relation and no `userId` field, the database would have to join the User table just to find which notifications belong to user 5.
+
+Rule: store the FK value for filtering, use the relation line only when you need to fetch the related data.
+
+## Nullable Fields
+
+The `?` after a type means the field can be null:
+
+```prisma
+postId  Int?   // can be null
+post    Post?  // relation is also nullable when postId is nullable
+```
+
+Use this when not all rows need that field. For example, a FOLLOW notification has no related post, so `postId` is null.
+
+## `select` Inside `include`
+
+`include: { actor: true }` fetches the entire actor User object. To fetch only specific fields, use `select` inside the include:
+
+```js
+prisma.notification.findMany({
+  where: { userId: 5 },
+  include: {
+    actor: { select: { username: true, avatar: true } },
+    post:  { select: { id: true } }
+  }
+})
+```
+
+Each notification in the result then looks like:
+
+```json
+{
+  "id": 1,
+  "type": "LIKE",
+  "actorId": 3,
+  "actor": { "username": "alice", "avatar": "..." },
+  "postId": 12,
+  "post": { "id": 12 }
+}
+```
+
+This is how the backend sends the actor's current username to the frontend without storing it as a separate column — Prisma follows the `actorId` FK at fetch time and grabs the latest value.
+
+## Database Integrity
+
+Foreign keys also enforce data integrity. The database ensures that `actorId: 5` must point to an existing user — you cannot create a notification referencing a user that does not exist.
+
+When a user is deleted, you can configure the FK to cascade: automatically delete all notifications where `actorId` matched that user. This prevents broken references in the database.
+
 ## Self-Check Questions
 
 - What is the difference between `schema.prisma` and a migration file?
 - What does `prisma generate` change?
 - What does `prisma migrate deploy` change?
 - Why does backend code use `prisma.user.findUnique(...)` instead of raw SQL here?
+- What is the difference between the `actorId Int` field and the `actor User @relation(...)` line?
+- Why is `userId` stored directly on the Notification model instead of only using the relation?
+- What does the `?` after a type mean in a Prisma model?
+- When would you use `select` inside an `include`?
