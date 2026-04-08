@@ -204,9 +204,9 @@
     box-shadow: inset 0 -2px 0 rgba(211, 47, 47, 0.4);
   }
 
-  .archive-photo {
+  /* .archive-photo {
     filter: grayscale(100%) contrast(1.18) sepia(0.22);
-  }
+  } */
 }
 
 @layer utilities {
