@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, RefreshCcw } from "lucide-react";
-import { RightRail } from "@/components/layout/RightRail";
+import ArchiveFilters from "@/components/decor/ArchiveFilters";
 import { BannerUploader } from "@/components/settings/BannerUploader";
 import { ProfilePhotoUploader } from "@/components/settings/ProfilePhotoUploader";
 import { SettingsField, SettingsTextarea } from "@/components/settings/SettingsField";
 import { SettingsPaper } from "@/components/settings/SettingsPaper";
 import { SettingsPasswordSection } from "@/components/settings/SettingsPasswordSection";
-import { Button } from "@/components/ui/button";
+import StampButton from "@/components/ui/StampButton";
 import {
   changeLocalPassword,
   setLocalPassword,
@@ -16,10 +16,8 @@ import {
   uploadSettingsMedia,
   type CurrentUser,
 } from "@/lib/api";
-import { getRightRailTitle, type RightRailSuggestion } from "@/lib/right-rail";
 import { useAuth } from "@/context/AuthContext";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
-import { useFriendRequests } from "@/hooks/useFriendRequests";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -105,7 +103,6 @@ export default function SettingsPage() {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null);
   const [posts, setPosts] = useState<SettingsPostSummary[]>([]);
-  const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
@@ -118,21 +115,6 @@ export default function SettingsPage() {
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  });
-
-  const {
-    sentRequests,
-    incomingRequestIdsBySender,
-    sendingFriendId,
-    handleAddFriend,
-    handleAcceptFriend,
-  } = useFriendRequests({
-    token,
-    onFriendAccepted: (acceptedUserId) => {
-      setSuggestions((previous) =>
-        previous.filter((suggestion) => suggestion.id !== acceptedUserId),
-      );
-    },
   });
 
   const totalLikes = useMemo(
@@ -222,7 +204,7 @@ export default function SettingsPage() {
       try {
         setLoading(true);
 
-        const [currentUserRes, postsRes, suggestionsRes] = await Promise.all([
+        const [currentUserRes, postsRes] = await Promise.all([
           fetch(`${API_URL}/user`, {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -233,17 +215,11 @@ export default function SettingsPage() {
               Authorization: `Bearer ${token}`,
             },
           }),
-          fetch(`${API_URL}/friends/suggestions`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
         ]);
 
-        const [currentUserData, postsData, suggestionsData] = await Promise.all([
+        const [currentUserData, postsData] = await Promise.all([
           currentUserRes.json(),
           postsRes.json(),
-          suggestionsRes.json(),
         ]);
 
         if (!currentUserRes.ok) {
@@ -254,34 +230,10 @@ export default function SettingsPage() {
           throw new Error(postsData.message || "Unable to load archive totals.");
         }
 
-        if (!suggestionsRes.ok) {
-          throw new Error(
-            suggestionsData.message || "Unable to load right rail suggestions.",
-          );
-        }
-
         const nextUser = currentUserData as SettingsUser;
         setSettingsUser(nextUser);
         setForm(normalizeUserForm(nextUser));
         setPosts(Array.isArray(postsData) ? postsData : []);
-        setSuggestions(
-          Array.isArray(suggestionsData?.suggestions)
-            ? suggestionsData.suggestions
-                .filter(
-                  (item: unknown): item is RightRailSuggestion =>
-                    typeof item === "object" &&
-                    item !== null &&
-                    "id" in item &&
-                    "username" in item,
-                )
-                .map((item) => ({
-                  id: item.id,
-                  username: item.username,
-                  displayName: item.displayName || null,
-                  avatar: item.avatar || null,
-                }))
-            : [],
-        );
         setStampText("PENDING VERIFICATION");
       } catch (error) {
         console.error("settings fetch error:", error);
@@ -295,46 +247,6 @@ export default function SettingsPage() {
 
     fetchSettingsData();
   }, [notifyError, token, user?.id]);
-
-  const handleRefresh = async () => {
-    if (!token || !user?.id) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const response = await fetch(`${API_URL}/user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to refresh the account record.");
-      }
-
-      const nextUser = data as SettingsUser;
-      setSettingsUser(nextUser);
-      setForm(normalizeUserForm(nextUser));
-      setAvatarFile(null);
-      setBannerFile(null);
-      setAvatarPreviewUrl(null);
-      setBannerPreviewUrl(null);
-      setStampText("PENDING VERIFICATION");
-      setStatusLine("Settings paper refreshed from the latest archive record.");
-      setLastSyncAt(Date.now());
-      await refreshUser();
-    } catch (error) {
-      console.error("refresh settings error:", error);
-      notifyError(
-        error instanceof Error ? error.message : "Failed to refresh settings.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAvatarSelect = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -545,8 +457,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex items-start justify-start gap-8 xl:gap-10">
-      <section className="min-w-0 w-full max-w-[820px]">
+    <div className="flex justify-center">
+      <ArchiveFilters />
+      <section className="min-w-0 w-full max-w-[896px]">
         {loading ? (
           <section className="archive-paper border border-black/10 px-6 py-8">
             <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-label">
@@ -559,7 +472,6 @@ export default function SettingsPage() {
             <SettingsPaper
               title="Profile Configuration"
               subtitle="User Settings / Registry Alpha"
-              stampText={stampText}
               footer={
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex gap-2">
@@ -647,7 +559,9 @@ export default function SettingsPage() {
                     )
                   }
                 />
+              </div>
 
+              <div className="md:col-span-12">
                 <SettingsPasswordSection
                   hasPassword={Boolean(settingsUser.hasPassword)}
                   currentPassword={passwordForm.currentPassword}
@@ -701,24 +615,14 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-4">
-                    <button
+                    <StampButton
                       type="button"
-                      className="font-mono text-[12px] uppercase tracking-[0.32em] text-label transition hover:text-accent-orange disabled:opacity-50"
-                      onClick={handleRefresh}
-                      disabled={loading || savingProfile || savingPassword}
-                    >
-                      [ Refresh Record ]
-                    </button>
-                    <Button
-                      type="button"
-                      variant="ledger"
-                      size="lg"
-                      className="rounded-none"
+                      textClassName="text-5xl"
                       onClick={handleProfileSave}
                       disabled={savingProfile}
                     >
-                      {savingProfile ? "Committing..." : "Commit To Ledger"}
-                    </Button>
+                      {savingProfile ? "Confirming..." : "Confirm"}
+                    </StampButton>
                   </div>
                 </div>
               </div>
@@ -745,18 +649,6 @@ export default function SettingsPage() {
         )}
       </section>
 
-      <RightRail
-        totalPosts={posts.length}
-        totalLikes={totalLikes}
-        totalComments={totalComments}
-        sectionTitle={getRightRailTitle({ isOwnProfile: true })}
-        suggestions={suggestions}
-        sentRequests={sentRequests}
-        incomingRequestIdsBySender={incomingRequestIdsBySender}
-        sendingFriendId={sendingFriendId}
-        onAddFriend={handleAddFriend}
-        onAcceptFriend={handleAcceptFriend}
-      />
     </div>
   );
 }

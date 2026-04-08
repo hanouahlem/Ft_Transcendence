@@ -31,65 +31,64 @@ export function SettingsPasswordSection({
 }: SettingsPasswordSectionProps) {
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-            08. Password
-          </span>
-          <p className="text-sm text-label">
-            {hasPassword
-              ? "Change the local password attached to this archive account."
-              : "This account has no local password yet. Set one now."}
-          </p>
-        </div>
-
-        <Button
-          type="button"
-          variant="ledger"
-          size="sm"
-          className="rounded-none"
-          onClick={onSubmit}
-          disabled={saving}
-        >
-          <KeyRound className="h-3.5 w-3.5" />
-          {saving ? "Writing..." : hasPassword ? "Change Password" : "Set Password"}
-        </Button>
-      </div>
-
-      {hasPassword ? (
-        <div className="grid gap-4 md:grid-cols-3">
-          <SettingsField
-            label="Current password"
-            type="password"
-            value={currentPassword}
-            onChange={(event) => onCurrentPasswordChange(event.target.value)}
-            autoComplete="current-password"
-          />
+      <div
+        className={
+          hasPassword
+            ? "grid gap-4 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-end"
+            : "grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
+        }
+      >
+        {hasPassword ? (
+          <>
+            <SettingsField
+              label="Current password"
+              type="password"
+              value={currentPassword}
+              onChange={(event) => onCurrentPasswordChange(event.target.value)}
+              autoComplete="current-password"
+            />
+            <SettingsField
+              label="New password"
+              type="password"
+              value={newPassword}
+              onChange={(event) => onNewPasswordChange(event.target.value)}
+              autoComplete="new-password"
+            />
+            <SettingsField
+              label="Confirm password"
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => onConfirmPasswordChange(event.target.value)}
+              autoComplete="new-password"
+            />
+          </>
+        ) : (
           <SettingsField
             label="New password"
             type="password"
             value={newPassword}
             onChange={(event) => onNewPasswordChange(event.target.value)}
             autoComplete="new-password"
+            placeholder="Enter a local password..."
           />
-          <SettingsField
-            label="Confirm password"
-            type="password"
-            value={confirmPassword}
-            onChange={(event) => onConfirmPasswordChange(event.target.value)}
-            autoComplete="new-password"
-          />
-        </div>
-      ) : (
-        <SettingsField
-          label="New password"
-          type="password"
-          value={newPassword}
-          onChange={(event) => onNewPasswordChange(event.target.value)}
-          autoComplete="new-password"
-          placeholder="Enter a local password..."
-        />
-      )}
+        )}
+
+        <Button
+          type="button"
+          variant="paper"
+          size="sm"
+          className="rounded-none md:mb-0.5"
+          onClick={onSubmit}
+          disabled={saving}
+        >
+          <KeyRound className="h-3.5 w-3.5" />
+          {saving
+            ? "Writing..."
+            : hasPassword
+              ? "Change Password"
+              : "Set Password"}
+        </Button>
+      </div>
 
       {message ? (
         <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.16em] text-label">

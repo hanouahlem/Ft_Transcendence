@@ -1,8 +1,7 @@
 "use client";
 
-import { Camera, RefreshCcw, Trash2 } from "lucide-react";
+import { Camera, Trash2, Upload } from "lucide-react";
 import { useRef, type ChangeEvent } from "react";
-import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { Button } from "@/components/ui/button";
 
 type ProfilePhotoUploaderProps = {
@@ -39,60 +38,55 @@ export function ProfilePhotoUploader({
         05. Visual Capture
       </span>
 
-      <div className="border border-dashed border-label/70 bg-stage/45 p-4">
-        <div className="flex flex-col items-center gap-4 text-center">
+      <div className="flex flex-col items-start gap-3">
+        <div className="relative w-full max-w-[220px]">
           <button
             type="button"
-            className="group flex w-full flex-col items-center justify-center gap-3 border border-dashed border-label/70 bg-paper-muted/70 px-4 py-6 transition hover:border-accent-orange hover:bg-paper-muted disabled:cursor-not-allowed disabled:opacity-60"
+            className="group relative flex aspect-square w-full items-center justify-center overflow-hidden border border-dashed border-label bg-stage transition hover:border-accent-orange disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => inputRef.current?.click()}
             disabled={disabled}
           >
             {imageUrl ? (
-              <ProfilePicture
-                name={name}
-                src={imageUrl}
-                alt={`${name} profile picture`}
-                size="lg"
-                className="h-28 w-28 rotate-[-2deg]"
-              />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imageUrl}
+                  alt={`${name} profile picture`}
+                  className="archive-photo h-full w-full object-cover"
+                />
+              </>
             ) : (
-              <div className="flex h-28 w-28 items-center justify-center border border-dashed border-label/70 bg-paper text-label transition group-hover:text-accent-orange">
-                <Camera className="h-9 w-9" />
+              <div className="flex flex-col items-center justify-center gap-2 px-4 text-center text-label transition group-hover:text-accent-orange">
+                <Camera className="h-6 w-6" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em]">
+                  [ Attach Photo ]
+                </span>
               </div>
             )}
-
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">
-                {imageUrl ? "[ Replace Photo ]" : "[ Attach Photo ]"}
-              </p>
-              <p className="mt-1 text-sm text-label">
-                PNG, JPG, WEBP field capture
-              </p>
-            </div>
           </button>
 
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="absolute bottom-3 right-3 flex gap-2">
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              className="rounded-none"
+              size="icon-sm"
+              className="rounded-none bg-paper/90"
               onClick={() => inputRef.current?.click()}
               disabled={disabled}
+              aria-label="Replace profile photo"
             >
-              <RefreshCcw className="h-3.5 w-3.5" />
-              Replace
+              <Upload className="h-3.5 w-3.5" />
             </Button>
             <Button
               type="button"
-              variant="stamp"
-              size="sm"
-              className="rounded-none"
+              variant="outline"
+              size="icon-sm"
+              className="rounded-none bg-paper/90"
               onClick={onClear}
               disabled={disabled || !imageUrl}
+              aria-label="Clear profile photo"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Clear
             </Button>
           </div>
         </div>

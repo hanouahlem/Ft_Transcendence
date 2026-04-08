@@ -30,7 +30,7 @@ export function SettingsField({
       <Input
         {...props}
         className={cn(
-          "archive-input h-9 rounded-none border-0 border-b border-dashed border-label/80 bg-transparent px-0 py-1 font-mono text-sm text-ink shadow-none focus-visible:border-accent-orange focus-visible:ring-0 disabled:opacity-55",
+          "archive-input h-9 rounded-none border-0 border-b border-dashed border-label/80 bg-transparent px-0 py-1 font-mono text-sm text-ink shadow-none placeholder:text-label/40 focus-visible:border-accent-orange focus-visible:ring-0 disabled:opacity-55",
           inputClassName,
         )}
       />
@@ -52,7 +52,7 @@ export function SettingsTextarea({
       <textarea
         {...props}
         className={cn(
-          "archive-input min-h-32 w-full resize-y border border-black/10 bg-paper px-4 py-3 font-display text-lg leading-8 text-ink outline-none placeholder:text-label/55 focus:border-accent-orange",
+          "archive-input min-h-53 w-full resize-y border-b-2 border-black/10 bg-[#f5f2eb] px-4 py-3 font-display text-lg leading-8 text-ink outline-none placeholder:text-label/40 focus:border-accent-orange",
           textareaClassName,
         )}
       />

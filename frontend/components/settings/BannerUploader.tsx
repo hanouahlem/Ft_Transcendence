@@ -1,7 +1,8 @@
 "use client";
 
-import { ImagePlus, RefreshCcw, Trash2 } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import { useRef, type ChangeEvent } from "react";
+import { NatureCanvas } from "@/components/layout/NatureCanvas";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { Button } from "@/components/ui/button";
 
@@ -55,12 +56,13 @@ export function BannerUploader({
         06. Archive Banner
       </span>
 
-      <div className="relative border border-black/15 bg-paper">
+      <div className="relative border border-black/15 bg-[#f5f2eb]">
+        {!imageUrl ? <NatureCanvas embedded className="opacity-55" /> : null}
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-20"
           style={{
             backgroundImage:
-              "radial-gradient(rgba(26,26,26,0.1) 1px, transparent 1px)",
+              "radial-gradient(rgba(26,26,26,0.08) 1px, transparent 1px)",
             backgroundSize: "20px 20px",
           }}
         />
@@ -73,7 +75,7 @@ export function BannerUploader({
               className="archive-photo h-full w-full"
             />
           ) : (
-            <div className="flex h-full items-center justify-center px-6 text-center font-mono text-xs uppercase tracking-[0.14em] text-label/60">
+            <div className="flex h-full items-center justify-center bg-transparent px-6 text-center font-mono text-xs uppercase tracking-[0.14em] text-label/65">
               Initialize banner sketch or upload a new archive plate
             </div>
           )}
@@ -88,7 +90,7 @@ export function BannerUploader({
               disabled={disabled}
               aria-label="Replace banner"
             >
-              <RefreshCcw className="h-3.5 w-3.5" />
+              <Upload className="h-3.5 w-3.5" />
             </Button>
             <Button
               type="button"
@@ -105,25 +107,13 @@ export function BannerUploader({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-label">
           <div className="h-4 w-4 opacity-60">
             <ArchiveStar />
           </div>
           Decorative archive header
         </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="rounded-none"
-          onClick={() => inputRef.current?.click()}
-          disabled={disabled}
-        >
-          <ImagePlus className="h-3.5 w-3.5" />
-          {imageUrl ? "Swap Banner" : "Upload Banner"}
-        </Button>
       </div>
 
       <input
