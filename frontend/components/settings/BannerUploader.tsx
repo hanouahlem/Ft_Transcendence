@@ -1,10 +1,12 @@
 "use client";
 
 import { Trash2, Upload } from "lucide-react";
-import { useRef, type ChangeEvent } from "react";
+import { FileUpload, useFileUpload } from "@ark-ui/react/file-upload";
+import { useEffect } from "react";
 import { NatureCanvas } from "@/components/layout/NatureCanvas";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type BannerUploaderProps = {
   name: string;
@@ -37,26 +39,40 @@ export function BannerUploader({
   onSelect,
   onClear,
 }: BannerUploaderProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const fileUpload = useFileUpload({
+    maxFiles: 1,
+    accept: ["image/*"],
+    disabled,
+  });
+  const acceptedFile = fileUpload.acceptedFiles[0];
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
+  useEffect(() => {
+    if (!acceptedFile) {
       return;
     }
 
-    onSelect(file);
-    event.target.value = "";
-  };
+    onSelect(acceptedFile);
+    fileUpload.clearFiles();
+  }, [acceptedFile, fileUpload, onSelect]);
 
   return (
-    <div className="relative">
+    <FileUpload.RootProvider value={fileUpload}>
       <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-label">
         06. Archive Banner
       </span>
 
-      <div className="relative border border-black/15 bg-[#f5f2eb]">
+      <FileUpload.Dropzone
+        disableClick
+        className={cn(
+          "relative border border-black/15 bg-[#f5f2eb] transition",
+          fileUpload.dragging && "border-accent-orange bg-paper-muted",
+        )}
+        onClick={() => {
+          if (!disabled) {
+            fileUpload.openFilePicker();
+          }
+        }}
+      >
         {!imageUrl ? <NatureCanvas embedded className="opacity-55" /> : null}
         <div
           className="absolute inset-0 opacity-20"
@@ -86,7 +102,12 @@ export function BannerUploader({
               variant="outline"
               size="icon-sm"
               className="rounded-none bg-paper/90"
-              onClick={() => inputRef.current?.click()}
+              onClick={(event) => {
+                event.stopPropagation();
+                if (!disabled) {
+                  fileUpload.openFilePicker();
+                }
+              }}
               disabled={disabled}
               aria-label="Replace banner"
             >
@@ -97,7 +118,11 @@ export function BannerUploader({
               variant="outline"
               size="icon-sm"
               className="rounded-none bg-paper/90"
-              onClick={onClear}
+              onClick={(event) => {
+                event.stopPropagation();
+                fileUpload.clearFiles();
+                onClear();
+              }}
               disabled={disabled || !imageUrl}
               aria-label="Clear banner"
             >
@@ -105,7 +130,7 @@ export function BannerUploader({
             </Button>
           </div>
         </div>
-      </div>
+      </FileUpload.Dropzone>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-label">
@@ -116,13 +141,7 @@ export function BannerUploader({
         </div>
       </div>
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleChange}
-      />
-    </div>
+      <FileUpload.HiddenInput />
+    </FileUpload.RootProvider>
   );
 }

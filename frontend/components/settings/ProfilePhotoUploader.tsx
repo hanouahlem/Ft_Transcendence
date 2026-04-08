@@ -1,8 +1,10 @@
 "use client";
 
 import { Camera, Trash2, Upload } from "lucide-react";
-import { useRef, type ChangeEvent } from "react";
+import { FileUpload, useFileUpload } from "@ark-ui/react/file-upload";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type ProfilePhotoUploaderProps = {
   name: string;
@@ -19,32 +21,43 @@ export function ProfilePhotoUploader({
   onSelect,
   onClear,
 }: ProfilePhotoUploaderProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const fileUpload = useFileUpload({
+    maxFiles: 1,
+    accept: ["image/*"],
+    disabled,
+  });
+  const acceptedFile = fileUpload.acceptedFiles[0];
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
+  useEffect(() => {
+    if (!acceptedFile) {
       return;
     }
 
-    onSelect(file);
-    event.target.value = "";
-  };
+    onSelect(acceptedFile);
+    fileUpload.clearFiles();
+  }, [acceptedFile, fileUpload, onSelect]);
 
   return (
-    <div>
+    <FileUpload.RootProvider value={fileUpload}>
       <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-label">
         05. Visual Capture
       </span>
 
       <div className="flex flex-col items-start gap-3">
         <div className="relative w-full max-w-[220px]">
-          <button
-            type="button"
-            className="group relative flex aspect-square w-full items-center justify-center overflow-hidden border border-dashed border-label bg-stage transition hover:border-accent-orange disabled:cursor-not-allowed disabled:opacity-60"
-            onClick={() => inputRef.current?.click()}
-            disabled={disabled}
+          <FileUpload.Dropzone
+            disableClick
+            className={cn(
+              "group relative flex aspect-square w-full items-center justify-center overflow-hidden border border-dashed border-label bg-stage transition",
+              "hover:border-accent-orange",
+              disabled && "cursor-not-allowed opacity-60",
+              fileUpload.dragging && "border-accent-orange bg-paper-muted",
+            )}
+            onClick={() => {
+              if (!disabled) {
+                fileUpload.openFilePicker();
+              }
+            }}
           >
             {imageUrl ? (
               <>
@@ -63,7 +76,7 @@ export function ProfilePhotoUploader({
                 </span>
               </div>
             )}
-          </button>
+          </FileUpload.Dropzone>
 
           <div className="absolute bottom-3 right-3 flex gap-2">
             <Button
@@ -71,7 +84,12 @@ export function ProfilePhotoUploader({
               variant="outline"
               size="icon-sm"
               className="rounded-none bg-paper/90"
-              onClick={() => inputRef.current?.click()}
+              onClick={(event) => {
+                event.stopPropagation();
+                if (!disabled) {
+                  fileUpload.openFilePicker();
+                }
+              }}
               disabled={disabled}
               aria-label="Replace profile photo"
             >
@@ -82,7 +100,11 @@ export function ProfilePhotoUploader({
               variant="outline"
               size="icon-sm"
               className="rounded-none bg-paper/90"
-              onClick={onClear}
+              onClick={(event) => {
+                event.stopPropagation();
+                fileUpload.clearFiles();
+                onClear();
+              }}
               disabled={disabled || !imageUrl}
               aria-label="Clear profile photo"
             >
@@ -92,13 +114,7 @@ export function ProfilePhotoUploader({
         </div>
       </div>
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleChange}
-      />
-    </div>
+      <FileUpload.HiddenInput />
+    </FileUpload.RootProvider>
   );
 }
