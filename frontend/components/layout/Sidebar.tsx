@@ -5,8 +5,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
 	Bell,
+	Bookmark,
 	Home,
 	LogOut,
+	MessageCircle,
 	Search,
 	SlidersHorizontal,
 	UserRound,
