@@ -9,10 +9,12 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
+  displayName String?
   email     String   @unique
   password  String?
   githubId  String?  @unique
   fortyTwoId String? @unique
+  banner    String?
   avatar    String?
   bio       String?
   status    String?

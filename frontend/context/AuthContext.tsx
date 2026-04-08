@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { getCurrentUser, type CurrentUser } from "@/lib/api";
 
 type AuthContextType = {
@@ -10,6 +10,7 @@ type AuthContextType = {
   user: CurrentUser | null;
   login: (token: string) => Promise<boolean>;
   logout: () => void;
+  refreshUser: () => Promise<CurrentUser | null>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +19,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  const loadUserFromToken = useCallback(async (activeToken: string) => {
+    try {
+      const result = await getCurrentUser(activeToken);
+
+      if (!result.ok) {
+        localStorage.removeItem("token");
+        setToken(null);
+        setUser(null);
+        return null;
+      }
+
+      setUser(result.data);
+      return result.data;
+    } catch (error) {
+      console.error("Erreur chargement utilisateur :", error);
+      localStorage.removeItem("token");
+      setToken(null);
+      setUser(null);
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -33,29 +56,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(storedToken);
 
       try {
-        const result = await getCurrentUser(storedToken);
-
-        if (!result.ok) {
-          localStorage.removeItem("token");
-          setToken(null);
-          setUser(null);
-          setIsAuthLoading(false);
-          return;
-        }
-
-        setUser(result.data);
-      } catch (error) {
-        console.error("Erreur chargement utilisateur :", error);
-        localStorage.removeItem("token");
-        setToken(null);
-        setUser(null);
+        await loadUserFromToken(storedToken);
       } finally {
         setIsAuthLoading(false);
       }
     };
 
     loadUser();
-  }, []);
+  }, [loadUserFromToken]);
 
   const login = async (newToken: string) => {
     localStorage.setItem("token", newToken);
@@ -63,23 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthLoading(true);
 
     try {
-      const result = await getCurrentUser(newToken);
-
-      if (!result.ok) {
-        localStorage.removeItem("token");
-        setToken(null);
-        setUser(null);
-        return false;
-      }
-
-      setUser(result.data);
-      return true;
-    } catch (error) {
-      console.error("Erreur récupération utilisateur après login :", error);
-      localStorage.removeItem("token");
-      setToken(null);
-      setUser(null);
-      return false;
+      const loadedUser = await loadUserFromToken(newToken);
+      return Boolean(loadedUser);
     } finally {
       setIsAuthLoading(false);
     }
@@ -92,6 +85,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthLoading(false);
   };
 
+  const refreshUser = useCallback(async () => {
+    if (!token) {
+      setUser(null);
+      return null;
+    }
+
+    return loadUserFromToken(token);
+  }, [loadUserFromToken, token]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -101,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}

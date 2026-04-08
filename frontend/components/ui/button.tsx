@@ -14,7 +14,7 @@ const buttonVariants = cva(
         secondary:
           "border-black/10 bg-black/5 text-label hover:bg-black/10 hover:text-ink",
         destructive:
-          "border-none bg-transparent text-accent-red hover:bg-accent-red hover:text-paper",
+          "border-ink bg-accent-red text-paper shadow-[2px_4px_0_#000] hover:bg-accent-red/80",
         ghost:
           "border-transparent bg-transparent text-label hover:border-black/10 hover:bg-black/5 hover:text-ink",
         link: "border-transparent bg-transparent text-accent-red underline underline-offset-4 shadow-none hover:text-ink",
@@ -32,6 +32,8 @@ const buttonVariants = cva(
           "border-none bg-transparent text-accent-red hover:bg-accent-red hover:text-paper",
         black:
           "border-black/10 bg-ink text-paper hover:bg-black/70 hover:text-paper/90",
+        ledger:
+          "border-ink bg-ink text-paper shadow-[4px_4px_0_#ff4a1c] hover:bg-accent-orange hover:text-paper hover:shadow-[4px_4px_0_#ff4a1c]",
       },
       size: {
         xs: "min-h-8 px-2.5 py-1.5 text-[10px]",

@@ -13,6 +13,7 @@ import {
   favoriteComment,
   unfavoriteComment,
 } from "../services/postService.js";
+import { getOptionalEnv } from "../env.js";
 
 export const getPostsHandler = async (req, res) => {
   try {
@@ -230,11 +231,16 @@ export const createCommentHandler = async (req, res) => {
       mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
     }
 
+    const seedScriptKey = getOptionalEnv("SEED_SCRIPT_KEY");
+    const skipModeration =
+      Boolean(seedScriptKey) && req.get("x-seed-script-key") === seedScriptKey;
+
     const comment = await createComment({
       postId,
       userId,
       content: content?.trim() || "",
       mediaUrl,
+      skipModeration,
     });
 
     return res.status(201).json({

@@ -43,3 +43,7 @@
      backend/prisma/schema.prisma:101
 
   Overall, your schema is decent for a school project, but these three are structural weaknesses evaluators can challenge. The single highest-impact fix is adding DB constraints for Friends (unique pair + controlled status).
+
+## commentChecker
+
+- `backend/src/services/commentChecker.js` assumes `data.choices[0].message.content` always exists. If the moderation provider returns an error payload or a different JSON shape, comment creation can crash with a `500` instead of failing gracefully.

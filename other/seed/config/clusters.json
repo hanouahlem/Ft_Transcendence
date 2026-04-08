@@ -1,0 +1,100 @@
+{
+  "clusters": {
+    "builders": {
+      "identity": "shipping-focused teammates who talk in fixes, blockers, and handoff notes",
+      "postingStyle": "practical status updates with release-night relief when something finally settles",
+      "defaultThemes": ["shipping", "docker", "qa", "docs", "bug_hunt", "realtime", "release_day"],
+      "defaultToneFragments": ["keeping it concrete", "naming the awkward state", "writing the working command down once"],
+      "crossClusterAffinityWeights": {
+        "builders": 1,
+        "designers": 0.82,
+        "nightshift": 0.74,
+        "campus": 0.58,
+        "sports": 0.38,
+        "misc": 0.66
+      },
+      "imageLikelihoodModifier": 0.85,
+      "commentStyleHints": ["offers a concrete next step", "references a similar fix", "keeps praise understated"]
+    },
+    "designers": {
+      "identity": "visual polish people who care about rhythm, screenshots, and how a post feels in the feed",
+      "postingStyle": "image-forward notes, visual opinions, and small aesthetic wins",
+      "defaultThemes": ["ui_polish", "design_system", "photography", "coffee", "weekend_plan", "makerspace", "release_day"],
+      "defaultToneFragments": ["framing the mood first", "calling out the visual friction", "letting the image do some work"],
+      "crossClusterAffinityWeights": {
+        "builders": 0.82,
+        "designers": 1,
+        "nightshift": 0.52,
+        "campus": 0.79,
+        "sports": 0.41,
+        "misc": 0.71
+      },
+      "imageLikelihoodModifier": 1.35,
+      "commentStyleHints": ["reacts to presentation details", "keeps disagreement mild", "often turns replies into mood checks"]
+    },
+    "nightshift": {
+      "identity": "late-hour grinders who post after the room empties and before the bug fog clears",
+      "postingStyle": "tired but useful updates, overnight frustrations, and strange-hour momentum",
+      "defaultThemes": ["bug_hunt", "docker", "game_night", "coffee", "commute", "realtime", "release_day"],
+      "defaultToneFragments": ["running on the late window", "keeping the logs nearby", "saying the quiet blocker out loud"],
+      "crossClusterAffinityWeights": {
+        "builders": 0.74,
+        "designers": 0.52,
+        "nightshift": 1,
+        "campus": 0.46,
+        "sports": 0.49,
+        "misc": 0.63
+      },
+      "imageLikelihoodModifier": 0.78,
+      "commentStyleHints": ["leans empathetic on rough posts", "offers practical debugging advice", "sounds dry without sounding cold"]
+    },
+    "campus": {
+      "identity": "class-and-lab regulars who mix project updates with campus rhythm and group energy",
+      "postingStyle": "social questions, study-day notes, photo captions, and event-like posts",
+      "defaultThemes": ["study_group", "campus_life", "weekend_plan", "coffee", "food_spot", "makerspace", "qa"],
+      "defaultToneFragments": ["checking who is around later", "tying updates to the day rhythm", "leaving room for replies"],
+      "crossClusterAffinityWeights": {
+        "builders": 0.58,
+        "designers": 0.79,
+        "nightshift": 0.46,
+        "campus": 1,
+        "sports": 0.68,
+        "misc": 0.64
+      },
+      "imageLikelihoodModifier": 1.24,
+      "commentStyleHints": ["asks follow-up questions", "keeps the tone open and social", "reacts quickly to events and photos"]
+    },
+    "sports": {
+      "identity": "movement-driven users who frame progress through routine, practice, and post-session resets",
+      "postingStyle": "short opinions, wins, and routine-heavy status posts with occasional game-night energy",
+      "defaultThemes": ["running", "football", "wellness", "weekend_plan", "commute", "game_night", "small_routine"],
+      "defaultToneFragments": ["keeping things moving", "linking work to routine", "treating resets like part of the process"],
+      "crossClusterAffinityWeights": {
+        "builders": 0.38,
+        "designers": 0.41,
+        "nightshift": 0.49,
+        "campus": 0.68,
+        "sports": 1,
+        "misc": 0.51
+      },
+      "imageLikelihoodModifier": 0.94,
+      "commentStyleHints": ["keeps replies short and encouraging", "slides into banter on wins", "gives routine-oriented advice"]
+    },
+    "misc": {
+      "identity": "side-project roamers who bounce between useful notes, personal rituals, and niche finds",
+      "postingStyle": "bookmarkable progress notes, side quests, and low-key recommendations",
+      "defaultThemes": ["docs", "side_project", "food_spot", "coffee", "climbing", "weekend_plan", "makerspace"],
+      "defaultToneFragments": ["saving a useful detail for later", "keeping one side quest in motion", "turning a loose thought into a tiny plan"],
+      "crossClusterAffinityWeights": {
+        "builders": 0.66,
+        "designers": 0.71,
+        "nightshift": 0.63,
+        "campus": 0.64,
+        "sports": 0.51,
+        "misc": 1
+      },
+      "imageLikelihoodModifier": 0.98,
+      "commentStyleHints": ["shares a useful shortcut", "adds a recommendation when it fits", "keeps opinions light"]
+    }
+  }
+}

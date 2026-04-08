@@ -10,7 +10,6 @@ import { ProfilePicture } from "@/components/ui/ProfilePicture";
 type PostCardProps = {
 	post: FeedPost;
 	currentUserId: number | undefined;
-	variantIndex: number;
 	onOpenPost: (postId: number, focusCommentInput?: boolean) => void;
 	onDelete: (postId: number) => Promise<void>;
 	onToggleLike: (post: FeedPost) => Promise<void>;
@@ -94,6 +93,10 @@ const POST_VARIANTS: PostVariant[] = [
 	},
 ];
 
+function getVariantKeyFromPostId(postId: number) {
+	return postId % POST_VARIANTS.length;
+}
+
 function OrangeStar() {
 	return (
 		<svg
@@ -112,7 +115,7 @@ function OrangeStar() {
 
 function renderBody(
 	post: FeedPost,
-	variantIndex: number,
+	variantKey: number,
 	contentClass: string,
 ) {
 	const content = post.content.trim();
@@ -121,7 +124,7 @@ function renderBody(
 		return null;
 	}
 
-	if (variantIndex === 0) {
+	if (variantKey === 0) {
 		const firstCharacter = content[0];
 		const rest = content.slice(1);
 
@@ -135,7 +138,7 @@ function renderBody(
 		);
 	}
 
-	if (variantIndex === 3 && !post.media.length && content.length < 200) {
+	if (variantKey === 3 && !post.media.length && content.length < 200) {
 		return (
 			<p className={cn(contentClass, "font-display")}>
 				&quot;{content}&quot;
@@ -143,7 +146,7 @@ function renderBody(
 		);
 	}
 
-	if (variantIndex === 3) {
+	if (variantKey === 3) {
 		return (
 			<p className="font-display text-lg leading-relaxed text-ink">
 				{content}
@@ -157,7 +160,6 @@ function renderBody(
 export function PostCard({
 	post,
 	currentUserId,
-	variantIndex,
 	onOpenPost,
 	onDelete,
 	onToggleLike,
@@ -166,12 +168,14 @@ export function PostCard({
 	likingPostId,
 	favoritingPostId,
 }: PostCardProps) {
-	const variantKey = variantIndex % POST_VARIANTS.length;
+	const variantKey = getVariantKeyFromPostId(post.id);
 	const variant = POST_VARIANTS[variantKey];
 	const isOwner = post.author.id === currentUserId;
 	const isDeleting = deletingPostId === post.id;
 	const isLiking = likingPostId === post.id;
 	const isFavoriting = favoritingPostId === post.id;
+	const authorDisplayName =
+		post.author.displayName?.trim() || post.author.username;
 
 	return (
 		<div className={variant.wrapper}>
@@ -207,9 +211,9 @@ export function PostCard({
 							className="shrink-0"
 						>
 							<ProfilePicture
-								name={post.author.username}
+								name={authorDisplayName}
 								src={post.author.avatar}
-								alt={post.author.username}
+								alt={authorDisplayName}
 								className={cn(
 									variantKey === 2
 										? "h-8 w-8 rotate-1"
@@ -229,7 +233,7 @@ export function PostCard({
 											: "text-lg",
 									)}
 								>
-									{post.author.username}
+									{authorDisplayName}
 								</Link>
 								<span className="font-mono text-xs text-label">
 									@{post.author.username.toLowerCase()}

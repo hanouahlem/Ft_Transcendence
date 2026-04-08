@@ -340,3 +340,37 @@ useAuth lets components read them
 To see how pages use this auth state in navigation and route protection, read:
 
 - `lessons/frontend/4_Protected_Pages_and_Navigation_Flow.md`
+
+## Settings Refresh Addition
+
+The centralized settings page introduced one extra auth-context capability:
+
+- `refreshUser()`
+
+File:
+
+- `frontend/context/AuthContext.tsx`
+
+Real code:
+
+```tsx
+const refreshUser = useCallback(async () => {
+  if (!token) {
+    setUser(null);
+    return null;
+  }
+
+  return loadUserFromToken(token);
+}, [loadUserFromToken, token]);
+```
+
+Why this matters:
+
+- after saving settings, the sidebar should immediately show the new avatar or display name
+- after a first-time password is set, the frontend must see `hasPassword` switch from `false` to `true`
+- pages do not need to duplicate current-user refresh logic
+
+Mental model:
+
+- `login()` is for receiving a new token
+- `refreshUser()` is for reloading the same logged-in user with the existing token

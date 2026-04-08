@@ -56,6 +56,8 @@ export function RightRailSuggestions({
 						const incomingRequestId =
 							incomingRequestIdsBySender[author.id];
 						const tileClasses = ["-rotate-2", "rotate-1", "-rotate-1"];
+						const authorDisplayName =
+							author.displayName?.trim() || author.username;
 
 						return (
 							<div
@@ -63,9 +65,9 @@ export function RightRailSuggestions({
 								className="flex items-center gap-3 border-b border-dashed border-black/15 pb-4 last:border-b-0 last:pb-0"
 							>
 								<ProfilePicture
-									name={author.username}
+									name={authorDisplayName}
 									src={author.avatar}
-									alt={author.username}
+									alt={authorDisplayName}
 									className={cn(
 										"h-9 w-9",
 										tileClasses[
@@ -79,7 +81,7 @@ export function RightRailSuggestions({
 										href={`/profil/${author.id}`}
 										className="truncate text-sm font-bold text-ink transition-colors hover:text-accent-blue"
 									>
-										{author.username}
+										{authorDisplayName}
 									</Link>
 									<p className="truncate font-mono text-[10px] text-label">
 										@{author.username.toLowerCase()}

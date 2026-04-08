@@ -1,0 +1,51 @@
+{
+  "targets": {
+    "acceptedTotal": 1360,
+    "pendingTotal": 420
+  },
+  "clusterPairDensities": [
+    { "clusters": ["builders", "builders"], "accepted": 0.92, "pending": 0.18 },
+    { "clusters": ["builders", "designers"], "accepted": 0.72, "pending": 0.11 },
+    { "clusters": ["builders", "nightshift"], "accepted": 0.66, "pending": 0.12 },
+    { "clusters": ["builders", "campus"], "accepted": 0.52, "pending": 0.1 },
+    { "clusters": ["builders", "sports"], "accepted": 0.34, "pending": 0.06 },
+    { "clusters": ["builders", "misc"], "accepted": 0.58, "pending": 0.09 },
+    { "clusters": ["designers", "designers"], "accepted": 0.88, "pending": 0.17 },
+    { "clusters": ["designers", "nightshift"], "accepted": 0.48, "pending": 0.08 },
+    { "clusters": ["designers", "campus"], "accepted": 0.69, "pending": 0.12 },
+    { "clusters": ["designers", "sports"], "accepted": 0.39, "pending": 0.06 },
+    { "clusters": ["designers", "misc"], "accepted": 0.63, "pending": 0.09 },
+    { "clusters": ["nightshift", "nightshift"], "accepted": 0.82, "pending": 0.16 },
+    { "clusters": ["nightshift", "campus"], "accepted": 0.44, "pending": 0.08 },
+    { "clusters": ["nightshift", "sports"], "accepted": 0.46, "pending": 0.07 },
+    { "clusters": ["nightshift", "misc"], "accepted": 0.57, "pending": 0.09 },
+    { "clusters": ["campus", "campus"], "accepted": 0.86, "pending": 0.18 },
+    { "clusters": ["campus", "sports"], "accepted": 0.61, "pending": 0.1 },
+    { "clusters": ["campus", "misc"], "accepted": 0.62, "pending": 0.1 },
+    { "clusters": ["sports", "sports"], "accepted": 0.79, "pending": 0.15 },
+    { "clusters": ["sports", "misc"], "accepted": 0.47, "pending": 0.07 },
+    { "clusters": ["misc", "misc"], "accepted": 0.74, "pending": 0.13 }
+  ],
+  "bridgeUserOverrides": [
+    { "username": "bob", "acceptedBoost": 0.18, "pendingBoost": 0.03 },
+    { "username": "grace", "acceptedBoost": 0.18, "pendingBoost": 0.04 },
+    { "username": "mia", "acceptedBoost": 0.19, "pendingBoost": 0.04 },
+    { "username": "olivia", "acceptedBoost": 0.16, "pendingBoost": 0.04 },
+    { "username": "liam", "acceptedBoost": 0.15, "pendingBoost": 0.03 },
+    { "username": "ava", "acceptedBoost": 0.17, "pendingBoost": 0.03 },
+    { "username": "quinn", "acceptedBoost": 0.11, "pendingBoost": 0.03 },
+    { "username": "remy", "acceptedBoost": 0.09, "pendingBoost": 0.02 },
+    { "username": "julia", "acceptedBoost": 0.08, "pendingBoost": 0.02 },
+    { "username": "kai", "acceptedBoost": 0.08, "pendingBoost": 0.02 }
+  ],
+  "showcaseUserConnectionBoosts": [
+    { "username": "alice", "acceptedBoost": 0.2, "pendingBoost": 0.05, "incomingPendingBoost": 0.06, "outgoingPendingBoost": 0.05 },
+    { "username": "bob", "acceptedBoost": 0.19, "pendingBoost": 0.05, "incomingPendingBoost": 0.06, "outgoingPendingBoost": 0.05 },
+    { "username": "grace", "acceptedBoost": 0.16, "pendingBoost": 0.04, "incomingPendingBoost": 0.04, "outgoingPendingBoost": 0.03 },
+    { "username": "pablo", "acceptedBoost": 0.14, "pendingBoost": 0.04, "incomingPendingBoost": 0.04, "outgoingPendingBoost": 0.03 },
+    { "username": "mia", "acceptedBoost": 0.16, "pendingBoost": 0.04, "incomingPendingBoost": 0.04, "outgoingPendingBoost": 0.03 },
+    { "username": "olivia", "acceptedBoost": 0.15, "pendingBoost": 0.04, "incomingPendingBoost": 0.04, "outgoingPendingBoost": 0.03 },
+    { "username": "hugo", "acceptedBoost": 0.13, "pendingBoost": 0.03, "incomingPendingBoost": 0.03, "outgoingPendingBoost": 0.02 },
+    { "username": "ava", "acceptedBoost": 0.14, "pendingBoost": 0.04, "incomingPendingBoost": 0.04, "outgoingPendingBoost": 0.03 }
+  ]
+}

@@ -5,11 +5,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
 	Bell,
-	Bookmark,
 	Home,
 	LogOut,
-	MessageCircle,
 	Search,
+	SlidersHorizontal,
 	UserRound,
 } from "lucide-react";
 import type { CurrentUser } from "@/lib/api";
@@ -28,8 +27,7 @@ const NAV_ITEMS = [
 	{ href: "/feed", label: "Timeline", icon: Home },
 	{ href: "/friends", label: "Discoveries", icon: Search },
 	{ href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
-	{ href: "/settings/notifications", label: "Messages", icon: MessageCircle },
-	{ href: "/settings/profile", label: "Bookmarks", icon: Bookmark },
+	{ href: "/settings", label: "Settings", icon: SlidersHorizontal },
 	{ href: "/profil", label: "Profile", icon: UserRound },
 ];
 
@@ -40,6 +38,8 @@ export function Sidebar({
 }: SidebarProps) {
 	const pathname = usePathname();
 	const [expanded, setExpanded] = useState(false);
+	const userDisplayName = user?.displayName?.trim() || user?.username || "Field User";
+	const userHandle = user?.username || "observer";
 
 	return (
 		<aside
@@ -132,9 +132,9 @@ export function Sidebar({
 					className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-black/5"
 				>
 					<ProfilePicture
-						name={user?.username || "Field User"}
+						name={userDisplayName}
 						src={user?.avatar}
-						alt={user?.username || "Field User"}
+						alt={userDisplayName}
 						className="h-8 w-8 shrink-0 -rotate-3"
 					/>
 
@@ -143,10 +143,10 @@ export function Sidebar({
 						style={{ opacity: expanded ? 1 : 0 }}
 					>
 						<p className="truncate text-sm font-semibold text-ink">
-							{user?.username || "Field User"}
+							{userDisplayName}
 						</p>
 						<p className="truncate font-mono text-[11px] uppercase tracking-[0.16em] text-label">
-							@{(user?.username || "observer").toLowerCase()}
+							@{userHandle.toLowerCase()}
 						</p>
 					</div>
 				</Link>

@@ -93,6 +93,7 @@ export default function LoginPaperCard({
 								type="submit"
 								form="login-form"
 								disabled={loading}
+								textClassName="text-5xl"
 								className="absolute right-0 bottom-8 sm:right-2 lg:bottom-9"
 							>
 								{loading ? "..." : "Login"}
