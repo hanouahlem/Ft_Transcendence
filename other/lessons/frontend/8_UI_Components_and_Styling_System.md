@@ -196,3 +196,30 @@ Before evaluation, each teammate should be able to explain:
 2. why `Frontend/app/feed/page.tsx` still owns the fetch/mutation logic
 3. what `Sidebar`, `PostCard`, `NewPostDialog`, and `RightRail` each do
 4. how real actions like publish, like, favorite, comment, and friend request still work after the redesign
+
+## Settings Page Reuse
+
+The same archive design system now powers the centralized settings page too.
+
+New files:
+
+- `frontend/app/(app)/settings/page.tsx`
+- `frontend/components/settings/SettingsPaper.tsx`
+- `frontend/components/settings/SettingsField.tsx`
+- `frontend/components/settings/ProfilePhotoUploader.tsx`
+- `frontend/components/settings/BannerUploader.tsx`
+- `frontend/components/settings/SettingsPasswordSection.tsx`
+
+What this shows:
+
+- the route file still owns fetches, saves, uploads, and auth refresh
+- the new settings components own the archive paper layout and section-level presentation
+- the page still reuses the existing app shell pieces like `RightRail` and `Button`
+
+One new button variant was added in:
+
+- `frontend/components/ui/button.tsx`
+
+The new `ledger` variant is the stronger black-and-orange commit button used by the settings paper.
+
+This matters during evaluation because it shows the archive style is now a reusable system, not a one-page feed experiment.

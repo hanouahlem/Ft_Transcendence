@@ -1,0 +1,233 @@
+{
+  "postFamilies": {
+    "status": [
+      "{lead}. {detail}. {ask}",
+      "{lead}. {detail}.",
+      "{detail}. {ask}"
+    ],
+    "progress": [
+      "{lead}. {detail}. {win}.",
+      "{lead}. {win}. {ask}",
+      "{detail}. {win}."
+    ],
+    "question": [
+      "{lead}. {question} {ask}",
+      "{question} {ask}",
+      "{lead}. {question}"
+    ],
+    "opinion": [
+      "{lead}. {opinion}. {ask}",
+      "{opinion}. {ask}",
+      "{lead}. {opinion}."
+    ],
+    "frustration": [
+      "{lead}. {frustration}. {ask}",
+      "{frustration}. {ask}",
+      "{lead}. {frustration}."
+    ],
+    "small_win": [
+      "{lead}. {win}. {ask}",
+      "{win}. {detail}.",
+      "{lead}. {win}."
+    ],
+    "photo": [
+      "{caption}. {detail}.",
+      "{lead}. {caption}.",
+      "{caption}. {ask}"
+    ],
+    "event": [
+      "{lead}. {eventLine}. {ask}",
+      "{eventLine}. {ask}",
+      "{lead}. {eventLine}."
+    ]
+  },
+  "commentFamilies": {
+    "agreement": [
+      "{lead} {reply}",
+      "{reply}",
+      "{lead} {postHook} {reply}"
+    ],
+    "advice": [
+      "{lead} {reply}",
+      "{reply}",
+      "{lead} if it helps, {reply}"
+    ],
+    "reaction": [
+      "{lead} {reply}",
+      "{reply}",
+      "{lead} {reply} {postHook}"
+    ],
+    "congrats": [
+      "{lead} {reply}",
+      "{reply}",
+      "{lead} {reply} well earned."
+    ],
+    "empathy": [
+      "{lead} {reply}",
+      "{reply}",
+      "{lead} {reply} I had the same mood last week."
+    ],
+    "banter": [
+      "{lead} {reply}",
+      "{reply}",
+      "{lead} {reply} and now I am judging my own timeline."
+    ],
+    "follow_up": [
+      "{lead} {reply}",
+      "{reply}",
+      "{lead} {reply} curious where you land."
+    ]
+  },
+  "themeFragments": {
+    "shipping": {
+      "label": "shipping",
+      "hooks": ["the release checklist finally reading clean", "the last awkward edge before merge", "a handoff note that finally makes sense"],
+      "details": ["trying to keep the rollback path boring", "leaving the next pass easier than this one", "making the handoff less mysterious than yesterday"]
+    },
+    "docker": {
+      "label": "docker",
+      "hooks": ["one container finally behaving", "the compose stack settling down", "a setup command that stopped lying"],
+      "details": ["keeping the env mismatch from resurfacing", "writing the working version down before it drifts", "trying to make local setup less fragile"]
+    },
+    "qa": {
+      "label": "qa",
+      "hooks": ["the unhappy path showing itself early", "a test note that saved another loop", "the check that catches the obvious thing later"],
+      "details": ["trying to make failure states less dramatic", "keeping the weird edge case visible", "documenting the part that actually breaks"]
+    },
+    "docs": {
+      "label": "docs",
+      "hooks": ["a note future me might actually read", "the explanation that should have existed yesterday", "a cleaner walkthrough for the next handoff"],
+      "details": ["trying to save somebody an avoidable detour", "putting the useful command somewhere stable", "keeping evaluation prep less painful"]
+    },
+    "bug_hunt": {
+      "label": "bug hunt",
+      "hooks": ["a stubborn edge case finally blinking", "the bug that only appears when the room is quiet", "a messy state transition becoming traceable"],
+      "details": ["trying not to chase the wrong symptom again", "leaving breadcrumbs before the fix disappears from memory", "keeping the debug trail short enough to explain"]
+    },
+    "realtime": {
+      "label": "realtime flow",
+      "hooks": ["socket state finally feeling less cursed", "event order becoming readable", "reconnect behavior staying calm for once"],
+      "details": ["trying to keep the sequence understandable", "making reconnects less dramatic than the logs suggest", "leaving the next round of events easier to trust"]
+    },
+    "release_day": {
+      "label": "release day",
+      "hooks": ["the last pre-ship check", "the part of the rollout that usually slips", "the final pass before calling it stable enough"],
+      "details": ["trying to keep the ending boring in the best way", "leaving less cleanup for tomorrow morning", "making the final hour read cleaner than the first"]
+    },
+    "ui_polish": {
+      "label": "ui polish",
+      "hooks": ["spacing finally feeling deliberate", "the card rhythm settling into place", "a rough corner in the feed looking intentional"],
+      "details": ["trying not to overwork the obvious fix", "keeping the layout calm on small screens too", "letting the UI breathe before adding more"]
+    },
+    "design_system": {
+      "label": "design system",
+      "hooks": ["one component actually matching the rest", "a token choice finally feeling justified", "the shared pattern starting to read like a system"],
+      "details": ["trying to reduce one avoidable visual argument", "keeping the next component easier to align", "making the rules visible enough to reuse"]
+    },
+    "photography": {
+      "label": "photos",
+      "hooks": ["light doing most of the work", "a quick frame worth keeping", "the kind of photo break that resets the mood"],
+      "details": ["trying to keep one good frame from disappearing in the roll", "saving this before it becomes just another blur", "keeping the visual note instead of another paragraph"]
+    },
+    "coffee": {
+      "label": "coffee run",
+      "hooks": ["the cup that saved the second half of the day", "a break that came back with a better answer", "the tiny reset before the next pass"],
+      "details": ["trying to buy clarity with ten quiet minutes", "keeping the day from flattening out", "using the break before the next stubborn block"]
+    },
+    "weekend_plan": {
+      "label": "weekend plan",
+      "hooks": ["the idea that might actually survive Saturday", "one loose plan starting to look real", "the kind of detour that earns a longer route home"],
+      "details": ["trying to keep one thing on the calendar that is not a task", "leaving room for people to join if they want", "not overplanning it on purpose"]
+    },
+    "makerspace": {
+      "label": "makerspace",
+      "hooks": ["the workbench corner with better energy", "a shared table turning into a decent idea", "the part of the room where people actually trade notes"],
+      "details": ["trying to keep the rough draft public long enough to help", "using the space to unblock the next step", "letting the room shape the better version"]
+    },
+    "game_night": {
+      "label": "game night",
+      "hooks": ["a lobby that finally feels fun again", "the scoreboard mood after a long block", "the kind of evening plan that resets the whole room"],
+      "details": ["trying to keep it social without turning it into a project", "using a lighter plan to end a dense day", "letting the competitive energy stay friendly"]
+    },
+    "commute": {
+      "label": "commute",
+      "hooks": ["the walk where the answer finally appeared", "a train thought worth writing down", "the longer route that fixed the mood first"],
+      "details": ["trying to leave the desk before forcing another bad pass", "using the in-between time to sort the next move", "keeping the reset honest instead of performative"]
+    },
+    "study_group": {
+      "label": "study group",
+      "hooks": ["the table that always gets louder after the first hour", "one shared problem turning into a decent explanation", "the kind of group session that actually helps"],
+      "details": ["trying to keep the hard part explainable out loud", "leaving the next evaluator answer cleaner", "using the group energy before everyone scatters"]
+    },
+    "campus_life": {
+      "label": "campus life",
+      "hooks": ["the lab rhythm taking over the day again", "a hallway conversation turning into a plan", "the quiet corner that keeps getting claimed early"],
+      "details": ["trying to line the project up with the day instead of fighting it", "leaving room for whoever is nearby later", "using the day flow instead of pretending it is neutral"]
+    },
+    "food_spot": {
+      "label": "food spot",
+      "hooks": ["the place that keeps rescuing late afternoons", "a stop that somehow fixes the mood first", "one good recommendation doing more than another meeting"],
+      "details": ["trying to keep the reset simple", "saving the spot because somebody will ask later", "letting a small detour count as progress too"]
+    },
+    "running": {
+      "label": "running",
+      "hooks": ["a run clearing the static out", "the lap that fixed my attitude first", "the kind of reset that makes the next task readable"],
+      "details": ["trying to move before staring harder at the same bug", "using the routine instead of waiting for motivation", "keeping the reset physical enough to work"]
+    },
+    "football": {
+      "label": "football",
+      "hooks": ["the match plan for later", "a training note turning into a better work rhythm", "the post-session energy still hanging around"],
+      "details": ["trying to keep the good momentum after practice", "using the team rhythm as the template for the evening", "saving one thought before the playlist changes"]
+    },
+    "wellness": {
+      "label": "wellness",
+      "hooks": ["the routine that keeps the week from tilting", "one small reset that still matters", "the calmer version of the same afternoon"],
+      "details": ["trying to keep the process sustainable instead of dramatic", "using a small habit to rescue the bigger plan", "letting steady count as progress"]
+    },
+    "small_routine": {
+      "label": "small routine",
+      "hooks": ["the tiny habit that keeps paying off", "a familiar sequence doing its job again", "one repeated thing saving more energy than expected"],
+      "details": ["trying not to underestimate the boring fix", "keeping the repeatable part visible", "using the routine to lower the noise floor"]
+    },
+    "side_project": {
+      "label": "side project",
+      "hooks": ["the quiet extra thing still moving forward", "a tiny off-main-thread win", "the idea I keep returning to after the real work ends"],
+      "details": ["trying to leave a breadcrumb before the next late-night pass", "keeping the scope from expanding just because it can", "saving the useful bit before the rest gets ambitious"]
+    },
+    "climbing": {
+      "label": "climbing",
+      "hooks": ["the route that looked worse from the ground", "a small wall reset before heading back", "the kind of detour that makes the desk feel optional"],
+      "details": ["trying to bring some patience back with me", "letting the physical puzzle clear the digital one", "saving the post-climb calm while it lasts"]
+    }
+  },
+  "winFragments": [
+    "Small win: the cleaner version finally held.",
+    "Tiny relief: that path stopped wobbling.",
+    "Happy with this one because it stayed fixed on the second pass.",
+    "That landed better than I expected this morning."
+  ],
+  "frustrationFragments": [
+    "Still mildly annoyed that the same rough edge keeps moving around.",
+    "I can explain the bug now, which is progress, but I would still like it gone.",
+    "The state is clearer than it was and somehow more irritating for that reason.",
+    "This is one of those afternoons where the obvious answer keeps being wrong."
+  ],
+  "questionFragments": [
+    "Would you keep pushing this now or leave it for the fresh-hour version tomorrow?",
+    "Anybody else have a cleaner path for this than the one I am staring at?",
+    "If you were looking at this cold, what would you test first?",
+    "Trying to decide whether this needs another pass or just a simpler note."
+  ],
+  "opinionFragments": [
+    "Current opinion: the simpler version is winning here.",
+    "I keep landing on the side of less ceremony and more clarity.",
+    "This probably works better when it is a little less polished and a little more obvious.",
+    "I would rather keep this useful than make it look clever."
+  ],
+  "mediaCaptionFragments": [
+    "Keeping this frame because the mood matched the day exactly",
+    "Quick photo note before it disappears into the rest of the week",
+    "The kind of image that does half the explaining for me",
+    "Saving this one because it felt like a reset, not just a stop"
+  ]
+}

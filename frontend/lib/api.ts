@@ -20,8 +20,38 @@ export type LoginData =
 export type CurrentUser = {
   id: number;
   username: string;
+  displayName?: string | null;
   email: string;
+  banner?: string | null;
   avatar?: string | null;
+  bio?: string | null;
+  status?: string | null;
+  location?: string | null;
+  website?: string | null;
+  createdAt?: string;
+  hasPassword?: boolean;
+};
+
+export type UpdateProfileData = {
+  username: string;
+  displayName?: string | null;
+  banner?: string | null;
+  avatar?: string | null;
+  bio?: string | null;
+  status?: string | null;
+  location?: string | null;
+  website?: string | null;
+};
+
+export type ChangePasswordData = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+export type SetPasswordData = {
+  newPassword: string;
+  confirmPassword: string;
 };
 
 export type ApiSuccess<T> = {
@@ -88,6 +118,70 @@ export async function getCurrentUser(token: string) {
   });
 
   return handleResponse<CurrentUser>(response);
+}
+
+export async function updateUserProfile(
+  userId: number,
+  token: string,
+  profileData: UpdateProfileData,
+) {
+  const response = await fetch(`${API_URL}/users/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  return handleResponse<CurrentUser>(response);
+}
+
+export async function uploadSettingsMedia(file: File, token: string) {
+  const formData = new FormData();
+  formData.append("media", file);
+
+  const response = await fetch(`${API_URL}/settings/media`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  return handleResponse<{ url: string }>(response);
+}
+
+export async function setLocalPassword(
+  token: string,
+  payload: SetPasswordData,
+) {
+  const response = await fetch(`${API_URL}/settings/setpassword`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse<{ message: string }>(response);
+}
+
+export async function changeLocalPassword(
+  token: string,
+  payload: ChangePasswordData,
+) {
+  const response = await fetch(`${API_URL}/settings/security`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse<{ message: string }>(response);
 }
 
 export async function addFriend(receiverId: number) {

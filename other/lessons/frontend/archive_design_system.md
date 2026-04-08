@@ -165,6 +165,15 @@ Additional reusable archive controls also live in `frontend/components/ui`:
 - `StampButton.tsx`
 
 These matter because the login page no longer hides its form primitives inside `LoginPaperCard.tsx`.
+
+Recent `StampButton` detail:
+
+- `frontend/components/ui/StampButton.tsx` now exposes separate styling hooks:
+  - `textClassName`
+  - `paddingClassName`
+  - `borderClassName`
+- that lets one auth screen change the stamp size, padding, or border weight without changing the other screen
+- `stampClassName` still exists for broader wrapper overrides when needed
 `FieldInput.tsx` is now Ark Field-backed, so label, input, and error text stay grouped semantically while preserving the archive styling.
 
 There is now also an auth-scoped shared shell in:

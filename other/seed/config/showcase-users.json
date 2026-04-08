@@ -1,0 +1,124 @@
+{
+  "users": {
+    "alice": {
+      "profile": {
+        "bio": "Feed polish, handoff notes, and the kind of tiny fixes people only notice when they are missing.",
+        "status": "Tonight: one clean pass on the composer, then a long walk.",
+        "website": "https://example.com/alice"
+      },
+      "postBudget": { "min": 24, "max": 24 },
+      "interactionBoost": 1.4,
+      "incomingBoost": 1.45,
+      "outgoingBoost": 1.32,
+      "guaranteedIncomingPendingFrom": ["sam", "ava"],
+      "guaranteedOutgoingPendingTo": ["olivia"],
+      "guaranteedImagePosts": 3,
+      "guaranteedCommentThreads": 4
+    },
+    "bob": {
+      "profile": {
+        "bio": "Docker cleanup, backend rough edges, and writing the command down once it finally behaves.",
+        "status": "Current rule: no mystery env mismatches after dinner.",
+        "website": "https://example.com/bob"
+      },
+      "postBudget": { "min": 23, "max": 23 },
+      "interactionBoost": 1.36,
+      "incomingBoost": 1.41,
+      "outgoingBoost": 1.31,
+      "guaranteedIncomingPendingFrom": ["quinn", "karen"],
+      "guaranteedOutgoingPendingTo": ["mia"],
+      "guaranteedImagePosts": 2,
+      "guaranteedCommentThreads": 4
+    },
+    "grace": {
+      "profile": {
+        "bio": "Design rhythm, photo-heavy feed moments, and screenshots that make spacing arguments shorter.",
+        "status": "Collecting references before touching the feed cards again.",
+        "website": "https://example.com/grace"
+      },
+      "postBudget": { "min": 22, "max": 22 },
+      "interactionBoost": 1.28,
+      "incomingBoost": 1.3,
+      "outgoingBoost": 1.18,
+      "guaranteedIncomingPendingFrom": ["parker"],
+      "guaranteedOutgoingPendingTo": ["ava"],
+      "guaranteedImagePosts": 4,
+      "guaranteedCommentThreads": 3
+    },
+    "pablo": {
+      "profile": {
+        "bio": "Late-hour workflow fixes, terminal-first habits, and making the dev stack less fragile at 1am.",
+        "status": "Still chasing one reconnect issue before sleep.",
+        "website": "https://example.com/pablo"
+      },
+      "postBudget": { "min": 21, "max": 21 },
+      "interactionBoost": 1.24,
+      "incomingBoost": 1.24,
+      "outgoingBoost": 1.17,
+      "guaranteedIncomingPendingFrom": ["tessa"],
+      "guaranteedOutgoingPendingTo": ["alice"],
+      "guaranteedImagePosts": 2,
+      "guaranteedCommentThreads": 3
+    },
+    "mia": {
+      "profile": {
+        "bio": "Campus pacing, study-group logistics, and making busy days look a little more intentional.",
+        "status": "If there is table space near an outlet, I already claimed it.",
+        "website": "https://example.com/mia"
+      },
+      "postBudget": { "min": 21, "max": 21 },
+      "interactionBoost": 1.26,
+      "incomingBoost": 1.28,
+      "outgoingBoost": 1.18,
+      "guaranteedIncomingPendingFrom": ["bob"],
+      "guaranteedOutgoingPendingTo": ["liam"],
+      "guaranteedImagePosts": 3,
+      "guaranteedCommentThreads": 3
+    },
+    "olivia": {
+      "profile": {
+        "bio": "Campus life with saved spots, practical questions, and the occasional photo that does half the talking.",
+        "status": "Need one good answer before I lock tomorrow's plan.",
+        "website": "https://example.com/olivia"
+      },
+      "postBudget": { "min": 20, "max": 20 },
+      "interactionBoost": 1.23,
+      "incomingBoost": 1.24,
+      "outgoingBoost": 1.16,
+      "guaranteedIncomingPendingFrom": ["alice"],
+      "guaranteedOutgoingPendingTo": ["grace"],
+      "guaranteedImagePosts": 3,
+      "guaranteedCommentThreads": 3
+    },
+    "hugo": {
+      "profile": {
+        "bio": "Routine resets, post-session clarity, and the kind of short updates that read cleaner after a run.",
+        "status": "One more lap, then I can look at the logs with a better attitude.",
+        "website": "https://example.com/hugo"
+      },
+      "postBudget": { "min": 19, "max": 19 },
+      "interactionBoost": 1.18,
+      "incomingBoost": 1.18,
+      "outgoingBoost": 1.13,
+      "guaranteedIncomingPendingFrom": ["remy"],
+      "guaranteedOutgoingPendingTo": ["mia"],
+      "guaranteedImagePosts": 2,
+      "guaranteedCommentThreads": 2
+    },
+    "ava": {
+      "profile": {
+        "bio": "Side-project notes, useful shortcuts, and recommendations that somehow turn into longer threads.",
+        "status": "Saving one useful link before I forget why it mattered.",
+        "website": "https://example.com/ava"
+      },
+      "postBudget": { "min": 19, "max": 19 },
+      "interactionBoost": 1.2,
+      "incomingBoost": 1.22,
+      "outgoingBoost": 1.15,
+      "guaranteedIncomingPendingFrom": ["grace"],
+      "guaranteedOutgoingPendingTo": ["alice"],
+      "guaranteedImagePosts": 2,
+      "guaranteedCommentThreads": 2
+    }
+  }
+}

@@ -20,6 +20,11 @@ type PendingFriendRequest = {
   } | null;
 };
 
+type AcceptedFriend = {
+  id: number;
+  friendshipId?: number;
+};
+
 export function useFriendRequests({
   token,
   onFriendAccepted,
@@ -29,18 +34,21 @@ export function useFriendRequests({
   const [incomingRequestIdsBySender, setIncomingRequestIdsBySender] = useState<
     Record<number, number>
   >({});
+  const [connectedFriendshipIdsByUser, setConnectedFriendshipIdsByUser] =
+    useState<Record<number, number>>({});
   const [sendingFriendId, setSendingFriendId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!token) {
       setSentRequests([]);
       setIncomingRequestIdsBySender({});
+      setConnectedFriendshipIdsByUser({});
       return;
     }
 
     const fetchPendingRequests = async () => {
       try {
-        const [incomingRes, sentRes] = await Promise.all([
+        const [incomingRes, sentRes, friendsRes] = await Promise.all([
           fetch(`${API_URL}/friends/requests`, {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -51,11 +59,17 @@ export function useFriendRequests({
               Authorization: `Bearer ${token}`,
             },
           }),
+          fetch(`${API_URL}/friends`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
 
-        const [incomingData, sentData] = await Promise.all([
+        const [incomingData, sentData, friendsData] = await Promise.all([
           incomingRes.json(),
           sentRes.json(),
+          friendsRes.json(),
         ]);
 
         if (!incomingRes.ok || !Array.isArray(incomingData)) {
@@ -88,8 +102,26 @@ export function useFriendRequests({
               }, [])
             : [];
 
+        const nextConnectedFriendshipIds =
+          friendsRes.ok && Array.isArray(friendsData)
+            ? friendsData.reduce<Record<number, number>>(
+                (accumulator, friend: AcceptedFriend) => {
+                  if (
+                    typeof friend.id === "number" &&
+                    typeof friend.friendshipId === "number"
+                  ) {
+                    accumulator[friend.id] = friend.friendshipId;
+                  }
+
+                  return accumulator;
+                },
+                {},
+              )
+            : {};
+
         setIncomingRequestIdsBySender(nextIncomingRequests);
         setSentRequests(nextSentRequests);
+        setConnectedFriendshipIdsByUser(nextConnectedFriendshipIds);
       } catch (error) {
         console.error("fetchPendingRequests error:", error);
       }
@@ -172,6 +204,10 @@ export function useFriendRequests({
         delete next[senderId];
         return next;
       });
+      setConnectedFriendshipIdsByUser((prev) => ({
+        ...prev,
+        [senderId]: data.friend.id,
+      }));
 
       notifySuccess("Friend request accepted.");
       onFriendAccepted?.(senderId);
@@ -185,12 +221,57 @@ export function useFriendRequests({
     }
   };
 
+  const handleRemoveFriend = async (userId: number) => {
+    if (!token) {
+      notifyError("You must be logged in to remove a friend.");
+      return;
+    }
+
+    const friendshipId = connectedFriendshipIdsByUser[userId];
+
+    if (!friendshipId) {
+      notifyError("Friendship not found.");
+      return;
+    }
+
+    try {
+      setSendingFriendId(userId);
+
+      const res = await fetch(`${API_URL}/friends/${friendshipId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Unable to remove the friend.");
+      }
+
+      setConnectedFriendshipIdsByUser((prev) => {
+        const next = { ...prev };
+        delete next[userId];
+        return next;
+      });
+      notifySuccess(data.message || "Friend removed.");
+    } catch (error) {
+      console.error("handleRemoveFriend error:", error);
+      notifyError(error instanceof Error ? error.message : "Failed to remove the friend.");
+    } finally {
+      setSendingFriendId(null);
+    }
+  };
+
   return {
     sentRequests,
     setSentRequests,
     incomingRequestIdsBySender,
+    connectedFriendshipIdsByUser,
     sendingFriendId,
     handleAddFriend,
     handleAcceptFriend,
+    handleRemoveFriend,
   };
 }

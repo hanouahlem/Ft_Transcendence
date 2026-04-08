@@ -17,6 +17,8 @@ type RightRailProps = {
 	onAddFriend: (receiverId: number) => Promise<void>;
 	onAcceptFriend: (senderId: number) => Promise<void>;
 	allowFollow?: boolean;
+	reserveSpace?: boolean;
+	rightAnchorBase?: number;
 };
 
 export function RightRail({
@@ -31,12 +33,16 @@ export function RightRail({
 	onAddFriend,
 	onAcceptFriend,
 	allowFollow = true,
+	reserveSpace = true,
+	rightAnchorBase = 604,
 }: RightRailProps) {
 	return (
-		<aside className="hidden w-73 shrink-0 xl:block">
+		<aside
+			className={reserveSpace ? "hidden w-73 shrink-0 xl:block" : "hidden shrink-0 xl:block xl:w-0"}
+		>
 			<div
 				className="fixed inset-y-0 z-20 hidden w-77 py-8 xl:block"
-				style={{ right: "max(0px, calc(50vw - 604px))" }}
+				style={{ right: `max(0px, calc(50vw - ${rightAnchorBase}px))` }}
 			>
 				<div className="flex h-full w-full flex-col gap-10 overflow-y-auto pr-1">
 					<RightRailSearch />

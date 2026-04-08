@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 type Particle = {
   x: number;
@@ -90,7 +91,15 @@ function drawParticle(
   context.restore();
 }
 
-export function NatureCanvas() {
+type NatureCanvasProps = {
+  className?: string;
+  embedded?: boolean;
+};
+
+export function NatureCanvas({
+  className,
+  embedded = false,
+}: NatureCanvasProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -140,7 +149,11 @@ export function NatureCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-0 opacity-40"
+      className={cn(
+        "pointer-events-none inset-0 z-0 opacity-40",
+        embedded ? "absolute h-full w-full" : "fixed",
+        className,
+      )}
       aria-hidden="true"
     />
   );

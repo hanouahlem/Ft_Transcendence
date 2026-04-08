@@ -1,6 +1,7 @@
 export type FeedAuthor = {
   id: number;
   username: string;
+  displayName?: string | null;
   email: string;
   avatar?: string | null;
 };

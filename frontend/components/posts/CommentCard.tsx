@@ -33,32 +33,34 @@ export function CommentCard({
 	const isDeleting = deletingCommentId === comment.id;
 	const isLiking = likingCommentId === comment.id;
 	const isFavoriting = favoritingCommentId === comment.id;
+	const authorDisplayName =
+		comment.author.displayName?.trim() || comment.author.username;
 
 	return (
-		<div className="relative overflow-hidden border border-black/10 bg-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
+		<div className="relative w-full min-w-0 max-w-full overflow-hidden border border-black/10 bg-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
 			<div className="flex items-start justify-between gap-3">
-				<div className="flex min-w-0 items-center gap-3">
+				<div className="flex min-w-0 flex-1 items-center gap-3">
 					<Link
 						href={`/profil/${comment.author.id}`}
 						className="shrink-0"
 					>
 						<ProfilePicture
-							name={comment.author.username}
+							name={authorDisplayName}
 							src={comment.author.avatar}
-							alt={comment.author.username}
+							alt={authorDisplayName}
 							className="h-8 w-8 -rotate-2"
 						/>
 					</Link>
 
-					<div className="min-w-0">
+					<div className="min-w-0 flex-1">
 						<div className="flex flex-wrap items-center gap-3">
 							<Link
 								href={`/profil/${comment.author.id}`}
-								className="font-mono text-ink transition hover:text-accent-blue"
+								className="max-w-full truncate font-mono text-ink transition hover:text-accent-blue"
 							>
-								@{comment.author.username}
+								{authorDisplayName}
 							</Link>
-							<span className="font-mono text-[15px] text-label">
+							<span className="max-w-full truncate font-mono text-[15px] text-label">
 								@{comment.author.username.toLowerCase()}
 							</span>
 						</div>
@@ -85,7 +87,7 @@ export function CommentCard({
 				</div>
 			</div>
 
-			<p className="font-display text-m leading-7 text-ink/85">
+			<p className="mt-3 w-full min-w-0 max-w-full whitespace-pre-wrap break-all font-display text-m leading-7 text-ink/85">
 				{comment.content}
 			</p>
 

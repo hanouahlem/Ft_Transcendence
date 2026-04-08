@@ -21,15 +21,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { Separator } from "@/components/ui/separator";
 
 export default function SettingsProfilePage() {
   const { user, token } = useAuth();
 
   const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
   const [website, setWebsite] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
@@ -59,9 +62,11 @@ useEffect(() => {
       }
 
       setUsername(data.username || "");
+      setDisplayName(data.displayName || "");
       setBio(data.bio || "");
       setLocation(data.location || "");
       setWebsite(data.website || "");
+      setBannerUrl(data.banner || "");
       setAvatarUrl(data.avatar || "");
       setStatus(data.status || "");
     } catch (err) {
@@ -98,6 +103,8 @@ const handleSave = async () => {
       },
       body: JSON.stringify({
         username,
+        displayName,
+        banner: bannerUrl,
         avatar: avatarUrl,
         bio,
         status,
@@ -199,14 +206,22 @@ const handleSave = async () => {
               <Card className="rounded-[2rem] border-[#ddd3c2] bg-[#fffaf2]/95 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center text-center">
+                    <div className="relative w-full overflow-hidden rounded-[1.5rem] border border-[#d8cfbe] bg-[#eef3e8]">
+                      <ProfileBanner
+                        name={username || "User"}
+                        src={bannerUrl}
+                        className="h-32 w-full object-cover"
+                      />
+                    </div>
+
                     <ProfilePicture
-                      name={username || user?.username || "User"}
+                      name={displayName || username || user?.username || "User"}
                       src={avatarUrl}
-                      className="h-28 w-28 shadow-md"
+                      className="-mt-12 h-28 w-28 shadow-md"
                     />
 
                     <h2 className="mt-4 text-xl font-bold text-[#2f3a32]">
-                      {username || "Utilisateur"}
+                      {displayName || username || "Utilisateur"}
                     </h2>
 
                     <p className="mt-1 text-sm text-[#7b847b]">
@@ -221,6 +236,18 @@ const handleSave = async () => {
                   <Separator className="my-6 bg-[#e5dccd]" />
 
                   <div className="space-y-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-[#5d675e]">
+                        Banner URL
+                      </label>
+                      <Input
+                        value={bannerUrl}
+                        onChange={(e) => setBannerUrl(e.target.value)}
+                        placeholder="https://..."
+                        className="rounded-2xl border-[#d8cfbe] bg-[#fcf8f1]"
+                      />
+                    </div>
+
                     <div>
                       <label className="mb-2 block text-sm font-medium text-[#5d675e]">
                         Avatar URL
@@ -263,7 +290,20 @@ const handleSave = async () => {
                     </div>
                   )}
 
-                  <div className="space-y-5">
+                    <div className="space-y-5">
+                    <div>
+                      <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[#5d675e]">
+                        <User className="h-4 w-4" />
+                        Display name
+                      </label>
+                      <Input
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Your public name"
+                        className="rounded-2xl border-[#d8cfbe] bg-[#fcf8f1]"
+                      />
+                    </div>
+
                     <div>
                       <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[#5d675e]">
                         <User className="h-4 w-4" />

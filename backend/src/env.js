@@ -37,3 +37,8 @@ export function getEnv(name) {
 
   return value;
 }
+
+
+export function getOptionalEnv(name) {
+  return process.env[name]?.trim() || "";
+}
