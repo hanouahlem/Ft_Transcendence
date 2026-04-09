@@ -10,7 +10,7 @@ Last updated: 2026-04-09
 - [x] Phase 1: Lock the target API contract
 - [x] Phase 2: Refactor the notification data model
 - [x] Phase 3: Move notification creation fully into backend logic
-- [ ] Phase 4: Clean friends and feed backend behavior
+- [x] Phase 4: Clean friends and feed backend behavior
 - [ ] Phase 5: Update the frontend API layer
 - [ ] Phase 6: Migrate frontend routing to `/profile`
 - [ ] Phase 7: Make notifications actionable in the frontend
@@ -45,6 +45,14 @@ Last updated: 2026-04-09
 - `post.createCommentHandler()` now creates a `COMMENT` notification for the post owner
 - shared helper logic now skips self-notifications automatically
 
+## Phase 4 Notes
+
+- Feed page now supports `All Posts` vs `Friends` and calls `GET /posts` or `GET /posts/friends` accordingly   // [2 vues de feed]
+- Shared friend-request hook now uses `PATCH /friends/:id/accept`   // [route explicite]
+- Friends page now uses the same explicit accept route
+- Friends page removes friendships with the real `friendshipId` instead of the public user id   // [sinon delete peut viser le mauvais id]
+- Friends search/list no longer expects public `email` fields from `/users`   // [contrat public respecte]
+
 ## Migration Notes
 
 - Added migration: `backend/prisma/migrations/20260409_structured_notifications/migration.sql`
@@ -63,10 +71,10 @@ Last updated: 2026-04-09
 
 ## Current Compatibility Gaps
 
-- Frontend still uses old friend accept calls and still needs the Phase 5 API adapter pass
+- Shared API helpers in `frontend/lib/api.ts` still need the Phase 5 adapter pass even though page-level friend/feed behavior now matches the backend contract
 - Deprecated notifications page is intentionally unsupported now that the backend returns structured payloads only   // [ancienne page a refaire]
 - Profile route migration to `/profile/[username]` has not started yet
 
 ## Next Phase
 
-- Phase 4: clean friends and feed behavior around accepted-friends feed and explicit friend actions
+- Phase 5: update the shared frontend API layer to match the new backend contract everywhere

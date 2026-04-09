@@ -15,6 +15,8 @@ import { usePostInteractions } from "@/hooks/usePostInteractions";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
+type FeedScope = "all" | "friends";
+
 export default function FeedPage() {
   const { user, token } = useAuth();
   const { notifyError, notifySuccess } = useArchiveToasts();
@@ -25,6 +27,7 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
+  const [feedScope, setFeedScope] = useState<FeedScope>("all");
 
   const {
     sentRequests,
@@ -95,7 +98,7 @@ export default function FeedPage() {
     fetchPosts();
     fetchRightRailSuggestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, user?.id]);
+  }, [token, user?.id, feedScope]);
 
   useEffect(() => {
     const handlePostCreated = (event: Event) => {
@@ -103,6 +106,10 @@ export default function FeedPage() {
       const createdPost = customEvent.detail;
 
       if (!createdPost) {
+        return;
+      }
+
+      if (feedScope === "friends") {
         return;
       }
 
@@ -116,7 +123,7 @@ export default function FeedPage() {
     return () => {
       window.removeEventListener("archive:post-created", handlePostCreated);
     };
-  }, [setPosts]);
+  }, [feedScope, setPosts]);
 
   const resetComposer = () => {
     setPostContent("");
@@ -128,8 +135,9 @@ export default function FeedPage() {
 
     try {
       setLoading(true);
+      const endpoint = feedScope === "friends" ? "/posts/friends" : "/posts";
 
-      const res = await fetch(`${API_URL}/posts`, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -262,7 +270,9 @@ export default function FeedPage() {
 
       notifySuccess("Post published successfully.");
       if (data.post) {
-        setPosts((prevPosts) => [data.post, ...prevPosts]);
+        if (feedScope === "all") {
+          setPosts((prevPosts) => [data.post, ...prevPosts]);
+        }
       }
       resetComposer();
     } catch (err) {
@@ -291,16 +301,58 @@ export default function FeedPage() {
               onRemoveFile={handleRemoveFile}
             />
 
+            <section className="border border-black/10 bg-paper px-5 py-4 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
+                    Feed scope
+                  </p>
+                  <p className="mt-1 text-sm text-ink/70">
+                    Switch between the global archive and posts from accepted friends only.
+                  </p>
+                </div>
+
+                <div className="inline-flex border border-ink bg-paper-muted p-1">
+                  <button
+                    type="button"
+                    onClick={() => setFeedScope("all")}
+                    className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
+                      feedScope === "all"
+                        ? "bg-ink text-paper"
+                        : "text-label hover:bg-black/5"
+                    }`}
+                  >
+                    All Posts
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFeedScope("friends")}
+                    className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
+                      feedScope === "friends"
+                        ? "bg-ink text-paper"
+                        : "text-label hover:bg-black/5"
+                    }`}
+                  >
+                    Friends
+                  </button>
+                </div>
+              </div>
+            </section>
+
             {loading ? (
               <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                  Loading feed archive...
+                  {feedScope === "friends"
+                    ? "Loading friends archive..."
+                    : "Loading feed archive..."}
                 </p>
               </section>
             ) : posts.length === 0 ? (
               <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                  No posts have been recorded yet.
+                  {feedScope === "friends"
+                    ? "No accepted-friends posts have been recorded yet."
+                    : "No posts have been recorded yet."}
                 </p>
               </section>
             ) : (

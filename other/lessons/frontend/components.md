@@ -76,6 +76,7 @@ It owns:
 
 - authenticated user access through `useAuth()`
 - composer state with `useState`
+- feed scope state for `All Posts` vs `Friends`
 - derived values with `useMemo`
 - data loading with `fetchPosts()` and `fetchExistingFriendRelations()`
 - publish and friend-request mutations
@@ -133,6 +134,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 The page calls backend routes directly with `fetch`, for example:
 
 - `GET /posts`
+- `GET /posts/friends`
 - `POST /posts`
 - `DELETE /posts/:id`
 - `POST` or `DELETE /posts/:id/like`
@@ -144,6 +146,16 @@ The page calls backend routes directly with `fetch`, for example:
 - `GET /friends`
 - `GET /friends/suggestions`
 - `POST /friends`
+- `PATCH /friends/:id/accept`
+
+The feed scope toggle is important:
+
+- `All Posts` uses `GET /posts`
+- `Friends` uses `GET /posts/friends`
+- the backend filters that friends feed to accepted friendships only
+- when the page is in `Friends` mode, creating your own post does not inject it into the visible list because that endpoint is intentionally friend-only
+- comments are sent as JSON to `POST /posts/:id/comments` because the duplicate upload-based comment route was removed during the backend contract cleanup
+- moderation rejections from comment creation are shown as normal UI errors and are not logged as frontend console errors anymore
 
 ## 3. Shared Data Types
 

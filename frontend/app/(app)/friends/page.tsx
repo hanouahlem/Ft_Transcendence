@@ -21,12 +21,16 @@ type FriendRequest = {
 	};
 };
 
+type FriendListItem = RightRailSuggestion & {
+	friendshipId: number;
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function FriendsPage() {
 	const { user, token } = useAuth();
 
-	const [friends, setFriends] = useState<RightRailSuggestion[]>([]);
+	const [friends, setFriends] = useState<FriendListItem[]>([]);
 	const [requests, setRequests] = useState<FriendRequest[]>([]);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [searchedUsers, setSearchedUsers] = useState<any[]>([]);
@@ -64,7 +68,7 @@ export default function FriendsPage() {
 							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 							others.filter((u: any) =>
 								u.username.toLowerCase().includes(term) ||
-								(u.email && u.email.toLowerCase().includes(term))
+								(u.displayName && u.displayName.toLowerCase().includes(term))
 							)
 						);
 					} else {
@@ -87,7 +91,16 @@ export default function FriendsPage() {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			const data = await res.json();
-			if (res.ok) setFriends(Array.isArray(data) ? data : []);
+			if (res.ok && Array.isArray(data)) {
+				setFriends(
+					data.filter(
+						(friend): friend is FriendListItem =>
+							typeof friend?.id === "number" &&
+							typeof friend?.username === "string" &&
+							typeof friend?.friendshipId === "number"
+					)
+				);
+			}
 		} catch (err) {
 			console.error("Erreur fetch friends:", err);
 		}
@@ -173,8 +186,8 @@ export default function FriendsPage() {
 
 		try {
 			setProcessingId(requestId);
-			const res = await fetch(`${API_URL}/friends/${requestId}`, {
-				method: "PUT",
+			const res = await fetch(`${API_URL}/friends/${requestId}/accept`, {
+				method: "PATCH",
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (res.ok) {
@@ -208,16 +221,23 @@ export default function FriendsPage() {
 		}
 	};
 
-	const handleRemoveFriend = async (friendId: number) => {
+	const handleRemoveFriend = async (userId: number) => {
 		if (!token) return;
+
+		const friend = friends.find((entry) => entry.id === userId);
+		if (!friend) {
+			archiveToaster.error({ title: "Error", description: "Friendship not found." });
+			return;
+		}
+
 		try {
-			setProcessingId(friendId);
-			const res = await fetch(`${API_URL}/friends/${friendId}`, {
+			setProcessingId(userId);
+			const res = await fetch(`${API_URL}/friends/${friend.friendshipId}`, {
 				method: "DELETE",
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (res.ok) {
-				setFriends((prev) => prev.filter((f) => f.id !== friendId));
+				setFriends((prev) => prev.filter((entry) => entry.id !== userId));
 				archiveToaster.success({ title: "Removed", description: "Friend removed." });
 			} else {
 				const data = await res.json();
@@ -313,7 +333,9 @@ export default function FriendsPage() {
 												<ProfilePicture name={u.username} src={u.avatar} size="default" className={i % 2 === 0 ? "rotate-2" : "-rotate-2"} />
 												<div>
 													<p className="font-bold text-ink">{u.username}</p>
-													<p className="font-mono text-[10px] uppercase text-label">{u.email}</p>
+													<p className="font-mono text-[10px] uppercase text-label">
+														{u.displayName || "Observer profile"}
+													</p>
 												</div>
 											</div>
 											<div>

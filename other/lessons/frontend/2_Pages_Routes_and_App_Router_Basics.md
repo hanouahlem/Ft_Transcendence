@@ -201,12 +201,12 @@ In this repo, a route tells you where the page lives, but not how much real back
 
 Examples:
 
-- `/feed` is connected to real backend post routes
+- `/feed` is connected to real backend post routes and can switch between the global feed and the accepted-friends feed
 - `/profil` and `/profil/:id` read profile-related backend data:
   - `GET /users/:id`
   - `GET /users/:id/posts`
   - `GET /users/:id/friends`
-- `/friends` has real UI but incomplete backend wiring in places
+- `/friends` has real backend wiring for requests, acceptance, and removal through friendship ids
 - `/notifications` is currently mostly mock/demo UI
 - some settings pages still contain placeholder/demo data
 

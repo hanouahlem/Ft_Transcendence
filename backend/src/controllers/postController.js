@@ -274,6 +274,18 @@ export const createCommentHandler = async (req, res) => {
       comment,
     });
   } catch (error) {
+    if (error.message === "This comment contains inappropriate content.") {
+      return res.status(422).json({
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Post not found" || error.message === "User not found") {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
+
     console.error("Erreur createCommentHandler :", error);
     return res.status(500).json({
       message: error.message || "Unable to create comment.",

@@ -214,6 +214,11 @@ Across the backend, you can see repeated patterns:
 
 These patterns matter because they make the API predictable.
 
+Concrete example:
+
+- `createCommentHandler` returns `422` when moderation rejects a comment like "This comment contains inappropriate content."
+- that is treated as a normal validation failure, not as a server crash
+
 ## Mental Model To Remember
 
 Think of feature code like this:
