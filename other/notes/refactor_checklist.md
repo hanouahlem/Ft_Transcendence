@@ -98,6 +98,8 @@ Last updated: 2026-04-10
 - `npx prisma migrate deploy` applied `20260409_structured_notifications`
 - `npx prisma generate` completed successfully inside the backend container
 - Backend startup crash from missing `getFriendsPostsHandler` export was fixed after Phase 2
+- `git diff --check` passed during the later frontend cleanup and notifications phases
+- A full browser-level regression run for the Phase 9 flows was not executed in this workspace, so final end-to-end verification is still a manual pass to do locally/in Docker
 
 ## Current Compatibility Gaps
 
@@ -105,4 +107,4 @@ Last updated: 2026-04-10
 
 ## Next Phase
 
-- Main refactor plan complete; any remaining work is follow-up cleanup outside the original 8 phases
+- Main refactor implementation phases are complete; the only remaining wrap-up outside this workspace is a manual end-to-end regression pass

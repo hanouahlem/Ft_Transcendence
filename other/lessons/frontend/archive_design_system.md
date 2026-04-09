@@ -368,4 +368,4 @@ That avoids two problems:
 
 If you need a short explanation:
 
-> Yes, we already have the beginnings of a real archive design system. The stable part lives in `frontend/app/globals.css` with archive tokens and utility classes, in `frontend/components/layout` with reusable shell elements, and in `frontend/components/ui/button.tsx` with the shared archive-styled button primitive. The system is not fully mature yet because some old pages still use legacy generic UI and some primitive wrappers are still being migrated, but the direction is already explicit and reusable.
+> Yes, we have a real archive design system now. The stable part lives in `frontend/app/globals.css` with archive tokens and utility classes, in `frontend/components/layout` with reusable shell elements, and in shared pieces like `frontend/components/ui/button.tsx`, `frontend/components/decor/ArchiveTape.tsx`, and `frontend/components/decor/ArchiveStar.tsx`. The system is still evolving, but it already powers the active login, feed, profile, settings, and notifications pages with reusable patterns instead of one-off styling.

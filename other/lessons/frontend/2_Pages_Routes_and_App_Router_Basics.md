@@ -205,7 +205,7 @@ Examples:
 - `/notifications` now uses real backend notification rows and builds navigation targets from `type`, `actor.username`, and `postId`
 - `/settings` is the single active account route and owns profile edits, media uploads, and password updates
 
-So route knowledge is only the first layer. You also need to know whether a page is backed by real API calls, partial wiring, or placeholder UI.
+So route knowledge is only the first layer. You also need to know which backend calls and shared components each active page owns.
 
 ## Key Terms
 

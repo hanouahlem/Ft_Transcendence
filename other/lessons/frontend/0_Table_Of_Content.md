@@ -101,8 +101,8 @@ Goal: understand what each major frontend page currently does and how complete i
 
 - feed page: posts, likes, comments, uploads
 - friends page: user list, search, current integration gaps
-- notifications page: mock UI vs real backend routes
-- profile and settings pages: real data vs placeholder/demo data
+- notifications page: real structured notification ledger and deep-link behavior
+- profile and settings pages: how the real routed pages map to backend data and mutations
 - how to identify frontend drift from backend capabilities
 
 Study file:
