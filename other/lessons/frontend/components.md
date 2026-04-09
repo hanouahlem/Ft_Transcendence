@@ -169,7 +169,7 @@ These types define the shape expected by the UI:
 export type FeedAuthor = {
   id: number;
   username: string;
-  email: string;
+  displayName?: string | null;
   avatar?: string | null;
 };
 

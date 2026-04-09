@@ -11,7 +11,7 @@ Last updated: 2026-04-09
 - [x] Phase 2: Refactor the notification data model
 - [x] Phase 3: Move notification creation fully into backend logic
 - [x] Phase 4: Clean friends and feed backend behavior
-- [ ] Phase 5: Update the frontend API layer
+- [x] Phase 5: Update the frontend API layer
 - [ ] Phase 6: Migrate frontend routing to `/profile`
 - [ ] Phase 7: Make notifications actionable in the frontend
 
@@ -53,6 +53,12 @@ Last updated: 2026-04-09
 - Friends page removes friendships with the real `friendshipId` instead of the public user id   // [sinon delete peut viser le mauvais id]
 - Friends search/list no longer expects public `email` fields from `/users`   // [contrat public respecte]
 
+## Phase 5 Notes
+
+- `frontend/lib/api.ts` now exposes shared helpers for global feed, friends feed, public user lookup by username, structured notifications, and the explicit friend accept route   // [centralisation des appels]
+- frontend notification types now match the structured backend payload (`type`, `actor`, `postId`)   // [base pour la future page notifications]
+- shared frontend types no longer pretend that public feed/user payloads include `email`   // [alignement avec le backend]
+
 ## Migration Notes
 
 - Added migration: `backend/prisma/migrations/20260409_structured_notifications/migration.sql`
@@ -71,10 +77,10 @@ Last updated: 2026-04-09
 
 ## Current Compatibility Gaps
 
-- Shared API helpers in `frontend/lib/api.ts` still need the Phase 5 adapter pass even though page-level friend/feed behavior now matches the backend contract
+- Some pages still use direct `fetch(...)` even though the shared API layer now matches the backend contract   // [migration progressive]
 - Deprecated notifications page is intentionally unsupported now that the backend returns structured payloads only   // [ancienne page a refaire]
 - Profile route migration to `/profile/[username]` has not started yet
 
 ## Next Phase
 
-- Phase 5: update the shared frontend API layer to match the new backend contract everywhere
+- Phase 6: migrate frontend routing from `/profil` to `/profile/[username]`
