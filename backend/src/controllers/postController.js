@@ -1,6 +1,7 @@
 import {
   createPost,
   getAllPosts,
+  getFriendsPosts,
   deletePost,
   likePost,
   unlikePost,
@@ -23,6 +24,17 @@ export const getPostsHandler = async (req, res) => {
   } catch (error) {
     console.error("Erreur getPostsHandler :", error);
     res.status(500).json({ message: "Unable to fetch posts." });
+  }
+};
+
+export const getFriendsPostsHandler = async (req, res) => {
+  try {
+    const currentUserId = req.user?.id ?? req.user?.userId;
+    const posts = await getFriendsPosts(currentUserId);
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Erreur getFriendsPostsHandler :", error);
+    res.status(500).json({ message: "Unable to fetch friends posts." });
   }
 };
 
@@ -219,16 +231,10 @@ export const createCommentHandler = async (req, res) => {
       });
     }
 
-    if ((!content || !content.trim()) && !req.file) {
+    if (!content || !content.trim()) {
       return res.status(400).json({
-        message: "Comment content or media is required.",
+        message: "Comment content is required.",
       });
-    }
-
-    let mediaUrl = null;
-
-    if (req.file) {
-      mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
     }
 
     const seedScriptKey = getOptionalEnv("SEED_SCRIPT_KEY");
@@ -238,8 +244,8 @@ export const createCommentHandler = async (req, res) => {
     const comment = await createComment({
       postId,
       userId,
-      content: content?.trim() || "",
-      mediaUrl,
+      content: content.trim(),
+      mediaUrl: null,
       skipModeration,
     });
 
@@ -438,6 +444,7 @@ export const unfavoriteCommentHandler = async (req, res) => {
 export default {
   createPostHandler,
   getPostsHandler,
+  getFriendsPostsHandler,
   deletePostHandler,
   likePostHandler,
   unlikePostHandler,

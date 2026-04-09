@@ -12,7 +12,6 @@ const formatComment = (comment, currentUserId) => {
       id: comment.user.id,
       username: comment.user.username,
       displayName: comment.user.displayName,
-      email: comment.user.email,
       avatar: comment.user.avatar,
     },
     likesCount: comment.commentLikes.length,
@@ -36,7 +35,6 @@ const formatPost = (post, currentUserId) => {
       id: post.author.id,
       username: post.author.username,
       displayName: post.author.displayName,
-      email: post.author.email,
       avatar: post.author.avatar,
     },
     likesCount: post.likes.length,
@@ -55,26 +53,64 @@ const formatPost = (post, currentUserId) => {
   };
 };
 
+const feedPostInclude = {
+  author: true,
+  likes: true,
+  favorites: true,
+  comments: {
+    include: {
+      user: true,
+      commentLikes: true,
+      commentFavorites: true,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  },
+};
+
 export const getAllPosts = async (currentUserId) => {
   const posts = await prisma.post.findMany({
     orderBy: {
       createdAt: "desc",
     },
-    include: {
-      author: true,
-      likes: true,
-      favorites: true,
-      comments: {
-        include: {
-          user: true,
-          commentLikes: true,
-          commentFavorites: true,
-        },
-        orderBy: {
-          createdAt: "asc",
-        },
+    include: feedPostInclude,
+  });
+
+  return posts.map((post) => formatPost(post, currentUserId));
+};
+
+export const getFriendsPosts = async (currentUserId) => {
+  const resolvedUserId = Number(currentUserId);
+  const acceptedFriends = await prisma.friends.findMany({
+    where: {
+      status: "accepted",
+      OR: [{ senderId: resolvedUserId }, { receiverId: resolvedUserId }],
+    },
+    select: {
+      senderId: true,
+      receiverId: true,
+    },
+  });
+
+  const friendIds = acceptedFriends.map((relation) =>
+    relation.senderId === resolvedUserId ? relation.receiverId : relation.senderId
+  );
+
+  if (friendIds.length === 0) {
+    return [];
+  }
+
+  const posts = await prisma.post.findMany({
+    where: {
+      authorId: {
+        in: friendIds,
       },
     },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: feedPostInclude,
   });
 
   return posts.map((post) => formatPost(post, currentUserId));
@@ -145,10 +181,10 @@ export const deletePost = async (postId, userId) => {
   }
 
   await prisma.favorite.deleteMany({
-  where: {
-    postId: Number(postId),
-  },
-});
+    where: {
+      postId: Number(postId),
+    },
+  });
 
   await prisma.like.deleteMany({
     where: {
@@ -163,10 +199,10 @@ export const deletePost = async (postId, userId) => {
   });
 
   await prisma.repost.deleteMany({
-  where: {
-    postId: Number(postId),
-  },
-});
+    where: {
+      postId: Number(postId),
+    },
+  });
 
   await prisma.post.delete({
     where: {

@@ -18,6 +18,26 @@ const currentUserSelect = {
   password: true,
 };
 
+const publicUserSelect = {
+  id: true,
+  username: true,
+  displayName: true,
+  banner: true,
+  avatar: true,
+  bio: true,
+  status: true,
+  location: true,
+  website: true,
+  createdAt: true,
+};
+
+const publicUserListSelect = {
+  id: true,
+  username: true,
+  displayName: true,
+  avatar: true,
+};
+
 function toSafeCurrentUser(user) {
   if (!user) {
     return null;
@@ -34,11 +54,7 @@ function toSafeCurrentUser(user) {
 export async function allUsers(req, res) {
   try {
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        email: true,
-      },
+      select: publicUserListSelect,
     });
 
     return res.json(users);
@@ -228,6 +244,37 @@ export async function searchUser(req, res){
         console.error("searchUsers error:", error);
         return res.status(500).json({ message: "Failed to search users" });
     }
+}
+
+export async function getUserByUsername(req, res) {
+  try {
+    const username =
+      typeof req.params.username === "string" ? req.params.username.trim() : "";
+
+    if (!username) {
+      return res.status(400).json({
+        message: "Username is required.",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: publicUserSelect,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("getUserByUsername error:", error);
+    return res.status(500).json({
+      message: "Unable to fetch user.",
+    });
+  }
 }
 
 export async function updateUser(req, res) {
@@ -422,19 +469,7 @@ const getUserById = async (req, res) => {
       where: {
         id: userId,
       },
-      select: {
-            id: true,
-            username: true,
-            displayName: true,
-            email: true,
-            banner: true,
-            avatar: true,
-            bio: true,
-            status: true,
-            location: true,
-            website: true,
-            createdAt: true,
-            },
+      select: publicUserSelect,
     });
 
     if (!user) {
@@ -461,7 +496,6 @@ const formatFeedComment = (comment, currentUserId) => {
       id: comment.user.id,
       username: comment.user.username,
       displayName: comment.user.displayName,
-      email: comment.user.email,
       avatar: comment.user.avatar,
     },
     likesCount: comment.commentLikes?.length || 0,
@@ -496,7 +530,6 @@ const formatFeedPost = (post, currentUserId) => {
       id: post.author.id,
       username: post.author.username,
       displayName: post.author.displayName,
-      email: post.author.email,
       avatar: post.author.avatar,
     },
     likesCount: post.likes.length,
@@ -747,6 +780,7 @@ export default {
   getUserLikes,
   getUserFavorites,
   searchUser,
+  getUserByUsername,
   updateUser,
   updatePassword,
   setPassword,
