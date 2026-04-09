@@ -1590,6 +1590,7 @@ async function registerUsers(users) {
       token,
       json: {
         username: user.username,
+        displayName: user.displayName,
         avatar: user.avatar,
         bio: user.profile.bio,
         status: user.profile.status,
@@ -1625,8 +1626,8 @@ async function acceptFriend(from, to) {
     throw new Error(`Unable to find pending request ${from} -> ${to}`);
   }
 
-  await apiRequest(`/friends/${relation.id}`, {
-    method: "PUT",
+  await apiRequest(`/friends/${relation.id}/accept`, {
+    method: "PATCH",
     token: TOKENS.get(to),
   });
 }
@@ -1895,6 +1896,90 @@ async function buildSeedState() {
   };
 }
 
+async function guaranteeShowcaseNotifications(createdPosts) {
+  console.log("=== Guaranteeing one of each notification type for alice and bob ===");
+
+  const alicePost = createdPosts.find((p) => p.author.username === "alice");
+  const bobPost = createdPosts.find((p) => p.author.username === "bob");
+
+  // LIKE
+  for (const [liker, post] of [["karen", alicePost], ["iris", bobPost]]) {
+    try {
+      await apiRequest(`/posts/${post.id}/like`, {
+        method: "POST",
+        token: TOKENS.get(liker),
+      });
+      console.log(`  LIKE         : ${liker} liked ${post.author.username}'s post`);
+    } catch {
+      console.log(`  LIKE         : ${liker} -> ${post.author.username} skipped (already liked)`);
+    }
+  }
+
+  // COMMENT
+  const showcaseComments = [
+    ["luca", alicePost, "Solid update, saving this for later."],
+    ["karen", bobPost, "Good to know, thanks for sharing."],
+  ];
+
+  for (const [commenter, post, content] of showcaseComments) {
+    try {
+      await apiRequest(`/posts/${post.id}/comments`, {
+        method: "POST",
+        token: TOKENS.get(commenter),
+        json: { content },
+        extraHeaders: SEED_SCRIPT_KEY ? { "x-seed-script-key": SEED_SCRIPT_KEY } : {},
+      });
+      console.log(`  COMMENT      : ${commenter} commented on ${post.author.username}'s post`);
+    } catch {
+      console.log(`  COMMENT      : ${commenter} -> ${post.author.username} skipped`);
+    }
+  }
+
+  // FOLLOW
+  for (const [sender, receiver] of [["iris", "alice"], ["luca", "bob"]]) {
+    try {
+      await sendFriend(sender, receiver);
+      console.log(`  FOLLOW       : ${sender} sent a request to ${receiver}`);
+    } catch {
+      console.log(`  FOLLOW       : ${sender} -> ${receiver} skipped (already exists)`);
+    }
+  }
+
+  // FOLLOW_ACCEPT: alice and bob's outgoing pending requests get accepted
+  for (const [requester, accepter] of [["alice", "olivia"], ["bob", "mia"]]) {
+    try {
+      await acceptFriend(requester, accepter);
+      console.log(`  FOLLOW_ACCEPT: ${accepter} accepted ${requester}'s request`);
+    } catch {
+      console.log(`  FOLLOW_ACCEPT: ${requester} -> ${accepter} skipped`);
+    }
+  }
+
+  // UNFOLLOW: create a temporary friendship then delete it
+  for (const [actor, showcase] of [["liam", "alice"], ["leo", "bob"]]) {
+    try {
+      await sendFriend(actor, showcase);
+      await acceptFriend(actor, showcase);
+
+      const friendships = await apiRequest("/friends", { token: TOKENS.get(actor) });
+      const showcaseId = USER_IDS.get(showcase);
+      const row = friendships.find((f) => f.id === showcaseId);
+
+      if (!row) {
+        throw new Error(`Could not find friendship row between ${actor} and ${showcase}`);
+      }
+
+      await apiRequest(`/friends/${row.friendshipId}`, {
+        method: "DELETE",
+        token: TOKENS.get(actor),
+      });
+      console.log(`  UNFOLLOW     : ${actor} unfriended ${showcase}`);
+    } catch (error) {
+      console.log(`  UNFOLLOW     : ${actor} -> ${showcase} skipped (${error.message})`);
+    }
+  }
+}
+
 async function main() {
   const state = await buildSeedState();
 
@@ -1917,6 +2002,7 @@ async function main() {
 
   const createdPosts = await createPosts(state.plans);
   const activityTotals = await seedInteractions(createdPosts, state.engagementPlans);
+  await guaranteeShowcaseNotifications(createdPosts);
   const aliceSummary = summarizeUser(createdPosts, state.graph, "alice");
   const bobSummary = summarizeUser(createdPosts, state.graph, "bob");
 

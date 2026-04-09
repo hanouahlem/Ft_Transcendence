@@ -212,9 +212,19 @@ export async function deleteFriend(req, res) {
             return res.status(404).json({ message: "Friend not found" });
         }
 
+        const otherUserId = friend.senderId === userId ? friend.receiverId : friend.senderId;
+
         await prisma.friends.delete({
             where: { id: friend.id }
         });
+
+        if (friend.status === "accepted") {
+            await createNotificationIfRelevant({
+                userId: otherUserId,
+                actorId: userId,
+                type: NOTIFICATION_TYPES.UNFOLLOW,
+            });
+        }
 
         return res.status(200).json({ message: "Friend removed" });
     } catch (error) {
