@@ -144,7 +144,7 @@ const handleSave = async () => {
                 variant="outline"
                 className="rounded-full border-[#d8cfbe] bg-[#fffaf2]"
               >
-                <Link href="/profil">
+                <Link href="/profile">
                   {error && (
                     <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                       {error}

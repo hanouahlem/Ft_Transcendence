@@ -41,7 +41,7 @@ export function CommentCard({
 			<div className="flex items-start justify-between gap-3">
 				<div className="flex min-w-0 flex-1 items-center gap-3">
 					<Link
-						href={`/profil/${comment.author.id}`}
+						href={`/profile/${encodeURIComponent(comment.author.username)}`}
 						className="shrink-0"
 					>
 						<ProfilePicture
@@ -55,7 +55,7 @@ export function CommentCard({
 					<div className="min-w-0 flex-1">
 						<div className="flex flex-wrap items-center gap-3">
 							<Link
-								href={`/profil/${comment.author.id}`}
+								href={`/profile/${encodeURIComponent(comment.author.username)}`}
 								className="max-w-full truncate font-mono text-ink transition hover:text-accent-blue"
 							>
 								{authorDisplayName}

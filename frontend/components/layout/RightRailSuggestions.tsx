@@ -78,7 +78,7 @@ export function RightRailSuggestions({
 
 								<div className="min-w-0 flex-1">
 									<Link
-										href={`/profil/${author.id}`}
+										href={`/profile/${encodeURIComponent(author.username)}`}
 										className="truncate text-sm font-bold text-ink transition-colors hover:text-accent-blue"
 									>
 										{authorDisplayName}

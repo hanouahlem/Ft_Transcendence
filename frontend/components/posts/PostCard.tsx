@@ -207,7 +207,7 @@ export function PostCard({
 				>
 					<div className="flex min-w-0 items-center gap-3">
 						<Link
-							href={`/profil/${post.author.id}`}
+							href={`/profile/${encodeURIComponent(post.author.username)}`}
 							className="shrink-0"
 						>
 							<ProfilePicture
@@ -225,7 +225,7 @@ export function PostCard({
 						<div className="min-w-0">
 							<div className="flex flex-wrap items-center gap-3">
 								<Link
-									href={`/profil/${post.author.id}`}
+									href={`/profile/${encodeURIComponent(post.author.username)}`}
 									className={cn(
 										"truncate font-bold uppercase tracking-wide text-ink",
 										variantKey === 2

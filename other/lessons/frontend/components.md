@@ -326,8 +326,8 @@ The profile routes use the same shell and post components as the rest of the app
 
 Current files:
 
-- `frontend/app/(app)/profil/page.tsx`
-- `frontend/app/(app)/profil/[id]/page.tsx`
+- `frontend/app/(app)/profile/page.tsx`
+- `frontend/app/(app)/profile/[username]/page.tsx`
 - `frontend/components/profile/ProfileView.tsx`
 - `frontend/components/layout/RightRail.tsx`
 - `frontend/components/posts/PostCard.tsx`
@@ -338,10 +338,10 @@ Current files:
 How it works:
 
 - both routes render the same client component: `ProfileView`
-- `/profil` resolves the current authenticated user from `useAuth()`
-- `/profil/[id]` parses the dynamic route parameter and passes it into `ProfileView`
+- `/profile` resolves the current authenticated user
+- `/profile/[username]` resolves the public profile user first, then loads posts/friends from that user id
 - `ProfileView` fetches:
-  - `GET /users/:id` for the profile metadata
+  - `GET /user` for the authenticated self route or `GET /users/by-username/:username` for a public profile
 - `GET /users/:id/posts` for the archive entries
 - `GET /users/:id/friends` for the right-rail suggestions and the fellows count
 - `ProfileView` uses `useFriendRequests()` for follow/request state and mutations
@@ -356,7 +356,7 @@ Important design rule:
 Real route composition:
 
 ```tsx
-<ProfileView profileId={profileId} />
+<ProfileView profileUsername={username} />
 ```
 
 Real post rendering:

@@ -115,7 +115,7 @@ export function PostDialog({
 								<div className="mb-5 flex items-start justify-between gap-4 border-b border-dashed border-black/20 pb-4">
 									<div className="flex min-w-0 items-center gap-3">
 										<Link
-											href={`/profil/${post.author.id}`}
+											href={`/profile/${encodeURIComponent(post.author.username)}`}
 											className="shrink-0"
 										>
 											<ProfilePicture
@@ -129,7 +129,7 @@ export function PostDialog({
 										<div className="min-w-0">
 											<div className="flex flex-wrap items-center gap-3">
 												<Link
-													href={`/profil/${post.author.id}`}
+													href={`/profile/${encodeURIComponent(post.author.username)}`}
 													className="truncate text-lg font-display uppercase tracking-wide text-ink"
 												>
 													{authorDisplayName}

@@ -13,23 +13,19 @@
 /feed                      Main feed
 /friends                   Friends list and requests
 /notifications             Notifications list
-/profil                    Own profile (rename to /profile pending)
-/profil/[id]               Another user's profile (change to /profile/[username] pending)
+/profile                   Own profile
+/profile/[username]        Another user's public profile
 /settings                  Settings page (profile + password)
 ```
 
 ---
 
-## 1. Profile Route Should Use Username, Not ID
+## 1. Profile Route Uses Username-Based URLs
 
-Current issue:
-- `/profil/[id]` uses the numeric database ID and French spelling.
-
-What to change:
-- Rename the folder from `profil` to `profile` for consistent English naming.
-- Change the dynamic segment from `[id]` to `[username]`.
-- The backend needs to support user lookup by username (e.g. `GET /users/by-username/:username` or modify `GET /users/:identifier` to accept both).
-- Update all internal links that point to `/profil` or `/profil/[id]`.
+Implemented:
+- Active profile routes now use `/profile` and `/profile/[username]`.
+- Public profile resolution goes through `GET /users/by-username/:username`.
+- Internal profile links now point to username-based URLs instead of numeric ids.
 - If a user changes their username, old links will break — acceptable for this project.
 
 ---

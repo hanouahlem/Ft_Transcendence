@@ -30,8 +30,8 @@ frontend/app/(auth)/register/page.tsx
 frontend/app/feed/page.tsx
 frontend/app/friends/page.tsx
 frontend/app/notifications/page.tsx
-frontend/app/profil/page.tsx
-frontend/app/profil/[id]/page.tsx
+frontend/app/profile/page.tsx
+frontend/app/profile/[username]/page.tsx
 frontend/app/settings/profile/page.tsx
 frontend/app/settings/security/page.tsx
 frontend/app/settings/notifications/page.tsx
@@ -45,8 +45,8 @@ That means the current frontend URLs are:
 - `/feed`
 - `/friends`
 - `/notifications`
-- `/profil`
-- `/profil/:id`
+- `/profile`
+- `/profile/:username`
 - `/settings/profile`
 - `/settings/security`
 - `/settings/notifications`
@@ -103,8 +103,8 @@ Several pages are intended for logged-in users:
 - `frontend/app/feed/page.tsx`
 - `frontend/app/friends/page.tsx`
 - `frontend/app/notifications/page.tsx`
-- `frontend/app/profil/page.tsx`
-- `frontend/app/profil/[id]/page.tsx`
+- `frontend/app/profile/page.tsx`
+- `frontend/app/profile/[username]/page.tsx`
 
 These pages usually wrap their content with `ProtectedRoute`.
 
@@ -202,8 +202,8 @@ In this repo, a route tells you where the page lives, but not how much real back
 Examples:
 
 - `/feed` is connected to real backend post routes and can switch between the global feed and the accepted-friends feed
-- `/profil` and `/profil/:id` read profile-related backend data:
-  - `GET /users/:id`
+- `/profile` and `/profile/:username` read profile-related backend data:
+  - `GET /user` for the authenticated user route or `GET /users/by-username/:username` for a public profile
   - `GET /users/:id/posts`
   - `GET /users/:id/friends`
 - `/friends` has real backend wiring for requests, acceptance, and removal through friendship ids

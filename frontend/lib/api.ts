@@ -321,6 +321,10 @@ export async function getUserPosts(userId: number, token?: string | null) {
   return requestWithAuth<FeedPost[]>(`/users/${userId}/posts`, { token });
 }
 
+export async function getUserFriends(userId: number, token?: string | null) {
+  return requestWithAuth<FriendPreview[]>(`/users/${userId}/friends`, { token });
+}
+
 export async function getFeedPosts(
   scope: FeedScope = "all",
   token?: string | null,

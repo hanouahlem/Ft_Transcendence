@@ -35,7 +35,7 @@ const NAV_ITEMS = [
 	{ href: "/settings/notifications", label: "Settings", icon: Settings },
 	{ href: "/message", label: "Message", icon: MessageCircle },
 	{ href: "/settings/profile", label: "Bookmarks", icon: Bookmark },
-	{ href: "/profil", label: "Profile", icon: UserRound },
+	{ href: "/profile", label: "Profile", icon: UserRound },
 ];
 
 export function Sidebar({
@@ -135,7 +135,7 @@ export function Sidebar({
 
 			<div className="mt-auto space-y-3">
 				<Link
-					href="/profil"
+					href="/profile"
 					className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-black/5"
 				>
 					<ProfilePicture

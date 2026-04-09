@@ -12,7 +12,7 @@ Last updated: 2026-04-09
 - [x] Phase 3: Move notification creation fully into backend logic
 - [x] Phase 4: Clean friends and feed backend behavior
 - [x] Phase 5: Update the frontend API layer
-- [ ] Phase 6: Migrate frontend routing to `/profile`
+- [x] Phase 6: Migrate frontend routing to `/profile`
 - [ ] Phase 7: Make notifications actionable in the frontend
 
 ## Phase 1 Notes
@@ -59,6 +59,12 @@ Last updated: 2026-04-09
 - frontend notification types now match the structured backend payload (`type`, `actor`, `postId`)   // [base pour la future page notifications]
 - shared frontend types no longer pretend that public feed/user payloads include `email`   // [alignement avec le backend]
 
+## Phase 6 Notes
+
+- Active profile routing now uses `/profile` and `/profile/[username]` instead of `/profil` and numeric ids   // [urls lisibles]
+- `ProfileView` now resolves public profiles through `GET /users/by-username/:username` before loading posts and friends   // [transition vers username]
+- Feed, comments, right rail, sidebar, and profile-adjacent links now point to username-based profile URLs   // [navigation coherente]
+
 ## Migration Notes
 
 - Added migration: `backend/prisma/migrations/20260409_structured_notifications/migration.sql`
@@ -79,8 +85,8 @@ Last updated: 2026-04-09
 
 - Some pages still use direct `fetch(...)` even though the shared API layer now matches the backend contract   // [migration progressive]
 - Deprecated notifications page is intentionally unsupported now that the backend returns structured payloads only   // [ancienne page a refaire]
-- Profile route migration to `/profile/[username]` has not started yet
+- Deprecated settings sub-routes still exist and still reference the old settings tree   // [cleanup plus tard]
 
 ## Next Phase
 
-- Phase 6: migrate frontend routing from `/profil` to `/profile/[username]`
+- Phase 7: make notifications actionable with type-based rendering and profile/post links

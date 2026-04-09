@@ -31,7 +31,7 @@ Study file:
 Goal: understand how pages map to URLs in this repo.
 
 - `page.tsx` file-based routing
-- root pages: `/`, `/login`, `/register`, `/feed`, `/friends`, `/notifications`, `/profil`
+- root pages: `/`, `/login`, `/register`, `/feed`, `/friends`, `/notifications`, `/profile`
 - nested routes under `/settings/...`
 - what each current page is responsible for
 - when a page needs to be a client component
