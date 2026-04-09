@@ -32,7 +32,8 @@ model User {
   reposts         Repost[]
   sentFriends     Friends[] @relation("sent")
   receivedFriends Friends[] @relation("received")
-  notifications   Notification[]
+  notificationsReceived Notification[] @relation("notificationRecipient")
+  notificationsSent     Notification[] @relation("notificationActor")
   favorites       Favorite[]
   commentLikes     CommentLike[]
   commentFavorites CommentFavorite[]
@@ -49,6 +50,7 @@ model Post {
   comments  Comment[]
   favorites Favorite[]
   reposts   Repost[]
+  notifications Notification[]
 }
 
 model Repost {
@@ -105,11 +107,22 @@ model Friends {
 
 model Notification {
   id        Int      @id @default(autoincrement())
-  content   String
+  type      String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+
+  user      User     @relation("notificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
+
+  actor     User     @relation("notificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  actorId   Int
+
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+  postId    Int?
+
+  @@index([userId])
+  @@index([actorId])
+  @@index([postId])
 }
 
 model CommentLike {

@@ -1,4 +1,5 @@
 import prisma from "../prisma.js";
+import { createNotification, NOTIFICATION_TYPES } from "../services/notificationService.js";
 
 function toFriendPreview(user) {
     return {
@@ -85,17 +86,10 @@ export async function addFriend(req, res) {
             }
         });
 
-        const sender = await prisma.user.findUnique({
-            where: { id: senderId },
-            select: { username: true }
-        });
-
-        await prisma.notification.create({
-            data: {
-                userId: receiverId,
-                content: `${sender?.username ?? "Someone"} sent you a friend request.`,
-                read: false,
-            }
+        await createNotification({
+            userId: receiverId,
+            actorId: senderId,
+            type: NOTIFICATION_TYPES.FOLLOW,
         });
 
         return res.status(201).json({

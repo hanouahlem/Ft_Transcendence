@@ -186,14 +186,14 @@ model Notification {
   id       Int    @id @default(autoincrement())
   type     String
 
-  userId   Int                                                              // FK value — stored in DB
-  user     User   @relation("recipient", fields: [userId], references: [id]) // pointer — NOT a real column
+  userId   Int                                                                                  // FK value — stored in DB
+  user     User   @relation("notificationRecipient", fields: [userId], references: [id])       // pointer — NOT a real column
 
-  actorId  Int                                                              // FK value — stored in DB
-  actor    User   @relation("actor", fields: [actorId], references: [id])   // pointer — NOT a real column
+  actorId  Int                                                                                  // FK value — stored in DB
+  actor    User   @relation("notificationActor", fields: [actorId], references: [id])          // pointer — NOT a real column
 
-  postId   Int?                                                             // nullable FK (the ? means it can be null)
-  post     Post?  @relation(fields: [postId], references: [id])             // nullable pointer
+  postId   Int?                                                                                 // nullable FK (the ? means it can be null)
+  post     Post?  @relation(fields: [postId], references: [id])                                // nullable pointer
 }
 ```
 
@@ -225,6 +225,29 @@ post    Post?  // relation is also nullable when postId is nullable
 ```
 
 Use this when not all rows need that field. For example, a FOLLOW notification has no related post, so `postId` is null.
+
+## Current Project Change
+
+The old project model stored only `content String` on `Notification`.
+That was easy to render, but weak for navigation and hard to trust because the backend could not reliably know:
+
+- who triggered the event
+- what action happened
+- whether a post was involved
+
+The refactor moved that meaning into structured fields in [backend/prisma/schema.prisma](/Users/curtis/Desktop/DEV/last_jeune/backend/prisma/schema.prisma):
+
+- `type` tells the frontend what happened
+- `userId` is the recipient
+- `actorId` is the user who triggered the event
+- `postId` is optional because not every notification points to a post
+
+For existing rows, the migration backfills:
+
+- `type = "MESSAGE"`
+- `actorId = userId`
+
+That fallback keeps the migration runnable on old data, even though those legacy rows did not originally store actor information.
 
 ## `select` Inside `include`
 

@@ -37,7 +37,6 @@ Define the final route and payload shape before editing multiple frontend pages.
   - `GET /users`
   - `GET /users/:id` or equivalent public profile route
 - Return `email` only on private account routes such as the authenticated self route.
-- Remove public `POST /notifications`.
 - Remove the duplicate `POST /posts/:id/comments` route and keep only the non-upload version.
 
 ### Friend Route Direction
