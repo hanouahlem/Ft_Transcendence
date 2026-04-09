@@ -301,24 +301,13 @@ export default function FeedPage() {
               onRemoveFile={handleRemoveFile}
             />
 
-            <section className="border border-black/10 bg-paper px-5 py-4 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                    Feed scope
-                  </p>
-                  <p className="mt-1 text-sm text-ink/70">
-                    Switch between the global archive and posts from accepted friends only.
-                  </p>
-                </div>
-
-                <div className="inline-flex border border-ink bg-paper-muted p-1">
+                <div className="-rotate-1 self-end w-fit inline-flex border border-ink/0 bg-paper-muted p-1 -my-6">
                   <button
                     type="button"
                     onClick={() => setFeedScope("all")}
                     className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
                       feedScope === "all"
-                        ? "bg-ink text-paper"
+                        ? "bg-accent-blue text-paper"
                         : "text-label hover:bg-black/5"
                     }`}
                   >
@@ -329,15 +318,13 @@ export default function FeedPage() {
                     onClick={() => setFeedScope("friends")}
                     className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
                       feedScope === "friends"
-                        ? "bg-ink text-paper"
+                        ? "bg-accent-green text-paper"
                         : "text-label hover:bg-black/5"
                     }`}
                   >
                     Friends
                   </button>
                 </div>
-              </div>
-            </section>
 
             {loading ? (
               <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">

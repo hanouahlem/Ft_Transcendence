@@ -3,7 +3,7 @@
 Purpose:
 Track refactor progress, important deviations from the original plan, and verification notes between phases.
 
-Last updated: 2026-04-09
+Last updated: 2026-04-10
 
 ## Current Status
 
@@ -14,6 +14,7 @@ Last updated: 2026-04-09
 - [x] Phase 5: Update the frontend API layer
 - [x] Phase 6: Migrate frontend routing to `/profile`
 - [x] Phase 7: Make notifications actionable in the frontend
+- [x] Phase 8: Clean feed/settings frontend routes and deprecated pages
 
 ## Phase 1 Notes
 
@@ -75,6 +76,13 @@ Last updated: 2026-04-09
 - `ProfileView` opens the matching post dialog when a notification lands on a `?post=[postId]` profile URL   // [click notif ouvre le bon post]
 - The notifications right rail owns local search/filter controls and “mark all as read” without reintroducing old Radix-based UI wrappers   // [archive ui propre]
 
+## Phase 8 Notes
+
+- `/feed` already exposes both `All` and `Friends` scopes, so this cleanup phase focused on the remaining frontend route tree   // [le split du feed etait deja fait]
+- Deleted the deprecated `/settings/profile`, `/settings/security`, and `/settings/notifications` pages and kept `/settings` as the single active account route   // [une seule page settings maintenant]
+- Updated the sidebar so the live settings entry points to `/settings` instead of the removed split pages   // [navigation nettoyee]
+- Removed the fake `Bookmarks` sidebar entry that only existed because of the deprecated settings tree   // [plus de faux lien]
+
 ## Migration Notes
 
 - Added migration: `backend/prisma/migrations/20260409_structured_notifications/migration.sql`
@@ -94,8 +102,7 @@ Last updated: 2026-04-09
 ## Current Compatibility Gaps
 
 - Some pages still use direct `fetch(...)` even though the shared API layer now matches the backend contract   // [migration progressive]
-- Deprecated settings sub-routes still exist and still reference the old settings tree   // [cleanup plus tard]
 
 ## Next Phase
 
-- Phase 8: clean remaining feed/settings frontend routes and deprecated pages
+- Main refactor plan complete; any remaining work is follow-up cleanup outside the original 8 phases

@@ -213,6 +213,7 @@ What this shows:
 - the route file still owns fetches, saves, uploads, and auth refresh
 - the settings components own the archive paper layout and section-level presentation
 - the page reuses shared app shell pieces like `RightRail` and `Button`
+- the old split settings routes were removed, so this component set only serves `frontend/app/(app)/settings/page.tsx`
 
 The `ledger` button variant lives in:
 

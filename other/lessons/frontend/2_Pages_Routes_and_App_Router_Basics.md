@@ -32,9 +32,7 @@ frontend/app/friends/page.tsx
 frontend/app/notifications/page.tsx
 frontend/app/profile/page.tsx
 frontend/app/profile/[username]/page.tsx
-frontend/app/settings/profile/page.tsx
-frontend/app/settings/security/page.tsx
-frontend/app/settings/notifications/page.tsx
+frontend/app/settings/page.tsx
 ```
 
 That means the current frontend URLs are:
@@ -47,9 +45,7 @@ That means the current frontend URLs are:
 - `/notifications`
 - `/profile`
 - `/profile/:username`
-- `/settings/profile`
-- `/settings/security`
-- `/settings/notifications`
+- `/settings`
 
 ## The Homepage Route
 
@@ -116,9 +112,8 @@ Nested folders create nested URLs.
 
 Example:
 
-- `frontend/app/settings/profile/page.tsx` -> `/settings/profile`
-- `frontend/app/settings/security/page.tsx` -> `/settings/security`
-- `frontend/app/settings/notifications/page.tsx` -> `/settings/notifications`
+- `frontend/app/profile/[username]/page.tsx` -> `/profile/:username`
+- `frontend/app/settings/page.tsx` -> `/settings`
 
 This is one of the main benefits of the App Router: the folder structure already shows the URL structure.
 
@@ -130,9 +125,9 @@ So when someone visits `/friends`, Next.js renders:
 
 - `frontend/app/friends/page.tsx`
 
-When someone visits `/settings/security`, Next.js renders:
+When someone visits `/settings`, Next.js renders:
 
-- `frontend/app/settings/security/page.tsx`
+- `frontend/app/settings/page.tsx`
 
 This is the core routing convention to remember.
 
@@ -208,7 +203,7 @@ Examples:
   - `GET /users/:id/friends`
 - `/friends` has real backend wiring for requests, acceptance, and removal through friendship ids
 - `/notifications` now uses real backend notification rows and builds navigation targets from `type`, `actor.username`, and `postId`
-- some settings pages still contain placeholder/demo data
+- `/settings` is the single active account route and owns profile edits, media uploads, and password updates
 
 So route knowledge is only the first layer. You also need to know whether a page is backed by real API calls, partial wiring, or placeholder UI.
 
@@ -235,7 +230,7 @@ shared components are reused inside pages
 
 - Which file maps to the `/friends` route?
 - Why does `frontend/app/page.tsx` map to `/`?
-- What URL does `frontend/app/settings/security/page.tsx` create?
+- What URL does `frontend/app/settings/page.tsx` create?
 - What is the difference between a route file and a shared component?
 - Why do many route files in this repo use `"use client"`?
 

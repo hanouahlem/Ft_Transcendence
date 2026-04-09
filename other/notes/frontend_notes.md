@@ -32,20 +32,19 @@ Implemented:
 
 ## 2. Remove Deprecated Settings Sub-Routes
 
-TODO:
-- Delete `/settings/security`, `/settings/notifications`, and `/settings/profile` — all deprecated by the new unified `/settings` page.
-- Remove the corresponding folders under `frontend/app/(app)/settings/`.
+Implemented:
+- Deleted `/settings/security`, `/settings/notifications`, and `/settings/profile`.
+- Kept `/settings` as the single account settings route.
+- Updated active navigation so the sidebar points to `/settings` instead of the removed split pages.
 
 ---
 
-## 3. Feed Only Shows the Global Feed
+## 3. Feed Supports Global And Friends Views
 
-Current issue:
-- `/feed` calls `GET /posts`, which returns all posts.
-- There is no friends-only feed view.
-
-Cleaner direction:
-- Once `GET /posts/friends` is added to the backend, add two tabs on the feed page ("All" and "Friends") that swap which endpoint is called.
+Implemented:
+- `/feed` exposes `All` and `Friends` scopes.
+- The page swaps between `GET /posts` and `GET /posts/friends`.
+- Friends scope does not inject a freshly created post into the visible list unless it belongs in that filtered feed.
 
 ---
 
@@ -59,9 +58,10 @@ Current issue:
 Decided approach:
 - Add `type`, `actor`, and nullable `postId` to the notification response shape.
 - The backend should include `actor.id`, `actor.username`, and `actor.avatar` so the frontend can build profile links without an extra lookup.
-- Notifications that relate to a post (like, comment) link to `/profile/[actor.username]?post=[postId]`.
+- Notifications that relate to your own post (like, comment) link to `/profile?post=[postId]`.
 - The profile page reads the `?post=` query param on mount and auto-opens the existing post dialog for that post.
-- Notifications that relate to a user action (follow, unfollow, follow request accepted) link to `/profile/[actor.username]`.
+- Notifications that relate to another user's action (follow, unfollow, follow request accepted) link to `/profile/[actor.username]`.
+- Mention notifications keep the actor-profile context for the referenced post: `/profile/[actor.username]?post=[postId]`.
 - No dedicated `/posts/[id]` route needed.
 
 Fallback:

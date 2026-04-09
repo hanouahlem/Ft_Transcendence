@@ -5,12 +5,9 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
 	Bell,
-	Bookmark,
 	Home,
 	LogOut,
 	MessageCircle,
-	Search,
-	SlidersHorizontal,
 	UserRound,
 	Settings,
 	Handshake,
@@ -29,13 +26,11 @@ type SidebarProps = {
 
 const NAV_ITEMS = [
 	{ href: "/feed", label: "Timeline", icon: Home },
-	// { href: "/friends", label: "Discoveries", icon: Search },
-	{ href: "/friends", label: "Friends", icon: Handshake },
-	{ href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
-	{ href: "/settings/notifications", label: "Settings", icon: Settings },
-	{ href: "/message", label: "Message", icon: MessageCircle },
-	{ href: "/settings/profile", label: "Bookmarks", icon: Bookmark },
 	{ href: "/profile", label: "Profile", icon: UserRound },
+	{ href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
+	{ href: "/friends", label: "Friends", icon: Handshake },
+	{ href: "/message", label: "Message", icon: MessageCircle, badge: 2 },
+	{ href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar({
