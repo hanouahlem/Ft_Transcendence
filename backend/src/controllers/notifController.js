@@ -1,49 +1,13 @@
 import prisma from "../prisma.js";
 import {
-    createNotification,
-    isValidNotificationType,
     notificationInclude,
     serializeNotification,
 } from "../services/notificationService.js";
 
 export async function createNotif(req, res){
-    try {
-        const userId = req.user.id;
-        const rawType = typeof req.body.type === "string" ? req.body.type.trim().toUpperCase() : "";
-        const rawPostId = req.body.postId;
-
-        if (!userId) {
-            return res.status(400).json({ message: "userId is required" });
-        }
-
-        if (!isValidNotificationType(rawType)) {
-            return res.status(400).json({ message: "A valid notification type is required" });
-        }
-
-        let postId = null;
-        if (rawPostId !== undefined && rawPostId !== null && rawPostId !== "") {
-            postId = Number(rawPostId);
-
-            if (Number.isNaN(postId) || postId < 1) {
-                return res.status(400).json({ message: "postId must be a positive integer" });
-            }
-        }
-
-        const notif = await createNotification({
-            userId,
-            actorId: userId,
-            type: rawType,
-            postId,
-        });
-
-        return res.status(201).json({ notif: serializeNotification(notif) });
-    }
-
-    catch (error){
-        console.error("createNotif error: ", error);
-        return res.status(500).json({ message: "Failed to create a notification" });
-    }
-
+    return res.status(403).json({
+        message: "Notifications are created automatically from backend events.",
+    });
 }
 
 

@@ -56,17 +56,17 @@ Cleaner direction:
 ## 4. Notifications Are Not Actionable
 
 Current issue:
-- The `Notification` model only has `{ id, content, read, createdAt, userId }`.
-- There is no `type`, `actorId`, or `postId` — so notifications cannot link anywhere.
-- Clicking a notification does nothing except mark it read or dismiss it.
+- The old notifications page was built around `{ id, content, read, createdAt, userId }`.
+- The backend now returns structured notification data, so that page no longer matches the API contract.
+- Clicking a notification still does nothing except mark it read or dismiss it.
 
 Decided approach:
-- Add `type`, `actorId`, `actorUsername`, and nullable `postId` to the notification model.
-- Store `actorUsername` alongside `actorId` so the frontend can build profile links without an extra lookup.
-- Notifications that relate to a post (like, comment) link to `/profile/[username]?post=[postId]`.
+- Add `type`, `actor`, and nullable `postId` to the notification response shape.
+- The backend should include `actor.id`, `actor.username`, and `actor.avatar` so the frontend can build profile links without an extra lookup.
+- Notifications that relate to a post (like, comment) link to `/profile/[actor.username]?post=[postId]`.
 - The profile page reads the `?post=` query param on mount and auto-opens the existing post dialog for that post.
-- Notifications that relate to a user action (follow, unfollow, follow request accepted) link to `/profile/[actorUsername]`.
+- Notifications that relate to a user action (follow, unfollow, follow request accepted) link to `/profile/[actor.username]`.
 - No dedicated `/posts/[id]` route needed.
 
 Fallback:
-- If the `?post=` linking is not done in time, just linking to `/profile/[actorUsername]` is good enough for evaluation.
+- If the `?post=` linking is not done in time, just linking to `/profile/[actor.username]` is good enough for evaluation.

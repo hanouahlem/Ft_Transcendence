@@ -126,6 +126,13 @@ Examples:
 - cannot accept a request already handled
 - recommendation logic excludes the current user and already accepted friends, then fills empty slots with other users
 
+Notification side effects now also live here:
+
+- `addFriend` creates a `FOLLOW` notification for the receiver
+- `acceptFriend` creates a `FOLLOW_ACCEPT` notification for the original sender
+- both use the shared helper from `backend/src/services/notificationService.js`
+- the helper skips self-notifications so the backend does not create noisy rows when actor and recipient are the same user
+
 ## Post Logic
 
 Files:
@@ -156,6 +163,7 @@ The post controllers handle HTTP concerns:
 - fetch posts with relations
 - delete posts
 - like/unlike posts
+- return enough owner data for notification side effects after likes and comments
 - delete image files when a post is deleted
 
 ## Why A Service Layer Exists For Posts
@@ -168,6 +176,31 @@ The service layer helps separate:
 - business/data manipulation code
 
 That makes controllers smaller and easier to read.
+
+### Post Notifications
+
+Phase 3 of the refactor moved notification creation into real backend events instead of trusting `POST /notifications`.
+
+Real code path:
+
+- `backend/src/controllers/postController.js`
+- `backend/src/services/postService.js`
+- `backend/src/services/notificationService.js`
+
+What happens now:
+
+- `likePostHandler` calls `likePost(...)`
+- the service returns whether a new like was actually created and which user owns the post
+- the controller creates a `LIKE` notification only for a new like
+- `createCommentHandler` calls `createComment(...)`
+- the service returns both the formatted comment and the post owner id
+- the controller creates a `COMMENT` notification for the post owner
+
+Why this matters:
+
+- the client can no longer forge a fake "X liked your post" event by calling the notifications route directly
+- notifications stay tied to real database writes
+- duplicate like notifications are avoided because liking an already-liked post returns `created: false`
 
 ## Validation And Error Handling Patterns
 

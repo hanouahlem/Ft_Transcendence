@@ -197,6 +197,7 @@ What changed:
 - `GET /users/by-username/:username` exists so the frontend can move to username-based profile URLs later
 - friend acceptance now uses a verb and path that describe the action clearly
 - `GET /posts` is the global feed and `GET /posts/friends` is reserved for accepted-friends posts only
+- `POST /notifications` still exists at the route level, but it is now blocked for normal clients so notifications can only come from backend event logic
 
 Why route order matters here:
 

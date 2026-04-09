@@ -15,6 +15,10 @@ import {
   unfavoriteComment,
 } from "../services/postService.js";
 import { getOptionalEnv } from "../env.js";
+import {
+  createNotificationIfRelevant,
+  NOTIFICATION_TYPES,
+} from "../services/notificationService.js";
 
 export const getPostsHandler = async (req, res) => {
   try {
@@ -170,7 +174,16 @@ export const likePostHandler = async (req, res) => {
       });
     }
 
-    await likePost(postId, userId);
+    const likeResult = await likePost(postId, userId);
+
+    if (likeResult.created) {
+      await createNotificationIfRelevant({
+        userId: likeResult.postAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.LIKE,
+        postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Post liked successfully.",
@@ -241,12 +254,19 @@ export const createCommentHandler = async (req, res) => {
     const skipModeration =
       Boolean(seedScriptKey) && req.get("x-seed-script-key") === seedScriptKey;
 
-    const comment = await createComment({
+    const { comment, postAuthorId } = await createComment({
       postId,
       userId,
       content: content.trim(),
       mediaUrl: null,
       skipModeration,
+    });
+
+    await createNotificationIfRelevant({
+      userId: postAuthorId,
+      actorId: userId,
+      type: NOTIFICATION_TYPES.COMMENT,
+      postId,
     });
 
     return res.status(201).json({

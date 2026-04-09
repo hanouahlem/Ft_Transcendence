@@ -1,5 +1,8 @@
 import prisma from "../prisma.js";
-import { createNotification, NOTIFICATION_TYPES } from "../services/notificationService.js";
+import {
+    createNotificationIfRelevant,
+    NOTIFICATION_TYPES,
+} from "../services/notificationService.js";
 
 function toFriendPreview(user) {
     return {
@@ -86,7 +89,7 @@ export async function addFriend(req, res) {
             }
         });
 
-        await createNotification({
+        await createNotificationIfRelevant({
             userId: receiverId,
             actorId: senderId,
             type: NOTIFICATION_TYPES.FOLLOW,
@@ -173,6 +176,12 @@ export async function acceptFriend(req, res) {
         const updatedFriend = await prisma.friends.update({
             where: { id: requestId },
             data: { status: "accepted" }
+        });
+
+        await createNotificationIfRelevant({
+            userId: friends.senderId,
+            actorId: userId,
+            type: NOTIFICATION_TYPES.FOLLOW_ACCEPT,
         });
 
         return res.status(200).json({ friend: updatedFriend });

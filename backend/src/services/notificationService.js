@@ -31,37 +31,9 @@ export function isValidNotificationType(type) {
   return VALID_NOTIFICATION_TYPES.has(type);
 }
 
-function buildNotificationContent(notification) {
-  const actorName = notification.actor?.username ?? "Someone";
-
-  switch (notification.type) {
-    case NOTIFICATION_TYPES.FOLLOW:
-      return `${actorName} sent you a friend request.`;
-    case NOTIFICATION_TYPES.UNFOLLOW:
-      return `${actorName} removed you from friends.`;
-    case NOTIFICATION_TYPES.FOLLOW_ACCEPT:
-      return `${actorName} accepted your friend request.`;
-    case NOTIFICATION_TYPES.LIKE:
-      return `${actorName} liked your post.`;
-    case NOTIFICATION_TYPES.COMMENT:
-      return `${actorName} commented on your post.`;
-    case NOTIFICATION_TYPES.MENTION:
-      return `${actorName} mentioned you in a post.`;
-    case NOTIFICATION_TYPES.MESSAGE:
-      if (notification.actorId === notification.userId) {
-        return "You have a new message.";
-      }
-
-      return `${actorName} sent you a message.`;
-    default:
-      return "You have a new notification.";
-  }
-}
-
 export function serializeNotification(notification) {
   return {
     ...notification,
-    content: buildNotificationContent(notification),
     postId: notification.postId ?? notification.post?.id ?? null,
   };
 }
@@ -75,5 +47,32 @@ export async function createNotification({ userId, actorId, type, postId = null 
       postId,
     },
     include: notificationInclude,
+  });
+}
+
+export async function createNotificationIfRelevant({
+  userId,
+  actorId,
+  type,
+  postId = null,
+}) {
+  const recipientId = Number(userId);
+  const resolvedActorId = Number(actorId);
+
+  if (
+    Number.isNaN(recipientId) ||
+    Number.isNaN(resolvedActorId) ||
+    recipientId < 1 ||
+    resolvedActorId < 1 ||
+    recipientId === resolvedActorId
+  ) {
+    return null;
+  }
+
+  return createNotification({
+    userId: recipientId,
+    actorId: resolvedActorId,
+    type,
+    postId,
   });
 }

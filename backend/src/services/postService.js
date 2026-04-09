@@ -232,7 +232,10 @@ export const likePost = async (postId, userId) => {
   });
 
   if (existingLike) {
-    return true;
+    return {
+      created: false,
+      postAuthorId: post.authorId,
+    };
   }
 
   await prisma.like.create({
@@ -242,7 +245,10 @@ export const likePost = async (postId, userId) => {
     },
   });
 
-  return true;
+  return {
+    created: true,
+    postAuthorId: post.authorId,
+  };
 };
 
 export const unlikePost = async (postId, userId) => {
@@ -318,7 +324,10 @@ export const createComment = async (input) => {
     },
   });
 
-  return formatComment(comment, input.userId);
+  return {
+    comment: formatComment(comment, input.userId),
+    postAuthorId: post.authorId,
+  };
 };
 
 export const favoritePost = async (postId, userId) => {
