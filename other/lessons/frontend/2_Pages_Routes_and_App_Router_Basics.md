@@ -207,7 +207,7 @@ Examples:
   - `GET /users/:id/posts`
   - `GET /users/:id/friends`
 - `/friends` has real backend wiring for requests, acceptance, and removal through friendship ids
-- `/notifications` is currently mostly mock/demo UI
+- `/notifications` now uses real backend notification rows and builds navigation targets from `type`, `actor.username`, and `postId`
 - some settings pages still contain placeholder/demo data
 
 So route knowledge is only the first layer. You also need to know whether a page is backed by real API calls, partial wiring, or placeholder UI.

@@ -17,12 +17,14 @@ export const notificationInclude = {
     select: {
       id: true,
       username: true,
+      displayName: true,
       avatar: true,
     },
   },
   post: {
     select: {
       id: true,
+      content: true,
     },
   },
 };

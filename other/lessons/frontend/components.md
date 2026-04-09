@@ -220,7 +220,7 @@ How it works:
 - uses `class-variance-authority` (`cva`)
 - keeps the stable import path `@/components/ui/button`
 - uses archive visual classes as the real button language
-- exposes both standard app variants (`default`, `outline`, `secondary`, `destructive`) and archive-specific aliases (`paper`, `stamp`, `subtle`, `delete`, `black`, `bluesh`)
+- exposes both standard app variants (`default`, `outline`, `secondary`, `destructive`) and archive-specific aliases (`paper`, `stamp`, `subtle`, `delete`, `black`, `bluesh`, `correspondence`)
 - exposes sizes like `sm`, `default`, `lg`, `icon`
 
 ### `frontend/components/ui/avatar.tsx`
@@ -380,11 +380,13 @@ Explain it during evaluation like this:
 - the app shell is shared by the `(app)` layout through `AppSidebarShell`
 - the profile page only owns profile-specific data loading and hero/stats layout
 - the actual post interaction system is the same shared hook and components already used in the feed
+- decorative archive stars are now centralized in `frontend/components/decor/ArchiveStar.tsx`, so profile, notifications, and post variants reuse the same SVG asset
 
 Real hero-layout detail from `frontend/components/profile/ProfileView.tsx`:
 
 - the hero now prefers `displayName` for the large title while keeping `@username` as the stable handle
 - the banner component receives `src={profile.banner}` so saved banner URLs render directly in the hero
+- the red archive star used around the profile picture now lives in `frontend/components/decor/ArchiveStar.tsx` instead of being declared inline in the page component
 - the location chip and the profile action buttons are rendered inside one shared flex row with `justify-between`
 - this keeps metadata on the left and actions on the right instead of stacking them as unrelated blocks
 - `flex-wrap` is still enabled so the row can break safely on narrower screens
@@ -466,6 +468,40 @@ Important detail:
 - it still keeps `@username` as the handle line
 - that keeps generated fallback avatars consistent with post cards, dialogs, comments, profile, and sidebar
 - the feed page must preserve `displayName` when normalizing `/friends/suggestions`; otherwise the right rail falls back to `username` and the generated avatar changes only on the feed screen
+
+### Notifications Ledger
+
+Current files:
+
+- `frontend/app/(app)/notifications/page.tsx`
+- `frontend/components/notifications/NotificationCard.tsx`
+- `frontend/components/notifications/NotificationsRail.tsx`
+- `frontend/lib/notification-utils.ts`
+
+What this does:
+
+- replaces the deprecated notifications screen with the real archive-style page used by the app
+- renders each notification from structured backend fields instead of trusting a stored sentence
+- deep-links post-related notifications into profile post dialogs through `?post=[postId]`, with `LIKE` and `COMMENT` opening the recipient's own profile view and `MENTION` preserving the actor-profile context
+- groups dense like activity on the same post into one summary card when more than 5 raw `LIKE` notifications target that post
+
+How it works:
+
+- `page.tsx` fetches `GET /notifications` through `frontend/lib/api.ts`
+- `notification-utils.ts` decides:
+  - the display copy for each `type`
+  - the destination URL for each notification
+  - the local search/filter matching text
+  - when raw notifications should be grouped into a frontend-only ledger row
+- `NotificationCard` renders one paper-style record and the whole card acts as the click target
+- `LikeNotificationGroupCard` renders the special grouped-like summary with stacked avatars and marks all grouped like rows as read on click
+- `NotificationsRail` owns local search text, local category toggles, and the bulk “mark all as read” action
+
+Important evaluation point:
+
+- the backend does not send notification display text anymore
+- the frontend builds the sentence and the target link from `type`, `actor`, and optional `postId`
+- the grouped like card is a presentation rule in the notifications page, not a new backend notification type
 
 ### Sidebar "Log Entry" -> `NewPostDialog` Flow
 

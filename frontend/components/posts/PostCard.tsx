@@ -6,6 +6,7 @@ import { RelativeTime } from "@/components/ui/relative-time";
 import { cn } from "@/lib/utils";
 import { SocialToggle } from "@/components/posts/SocialToggle";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import ArchiveStar from "@/components/decor/ArchiveStar";
 
 type PostCardProps = {
 	post: FeedPost;
@@ -30,6 +31,7 @@ type PostVariant = {
 	actionJustify: string;
 	accentDot?: boolean;
 	star?: boolean;
+	starClass?: string;
 };
 
 const POST_VARIANTS: PostVariant[] = [
@@ -78,6 +80,7 @@ const POST_VARIANTS: PostVariant[] = [
 			"text-2xl font-bold italic leading-snug text-center py-4 opacity-90",
 		actionJustify: "justify-start gap-8",
 		star: true,
+		starClass: "right-6 top-2 h-8 w-8 rotate-90 scale-50",
 	},
 	{
 		wrapper: "",
@@ -90,27 +93,13 @@ const POST_VARIANTS: PostVariant[] = [
 		headerBorder: "border-dashed border-label/40",
 		contentClass: "text-lg leading-relaxed",
 		actionJustify: "justify-between",
+		star: true,
+		starClass: "bottom-[20%] -left-4 h-10 w-10 rotate-[12deg] scale-75",
 	},
 ];
 
 function getVariantKeyFromPostId(postId: number) {
 	return postId % POST_VARIANTS.length;
-}
-
-function OrangeStar() {
-	return (
-		<svg
-			viewBox="0 0 50 50"
-			className="h-full w-full fill-none stroke-accent"
-			strokeWidth="1.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<polygon points="25,5 30,20 45,25 30,30 25,45 20,30 5,25 20,20" />
-			<line x1="15" y1="15" x2="35" y2="35" />
-			<line x1="15" y1="35" x2="35" y2="15" />
-		</svg>
-	);
 }
 
 function renderBody(
@@ -192,8 +181,13 @@ export function PostCard({
 				) : null}
 
 				{variant.star ? (
-					<div className="absolute right-6 top-2 h-8 w-8 rotate-90 scale-50 pointer-events-none">
-						<OrangeStar />
+					<div
+						className={cn(
+							"pointer-events-none absolute z-20",
+							variant.starClass,
+						)}
+					>
+						<ArchiveStar />
 					</div>
 				) : null}
 
@@ -293,7 +287,7 @@ export function PostCard({
 								) : null}
 								{variantKey === 0 ? (
 									<div className="pointer-events-none absolute -left-4 -top-4 h-8 w-8 rotate-12 scale-75">
-										<OrangeStar />
+										<ArchiveStar />
 									</div>
 								) : null}
 							</div>

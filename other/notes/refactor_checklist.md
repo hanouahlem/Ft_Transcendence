@@ -13,7 +13,7 @@ Last updated: 2026-04-09
 - [x] Phase 4: Clean friends and feed backend behavior
 - [x] Phase 5: Update the frontend API layer
 - [x] Phase 6: Migrate frontend routing to `/profile`
-- [ ] Phase 7: Make notifications actionable in the frontend
+- [x] Phase 7: Make notifications actionable in the frontend
 
 ## Phase 1 Notes
 
@@ -65,6 +65,16 @@ Last updated: 2026-04-09
 - `ProfileView` now resolves public profiles through `GET /users/by-username/:username` before loading posts and friends   // [transition vers username]
 - Feed, comments, right rail, sidebar, and profile-adjacent links now point to username-based profile URLs   // [navigation coherente]
 
+## Phase 7 Notes
+
+- `/notifications` is the real archive-styled ledger page built from structured backend notifications, replacing the deprecated `content`-based screen   // [vraie page notifications maintenant]
+- Notification rows build their text from `type`, actor identity (`displayName` + `username`), and post metadata only; the backend does not generate display copy   // [plus de texte backend, liens utiles]
+- Notification cards are fully clickable records without per-card action buttons; header identity links go to the actor profile while the card body opens the notification destination   // [carte cliquable entiere]
+- `LIKE` and `COMMENT` deep-links use the connected user profile with `?post=[postId]`, while `MENTION` keeps the actor-profile context for the referenced post   // [logique des liens selon le type]
+- Heavy like activity on the same post is grouped into one summary card when a post has more than 5 `LIKE` rows; this aggregation stays frontend-only for the student project   // [regroupement visuel sans changer l'api]
+- `ProfileView` opens the matching post dialog when a notification lands on a `?post=[postId]` profile URL   // [click notif ouvre le bon post]
+- The notifications right rail owns local search/filter controls and “mark all as read” without reintroducing old Radix-based UI wrappers   // [archive ui propre]
+
 ## Migration Notes
 
 - Added migration: `backend/prisma/migrations/20260409_structured_notifications/migration.sql`
@@ -84,9 +94,8 @@ Last updated: 2026-04-09
 ## Current Compatibility Gaps
 
 - Some pages still use direct `fetch(...)` even though the shared API layer now matches the backend contract   // [migration progressive]
-- Deprecated notifications page is intentionally unsupported now that the backend returns structured payloads only   // [ancienne page a refaire]
 - Deprecated settings sub-routes still exist and still reference the old settings tree   // [cleanup plus tard]
 
 ## Next Phase
 
-- Phase 7: make notifications actionable with type-based rendering and profile/post links
+- Phase 8: clean remaining feed/settings frontend routes and deprecated pages

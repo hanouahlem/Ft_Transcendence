@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { MapPin, MessageCircle } from "lucide-react";
 import {
   getCurrentUser,
@@ -17,6 +18,7 @@ import { PostDialog } from "@/components/posts/PostDialog";
 import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
+import ArchiveStar from "@/components/decor/ArchiveStar";
 import {
   buildProfileSuggestions,
   getRightRailTitle,
@@ -36,22 +38,6 @@ type ProfileFriend = RightRailSuggestion;
 type ProfileViewProps = {
   profileUsername?: string | null;
 };
-
-function ArchiveStar() {
-  return (
-    <svg
-      viewBox="0 0 50 50"
-      className="h-full w-full fill-none stroke-accent-red"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="25,5 30,20 45,25 30,30 25,45 20,30 5,25 20,20" />
-      <line x1="15" y1="15" x2="35" y2="35" />
-      <line x1="15" y1="35" x2="35" y2="15" />
-    </svg>
-  );
-}
 
 function formatJoinedDate(dateString: string) {
   const date = new Date(dateString);
@@ -75,12 +61,16 @@ function formatCompactCount(value: number) {
 
 export function ProfileView({ profileUsername = null }: ProfileViewProps) {
   const { user, token, isAuthLoading } = useAuth();
+  const searchParams = useSearchParams();
   const isOwnProfile = profileUsername === null;
 
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [friends, setFriends] = useState<ProfileFriend[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
+  const [handledDeepLinkedPostId, setHandledDeepLinkedPostId] = useState<
+    number | null
+  >(null);
 
   const {
     sentRequests,
@@ -138,6 +128,16 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
     () => posts.reduce((sum, post) => sum + post.commentsCount, 0),
     [posts],
   );
+  const deepLinkedPostId = useMemo(() => {
+    const value = searchParams.get("post");
+
+    if (!value) {
+      return null;
+    }
+
+    const parsedValue = Number.parseInt(value, 10);
+    return Number.isNaN(parsedValue) ? null : parsedValue;
+  }, [searchParams]);
 
   const rightRailTitle = useMemo(
     () =>
@@ -243,6 +243,38 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
     resetInteractionState,
     setPosts,
     user?.id,
+  ]);
+
+  useEffect(() => {
+    setHandledDeepLinkedPostId(null);
+  }, [deepLinkedPostId, profileUsername]);
+
+  useEffect(() => {
+    if (
+      loading ||
+      deepLinkedPostId === null ||
+      postDialogOpen ||
+      handledDeepLinkedPostId === deepLinkedPostId
+    ) {
+      return;
+    }
+
+    const targetPost = posts.find((post) => post.id === deepLinkedPostId);
+
+    if (!targetPost) {
+      setHandledDeepLinkedPostId(deepLinkedPostId);
+      return;
+    }
+
+    handleOpenPost(targetPost.id);
+    setHandledDeepLinkedPostId(deepLinkedPostId);
+  }, [
+    deepLinkedPostId,
+    handleOpenPost,
+    handledDeepLinkedPostId,
+    loading,
+    postDialogOpen,
+    posts,
   ]);
 
   const resolvedProfileId = profile?.id ?? (isOwnProfile ? user?.id ?? null : null);

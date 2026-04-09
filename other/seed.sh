@@ -39,6 +39,7 @@ const SEED_SCRIPT_KEY = readSeedScriptKey();
 
 function makeUser({
   username,
+  displayName,
   avatarId,
   cluster,
   focus,
@@ -53,6 +54,7 @@ function makeUser({
 }) {
   return {
     username,
+    displayName,
     email: `${username}@test.com`,
     avatarId,
     cluster,
@@ -85,13 +87,6 @@ function stableNumber(input) {
   return hash;
 }
 
-function titleCaseUsername(username) {
-  return username
-    .split(/[_-]+/)
-    .filter(Boolean)
-    .map((part) => capitalize(part))
-    .join(" ");
-}
 
 function pickSeededSubset(users, count, seedLabel) {
   return new Set(
@@ -126,6 +121,7 @@ function listSummary(values) {
 const USERS = [
   makeUser({
     username: "alice",
+    displayName: "Alice Mercier",
     avatarId: 12,
     cluster: "builders",
     focus: "the feed composer and the small polish around it",
@@ -140,6 +136,7 @@ const USERS = [
   }),
   makeUser({
     username: "bob",
+    displayName: "Bob Lefevre",
     avatarId: 13,
     cluster: "builders",
     focus: "the Docker setup and the rough edges in the backend",
@@ -153,6 +150,7 @@ const USERS = [
   }),
   makeUser({
     username: "charlie",
+    displayName: "Charlie Dubois",
     avatarId: 14,
     cluster: "builders",
     focus: "the auth flow and the weird edge cases around it",
@@ -165,6 +163,7 @@ const USERS = [
   }),
   makeUser({
     username: "diana",
+    displayName: "Diana Rousseau",
     avatarId: 15,
     cluster: "builders",
     focus: "cleaning the profile view and the tabs around it",
@@ -178,6 +177,7 @@ const USERS = [
   }),
   makeUser({
     username: "emma",
+    displayName: "Emma Laurent",
     avatarId: 16,
     cluster: "builders",
     focus: "keeping the route flow readable when the app grows",
@@ -190,6 +190,7 @@ const USERS = [
   }),
   makeUser({
     username: "frank",
+    displayName: "Frank Moreau",
     avatarId: 17,
     cluster: "creatives",
     focus: "making the feed cards feel less stiff",
@@ -202,6 +203,7 @@ const USERS = [
   }),
   makeUser({
     username: "grace",
+    displayName: "Grace Simon",
     avatarId: 18,
     cluster: "creatives",
     focus: "the image-heavy posts and the way they land in the feed",
@@ -215,6 +217,7 @@ const USERS = [
   }),
   makeUser({
     username: "hugo",
+    displayName: "Hugo Martin",
     avatarId: 19,
     cluster: "creatives",
     focus: "notifications and the tiny details around them",
@@ -227,6 +230,7 @@ const USERS = [
   }),
   makeUser({
     username: "iris",
+    displayName: "Iris Bernard",
     avatarId: 20,
     cluster: "creatives",
     focus: "the visual rhythm across profile and feed",
@@ -240,6 +244,7 @@ const USERS = [
   }),
   makeUser({
     username: "jack",
+    displayName: "Jack Thomas",
     avatarId: 21,
     cluster: "creatives",
     focus: "the interaction details in comments and dialogs",
@@ -252,6 +257,7 @@ const USERS = [
   }),
   makeUser({
     username: "karen",
+    displayName: "Karen Petit",
     avatarId: 22,
     cluster: "operators",
     focus: "keeping the database layer predictable",
@@ -264,6 +270,7 @@ const USERS = [
   }),
   makeUser({
     username: "liam",
+    displayName: "Liam Robert",
     avatarId: 23,
     cluster: "operators",
     focus: "the multiplayer game loop and the state around it",
@@ -276,6 +283,7 @@ const USERS = [
   }),
   makeUser({
     username: "mia",
+    displayName: "Mia Richard",
     avatarId: 24,
     cluster: "operators",
     focus: "schema cleanup and removing duplicated edge cases",
@@ -288,6 +296,7 @@ const USERS = [
   }),
   makeUser({
     username: "noah",
+    displayName: "Noah Durand",
     avatarId: 25,
     cluster: "operators",
     focus: "game timing and the little race conditions around it",
@@ -300,6 +309,7 @@ const USERS = [
   }),
   makeUser({
     username: "olivia",
+    displayName: "Olivia Michel",
     avatarId: 26,
     cluster: "operators",
     focus: "bookmarks, saved views, and the things people revisit",
@@ -313,6 +323,7 @@ const USERS = [
   }),
   makeUser({
     username: "pablo",
+    displayName: "Pablo Garcia",
     avatarId: 27,
     cluster: "nightshift",
     focus: "making the local dev workflow less fragile",
@@ -325,6 +336,7 @@ const USERS = [
   }),
   makeUser({
     username: "quinn",
+    displayName: "Quinn Fournier",
     avatarId: 28,
     cluster: "nightshift",
     focus: "turning rough interaction ideas into something shippable",
@@ -337,6 +349,7 @@ const USERS = [
   }),
   makeUser({
     username: "ruby",
+    displayName: "Ruby Girard",
     avatarId: 29,
     cluster: "nightshift",
     focus: "smoothing the profile details people actually notice",
@@ -350,6 +363,7 @@ const USERS = [
   }),
   makeUser({
     username: "sam",
+    displayName: "Sam Leclerc",
     avatarId: 30,
     cluster: "nightshift",
     focus: "keeping the realtime bits understandable under pressure",
@@ -362,6 +376,7 @@ const USERS = [
   }),
   makeUser({
     username: "tina",
+    displayName: "Tina Bonnet",
     avatarId: 31,
     cluster: "nightshift",
     focus: "small interaction polish that keeps the app feeling alive",
@@ -378,7 +393,6 @@ const USERS_WITH_AVATARS = pickSeededSubset(USERS, 10, "profile-avatar");
 const USERS_WITH_BANNERS = pickSeededSubset(USERS, 15, "profile-banner");
 
 for (const user of USERS) {
-  user.displayName = titleCaseUsername(user.username);
   user.avatar = USERS_WITH_AVATARS.has(user.username)
     ? `https://i.pravatar.cc/300?img=${user.avatarId}`
     : null;
@@ -903,8 +917,8 @@ async function acceptFriend(from, to) {
     throw new Error(`Unable to find pending request ${from} -> ${to}`);
   }
 
-  await apiRequest(`/friends/${relation.id}`, {
-    method: "PUT",
+  await apiRequest(`/friends/${relation.id}/accept`, {
+    method: "PATCH",
     token: TOKENS.get(to),
   });
 }
@@ -1055,6 +1069,90 @@ function summarizeUser(createdPosts, username) {
   };
 }
 
+async function guaranteeShowcaseNotifications(createdPosts) {
+  console.log("=== Guaranteeing one of each notification type for alice and bob ===");
+
+  const alicePost = createdPosts.find((p) => p.user.username === "alice");
+  const bobPost = createdPosts.find((p) => p.user.username === "bob");
+
+  // LIKE: alice and bob each receive a like from an unconnected user
+  for (const [liker, post] of [["karen", alicePost], ["iris", bobPost]]) {
+    try {
+      await apiRequest(`/posts/${post.id}/like`, {
+        method: "POST",
+        token: TOKENS.get(liker),
+      });
+      console.log(`  LIKE        : ${liker} liked ${post.user.username}'s post`);
+    } catch {
+      console.log(`  LIKE        : ${liker} -> ${post.user.username} skipped (already liked)`);
+    }
+  }
+
+  // COMMENT: alice and bob each receive a comment from an unconnected user
+  const showcaseComments = [
+    ["frank", alicePost, "Solid update, saving this for later."],
+    ["karen", bobPost, "Good to know, thanks for sharing."],
+  ];
+
+  for (const [commenter, post, content] of showcaseComments) {
+    try {
+      await apiRequest(`/posts/${post.id}/comments`, {
+        method: "POST",
+        token: TOKENS.get(commenter),
+        json: { content },
+        extraHeaders: SEED_SCRIPT_KEY ? { "x-seed-script-key": SEED_SCRIPT_KEY } : {},
+      });
+      console.log(`  COMMENT     : ${commenter} commented on ${post.user.username}'s post`);
+    } catch {
+      console.log(`  COMMENT     : ${commenter} -> ${post.user.username} skipped`);
+    }
+  }
+
+  // FOLLOW: alice and bob each receive an incoming friend request
+  for (const [sender, receiver] of [["iris", "alice"], ["frank", "bob"]]) {
+    try {
+      await sendFriend(sender, receiver);
+      console.log(`  FOLLOW      : ${sender} sent a request to ${receiver}`);
+    } catch {
+      console.log(`  FOLLOW      : ${sender} -> ${receiver} skipped (already exists)`);
+    }
+  }
+
+  // FOLLOW_ACCEPT: alice and bob's outgoing pending requests get accepted
+  for (const [requester, accepter] of [["alice", "olivia"], ["bob", "mia"]]) {
+    try {
+      await acceptFriend(requester, accepter);
+      console.log(`  FOLLOW_ACCEPT: ${accepter} accepted ${requester}'s request`);
+    } catch {
+      console.log(`  FOLLOW_ACCEPT: ${requester} -> ${accepter} skipped`);
+    }
+  }
+
+  // UNFOLLOW: create a temporary friendship then delete it so alice and bob each receive an UNFOLLOW
+  for (const [actor, showcase] of [["liam", "alice"], ["diana", "bob"]]) {
+    try {
+      await sendFriend(actor, showcase);
+      await acceptFriend(actor, showcase);
+
+      const friendships = await apiRequest("/friends", { token: TOKENS.get(actor) });
+      const showcaseId = USER_IDS.get(showcase);
+      const row = friendships.find((f) => f.id === showcaseId);
+
+      if (!row) {
+        throw new Error(`Could not find friendship row between ${actor} and ${showcase}`);
+      }
+
+      await apiRequest(`/friends/${row.friendshipId}`, {
+        method: "DELETE",
+        token: TOKENS.get(actor),
+      });
+      console.log(`  UNFOLLOW    : ${actor} unfriended ${showcase}`);
+    } catch (error) {
+      console.log(`  UNFOLLOW    : ${actor} -> ${showcase} skipped (${error.message})`);
+    }
+  }
+}
+
 async function main() {
   validateGraph();
   await ensureBackendReady();
@@ -1071,6 +1169,7 @@ async function main() {
 
   const createdPosts = await createPosts();
   const activityTotals = await seedInteractions(createdPosts);
+  await guaranteeShowcaseNotifications(createdPosts);
   const aliceSummary = summarizeUser(createdPosts, "alice");
   const bobSummary = summarizeUser(createdPosts, "bob");
 
@@ -1102,5 +1201,84 @@ try {
 } catch (error) {
   console.error(`Seed failed: ${error.message}`);
   process.exitCode = 1;
+}
+NODE
+
+echo "=== Adding direct dev notifications for mention/message preview ==="
+docker compose exec -T backend sh -lc 'export DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB && node --input-type=module' <<'NODE'
+import prisma from "/app/src/prisma.js";
+
+const mentionPlans = [
+  { recipient: "alice", actor: "hugo", postOwner: "hugo", type: "MENTION" },
+  { recipient: "bob", actor: "iris", postOwner: "iris", type: "MENTION" },
+];
+
+const messagePlans = [
+  { recipient: "alice", actor: "diana", type: "MESSAGE" },
+  { recipient: "bob", actor: "charlie", type: "MESSAGE" },
+];
+
+async function resolveUserId(username) {
+  const user = await prisma.user.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+
+  return user?.id ?? null;
+}
+
+async function resolveLatestPostId(username) {
+  const post = await prisma.post.findFirst({
+    where: { author: { username } },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  });
+
+  return post?.id ?? null;
+}
+
+try {
+  for (const plan of mentionPlans) {
+    const userId = await resolveUserId(plan.recipient);
+    const actorId = await resolveUserId(plan.actor);
+    const postId = await resolveLatestPostId(plan.postOwner);
+
+    if (!userId || !actorId || !postId) {
+      console.log(`  ${plan.type.padEnd(11)}: ${plan.actor} -> ${plan.recipient} skipped (missing seed data)`);
+      continue;
+    }
+
+    await prisma.notification.deleteMany({
+      where: { userId, actorId, type: plan.type, postId },
+    });
+
+    await prisma.notification.create({
+      data: { userId, actorId, type: plan.type, postId },
+    });
+
+    console.log(`  ${plan.type.padEnd(11)}: ${plan.actor} mentioned ${plan.recipient} on post ${postId}`);
+  }
+
+  for (const plan of messagePlans) {
+    const userId = await resolveUserId(plan.recipient);
+    const actorId = await resolveUserId(plan.actor);
+
+    if (!userId || !actorId) {
+      console.log(`  ${plan.type.padEnd(11)}: ${plan.actor} -> ${plan.recipient} skipped (missing seed data)`);
+      continue;
+    }
+
+    await prisma.notification.deleteMany({
+      where: { userId, actorId, type: plan.type, postId: null },
+    });
+
+    await prisma.notification.create({
+      data: { userId, actorId, type: plan.type },
+    });
+
+    console.log(`  ${plan.type.padEnd(11)}: ${plan.actor} messaged ${plan.recipient}`);
+  }
+} finally {
+  await prisma.$disconnect();
 }
 NODE

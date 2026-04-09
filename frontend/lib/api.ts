@@ -132,6 +132,7 @@ export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 export type NotificationActor = {
   id: number;
   username: string;
+  displayName?: string | null;
   avatar?: string | null;
 };
 
@@ -146,6 +147,7 @@ export type NotificationItem = {
   postId: number | null;
   post?: {
     id: number;
+    content?: string | null;
   } | null;
 };
 
