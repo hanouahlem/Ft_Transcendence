@@ -45,6 +45,7 @@ The file `other/transcendance.md` is the **official project subject** from 42. A
    - Key terms an evaluator might ask about
 5. **Verify against the subject** — cross-check any claims about requirements or module criteria against `other/transcendance.md`
 6. **Keep it concise** — each section should be scannable in under 2 minutes
+7. **Core teachings, not refactor history** — A lesson should still make sense if the reader never saw the previous version of the codebase.
 
 ## Project structure
 
