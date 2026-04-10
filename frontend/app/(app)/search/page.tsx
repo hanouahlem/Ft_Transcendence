@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { PostCard } from "@/components/posts/PostCard";
@@ -86,6 +86,8 @@ export default function SearchPage() {
   const [pageError, setPageError] = useState<string | null>(null);
   const [users, setUsers] = useState<SearchUserRecord[]>([]);
   const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
+  const enrichedUserIdsRef = useRef(new Set<number>());
+  const enrichingUserIdsRef = useRef(new Set<number>());
 
   const {
     posts,
@@ -158,6 +160,8 @@ export default function SearchPage() {
       try {
         setLoading(true);
         setPageError(null);
+        enrichedUserIdsRef.current.clear();
+        enrichingUserIdsRef.current.clear();
 
         const [postsResult, usersResult, suggestionsResult] = await Promise.all([
           getPosts(token),
@@ -195,47 +199,30 @@ export default function SearchPage() {
         }, {});
 
         const baseUsers = Array.isArray(usersResult.data) ? usersResult.data : [];
-        const enrichedUsers = await Promise.all(
-          baseUsers.map(async (baseUser) => {
-            const [profileResult, friendsResult] = await Promise.all([
-              getUserById(baseUser.id, token),
-              getUserFriends(baseUser.id, token),
-            ]);
+        const resolvedUsers = baseUsers.map((baseUser) => {
+          const stats = postStatsByUser[baseUser.id] || {
+            postCount: 0,
+            totalLikes: 0,
+            totalComments: 0,
+          };
 
-            const profile = profileResult.ok
-              ? profileResult.data
-              : {
-                  ...baseUser,
-                  banner: null,
-                  bio: null,
-                  status: null,
-                  location: null,
-                  website: null,
-                  createdAt: undefined,
-                };
-            const stats = postStatsByUser[baseUser.id] || {
-              postCount: 0,
-              totalLikes: 0,
-              totalComments: 0,
-            };
-
-            return {
-              ...profile,
-              id: baseUser.id,
-              username: profile.username || baseUser.username,
-              displayName:
-                profile.displayName ?? baseUser.displayName ?? null,
-              avatar: profile.avatar ?? baseUser.avatar ?? null,
-              friendCount:
-                friendsResult.ok && Array.isArray(friendsResult.data)
-                  ? friendsResult.data.length
-                  : 0,
-              postCount: stats.postCount,
-              totalLikes: stats.totalLikes,
-              totalComments: stats.totalComments,
-            } satisfies SearchUserRecord;
-          }),
-        );
+          return {
+            id: baseUser.id,
+            username: baseUser.username,
+            displayName: baseUser.displayName ?? null,
+            avatar: baseUser.avatar ?? null,
+            banner: null,
+            bio: null,
+            status: null,
+            location: null,
+            website: null,
+            createdAt: undefined,
+            friendCount: 0,
+            postCount: stats.postCount,
+            totalLikes: stats.totalLikes,
+            totalComments: stats.totalComments,
+          } satisfies SearchUserRecord;
+        });
 
         const normalizedSuggestions =
           suggestionsResult.ok &&
@@ -261,7 +248,7 @@ export default function SearchPage() {
 
         setPosts(resolvedPosts);
         setUsers(
-          enrichedUsers.sort((left, right) =>
+          resolvedUsers.sort((left, right) =>
             left.username.localeCompare(right.username),
           ),
         );
@@ -350,6 +337,100 @@ export default function SearchPage() {
 
     return filteredUsers.slice(startIndex, startIndex + USERS_PER_PAGE);
   }, [currentPage, filteredUsers]);
+
+  useEffect(() => {
+    if (!token || loading || pageError || activeTab !== "users") {
+      return;
+    }
+
+    const visibleUsers = paginatedUsers.filter((user) => {
+      return (
+        !enrichedUserIdsRef.current.has(user.id) &&
+        !enrichingUserIdsRef.current.has(user.id)
+      );
+    });
+
+    if (visibleUsers.length === 0) {
+      return;
+    }
+
+    let cancelled = false;
+
+    visibleUsers.forEach((user) => {
+      enrichingUserIdsRef.current.add(user.id);
+    });
+
+    const enrichVisibleUsers = async () => {
+      try {
+        const enrichedUsers = await Promise.all(
+          visibleUsers.map(async (baseUser) => {
+            const [profileResult, friendsResult] = await Promise.all([
+              getUserById(baseUser.id, token),
+              getUserFriends(baseUser.id, token),
+            ]);
+
+            const profile = profileResult.ok
+              ? profileResult.data
+              : {
+                  ...baseUser,
+                  banner: null,
+                  bio: null,
+                  status: null,
+                  location: null,
+                  website: null,
+                  createdAt: undefined,
+                };
+
+            return {
+              ...baseUser,
+              username: profile.username || baseUser.username,
+              displayName:
+                profile.displayName ?? baseUser.displayName ?? null,
+              avatar: profile.avatar ?? baseUser.avatar ?? null,
+              banner: profile.banner ?? null,
+              bio: profile.bio ?? null,
+              status: profile.status ?? null,
+              location: profile.location ?? null,
+              website: profile.website ?? null,
+              createdAt: profile.createdAt,
+              friendCount:
+                friendsResult.ok && Array.isArray(friendsResult.data)
+                  ? friendsResult.data.length
+                  : baseUser.friendCount,
+            } satisfies SearchUserRecord;
+          }),
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        const enrichedUserMap = new Map(
+          enrichedUsers.map((user) => [user.id, user]),
+        );
+
+        setUsers((previousUsers) =>
+          previousUsers.map((user) => enrichedUserMap.get(user.id) || user),
+        );
+
+        enrichedUsers.forEach((user) => {
+          enrichedUserIdsRef.current.add(user.id);
+        });
+      } catch {
+        // Retry on the next visible-page pass if one of these requests fails.
+      } finally {
+        visibleUsers.forEach((user) => {
+          enrichingUserIdsRef.current.delete(user.id);
+        });
+      }
+    };
+
+    void enrichVisibleUsers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, loading, pageError, paginatedUsers, token]);
 
   useEffect(() => {
     if (loading || pageError || requestedPage === currentPage) {

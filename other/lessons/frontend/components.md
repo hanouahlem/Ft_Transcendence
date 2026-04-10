@@ -445,7 +445,7 @@ Important detail:
 ```tsx
 const NAV_ITEMS = [
   { href: "/feed", label: "Timeline", icon: Home },
-  { href: "/friends", label: "Discoveries", icon: Search },
+  { href: "/search", label: "Search", icon: Search },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
 ```
 
@@ -454,6 +454,7 @@ Explain during evaluation:
 - the sidebar owns navigation configuration in `NAV_ITEMS`
 - `NavButton` is the row renderer
 - `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” and “Logout”
+- the search page is a first-class route in the main sidebar, not only a control inside the right rail
 - the sidebar prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
 
 ### `frontend/components/layout/RightRailSuggestions.tsx`
@@ -644,6 +645,7 @@ How it works:
 - the `posts` tab reuses `PostCard`, so likes, favorites, deletes, and the post dialog still use the same real handlers as the feed
 - the `users` tab renders `SearchUserCard`, which reuses `ProfileBanner` and `ProfilePicture`
 - the visible results are paginated client-side, while the active page is still controlled from the URL
+- user-card enrichment is deferred to the visible users page, so the first search render no longer waits on profile and friends requests for every user
 
 Real code:
 
@@ -669,6 +671,7 @@ Evaluator terms:
 - UI wrapper: `frontend/components/ui/tabs.tsx` hides the Ark primitive behind the app's own API
 - pagination state: the active page is stored in `?page=2`, not only in React memory
 - client-side pagination: we fetch the dataset once, then slice the filtered results per page in the browser
+- lazy enrichment: profile details for user cards are fetched only for the visible page and then cached in local state
 
 ### `frontend/components/ui/pagination.tsx`
 
