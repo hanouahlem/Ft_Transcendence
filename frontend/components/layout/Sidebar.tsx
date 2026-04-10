@@ -8,6 +8,7 @@ import {
 	Home,
 	LogOut,
 	MessageCircle,
+	Search,
 	UserRound,
 	Settings,
 	Handshake,
@@ -26,6 +27,7 @@ type SidebarProps = {
 
 const NAV_ITEMS = [
 	{ href: "/feed", label: "Timeline", icon: Home },
+	{ href: "/search", label: "Search", icon: Search },
 	{ href: "/profile", label: "Profile", icon: UserRound },
 	{ href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
 	{ href: "/friends", label: "Friends", icon: Handshake },
