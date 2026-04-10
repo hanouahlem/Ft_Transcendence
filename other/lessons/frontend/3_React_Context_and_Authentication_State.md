@@ -281,14 +281,63 @@ So logging in is not just "save token". It is "save token and initialize auth st
 
 ```tsx
 const logout = () => {
-  localStorage.removeItem("token");
-  setToken(null);
-  setUser(null);
-  setIsAuthLoading(false);
+  clearAuthState();
 };
 ```
 
-This removes the token and resets the frontend back to a logged-out state.
+`clearAuthState()` removes the token, clears the current user, and cancels the expiry timer before resetting the frontend back to a logged-out state.
+
+## JWT Expiry Handling
+
+`AuthContext` now also handles JWT expiry on the client side.
+
+File:
+
+- `frontend/context/AuthContext.tsx`
+
+What it does:
+
+- decodes the JWT payload in the browser
+- reads the `exp` claim
+- rejects a token immediately if it is already expired
+- starts a logout timer so the frontend clears auth state when the token expires
+
+Real code:
+
+```tsx
+function getTokenExpiryTimestamp(token: string) {
+  try {
+    const [, payload] = token.split(".");
+
+    if (!payload) {
+      return null;
+    }
+
+    const decodedPayload = JSON.parse(decodeBase64Url(payload)) as { exp?: number };
+
+    if (typeof decodedPayload.exp !== "number") {
+      return null;
+    }
+
+    return decodedPayload.exp * 1000;
+  } catch (error) {
+    console.error("Invalid JWT payload:", error);
+    return null;
+  }
+}
+```
+
+Why this is useful:
+
+- without this, the app can look logged in until the next protected API call fails
+- with this, the frontend logs out as soon as the token lifetime is over
+- this improves UX, but the backend is still the real authority because it still verifies the JWT on every protected request
+
+Important concept:
+
+- decoding the JWT in the browser is only for reading metadata like `exp`
+- it does not verify the signature
+- security still depends on backend-side `jwt.verify(...)`
 
 ## Example Consumer: `ProtectedRoute`
 

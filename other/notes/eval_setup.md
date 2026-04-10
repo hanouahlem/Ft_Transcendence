@@ -200,6 +200,14 @@ Important rule:
 - do not use Docker service names like `backend` or `frontend` for these values
 - only internal container-to-container traffic should use service names like `postgres`
 
+OAuth cookie note:
+
+- the app currently uses temporary OAuth `state` cookies for the GitHub and 42 handshakes
+- these cookies are `HttpOnly`
+- these cookies are `SameSite=Lax`
+- these cookies are not currently set with `Secure: true`
+- for the HTTPS evaluation setup, this should be tightened so OAuth state cookies are only sent over HTTPS
+
 Later improvement:
 
 - move sensitive values like DB password and JWT secret to Docker secrets
