@@ -75,8 +75,9 @@ This is the controller for the page.
 It owns:
 
 - authenticated user access through `useAuth()`
-- composer state with `useState`
+- publish state, file state, and composer reset state with `useState`
 - feed scope state for `All Posts` vs `Friends`
+- feed pagination state for the visible post slice
 - derived values with `useMemo`
 - data loading with `fetchPosts()` and `fetchExistingFriendRelations()`
 - publish and friend-request mutations
@@ -100,9 +101,10 @@ const { posts, setPosts, handleToggleLike, handleAddComment, ... } =
 Main state:
 
 ```tsx
-const [postContent, setPostContent] = useState("");
 const [selectedFile, setSelectedFile] = useState<File | null>(null);
 const [previewUrl, setPreviewUrl] = useState("");
+const [currentPage, setCurrentPage] = useState(1);
+const [composerResetToken, setComposerResetToken] = useState(0);
 
 const { posts, setPosts, handleToggleLike, handleAddComment, ... } =
   usePostInteractions({ token });
@@ -124,6 +126,8 @@ Explain this during evaluation:
 - `useFriendRequests()` keeps the follow/request behavior consistent between feed and profile
 - `useFriendRequests()` reloads outgoing pending requests so `Sent` survives a refresh
 - post/comment interaction logic is shared with the profile page through `usePostInteractions()`
+- the feed is paginated client-side with the shared Ark-based `Pagination` wrapper
+- the text state for `NewPostCard` is local to the composer component, so typing does not rerender every visible post card
 
 API base:
 
@@ -1042,7 +1046,8 @@ Why this is separate:
 2. `useEffect` calls `fetchPosts()`
 3. `fetchPosts()` requests `GET /posts`
 4. the result is stored in `posts`
-5. `posts.map(...)` renders one `PostCard` per post
+5. the page slices `posts` for the active page
+6. `paginatedPosts.map(...)` renders one `PostCard` per visible post
 
 ### Publish a post
 

@@ -10,26 +10,26 @@ import { NewPostCard } from "@/components/posts/NewPostCard";
 
 type NewPostDialogProps = {
   open: boolean;
-  content: string;
+  initialContent?: string;
+  resetToken?: number;
 	previewUrl: string;
 	selectedFileName: string;
 	publishing: boolean;
 	onClose: () => void;
-	onPublish: () => void;
-  onContentChange: (value: string) => void;
+	onPublish: (content: string) => void;
   onOpenFilePicker: () => void;
   onRemoveFile: () => void;
 };
 
 export function NewPostDialog({
   open,
-	content,
+	initialContent,
+  resetToken,
 	previewUrl,
 	selectedFileName,
 	publishing,
 	onClose,
 	onPublish,
-  onContentChange,
   onOpenFilePicker,
   onRemoveFile,
 }: NewPostDialogProps) {
@@ -43,12 +43,12 @@ export function NewPostDialog({
 
         <div className="max-h-[90vh] overflow-auto px-4 py-8">
           <NewPostCard
-            content={content}
+            key={resetToken}
+            initialContent={initialContent}
             previewUrl={previewUrl}
 						selectedFileName={selectedFileName}
 						publishing={publishing}
 						onPublish={onPublish}
-						onContentChange={onContentChange}
 						onOpenFilePicker={onOpenFilePicker}
 						onRemoveFile={onRemoveFile}
 					/>

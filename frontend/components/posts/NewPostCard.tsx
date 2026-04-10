@@ -1,29 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type NewPostCardProps = {
-  content: string;
+  initialContent?: string;
   previewUrl: string;
   selectedFileName: string;
   publishing: boolean;
-  onPublish: () => void;
-  onContentChange: (value: string) => void;
+  onPublish: (content: string) => void;
   onOpenFilePicker: () => void;
   onRemoveFile: () => void;
 };
 
 export function NewPostCard({
-  content,
+  initialContent = "",
   previewUrl,
   selectedFileName,
   publishing,
   onPublish,
-  onContentChange,
   onOpenFilePicker,
   onRemoveFile,
 }: NewPostCardProps) {
+  const [content, setContent] = useState(initialContent);
+
   return (
     <section
       className="relative border border-white/20 bg-white p-6 pb-6 rotate-1"
@@ -40,7 +41,7 @@ export function NewPostCard({
 
         <textarea
           value={content}
-          onChange={(event) => onContentChange(event.target.value)}
+          onChange={(event) => setContent(event.target.value)}
           placeholder="What have you observed today?"
           className="archive-input archive-lines min-h-[114px] w-full resize-none border-0 bg-transparent px-0 py-0 text-3xl leading-7 text-ink"
           style={{ fontFamily: "var(--font-display)" }}
@@ -79,7 +80,7 @@ export function NewPostCard({
           <Button
             type="button"
             variant="stamp"
-            onClick={onPublish}
+            onClick={() => onPublish(content)}
             disabled={publishing}
             className="-rotate-2 border-accent-red px-4 py-1 text-sm"
           >

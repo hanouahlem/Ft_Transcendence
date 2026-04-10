@@ -2,6 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Plus } from "lucide-react";
+import {
+  Pagination,
+  PaginationControls,
+  PaginationItems,
+  PaginationNextTrigger,
+  PaginationPrevTrigger,
+  PaginationSummary,
+} from "@/components/ui/pagination";
 import type { FeedPost } from "@/lib/feed-types";
 import { RightRail } from "@/components/layout/RightRail";
 import { NewPostCard } from "@/components/posts/NewPostCard";
@@ -14,6 +22,7 @@ import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { usePostInteractions } from "@/hooks/usePostInteractions";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const POSTS_PER_PAGE = 50;
 
 type FeedScope = "all" | "friends";
 
@@ -21,13 +30,14 @@ export default function FeedPage() {
   const { user, token } = useAuth();
   const { notifyError, notifySuccess } = useArchiveToasts();
 
-  const [postContent, setPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
   const [feedScope, setFeedScope] = useState<FeedScope>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [composerResetToken, setComposerResetToken] = useState(0);
 
   const {
     sentRequests,
@@ -82,6 +92,14 @@ export default function FeedPage() {
     [posts],
   );
 
+  const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
+
+  const paginatedPosts = useMemo(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+
+    return posts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+  }, [currentPage, posts]);
+
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -99,6 +117,16 @@ export default function FeedPage() {
     fetchRightRailSuggestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, user?.id, feedScope]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [feedScope]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     const handlePostCreated = (event: Event) => {
@@ -126,7 +154,7 @@ export default function FeedPage() {
   }, [feedScope, setPosts]);
 
   const resetComposer = () => {
-    setPostContent("");
+    setComposerResetToken((previous) => previous + 1);
     handleRemoveFile();
   };
 
@@ -233,8 +261,10 @@ export default function FeedPage() {
     }
   };
 
-  const handlePublish = async () => {
-    if (!postContent.trim()) {
+  const handlePublish = async (content: string) => {
+    const trimmedContent = content.trim();
+
+    if (!trimmedContent) {
       notifyError("You need to write something before publishing.");
       return;
     }
@@ -248,7 +278,7 @@ export default function FeedPage() {
       setPublishing(true);
 
       const formData = new FormData();
-      formData.append("content", postContent);
+      formData.append("content", trimmedContent);
 
       if (selectedFile) {
         formData.append("media", selectedFile);
@@ -291,12 +321,11 @@ export default function FeedPage() {
         <section className="min-w-0 w-full max-w-[800px]">
           <div className="flex flex-col gap-8 lg:gap-12">
             <NewPostCard
-              content={postContent}
+              key={composerResetToken}
               previewUrl={previewUrl}
               selectedFileName={selectedFile?.name || ""}
               publishing={publishing}
               onPublish={handlePublish}
-              onContentChange={setPostContent}
               onOpenFilePicker={handleOpenFilePicker}
               onRemoveFile={handleRemoveFile}
             />
@@ -344,7 +373,7 @@ export default function FeedPage() {
               </section>
             ) : (
               <div className="flex flex-col gap-10">
-                {posts.map((post) => (
+                {paginatedPosts.map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}
@@ -360,6 +389,24 @@ export default function FeedPage() {
                 ))}
               </div>
             )}
+
+            {posts.length > POSTS_PER_PAGE ? (
+              <Pagination
+                count={posts.length}
+                page={currentPage}
+                pageSize={POSTS_PER_PAGE}
+                siblingCount={1}
+                onPageChange={(details) => setCurrentPage(details.page)}
+                className="border-t border-dashed border-label/30 py-8"
+              >
+                <PaginationSummary itemLabel="posts" />
+                <PaginationControls>
+                  <PaginationPrevTrigger />
+                  <PaginationItems />
+                  <PaginationNextTrigger />
+                </PaginationControls>
+              </Pagination>
+            ) : null}
 
             <div className="border-t border-dashed border-label py-8 text-center font-mono text-sm text-label">
               --- END OF RECENT LOGS ---

@@ -20,10 +20,10 @@ export default function AppSidebarShell({
   const { user, token, logout } = useAuth();
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [postContent, setPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [publishing, setPublishing] = useState(false);
+  const [composerResetToken, setComposerResetToken] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -96,13 +96,15 @@ export default function AppSidebarShell({
   };
 
   const resetComposer = () => {
-    setPostContent("");
+    setComposerResetToken((previous) => previous + 1);
     handleRemoveFile();
     setCreateOpen(false);
   };
 
-  const handlePublish = async () => {
-    if (!postContent.trim()) {
+  const handlePublish = async (content: string) => {
+    const trimmedContent = content.trim();
+
+    if (!trimmedContent) {
       notifyError("You need to write something before publishing.");
       return;
     }
@@ -116,7 +118,7 @@ export default function AppSidebarShell({
       setPublishing(true);
 
       const formData = new FormData();
-      formData.append("content", postContent);
+      formData.append("content", trimmedContent);
 
       if (selectedFile) {
         formData.append("media", selectedFile);
@@ -176,13 +178,12 @@ export default function AppSidebarShell({
 
           <NewPostDialog
             open={createOpen}
-            content={postContent}
+            resetToken={composerResetToken}
             previewUrl={previewUrl}
             selectedFileName={selectedFile?.name || ""}
             publishing={publishing}
             onClose={resetComposer}
             onPublish={handlePublish}
-            onContentChange={setPostContent}
             onOpenFilePicker={handleOpenFilePicker}
             onRemoveFile={handleRemoveFile}
           />
