@@ -394,11 +394,21 @@ const USERS_WITH_BANNERS = pickSeededSubset(USERS, 15, "profile-banner");
 
 for (const user of USERS) {
   user.avatar = USERS_WITH_AVATARS.has(user.username)
-    ? `https://i.pravatar.cc/300?img=${user.avatarId}`
+    ? `https://i.pravatar.cc/150?img=${user.avatarId}`
     : null;
   user.banner = USERS_WITH_BANNERS.has(user.username)
-    ? `https://picsum.photos/seed/${encodeURIComponent(`banner-${user.username}`)}/1400/420`
+    ? `https://picsum.photos/seed/${encodeURIComponent(`banner-${user.username}`)}/720/300`
     : null;
+
+  if (user.username === "alice") {
+    user.avatar = "https://i.pravatar.cc/150?u=42";
+    user.banner = "https://picsum.photos/seed/42/720/300";
+  }
+
+  if (user.username === "bob") {
+    user.avatar = "https://i.pravatar.cc/150?img=13";
+    user.banner = "https://picsum.photos/seed/transcendance/1400/420";
+  }
 }
 
 USERS.forEach((user, index) => {
@@ -532,12 +542,12 @@ function getImageSpec(user, postIndex) {
   }
 
   const dimensions = [
-    [1200, 800],
-    [1080, 1350],
-    [1000, 1000],
-    [1280, 720],
-    [900, 1200],
-    [1440, 960],
+    [600, 400],
+    [540, 675],
+    [500, 500],
+    [640, 360],
+    [450, 600],
+    [720, 480],
   ];
   const [width, height] = dimensions[(user.index + postIndex) % dimensions.length];
   const seed = `${user.username}-${postIndex + 1}`;

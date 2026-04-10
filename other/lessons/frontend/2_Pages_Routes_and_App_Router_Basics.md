@@ -27,12 +27,13 @@ Current route files include:
 frontend/app/page.tsx
 frontend/app/(auth)/login/page.tsx
 frontend/app/(auth)/register/page.tsx
-frontend/app/feed/page.tsx
-frontend/app/friends/page.tsx
-frontend/app/notifications/page.tsx
-frontend/app/profile/page.tsx
-frontend/app/profile/[username]/page.tsx
-frontend/app/settings/page.tsx
+frontend/app/(app)/feed/page.tsx
+frontend/app/(app)/search/page.tsx
+frontend/app/(app)/friends/page.tsx
+frontend/app/(app)/notifications/page.tsx
+frontend/app/(app)/profile/page.tsx
+frontend/app/(app)/profile/[username]/page.tsx
+frontend/app/(app)/settings/page.tsx
 ```
 
 That means the current frontend URLs are:
@@ -41,6 +42,7 @@ That means the current frontend URLs are:
 - `/login`
 - `/register`
 - `/feed`
+- `/search`
 - `/friends`
 - `/notifications`
 - `/profile`
@@ -96,11 +98,12 @@ That is why route files are not just "HTML pages". They can contain route-specif
 
 Several pages are intended for logged-in users:
 
-- `frontend/app/feed/page.tsx`
-- `frontend/app/friends/page.tsx`
-- `frontend/app/notifications/page.tsx`
-- `frontend/app/profile/page.tsx`
-- `frontend/app/profile/[username]/page.tsx`
+- `frontend/app/(app)/feed/page.tsx`
+- `frontend/app/(app)/search/page.tsx`
+- `frontend/app/(app)/friends/page.tsx`
+- `frontend/app/(app)/notifications/page.tsx`
+- `frontend/app/(app)/profile/page.tsx`
+- `frontend/app/(app)/profile/[username]/page.tsx`
 
 These pages usually wrap their content with `ProtectedRoute`.
 
@@ -112,8 +115,14 @@ Nested folders create nested URLs.
 
 Example:
 
-- `frontend/app/profile/[username]/page.tsx` -> `/profile/:username`
-- `frontend/app/settings/page.tsx` -> `/settings`
+- `frontend/app/(app)/profile/[username]/page.tsx` -> `/profile/:username`
+- `frontend/app/(app)/settings/page.tsx` -> `/settings`
+
+The new search route is:
+
+- `frontend/app/(app)/search/page.tsx` -> `/search`
+
+It stays inside the protected app shell, so it keeps the same sidebar, nature background, and right rail as `/feed`, `/friends`, `/notifications`, `/profile`, and `/settings`.
 
 This is one of the main benefits of the App Router: the folder structure already shows the URL structure.
 
@@ -123,11 +132,11 @@ In the App Router, `page.tsx` is the entry file for a route segment.
 
 So when someone visits `/friends`, Next.js renders:
 
-- `frontend/app/friends/page.tsx`
+- `frontend/app/(app)/friends/page.tsx`
 
 When someone visits `/settings`, Next.js renders:
 
-- `frontend/app/settings/page.tsx`
+- `frontend/app/(app)/settings/page.tsx`
 
 This is the core routing convention to remember.
 
@@ -165,7 +174,7 @@ A shared component is reused by multiple routes.
 Examples in this repo:
 
 - route files:
-  - `frontend/app/feed/page.tsx`
+  - `frontend/app/(app)/feed/page.tsx`
   - `frontend/app/(auth)/login/page.tsx`
 - shared components:
   - `frontend/components/layout/AppSidebarShell.tsx`
@@ -230,7 +239,7 @@ shared components are reused inside pages
 
 - Which file maps to the `/friends` route?
 - Why does `frontend/app/page.tsx` map to `/`?
-- What URL does `frontend/app/settings/page.tsx` create?
+- What URL does `frontend/app/(app)/settings/page.tsx` create?
 - What is the difference between a route file and a shared component?
 - Why do many route files in this repo use `"use client"`?
 

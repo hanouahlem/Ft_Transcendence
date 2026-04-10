@@ -595,14 +595,14 @@ const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
 Key point:
 
 - `RightRail` is mostly shell composition
-- `RightRailSearch` owns future search-route navigation
+- `RightRailSearch` owns route navigation to the real `/search` page
 - `RightRailTrends` owns static trend links
 - `RightRailSuggestions` owns the observer/friends UI and follow action rendering
 - observer suggestions are still real data coming from `page.tsx`
 - the component only needs `id`, `username`, and optional `avatar`, not full user records
 - the search bar does not filter suggestions locally
-- the search bar is a route-navigation control for the future `/search` page
-- trend chips also link to the future search route with a prefilled query
+- the search bar mirrors the active `/search?q=...` query when you are already on the search page
+- trend chips also link to `/search` with a prefilled query
 - `sectionTitle` changes by route:
   - `You Might Know` on feed
   - `My Friends` on your own profile
@@ -616,6 +616,96 @@ Key point:
   - `Add` for no existing request
   - `Accept` for incoming pending requests
   - `Sent` for outgoing pending requests
+
+### `frontend/app/(app)/search/page.tsx`
+
+Purpose:
+
+- provide one protected search page for posts and users
+- reuse the same archive shell as the rest of the app
+- keep real post interactions by rendering the shared `PostCard`
+
+Main pieces:
+
+- `frontend/app/(app)/search/page.tsx`
+- `frontend/components/search/SearchUserCard.tsx`
+- `frontend/components/ui/pagination.tsx`
+- `frontend/components/ui/tabs.tsx`
+- `frontend/components/posts/PostCard.tsx`
+- `frontend/components/layout/RightRail.tsx`
+
+How it works:
+
+- the page reads `q` and `tab` from the URL
+- the page also reads `page` from the URL, so pagination state is shareable and survives refreshes
+- it fetches all posts plus all users, then enriches user cards with public profile data and friend counts
+- post search matches post content, author names, and comment text
+- user search matches only username and display name
+- the `posts` tab reuses `PostCard`, so likes, favorites, deletes, and the post dialog still use the same real handlers as the feed
+- the `users` tab renders `SearchUserCard`, which reuses `ProfileBanner` and `ProfilePicture`
+- the visible results are paginated client-side, while the active page is still controlled from the URL
+
+Real code:
+
+```tsx
+<Tabs value={activeTab} onValueChange={(details) => handleTabChange(readSearchTab(details.value))}>
+  <TabsList variant="archive">
+    <TabsTrigger value="posts" variant="archive">Posts</TabsTrigger>
+    <TabsTrigger value="users" variant="archive">Users</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="posts">
+    {paginatedPosts.map((post) => (
+      <PostCard ... />
+    ))}
+  </TabsContent>
+</Tabs>
+```
+
+Evaluator terms:
+
+- URL search params: values like `?q=alice&tab=users`
+- controlled tabs: the active tab is owned by page state/URL instead of local uncontrolled DOM state
+- UI wrapper: `frontend/components/ui/tabs.tsx` hides the Ark primitive behind the app's own API
+- pagination state: the active page is stored in `?page=2`, not only in React memory
+- client-side pagination: we fetch the dataset once, then slice the filtered results per page in the browser
+
+### `frontend/components/ui/pagination.tsx`
+
+Purpose:
+
+- provide one archive-styled pagination wrapper backed by Ark UI
+- keep page buttons, ellipsis, and prev/next controls consistent across pages
+
+Why it exists:
+
+- Ark gives us page state, page range, and ellipsis logic
+- the app still needs its own wrapper so pages import from `@/components/ui/*`, not directly from the library
+
+How it works:
+
+- `Pagination` wraps Ark's root component
+- `PaginationItems` reads `pagination.pages` from `Pagination.Context` and renders either numbered items or ellipsis slots
+- `PaginationSummary` reads `pageRange` so the UI can say which slice of results is visible
+
+Real code:
+
+```tsx
+<Pagination count={resultCount} page={currentPage} pageSize={pageSize} onPageChange={handlePageChange}>
+  <PaginationSummary itemLabel={`${resultLabel} results`} />
+  <PaginationControls>
+    <PaginationPrevTrigger />
+    <PaginationItems />
+    <PaginationNextTrigger />
+  </PaginationControls>
+</Pagination>
+```
+
+Evaluator terms:
+
+- controlled pagination: the current page comes from props and changes through `onPageChange`
+- page range: Ark computes the visible item indexes for the current page
+- ellipsis logic: the component automatically shortens long page lists instead of rendering every page number
 
 ### `frontend/components/layout/NatureCanvas.tsx`
 
