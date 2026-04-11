@@ -32,6 +32,7 @@ clean:
 
 fclean:
 	$(COMPOSE) down -v --remove-orphans
+	@if [ -d backend/uploads ]; then find backend/uploads -mindepth 1 -delete; fi
 	docker system prune -af
 
 re: fclean up
