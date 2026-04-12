@@ -233,7 +233,7 @@ export function PostCard({
 								<UserIdentityLink
 									user={authorPreview}
 									className={cn(
-										"truncate font-bold uppercase tracking-wide text-ink",
+										"truncate font-bold tracking-wide text-ink",
 										variantKey === 2
 											? "text-base"
 											: "text-lg",

@@ -67,13 +67,13 @@ export function CommentCard({
 						<div className="flex flex-wrap items-center gap-3">
 							<UserIdentityLink
 								user={authorPreview}
-								className="max-w-full truncate font-mono text-ink transition hover:text-accent-blue"
+								className="max-w-full truncate font-display text-ink transition hover:text-accent-blue"
 							>
 								{authorDisplayName}
 							</UserIdentityLink>
 							<UserIdentityLink
 								user={authorPreview}
-								className="max-w-full truncate font-mono text-[15px] text-label"
+								className="max-w-full truncate font-mono text-xs text-label"
 							>
 								@{comment.author.username.toLowerCase()}
 							</UserIdentityLink>

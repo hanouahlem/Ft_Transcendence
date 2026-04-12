@@ -147,7 +147,7 @@ export function PostDialog({
 												{authorPreview ? (
 													<UserIdentityLink
 														user={authorPreview}
-														className="truncate text-lg font-display uppercase tracking-wide text-ink"
+														className="truncate text-lg font-display tracking-wide text-ink"
 													>
 														{authorDisplayName}
 													</UserIdentityLink>
