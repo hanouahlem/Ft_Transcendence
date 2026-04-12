@@ -13,6 +13,7 @@ import {
   type PublicUserListItem,
 } from "@/lib/api";
 import { archiveToaster } from "@/components/ui/toaster";
+import { useInboxUnread } from "@/context/InboxUnreadContext";
 
 function sortConversations(left: ConversationItem, right: ConversationItem) {
   const leftTimestamp = left.lastMessageAt ?? left.createdAt;
@@ -26,6 +27,7 @@ type UseMessagesOptions = {
 };
 
 export function useMessages({ token, currentUserId }: UseMessagesOptions) {
+  const { setUnreadMessagesCount } = useInboxUnread();
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [users, setUsers] = useState<PublicUserListItem[]>([]);
@@ -39,6 +41,7 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
   const [isNewConversationOpen, setIsNewConversationOpen] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState<number | null>(null);
   const messagesCacheRef = useRef<Map<number, ConversationMessage[]>>(new Map());
+  const hasLoadedConversationsRef = useRef(false);
   const selectedConversationIdRef = useRef<number | null>(null);
 
   const selectedConversation = useMemo(
@@ -76,6 +79,7 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
       return;
     }
 
+    hasLoadedConversationsRef.current = true;
     const nextConversations = [...result.data.conversations].sort(sortConversations);
     setConversations(nextConversations);
 
@@ -146,6 +150,7 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
 
   useEffect(() => {
     messagesCacheRef.current.clear();
+    hasLoadedConversationsRef.current = false;
     queueMicrotask(() => {
       setMessages([]);
     });
@@ -201,6 +206,19 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
       );
     });
   }, [selectedConversation, token]);
+
+  useEffect(() => {
+    if (!hasLoadedConversationsRef.current) {
+      return;
+    }
+
+    setUnreadMessagesCount(
+      conversations.reduce(
+        (total, conversation) => total + Math.max(0, conversation.unreadCount),
+        0,
+      ),
+    );
+  }, [conversations, setUnreadMessagesCount]);
 
   const handleOpenConversation = useCallback(
     async (targetUserId: number) => {

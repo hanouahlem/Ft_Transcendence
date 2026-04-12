@@ -450,7 +450,7 @@ Important detail:
 const NAV_ITEMS = [
   { href: "/feed", label: "Timeline", icon: Home },
   { href: "/search", label: "Search", icon: Search },
-  { href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
+  { href: "/notifications", label: "Notifications", icon: Bell },
 ```
 
 Explain during evaluation:
@@ -460,6 +460,43 @@ Explain during evaluation:
 - `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” and “Logout”
 - the search page is a first-class route in the main sidebar, not only a control inside the right rail
 - the sidebar prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
+- unread badges are not hardcoded anymore; `AppSidebarShell` reads them from `InboxUnreadProvider`, which is shared by the protected app pages
+
+### Sidebar Unread Count Flow
+
+Files:
+
+- `frontend/context/InboxUnreadContext.tsx`
+- `frontend/components/layout/AppSidebarShell.tsx`
+- `frontend/app/(app)/notifications/page.tsx`
+- `frontend/hooks/useMessages.ts`
+
+What this does:
+
+- keeps one shared unread notification count and one shared unread message count for the sidebar
+- avoids hardcoding badge values inside `Sidebar.tsx`
+- lets pages that already loaded the source data push exact counts into the shared store
+
+How it works:
+
+- `InboxUnreadProvider` is mounted inside `AppSidebarShell`, so every protected app page and the sidebar share the same context
+- on initial app-shell load, the provider fetches:
+  - `GET /notifications`, then counts rows where `read === false`
+  - `GET /conversations`, then sums every conversation `unreadCount`
+- the notifications page calls `setUnreadNotificationsCount(...)` whenever its local notification list changes
+- `useMessages` calls `setUnreadMessagesCount(...)` whenever its local conversation list changes
+
+Why this design is useful:
+
+- the sidebar stays dumb: it only renders numbers passed into it
+- unread logic stays close to the business data that already exists
+- opening a conversation or marking a notification as read updates the sidebar immediately without waiting for a full page reload
+
+Key terms an evaluator may ask:
+
+- React context: shared client state available to the sidebar and app pages
+- derived state: total unread messages is the sum of per-conversation `unreadCount`
+- optimistic UI: the notifications page marks items read locally first, then confirms with the backend
 
 ### `frontend/components/layout/RightRailSuggestions.tsx`
 

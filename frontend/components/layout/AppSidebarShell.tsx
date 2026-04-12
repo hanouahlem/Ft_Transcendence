@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { NewPostDialog } from "@/components/posts/NewPostDialog";
 import { archiveToaster } from "@/components/ui/toaster";
 import { useAuth } from "@/context/AuthContext";
+import { InboxUnreadProvider, useInboxUnread } from "@/context/InboxUnreadContext";
 import { cn } from "@/lib/utils";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -17,9 +18,24 @@ export default function AppSidebarShell({
 }: {
   children: React.ReactNode;
 }) {
+  const { token } = useAuth();
+
+  return (
+    <InboxUnreadProvider key={token ?? "anonymous"}>
+      <AppSidebarShellContent>{children}</AppSidebarShellContent>
+    </InboxUnreadProvider>
+  );
+}
+
+function AppSidebarShellContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, token, logout } = useAuth();
+  const { unreadMessagesCount, unreadNotificationsCount } = useInboxUnread();
   const isMessagePage = pathname === "/message";
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -171,6 +187,8 @@ export default function AppSidebarShell({
         <div className="relative z-10 min-h-screen lg:pl-[76px]">
           <Sidebar
             user={user}
+            unreadMessagesCount={unreadMessagesCount}
+            unreadNotificationsCount={unreadNotificationsCount}
             onCreatePost={() => setCreateOpen(true)}
             onLogout={handleLogout}
           />

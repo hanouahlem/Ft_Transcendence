@@ -53,7 +53,7 @@ export function ConversationThread({
   }, [selectedConversationId]);
 
   return (
-    <section className="archive-paper flex min-h-screen w-full flex-1 flex-col p-4 sm:p-6">
+    <section className="archive-paper shadow-none flex min-h-screen w-full flex-1 flex-col p-4 sm:p-6">
       <header className="mb-5 flex items-center justify-center gap-3">
         {selectedConversation ? (
           <>

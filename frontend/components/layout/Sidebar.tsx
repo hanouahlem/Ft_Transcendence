@@ -23,6 +23,8 @@ import { ProfilePicture } from "@/components/ui/ProfilePicture";
 
 type SidebarProps = {
 	user: CurrentUser | null;
+	unreadNotificationsCount: number;
+	unreadMessagesCount: number;
 	onCreatePost: () => void;
 	onLogout: () => void;
 };
@@ -31,14 +33,16 @@ const NAV_ITEMS = [
 	{ href: "/feed", label: "Timeline", icon: Home08Icon },
 	{ href: "/search", label: "Search", icon: Search01Icon },
 	{ href: "/profile", label: "Profile", icon: UserCircleIcon },
-	{ href: "/notifications", label: "Notifications", icon: Notification01Icon, badge: 3 },
+	{ href: "/notifications", label: "Notifications", icon: Notification01Icon },
 	{ href: "/friends", label: "Friends", icon: UserGroupIcon },
-	{ href: "/message", label: "Message", icon: Message01Icon, badge: 2 },
+	{ href: "/message", label: "Message", icon: Message01Icon },
 	{ href: "/settings", label: "Settings", icon: Settings02Icon },
 ];
 
 export function Sidebar({
 	user,
+	unreadNotificationsCount,
+	unreadMessagesCount,
 	onCreatePost,
 	onLogout,
 }: SidebarProps) {
@@ -92,7 +96,13 @@ export function Sidebar({
 						icon={item.icon}
 						active={pathname === item.href}
 						expanded={expanded}
-						badge={item.badge}
+						badge={
+							item.href === "/notifications"
+								? unreadNotificationsCount
+								: item.href === "/message"
+									? unreadMessagesCount
+									: undefined
+						}
 					/>
 				))}
 

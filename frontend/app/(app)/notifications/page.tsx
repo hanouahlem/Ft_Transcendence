@@ -7,6 +7,7 @@ import { NotificationCard } from "@/components/notifications/NotificationCard";
 import { NotificationsRail } from "@/components/notifications/NotificationsRail";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
 import { useAuth } from "@/context/AuthContext";
+import { useInboxUnread } from "@/context/InboxUnreadContext";
 import {
   getNotifications,
   markNotificationAsRead,
@@ -27,6 +28,7 @@ const DEFAULT_FILTERS: NotificationFilterState = {
 
 export default function NotificationsPage() {
   const { token } = useAuth();
+  const { setUnreadNotificationsCount } = useInboxUnread();
   const { notifyError, notifySuccess } = useArchiveToasts();
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -74,6 +76,14 @@ export default function NotificationsPage() {
     () => notifications.filter((notification) => !notification.read).length,
     [notifications],
   );
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    setUnreadNotificationsCount(unreadCount);
+  }, [loading, setUnreadNotificationsCount, unreadCount]);
 
   const ledgerItems = useMemo(
     () => buildNotificationLedgerItems(notifications),

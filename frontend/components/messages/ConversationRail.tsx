@@ -34,7 +34,7 @@ export function ConversationRail({
   onOpenNewConversation,
 }: ConversationRailProps) {
   return (
-    <aside className="flex min-h-screen w-full flex-col border border-black/10 bg-paper xl:w-[360px]">
+    <aside className="relative z-10 flex min-h-screen w-full flex-col border border-black/10 bg-paper xl:w-[360px]">
       <div className="flex-1 space-y-3 overflow-auto p-4">
         {isLoadingConversations ? (
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-label">
@@ -56,7 +56,7 @@ export function ConversationRail({
                 type="button"
                 onClick={() => onSelectConversation(conversation.id)}
                 className={cn(
-                  "relative w-full border p-4 text-left transition",
+                  "w-full border p-4 text-left transition",
                   rotationClass,
                   isActive
                     ? "border-ink border-2 bg-paper shadow-[4px_6px_0_rgba(26,26,26,0.12)]"
@@ -75,9 +75,16 @@ export function ConversationRail({
                       <p className="truncate text-sm font-bold text-ink">
                         {conversation.peer?.displayName || conversation.peer?.username || "Unknown user"}
                       </p>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-label">
-                        {formatRailTime(conversation.lastMessageAt)}
-                      </span>
+                      <div className="relative shrink-0 self-start">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-label">
+                          {formatRailTime(conversation.lastMessageAt)}
+                        </span>
+                        {conversation.unreadCount > 0 ? (
+                          <div className="absolute right-4 top-[calc(100%+4px)] rounded-full bg-accent-red px-2 py-0.5 font-mono text-[10px] font-sans uppercase tracking-[0.1em] text-paper shadow-[2px_2px_0_#1a1a1a]">
+                            {conversation.unreadCount}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                     <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-label">
                       @{conversation.peer?.username || "unknown"}
@@ -87,11 +94,6 @@ export function ConversationRail({
                     </p>
                   </div>
                 </div>
-                {conversation.unreadCount > 0 ? (
-                  <div className="absolute -right-2 -top-2 rounded-full bg-accent-orange px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-paper shadow-[2px_2px_0_#1a1a1a]">
-                    {conversation.unreadCount}
-                  </div>
-                ) : null}
               </button>
             );
           })
