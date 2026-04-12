@@ -56,40 +56,38 @@ export function ConversationRail({
                 type="button"
                 onClick={() => onSelectConversation(conversation.id)}
                 className={cn(
-                  "w-full border p-4 text-left transition",
+                  "relative w-full border p-4 text-left transition",
                   rotationClass,
                   isActive
                     ? "border-ink border-2 bg-paper shadow-[4px_6px_0_rgba(26,26,26,0.12)]"
                     : "border-black/10 bg-paper-muted hover:bg-paper hover:shadow-[3px_4px_0_rgba(26,26,26,0.08)]",
                 )}
               >
-                <div className="flex items-start gap-3">
+                {conversation.unreadCount > 0 ? (
+                  <div className="absolute -right-2 -top-2 z-10 rounded-full bg-accent-red px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-paper shadow-[2px_2px_0_#1a1a1a]">
+                    {conversation.unreadCount}
+                  </div>
+                ) : null}
+                <div className="flex items-center gap-4">
                   <ProfilePicture
                     name={conversation.peer?.displayName || conversation.peer?.username || "User"}
                     src={conversation.peer?.avatar}
-                    size="sm"
+                    size="lg"
                     withShadow={false}
+                    className="shrink-0 self-center"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-sm font-bold text-ink">
+                      <p className="truncate text-lg font-bold text-ink">
                         {conversation.peer?.displayName || conversation.peer?.username || "Unknown user"}
                       </p>
-                      <div className="relative shrink-0 self-start">
+                      <div className="shrink-0 self-start">
                         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-label">
                           {formatRailTime(conversation.lastMessageAt)}
                         </span>
-                        {conversation.unreadCount > 0 ? (
-                          <div className="absolute right-4 top-[calc(100%+4px)] rounded-full bg-accent-red px-2 py-0.5 font-mono text-[10px] font-sans uppercase tracking-[0.1em] text-paper shadow-[2px_2px_0_#1a1a1a]">
-                            {conversation.unreadCount}
-                          </div>
-                        ) : null}
                       </div>
                     </div>
-                    <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-label">
-                      @{conversation.peer?.username || "unknown"}
-                    </p>
-                    <p className="mt-1 truncate font-serif text-xs italic text-ink/75">
+                    <p className="mt-1 truncate font-serif text-md leading-5 text-ink/75">
                       {conversation.lastMessage?.content || "No message yet."}
                     </p>
                   </div>

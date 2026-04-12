@@ -563,6 +563,49 @@ Key terms an evaluator may ask:
 - derived state: total unread messages is the sum of per-conversation `unreadCount`
 - optimistic UI: the notifications page marks items read locally first, then confirms with the backend
 
+### Conversation Rail Rows
+
+Files:
+
+- `frontend/components/messages/ConversationRail.tsx`
+- `frontend/lib/api.ts`
+
+What this does:
+
+- renders one direct-message row per `ConversationItem`
+- prefers the peer `displayName` as the only visible identity line in the row
+- keeps the avatar visually centered and larger so the list reads more like a people ledger than a metadata table
+- uses a larger last-message preview to make the actual conversation content easier to scan
+- places the unread-count pill on the row's upper-right corner so it sits on the edge instead of taking space inside the content area
+
+Real code:
+
+```tsx
+<div className="flex items-center gap-4">
+  <ProfilePicture
+    name={conversation.peer?.displayName || conversation.peer?.username || "User"}
+    src={conversation.peer?.avatar}
+    size="lg"
+    withShadow={false}
+    className="shrink-0 self-center"
+  />
+  <div className="min-w-0 flex-1">
+    <p className="truncate text-sm font-bold text-ink">
+      {conversation.peer?.displayName || conversation.peer?.username || "Unknown user"}
+    </p>
+    <p className="mt-1 truncate font-serif text-sm italic leading-5 text-ink/75">
+      {conversation.lastMessage?.content || "No message yet."}
+    </p>
+  </div>
+</div>
+```
+
+Why this matters:
+
+- the backend still sends both `displayName` and `username`, but this rail treats `displayName` as the primary reading label
+- removing the extra handle line reduces vertical clutter in a dense inbox list
+- the row remains purely presentational: conversation selection still comes from the parent message page and `useMessages`
+
 ### `frontend/components/layout/RightRailSuggestions.tsx`
 
 Purpose:
