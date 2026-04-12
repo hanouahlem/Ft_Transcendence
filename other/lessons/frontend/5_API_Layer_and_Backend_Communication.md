@@ -117,6 +117,46 @@ This matches the backend contract from:
 - `GET /users/by-username/:username`
 - `PATCH /friends/:id/accept`
 
+## Direct Message Helpers
+
+The API layer now includes typed helpers for direct chat in:
+
+- `frontend/lib/api.ts`
+
+Real helpers:
+
+```ts
+export async function createDirectConversation(targetUserId: number, token?: string | null) {
+  return requestJson<CreateDirectConversationResponse>("/conversations/direct", {
+    method: "POST",
+    token,
+    body: { targetUserId },
+  });
+}
+
+export async function getConversations(token?: string | null) {
+  return requestWithAuth<ConversationListResponse>("/conversations", { token });
+}
+
+export async function sendConversationMessage(
+  conversationId: number,
+  content: string,
+  token?: string | null,
+) {
+  return requestJson<SendMessageResponse>(`/conversations/${conversationId}/messages`, {
+    method: "POST",
+    token,
+    body: { content },
+  });
+}
+```
+
+Why this matters:
+
+- pages no longer hardcode chat endpoint strings
+- request/response shape is explicit through types (`ConversationItem`, `ConversationMessage`)
+- auth handling stays consistent through `withAuthHeaders(...)`
+
 ## Structured Notification Types
 
 The frontend API layer now also knows the structured notification shape.

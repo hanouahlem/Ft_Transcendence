@@ -30,6 +30,7 @@ frontend/app/(auth)/register/page.tsx
 frontend/app/(app)/feed/page.tsx
 frontend/app/(app)/search/page.tsx
 frontend/app/(app)/friends/page.tsx
+frontend/app/(app)/message/page.tsx
 frontend/app/(app)/notifications/page.tsx
 frontend/app/(app)/profile/page.tsx
 frontend/app/(app)/profile/[username]/page.tsx
@@ -44,6 +45,7 @@ That means the current frontend URLs are:
 - `/feed`
 - `/search`
 - `/friends`
+- `/message`
 - `/notifications`
 - `/profile`
 - `/profile/:username`
@@ -102,6 +104,7 @@ Several pages are intended for logged-in users:
 - `frontend/app/(app)/search/page.tsx`
 - `frontend/app/(app)/friends/page.tsx`
 - `frontend/app/(app)/notifications/page.tsx`
+- `frontend/app/(app)/message/page.tsx`
 - `frontend/app/(app)/profile/page.tsx`
 - `frontend/app/(app)/profile/[username]/page.tsx`
 
@@ -211,6 +214,10 @@ Examples:
   - `GET /users/:id/posts`
   - `GET /users/:id/friends`
 - `/friends` has real backend wiring for requests, acceptance, and removal through friendship ids
+- `/message` is wired to the direct-message backend and split into small parts:
+  - route entry: `frontend/app/(app)/message/page.tsx`
+  - state/actions hook: `frontend/hooks/useMessages.ts`
+  - presentational parts in `frontend/components/messages/` (`ConversationThread`, `ConversationRail`, `NewConversationDialog`)
 - `/notifications` now uses real backend notification rows and builds navigation targets from `type`, `actor.username`, and `postId`
 - `/settings` is the single active account route and owns profile edits, media uploads, and password updates
 

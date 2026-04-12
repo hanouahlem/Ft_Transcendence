@@ -11,6 +11,7 @@ In this project the main feature areas are:
 - users and auth
 - friends
 - posts
+- direct messages
 
 ## User And Auth Logic
 
@@ -165,6 +166,75 @@ The post controllers handle HTTP concerns:
 - like/unlike posts
 - return enough owner data for notification side effects after likes and comments
 - delete image files when a post is deleted
+
+## Direct Message Logic
+
+Files:
+
+- `backend/src/controllers/messageController.js`
+- `backend/src/routes/routes.js`
+- `backend/prisma/schema.prisma`
+
+Main responsibilities:
+
+- create or reuse one direct conversation between two users
+- list authenticated user conversations with unread counts
+- fetch all messages for one conversation
+- send a message inside a conversation
+- mark a conversation as read for the authenticated user
+
+Routes added:
+
+- `POST /conversations/direct`
+- `GET /conversations`
+- `GET /conversations/:id/messages`
+- `POST /conversations/:id/messages`
+- `POST /conversations/:id/read`
+
+### Why unread status is on membership, not on each message
+
+Unread state is per user, so it is stored in `ConversationMember.lastReadMessageId`.
+
+Real model fields from `backend/prisma/schema.prisma`:
+
+```prisma
+model ConversationMember {
+  conversationId    Int
+  userId            Int
+  lastReadMessageId Int?
+}
+```
+
+Why this matters:
+
+- each participant has their own read pointer
+- unread count can be computed from "messages after last read id"
+- message rows stay immutable (`senderId`, `content`, `createdAt`)
+
+### `POST /conversations/direct`
+
+What it does:
+
+- validates `targetUserId`
+- rejects self conversation
+- checks target user exists
+- computes a stable `directKey` like `12:87`
+- uses Prisma `upsert` to avoid duplicate 1:1 conversations
+
+### `POST /conversations/:id/messages`
+
+What it does:
+
+- validates conversation membership from `conversationId + userId`
+- validates and trims message content
+- creates a `Message` row
+- updates `Conversation.lastMessageAt`
+- updates sender `ConversationMember.lastReadMessageId` to the new message id
+- creates `MESSAGE` notifications for the other members
+
+Key evaluator term:
+
+- **directKey**: deterministic key to guarantee one direct conversation per pair of users
 
 ## Why A Service Layer Exists For Posts
 

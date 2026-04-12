@@ -95,9 +95,7 @@ export type ApiFailure = {
 
 export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
 
-export type FriendPreview = PublicUserListItem;
-
-export type FriendListItem = FriendPreview & {
+export type FriendListItem = PublicUserListItem & {
   friendshipId: number;
 };
 
@@ -106,13 +104,32 @@ export type FriendRequest = {
   senderId: number;
   receiverId: number;
   status: string;
-  sender?: FriendPreview | null;
-  receiver?: FriendPreview | null;
+  sender?: PublicUserListItem | null;
+  receiver?: PublicUserListItem | null;
 };
 
 export type FriendSuggestionsResponse = {
   connectedUserIds: number[];
-  suggestions: FriendPreview[];
+  suggestions: PublicUserListItem[];
+};
+
+export type ConversationMessage = {
+  id: number;
+  conversationId: number;
+  senderId: number;
+  content: string;
+  createdAt: string;
+  sender: PublicUserListItem;
+};
+
+export type ConversationItem = {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  lastMessageAt: string | null;
+  unreadCount: number;
+  peer: PublicUserListItem | null;
+  lastMessage: ConversationMessage | null;
 };
 
 export type FeedScope = "all" | "friends";
@@ -157,6 +174,30 @@ export type NotificationsResponse = {
 
 export type NotificationActionResponse = {
   notification: NotificationItem;
+};
+
+export type ConversationListResponse = {
+  conversations: ConversationItem[];
+};
+
+export type ConversationMessagesResponse = {
+  messages: ConversationMessage[];
+};
+
+export type CreateDirectConversationResponse = {
+  conversation: ConversationItem;
+};
+
+export type SendMessageResponse = {
+  message: ConversationMessage;
+};
+
+export type MarkConversationReadResponse = {
+  read: {
+    conversationId: number;
+    lastReadMessageId: number | null;
+    unreadCount: number;
+  };
 };
 
 function getStoredToken() {
@@ -324,7 +365,7 @@ export async function getUserPosts(userId: number, token?: string | null) {
 }
 
 export async function getUserFriends(userId: number, token?: string | null) {
-  return requestWithAuth<FriendPreview[]>(`/users/${userId}/friends`, { token });
+  return requestWithAuth<PublicUserListItem[]>(`/users/${userId}/friends`, { token });
 }
 
 export async function getFeedPosts(
@@ -389,6 +430,56 @@ export async function deleteFriend(requestId: number, token?: string | null) {
 
 export async function getNotifications(token?: string | null) {
   return requestWithAuth<NotificationsResponse>("/notifications", { token });
+}
+
+export async function createDirectConversation(
+  targetUserId: number,
+  token?: string | null,
+) {
+  return requestJson<CreateDirectConversationResponse>("/conversations/direct", {
+    method: "POST",
+    token,
+    body: { targetUserId },
+  });
+}
+
+export async function getConversations(token?: string | null) {
+  return requestWithAuth<ConversationListResponse>("/conversations", { token });
+}
+
+export async function getConversationMessages(
+  conversationId: number,
+  token?: string | null,
+) {
+  return requestWithAuth<ConversationMessagesResponse>(
+    `/conversations/${conversationId}/messages`,
+    { token },
+  );
+}
+
+export async function sendConversationMessage(
+  conversationId: number,
+  content: string,
+  token?: string | null,
+) {
+  return requestJson<SendMessageResponse>(`/conversations/${conversationId}/messages`, {
+    method: "POST",
+    token,
+    body: { content },
+  });
+}
+
+export async function markConversationAsRead(
+  conversationId: number,
+  token?: string | null,
+) {
+  return requestWithAuth<MarkConversationReadResponse>(
+    `/conversations/${conversationId}/read`,
+    {
+      method: "POST",
+      token,
+    },
+  );
 }
 
 export async function markNotificationAsRead(

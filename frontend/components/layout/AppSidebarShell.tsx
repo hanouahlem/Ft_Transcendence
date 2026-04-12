@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { NatureCanvas } from "@/components/layout/NatureCanvas";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { NewPostDialog } from "@/components/posts/NewPostDialog";
 import { archiveToaster } from "@/components/ui/toaster";
 import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -17,7 +18,9 @@ export default function AppSidebarShell({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, token, logout } = useAuth();
+  const isMessagePage = pathname === "/message";
 
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -172,7 +175,14 @@ export default function AppSidebarShell({
             onLogout={handleLogout}
           />
 
-          <div className="mx-auto w-full max-w-[1132px] px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
+          <div
+            className={cn(
+              "w-full",
+              isMessagePage
+                ? "min-h-screen max-w-none px-0 py-0"
+                : "mx-auto max-w-[1132px] px-4 py-10 sm:px-6 lg:px-10 lg:py-12",
+            )}
+          >
             {children}
           </div>
 
