@@ -332,6 +332,7 @@ Current files:
 
 - `frontend/app/(app)/profile/page.tsx`
 - `frontend/app/(app)/profile/[username]/page.tsx`
+- `frontend/components/profile/FriendActionButton.tsx`
 - `frontend/components/profile/ProfileView.tsx`
 - `frontend/components/layout/RightRail.tsx`
 - `frontend/components/posts/PostCard.tsx`
@@ -349,13 +350,33 @@ How it works:
 - `GET /users/:id/posts` for the archive entries
 - `GET /users/:id/friends` for the right-rail suggestions and the fellows count
 - `ProfileView` uses `useFriendRequests()` for follow/request state and mutations
+- `ProfileView` delegates the other-user friendship CTA to `FriendActionButton`
 - `ProfileView` uses `usePostInteractions()` for delete, like, favorite, comment, and post-dialog state
+- on another user's profile, the secondary hero CTA is labeled `Message` and is rendered beside the friendship action
 
 Important design rule:
 
 - the profile page does not recreate post cards, likes, favorites, or comments
 - it uses `PostCard` and `PostDialog`
 - this keeps interaction logic consistent between feed and profile
+- the friendship CTA is isolated in `FriendActionButton`, so `ProfileView` stays focused on page data and layout instead of button-state branching
+
+`FriendActionButton` explanation:
+
+- it receives already-derived state for the displayed profile:
+  - connected friend
+  - incoming request
+  - outgoing pending request
+  - request currently submitting
+- it chooses the right archive button variant:
+  - `default` for add
+  - `bluesh` for accept
+  - `subtle` for pending
+  - `destructive` for remove
+- it also chooses the visible label:
+  - `Add`, `Accept`, `Pending`, `Remove`
+  - or transition labels like `Adding`, `Accepting`, `Removing`
+- it calls the matching mutation handler from `useFriendRequests()`
 
 Real route composition:
 
@@ -485,6 +506,7 @@ How it works:
   - `GET /conversations`, then sums every conversation `unreadCount`
 - the notifications page calls `setUnreadNotificationsCount(...)` whenever its local notification list changes
 - `useMessages` calls `setUnreadMessagesCount(...)` whenever its local conversation list changes
+- the profile page "Message" CTA links to `/message?userId=[profileId]`, and the message page consumes that query param to open or reuse the correct direct conversation on arrival
 
 Why this design is useful:
 
@@ -684,9 +706,17 @@ How it works:
 - post search matches post content, author names, and comment text
 - user search matches only username and display name
 - the `posts` tab reuses `PostCard`, so likes, favorites, deletes, and the post dialog still use the same real handlers as the feed
-- the `users` tab renders `SearchUserCard`, which reuses `ProfileBanner` and `ProfilePicture`
+- the `users` tab renders `SearchUserCard`, which reuses `ProfileBanner`, `ProfilePicture`, and `FriendActionButton`
 - the visible results are paginated client-side, while the active page is still controlled from the URL
 - user-card enrichment is deferred to the visible users page, so the first search render no longer waits on profile and friends requests for every user
+
+Important UI detail:
+
+- `SearchUserCard` is no longer one big link because it now contains a real friendship button
+- profile navigation stays on the banner/text/stat links
+- the friend CTA reuses the same `FriendActionButton` logic as the profile page, so add/accept/pending/remove behavior stays consistent
+- search cards intentionally hide the friendship CTA for users who are already connected, so the search grid stays discovery-focused instead of becoming a friend-management screen
+- the 5 decorative card variants are now chosen from `user.id % 5`, so a given user keeps the same visual treatment even if search ordering or pagination changes
 
 Real code:
 

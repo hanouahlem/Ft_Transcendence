@@ -9,6 +9,7 @@ Related files:
 - `frontend/components/messages/ConversationRail.tsx`
 - `frontend/components/messages/NewConversationDialog.tsx`
 - `frontend/lib/api.ts` (REST calls)
+- `frontend/components/profile/ProfileView.tsx` (links into `/message?userId=...`)
 
 ---
 
@@ -23,6 +24,7 @@ It handles:
 - sending messages
 - unread handling
 - in-memory message cache (per conversation)
+- route-entry deep link handling from `/message?userId=...`
 
 The page component does not do business logic anymore. It only connects UI components to this hook.
 
@@ -63,6 +65,7 @@ Why:
 
 ### `loadConversations()`
 Calls `GET /conversations`, sorts result, stores it in state, keeps valid selected conversation (or picks first one).
+- it also guards against stale async results: only the newest conversations request is allowed to write back into state
 
 Why:
 - initialize and refresh conversation list.
@@ -115,6 +118,17 @@ Dialog-specific wrapper around `handleOpenConversation`.
 Why:
 - clean dialog UX.
 
+### `handleStartConversationFromRoute(targetUserId)`
+Route-entry wrapper around `handleOpenConversation`.
+- used when the message page receives `/message?userId=...`
+- opens or reuses the direct conversation for that user
+- refreshes the conversation list after opening so the route entry and rail stay aligned with backend state
+- leaves dialog state untouched because this flow did not come from the dialog
+
+Why:
+- lets profile-page "Message" buttons deep-link into the inbox without moving route-specific logic into every caller.
+- prevents the initial conversations fetch from overwriting the deep-linked selection with an older response
+
 ---
 
 ## Effect-By-Effect Purpose
@@ -136,6 +150,15 @@ Runs when token is available.
 
 Why:
 - page bootstrap.
+
+### Message page route-entry effect
+The page reads `userId` from `useSearchParams()`.
+- if `/message?userId=42` is present, it calls `handleStartConversationFromRoute(42)`
+- after success, it replaces the URL back to `/message`
+
+Why:
+- the profile page can link directly into the correct chat
+- refreshing or later rerenders do not keep retriggering the open/create request
 
 ### Effect: selected conversation changed
 Implements stale-while-revalidate:
@@ -185,6 +208,10 @@ Why:
 - cache is volatile (lost on hard refresh/navigation unmount)
 - no socket real-time yet (REST-only v1)
 - no pagination (intentional for project scope)
+
+7. Why `POST /conversations/direct` is safe for deep links:
+- backend uses Prisma `upsert` on a deterministic `directKey`
+- that means `/message?userId=42` reuses the existing 1:1 conversation if it already exists instead of creating duplicates
 
 ---
 

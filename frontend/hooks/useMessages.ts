@@ -42,6 +42,7 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
   const [isCreatingConversation, setIsCreatingConversation] = useState<number | null>(null);
   const messagesCacheRef = useRef<Map<number, ConversationMessage[]>>(new Map());
   const hasLoadedConversationsRef = useRef(false);
+  const conversationsRequestIdRef = useRef(0);
   const selectedConversationIdRef = useRef<number | null>(null);
 
   const selectedConversation = useMemo(
@@ -67,8 +68,15 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
       return;
     }
 
+    const requestId = conversationsRequestIdRef.current + 1;
+    conversationsRequestIdRef.current = requestId;
     setIsLoadingConversations(true);
     const result = await getConversations(token);
+
+    if (requestId !== conversationsRequestIdRef.current) {
+      return;
+    }
+
     setIsLoadingConversations(false);
 
     if (!result.ok) {
@@ -313,6 +321,20 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
     [handleOpenConversation],
   );
 
+  const handleStartConversationFromRoute = useCallback(
+    async (targetUserId: number) => {
+      const opened = await handleOpenConversation(targetUserId);
+
+      if (!opened) {
+        return false;
+      }
+
+      await loadConversations();
+      return true;
+    },
+    [handleOpenConversation, loadConversations],
+  );
+
   return {
     conversations,
     messages,
@@ -334,5 +356,6 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
     handleSendMessage,
     handleRefresh,
     handleStartConversationFromDialog,
+    handleStartConversationFromRoute,
   };
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { MapPin } from "lucide-react";
 import ArchiveStar from "@/components/decor/ArchiveStar";
+import { FriendActionButton } from "@/components/profile/FriendActionButton";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,14 @@ export type SearchUserRecord = PublicUser & {
 
 type SearchUserCardProps = {
   user: SearchUserRecord;
-  index: number;
+  currentUserId?: number;
+  sentRequests: number[];
+  incomingRequestIdsBySender: Record<number, number>;
+  connectedFriendshipIdsByUser: Record<number, number>;
+  sendingFriendId: number | null;
+  onAddFriend: (userId: number) => void | Promise<void>;
+  onAcceptFriend: (userId: number) => void | Promise<void>;
+  onRemoveFriend: (userId: number) => void | Promise<void>;
 };
 
 const CARD_VARIANTS = [
@@ -70,25 +77,38 @@ function formatJoinedDate(dateString?: string) {
   }).format(date);
 }
 
-export function SearchUserCard({ user, index }: SearchUserCardProps) {
-  const variant = CARD_VARIANTS[index % CARD_VARIANTS.length];
+export function SearchUserCard({
+  user,
+  currentUserId,
+  sentRequests,
+  incomingRequestIdsBySender,
+  connectedFriendshipIdsByUser,
+  sendingFriendId,
+  onAddFriend,
+  onAcceptFriend,
+  onRemoveFriend,
+}: SearchUserCardProps) {
+  const variant = CARD_VARIANTS[user.id % CARD_VARIANTS.length];
   const displayName = user.displayName?.trim() || user.username;
   const bio =
     user.bio?.trim() ||
     user.status?.trim() ||
     "Field observer contributing fresh records to the archive.";
+  const profileHref = `/profile/${encodeURIComponent(user.username)}`;
+  const isOwnUser = currentUserId === user.id;
+  const isPending = sentRequests.includes(user.id);
+  const incomingRequestId = incomingRequestIdsBySender[user.id];
+  const isConnected = typeof connectedFriendshipIdsByUser[user.id] === "number";
+  const showFriendAction = !isOwnUser && !isConnected;
 
   return (
-    <Link
-      href={`/profile/${encodeURIComponent(user.username)}`}
-      className="group block"
+    <article
+      className={cn(
+        "group relative border border-label/30 shadow-[6px_10px_28px_rgba(26,26,26,0.12)] transition-transform duration-200 hover:-translate-y-1",
+        variant.surface,
+      )}
     >
-      <article
-        className={cn(
-          "relative border border-label/30 shadow-[6px_10px_28px_rgba(26,26,26,0.12)] transition-transform duration-200 group-hover:-translate-y-1",
-          variant.surface,
-        )}
-      >
+      <Link href={profileHref} className="block">
         <div className="relative h-24 overflow-hidden bg-paper-muted/80">
           <ProfileBanner
             name={user.username}
@@ -96,8 +116,10 @@ export function SearchUserCard({ user, index }: SearchUserCardProps) {
             className="h-full w-full object-cover"
           />
         </div>
+      </Link>
 
-        <div className="relative p-5 pt-0">
+      <div className="relative p-5 pt-0">
+        <Link href={profileHref}>
           <ProfilePicture
             name={displayName}
             src={user.avatar}
@@ -108,31 +130,46 @@ export function SearchUserCard({ user, index }: SearchUserCardProps) {
             )}
             frameClassName="bg-paper p-1"
           />
+        </Link>
 
-          <div className="pt-10">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
+        <div className="pt-10">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <Link href={profileHref} className="block">
                 <h3 className="truncate font-display text-2xl font-black uppercase tracking-[-0.04em] text-ink">
                   {displayName}
                 </h3>
                 <p className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-label">
                   @{user.username.toLowerCase()}
                 </p>
-              </div>
-
-              {user.location ? (
-                <span className="inline-flex max-w-[45%] shrink-0 items-center gap-1 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {user.location}
-                </span>
-              ) : null}
+              </Link>
             </div>
 
+            {showFriendAction ? (
+              <FriendActionButton
+                profileUserId={user.id}
+                isConnected={isConnected}
+                incomingRequestId={incomingRequestId}
+                isPending={isPending}
+                sendingFriendId={sendingFriendId}
+                onAddFriend={onAddFriend}
+                onAcceptFriend={onAcceptFriend}
+                onRemoveFriend={onRemoveFriend}
+              />
+            ) : null}
+          </div>
+
+          <Link href={profileHref} className="block">
             <p className="mt-3 min-h-[72px] text-sm leading-relaxed text-ink">
               {bio}
             </p>
+          </Link>
 
-            <div className="mt-4 grid grid-cols-3 gap-4 border-t border-dashed border-label/30 pt-3 text-center">
+          <Link
+            href={profileHref}
+            className="mt-4 block border-t border-dashed border-label/30 pt-3"
+          >
+            <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-base font-bold text-ink">
                   {formatCompactCount(user.postCount)}
@@ -158,20 +195,25 @@ export function SearchUserCard({ user, index }: SearchUserCardProps) {
                 </div>
               </div>
             </div>
+          </Link>
 
-            <div className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-label/20 pt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+          <Link
+            href={profileHref}
+            className="mt-4 flex items-center justify-between gap-3 border-t border-dashed border-label/20 pt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-label"
+          >
+            <div className="flex min-w-0 items-center justify-between gap-3 w-full">
               <span>{formatCompactCount(user.totalComments)} notes logged</span>
               <span>Joined {formatJoinedDate(user.createdAt)}</span>
             </div>
-          </div>
-
-          {variant.star ? (
-            <div className="pointer-events-none absolute bottom-[30%] -right-3 h-11 w-11 rotate-[14deg]">
-              <ArchiveStar />
-            </div>
-          ) : null}
+          </Link>
         </div>
-      </article>
-    </Link>
+
+        {variant.star ? (
+          <div className="pointer-events-none absolute bottom-[30%] -right-3 h-11 w-11 rotate-[14deg]">
+            <ArchiveStar />
+          </div>
+        ) : null}
+      </div>
+    </article>
   );
 }

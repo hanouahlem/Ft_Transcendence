@@ -118,9 +118,11 @@ export default function SearchPage() {
   const {
     sentRequests,
     incomingRequestIdsBySender,
+    connectedFriendshipIdsByUser,
     sendingFriendId,
     handleAddFriend,
     handleAcceptFriend,
+    handleRemoveFriend,
   } = useFriendRequests({
     token,
     onFriendAccepted: (userId) => {
@@ -571,11 +573,18 @@ export default function SearchPage() {
                     </section>
                   ) : (
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                      {paginatedUsers.map((candidate, index) => (
+                      {paginatedUsers.map((candidate) => (
                         <SearchUserCard
                           key={candidate.id}
                           user={candidate}
-                          index={(currentPage - 1) * USERS_PER_PAGE + index}
+                          currentUserId={user?.id}
+                          sentRequests={sentRequests}
+                          incomingRequestIdsBySender={incomingRequestIdsBySender}
+                          connectedFriendshipIdsByUser={connectedFriendshipIdsByUser}
+                          sendingFriendId={sendingFriendId}
+                          onAddFriend={handleAddFriend}
+                          onAcceptFriend={handleAcceptFriend}
+                          onRemoveFriend={handleRemoveFriend}
                         />
                       ))}
                     </div>

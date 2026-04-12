@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { MapPin, MessageCircle } from "lucide-react";
+import { MessageAdd01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MapPin } from "lucide-react";
 import {
   getCurrentUser,
   getUserByUsername,
@@ -18,6 +20,7 @@ import { PostDialog } from "@/components/posts/PostDialog";
 import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
+import { FriendActionButton } from "@/components/profile/FriendActionButton";
 import ArchiveStar from "@/components/decor/ArchiveStar";
 import {
   buildProfileSuggestions,
@@ -387,60 +390,24 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                             </>
                           ) : (
                             <>
-                              <Button
-                                type="button"
-                                variant={
-                                  profileConnected
-                                    ? "destructive"
-                                    : profileIncomingRequestId
-                                      ? "bluesh"
-                                      : profileSent
-                                        ? "subtle"
-                                        : "default"
-                                }
-                                size="lg"
-                                disabled={
-                                  profileSent ||
-                                  sendingFriendId === resolvedProfileId
-                                }
-                                onClick={() => {
-                                  if (!resolvedProfileId) {
-                                    return;
-                                  }
-
-                                  if (profileConnected) {
-                                    handleRemoveFriend(resolvedProfileId);
-                                    return;
-                                  }
-
-                                  if (profileIncomingRequestId) {
-                                    handleAcceptFriend(resolvedProfileId);
-                                    return;
-                                  }
-
-                                  if (!profileSent) {
-                                    handleAddFriend(resolvedProfileId);
-                                  }
-                                }}
-                              >
-                                {sendingFriendId === resolvedProfileId
-                                  ? profileConnected
-                                    ? "Removing"
-                                    : profileIncomingRequestId
-                                      ? "Accepting"
-                                      : "Adding"
-                                  : profileConnected
-                                    ? "Remove"
-                                    : profileIncomingRequestId
-                                      ? "Accept"
-                                      : profileSent
-                                        ? "Pending"
-                                        : "Add"}
-                              </Button>
+                              <FriendActionButton
+                                profileUserId={resolvedProfileId}
+                                isConnected={profileConnected}
+                                incomingRequestId={profileIncomingRequestId}
+                                isPending={profileSent}
+                                sendingFriendId={sendingFriendId}
+                                onAddFriend={handleAddFriend}
+                                onAcceptFriend={handleAcceptFriend}
+                                onRemoveFriend={handleRemoveFriend}
+                              />
                               <Button asChild variant="paper" size="lg">
-                                <Link href="/friends">
-                                  <MessageCircle className="h-4 w-4" />
-                                  Network
+                                <Link href={`/message?userId=${resolvedProfileId}`}>
+                                  <HugeiconsIcon
+                                    icon={MessageAdd01Icon}
+                                    size={18}
+                                    strokeWidth={1.9}
+                                  />
+                                  Message
                                 </Link>
                               </Button>
                             </>

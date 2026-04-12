@@ -218,6 +218,7 @@ Examples:
   - route entry: `frontend/app/(app)/message/page.tsx`
   - state/actions hook: `frontend/hooks/useMessages.ts`
   - presentational parts in `frontend/components/messages/` (`ConversationThread`, `ConversationRail`, `NewConversationDialog`)
+  - route-entry deep link: `/message?userId=[targetUserId]` opens or reuses the direct conversation for that profile
 - `/notifications` now uses real backend notification rows and builds navigation targets from `type`, `actor.username`, and `postId`
 - `/settings` is the single active account route and owns profile edits, media uploads, and password updates
 
