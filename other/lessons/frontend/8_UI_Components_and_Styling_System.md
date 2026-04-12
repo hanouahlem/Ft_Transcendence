@@ -222,3 +222,35 @@ The `ledger` button variant lives in:
 It is the stronger black-and-orange commit button used by the settings paper.
 
 This matters during evaluation because it shows the archive style is a reusable system, not a one-page experiment.
+
+## Ark PasswordInput Integration
+
+Password fields now use Ark UI's dedicated password primitive instead of plain `<input type="password">` in the places users expect show/hide behavior:
+
+- `frontend/components/ui/FieldInput.tsx` (used by login/register password fields)
+- `frontend/components/settings/SettingsField.tsx` (used by settings password fields)
+
+Real code pattern:
+
+```tsx
+<PasswordInput.Root>
+  <PasswordInput.Input
+    type="password"
+    value={value}
+    onChange={onChange}
+  />
+  <PasswordInput.VisibilityTrigger type="button">
+    <PasswordInput.Indicator fallback="Show">Hide</PasswordInput.Indicator>
+  </PasswordInput.VisibilityTrigger>
+</PasswordInput.Root>
+```
+
+Why this is useful:
+
+- one consistent show/hide interaction across login, register, and settings
+- less custom password-toggle logic to maintain in page components
+- keeps existing validation and submit flow unchanged, because the same controlled `value` and `onChange` are still used
+
+Key term:
+
+- controlled input: form input value is owned by React state (`value` + `onChange`), not unmanaged DOM state

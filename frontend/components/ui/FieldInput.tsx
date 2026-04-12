@@ -1,4 +1,7 @@
 import { Field } from "@ark-ui/react/field";
+import { PasswordInput } from "@ark-ui/react/password-input";
+import { ViewIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   useId,
   useState,
@@ -83,24 +86,55 @@ export default function FieldInput({
             : focused
               ? "border-accent-red/50"
               : "border-label/30",
-        )}
-      >
-        <Field.Input
-          type={type}
-          value={value}
-          onChange={onChange}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          required={required}
-          {...inputProps}
-          className={cn(
-            "archive-input w-full border-0 border-b-2 border-dotted border-label bg-transparent px-1 pt-3 pb-1 font-mono text-lg text-ink transition-colors placeholder:text-label/40 focus:border-accent-red focus:bg-accent-red/[0.02]",
-            invalid &&
-              "border-accent-red placeholder:text-accent-red/45 focus:border-accent-red focus:bg-accent-red/[0.02]",
-            type === "password" && "tracking-[0.1em]",
-            inputClassName,
           )}
-        />
+      >
+        {type === "password" ? (
+          <PasswordInput.Root>
+            <div className="relative">
+              <PasswordInput.Input
+                id={inputId}
+                value={value}
+                onChange={onChange}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                required={required}
+                {...inputProps}
+                className={cn(
+                  "archive-input w-full border-0 border-b-2 border-dotted border-label bg-transparent px-1 pt-3 pb-1 pr-18 font-mono text-lg text-ink tracking-[0.1em] transition-colors placeholder:text-label/40 focus:border-accent-red focus:bg-accent-red/[0.02]",
+                  invalid &&
+                    "border-accent-red placeholder:text-accent-red/45 focus:border-accent-red focus:bg-accent-red/[0.02]",
+                  inputClassName,
+                )}
+              />
+              <PasswordInput.VisibilityTrigger
+                type="button"
+                className="absolute right-0 top-1/2 -translate-y-1/2 bg-paper px-1 text-accent-red hover:text-ink"
+              >
+                <PasswordInput.Indicator
+                  fallback={<HugeiconsIcon icon={ViewOffIcon} size={16} strokeWidth={1.9} />}
+                >
+                  <HugeiconsIcon icon={ViewIcon} size={16} strokeWidth={1.9} />
+                </PasswordInput.Indicator>
+              </PasswordInput.VisibilityTrigger>
+            </div>
+          </PasswordInput.Root>
+        ) : (
+          <Field.Input
+            type={type}
+            value={value}
+            onChange={onChange}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            required={required}
+            {...inputProps}
+            className={cn(
+              "archive-input w-full border-0 border-b-2 border-dotted border-label bg-transparent px-1 pt-3 pb-1 font-mono text-lg text-ink transition-colors placeholder:text-label/40 focus:border-accent-red focus:bg-accent-red/[0.02]",
+              invalid &&
+                "border-accent-red placeholder:text-accent-red/45 focus:border-accent-red focus:bg-accent-red/[0.02]",
+              inputClassName,
+            )}
+          />
+        )}
       </div>
     </Field.Root>
   );
