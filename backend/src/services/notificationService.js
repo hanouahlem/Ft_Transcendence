@@ -1,4 +1,7 @@
 import prisma from "../prisma.js";
+import { getSocketServer, getUserRoomName } from "../socket.js";
+import { SOCKET_EVENTS } from "../socketEvents.js";
+import { emitInboxUnreadCounts } from "./inboxService.js";
 
 export const NOTIFICATION_TYPES = Object.freeze({
   FOLLOW: "FOLLOW",
@@ -41,7 +44,7 @@ export function serializeNotification(notification) {
 }
 
 export async function createNotification({ userId, actorId, type, postId = null }) {
-  return prisma.notification.create({
+  const notification = await prisma.notification.create({
     data: {
       userId,
       actorId,
@@ -50,6 +53,44 @@ export async function createNotification({ userId, actorId, type, postId = null 
     },
     include: notificationInclude,
   });
+
+  try {
+    getSocketServer()
+      .to(getUserRoomName(userId))
+      .emit(SOCKET_EVENTS.NOTIFICATION_CREATED, {
+        notification: serializeNotification(notification),
+      });
+
+    await emitInboxUnreadCounts(userId);
+  } catch (error) {
+    console.error("createNotification socket emit error:", error);
+  }
+
+  return notification;
+}
+
+export function emitNotificationRead({ userId, notificationId }) {
+  const resolvedUserId = Number(userId);
+  const resolvedNotificationId = Number(notificationId);
+
+  if (
+    !Number.isInteger(resolvedUserId) ||
+    resolvedUserId < 1 ||
+    !Number.isInteger(resolvedNotificationId) ||
+    resolvedNotificationId < 1
+  ) {
+    return;
+  }
+
+  try {
+    getSocketServer()
+      .to(getUserRoomName(resolvedUserId))
+      .emit(SOCKET_EVENTS.NOTIFICATION_READ, {
+        notificationId: resolvedNotificationId,
+      });
+  } catch (error) {
+    console.error("emitNotificationRead error:", error);
+  }
 }
 
 export async function createNotificationIfRelevant({

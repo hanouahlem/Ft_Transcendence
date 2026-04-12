@@ -1,8 +1,11 @@
 import prisma from "../prisma.js";
+import { getSocketServer, getUserRoomName } from "../socket.js";
+import { SOCKET_EVENTS } from "../socketEvents.js";
 import {
   createNotificationIfRelevant,
   NOTIFICATION_TYPES,
 } from "../services/notificationService.js";
+import { emitInboxUnreadCounts } from "../services/inboxService.js";
 
 const messageSenderSelect = {
   id: true,
@@ -93,6 +96,64 @@ async function getConversationOrNull(conversationId, currentUserId) {
   });
 
   return conversation;
+}
+
+async function getSerializedConversationForUser(conversationId, currentUserId) {
+  const conversation = await getConversationOrNull(conversationId, currentUserId);
+
+  if (!conversation) {
+    return null;
+  }
+
+  const currentMember = conversation.members.find((member) => member.userId === currentUserId);
+  const unreadCount = await getUnreadCount({
+    conversationId,
+    currentUserId,
+    lastReadMessageId: currentMember?.lastReadMessageId ?? null,
+  });
+
+  return serializeConversation({
+    conversation,
+    currentUserId,
+    unreadCount,
+  });
+}
+
+async function emitMessageCreated({ conversationId, message, participantUserIds }) {
+  try {
+    const serializedMessage = serializeMessage(message);
+    const socketServer = getSocketServer();
+
+    await Promise.all(
+      participantUserIds.map(async (userId) => {
+        const conversation = await getSerializedConversationForUser(conversationId, userId);
+
+        if (!conversation) {
+          return;
+        }
+
+        socketServer.to(getUserRoomName(userId)).emit(SOCKET_EVENTS.MESSAGE_CREATED, {
+          conversation,
+          message: serializedMessage,
+        });
+      }),
+    );
+  } catch (error) {
+    console.error("emitMessageCreated error:", error);
+  }
+}
+
+function emitConversationRead({ conversationId, userId, unreadCount }) {
+  try {
+    getSocketServer()
+      .to(getUserRoomName(userId))
+      .emit(SOCKET_EVENTS.CONVERSATION_READ, {
+        conversationId,
+        unreadCount,
+      });
+  } catch (error) {
+    console.error("emitConversationRead error:", error);
+  }
 }
 
 export async function createDirectConversation(req, res) {
@@ -353,6 +414,8 @@ export async function sendMessage(req, res) {
       },
     });
 
+    const participantUserIds = [currentUserId, ...recipients.map((recipient) => recipient.userId)];
+
     await Promise.all(
       recipients.map((recipient) =>
         createNotificationIfRelevant({
@@ -362,6 +425,12 @@ export async function sendMessage(req, res) {
         }),
       ),
     );
+
+    await emitMessageCreated({
+      conversationId,
+      message,
+      participantUserIds,
+    });
 
     return res.status(201).json({
       message: serializeMessage(message),
@@ -418,6 +487,13 @@ export async function markConversationAsRead(req, res) {
         lastReadMessageId: true,
       },
     });
+
+    emitConversationRead({
+      conversationId: updatedMembership.conversationId,
+      userId: currentUserId,
+      unreadCount: 0,
+    });
+    await emitInboxUnreadCounts(currentUserId);
 
     return res.status(200).json({
       read: {

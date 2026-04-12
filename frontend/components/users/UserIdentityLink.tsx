@@ -4,14 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { HoverCard as ArkHoverCard } from "@ark-ui/react/hover-card";
 import { Portal } from "@ark-ui/react/portal";
-import { useAuth } from "@/context/AuthContext";
 import { UserPreviewCard } from "@/components/users/UserPreviewCard";
 import {
   getUserById,
   getUserFriends,
   getUserPosts,
 } from "@/lib/api";
-import { buildProfileHref, type UserPreviewIdentity } from "@/lib/user-preview";
+import { buildProfileHref } from "@/lib/user-preview";
+import type { UserPreviewIdentity } from "@/lib/user-preview";
 import { cn } from "@/lib/utils";
 
 type UserIdentityLinkProps = {
@@ -29,6 +29,14 @@ type UserIdentityLinkProps = {
 const userPreviewCache = new Map<number, UserPreviewIdentity>();
 const userPreviewRequests = new Map<number, Promise<UserPreviewIdentity | null>>();
 const enrichedUserPreviewIds = new Set<number>();
+
+function getStoredToken() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return localStorage.getItem("token");
+}
 
 function mergeUserPreview(
   current: UserPreviewIdentity,
@@ -111,7 +119,6 @@ export function UserIdentityLink({
   positioning,
   onClick,
 }: UserIdentityLinkProps) {
-  const { token } = useAuth();
   const href = buildProfileHref(user.username);
   const pointerIntentRef = React.useRef(false);
   const [isOpen, setIsOpen] = React.useState(false);
@@ -148,6 +155,7 @@ export function UserIdentityLink({
         );
       }
 
+      const token = getStoredToken();
       if (!token || enrichedUserPreviewIds.has(user.id)) {
         return;
       }
@@ -162,7 +170,7 @@ export function UserIdentityLink({
         );
       });
     },
-    [token, user],
+    [user],
   );
 
   const trigger = (

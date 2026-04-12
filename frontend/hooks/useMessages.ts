@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import {
   createDirectConversation,
   getConversationMessages,
@@ -14,6 +14,12 @@ import {
 } from "@/lib/api";
 import { archiveToaster } from "@/components/ui/toaster";
 import { useInboxUnread } from "@/context/InboxUnreadContext";
+import { useSocket } from "@/context/SocketContext";
+import {
+  SOCKET_EVENTS,
+  type ConversationReadEvent,
+  type MessageCreatedEvent,
+} from "@/lib/socket-events";
 
 function sortConversations(left: ConversationItem, right: ConversationItem) {
   const leftTimestamp = left.lastMessageAt ?? left.createdAt;
@@ -28,6 +34,7 @@ type UseMessagesOptions = {
 
 export function useMessages({ token, currentUserId }: UseMessagesOptions) {
   const { setUnreadMessagesCount } = useInboxUnread();
+  const { socket, isConnected } = useSocket();
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [users, setUsers] = useState<PublicUserListItem[]>([]);
@@ -49,6 +56,28 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
     () => conversations.find((conversation) => conversation.id === selectedConversationId) ?? null,
     [conversations, selectedConversationId],
   );
+
+  const upsertConversation = useCallback((conversation: ConversationItem) => {
+    setConversations((previous) => {
+      const withoutCurrent = previous.filter((entry) => entry.id !== conversation.id);
+      return [conversation, ...withoutCurrent].sort(sortConversations);
+    });
+  }, []);
+
+  const appendMessageToCache = useCallback((conversationId: number, message: ConversationMessage) => {
+    const previousMessages = messagesCacheRef.current.get(conversationId) ?? [];
+
+    if (previousMessages.some((entry) => entry.id === message.id)) {
+      return previousMessages;
+    }
+
+    const nextMessages = [...previousMessages, message].sort(
+      (left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime(),
+    );
+
+    messagesCacheRef.current.set(conversationId, nextMessages);
+    return nextMessages;
+  }, []);
 
   const filteredUsers = useMemo(() => {
     const query = userSearch.trim().toLowerCase();
@@ -228,6 +257,26 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
     );
   }, [conversations, setUnreadMessagesCount]);
 
+  const handleMessageCreatedEvent = useEffectEvent((payload: MessageCreatedEvent) => {
+    upsertConversation(payload.conversation);
+    const nextMessages = appendMessageToCache(payload.conversation.id, payload.message);
+
+    if (selectedConversationIdRef.current === payload.conversation.id) {
+      setMessages(nextMessages);
+      setIsLoadingMessages(false);
+    }
+  });
+
+  const handleConversationReadEvent = useEffectEvent((payload: ConversationReadEvent) => {
+    setConversations((previous) =>
+      previous.map((conversation) =>
+        conversation.id === payload.conversationId
+          ? { ...conversation, unreadCount: payload.unreadCount }
+          : conversation,
+      ),
+    );
+  });
+
   const handleOpenConversation = useCallback(
     async (targetUserId: number) => {
       if (!token) {
@@ -278,11 +327,12 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
 
     const nextMessage = result.data.message;
     setDraft("");
-    setMessages((previous) => [...previous, nextMessage]);
-    messagesCacheRef.current.set(selectedConversationId, [
-      ...(messagesCacheRef.current.get(selectedConversationId) ?? []),
-      nextMessage,
-    ]);
+    const nextMessages = appendMessageToCache(selectedConversationId, nextMessage);
+
+    if (selectedConversationIdRef.current === selectedConversationId) {
+      setMessages(nextMessages);
+    }
+
     setConversations((previous) =>
       previous
         .map((conversation) =>
@@ -296,7 +346,7 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
         )
         .sort(sortConversations),
     );
-  }, [draft, selectedConversationId, token]);
+  }, [appendMessageToCache, draft, selectedConversationId, token]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -334,6 +384,42 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
     },
     [handleOpenConversation, loadConversations],
   );
+
+  useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
+    const handleMessageCreated = (payload: MessageCreatedEvent) => {
+      handleMessageCreatedEvent(payload);
+    };
+
+    const handleConversationRead = (payload: ConversationReadEvent) => {
+      handleConversationReadEvent(payload);
+    };
+
+    socket.on(SOCKET_EVENTS.MESSAGE_CREATED, handleMessageCreated);
+    socket.on(SOCKET_EVENTS.CONVERSATION_READ, handleConversationRead);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.MESSAGE_CREATED, handleMessageCreated);
+      socket.off(SOCKET_EVENTS.CONVERSATION_READ, handleConversationRead);
+    };
+  }, [handleConversationReadEvent, handleMessageCreatedEvent, socket]);
+
+  useEffect(() => {
+    if (!token || !isConnected) {
+      return;
+    }
+
+    void loadConversations().then(() => {
+      const activeConversationId = selectedConversationIdRef.current;
+
+      if (activeConversationId) {
+        void loadMessages(activeConversationId, { showLoading: false });
+      }
+    });
+  }, [isConnected, loadConversations, loadMessages, token]);
 
   return {
     conversations,

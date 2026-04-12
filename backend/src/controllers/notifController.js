@@ -1,8 +1,10 @@
 import prisma from "../prisma.js";
 import {
+    emitNotificationRead,
     notificationInclude,
     serializeNotification,
 } from "../services/notificationService.js";
+import { emitInboxUnreadCounts } from "../services/inboxService.js";
 
 export async function createNotif(req, res){
     return res.status(403).json({
@@ -58,6 +60,12 @@ export async function markAsRead(req, res){
             include: notificationInclude,
         });
 
+        emitNotificationRead({
+            userId,
+            notificationId: updatedNotif.id,
+        });
+        await emitInboxUnreadCounts(userId);
+
         return res.status(200).json({ notification: serializeNotification(updatedNotif)});
 
     }
@@ -86,9 +94,15 @@ export async function deleteNotif(req, res){
             return res.status(404).json({ message: "Notification not found"});
         }
 
+        const wasUnread = !notification.read;
+
         await prisma.notification.delete({
             where: { id: notification.id }
         });
+
+        if (wasUnread) {
+            await emitInboxUnreadCounts(userId);
+        }
 
         return res.status(200).json({ message: "Notification removed" });
     }

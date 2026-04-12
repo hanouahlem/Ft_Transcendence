@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from "react";
 import ArchiveFilters from "@/components/decor/ArchiveFilters";
 import { LikeNotificationGroupCard } from "@/components/notifications/LikeNotificationGroupCard";
 import { NotificationCard } from "@/components/notifications/NotificationCard";
@@ -8,6 +8,7 @@ import { NotificationsRail } from "@/components/notifications/NotificationsRail"
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxUnread } from "@/context/InboxUnreadContext";
+import { useSocket } from "@/context/SocketContext";
 import {
   getNotifications,
   markNotificationAsRead,
@@ -19,6 +20,11 @@ import {
   matchesNotificationLedgerFilters,
   type NotificationFilterState,
 } from "@/lib/notification-utils";
+import {
+  SOCKET_EVENTS,
+  type NotificationCreatedEvent,
+  type NotificationReadEvent,
+} from "@/lib/socket-events";
 
 const DEFAULT_FILTERS: NotificationFilterState = {
   social: true,
@@ -28,6 +34,7 @@ const DEFAULT_FILTERS: NotificationFilterState = {
 
 export default function NotificationsPage() {
   const { token } = useAuth();
+  const { socket, isConnected } = useSocket();
   const { setUnreadNotificationsCount } = useInboxUnread();
   const { notifyError, notifySuccess } = useArchiveToasts();
 
@@ -38,12 +45,14 @@ export default function NotificationsPage() {
   const [filters, setFilters] = useState<NotificationFilterState>(DEFAULT_FILTERS);
   const [markingAll, setMarkingAll] = useState(false);
 
-  useEffect(() => {
-    if (!token) {
-      return;
-    }
+  const fetchNotifications = useCallback(
+    async (options: { notifyOnError?: boolean } = {}) => {
+      if (!token) {
+        return;
+      }
 
-    const fetchNotifications = async () => {
+      const { notifyOnError = true } = options;
+
       try {
         setLoading(true);
         setError(null);
@@ -63,14 +72,24 @@ export default function NotificationsPage() {
             ? loadError.message
             : "Failed to load correspondence.";
         setError(message);
-        notifyError(message);
+
+        if (notifyOnError) {
+          notifyError(message);
+        }
       } finally {
         setLoading(false);
       }
-    };
+    },
+    [notifyError, token],
+  );
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
 
     void fetchNotifications();
-  }, [notifyError, token]);
+  }, [fetchNotifications, token]);
 
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.read).length,
@@ -84,6 +103,30 @@ export default function NotificationsPage() {
 
     setUnreadNotificationsCount(unreadCount);
   }, [loading, setUnreadNotificationsCount, unreadCount]);
+
+  const handleNotificationCreatedEvent = useEffectEvent(
+    ({ notification }: NotificationCreatedEvent) => {
+      setNotifications((current) => {
+        if (current.some((entry) => entry.id === notification.id)) {
+          return current;
+        }
+
+        return [notification, ...current];
+      });
+    },
+  );
+
+  const handleNotificationReadEvent = useEffectEvent(
+    ({ notificationId }: NotificationReadEvent) => {
+      setNotifications((current) =>
+        current.map((notification) =>
+          notification.id === notificationId
+            ? { ...notification, read: true }
+            : notification,
+        ),
+      );
+    },
+  );
 
   const ledgerItems = useMemo(
     () => buildNotificationLedgerItems(notifications),
@@ -240,6 +283,36 @@ export default function NotificationsPage() {
   const hasFiltersApplied =
     searchValue.trim().length > 0 ||
     Object.values(filters).some((enabled) => !enabled);
+
+  useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
+    const handleCreated = (payload: NotificationCreatedEvent) => {
+      handleNotificationCreatedEvent(payload);
+    };
+
+    const handleRead = (payload: NotificationReadEvent) => {
+      handleNotificationReadEvent(payload);
+    };
+
+    socket.on(SOCKET_EVENTS.NOTIFICATION_CREATED, handleCreated);
+    socket.on(SOCKET_EVENTS.NOTIFICATION_READ, handleRead);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.NOTIFICATION_CREATED, handleCreated);
+      socket.off(SOCKET_EVENTS.NOTIFICATION_READ, handleRead);
+    };
+  }, [handleNotificationCreatedEvent, handleNotificationReadEvent, socket]);
+
+  useEffect(() => {
+    if (!token || !isConnected) {
+      return;
+    }
+
+    void fetchNotifications({ notifyOnError: false });
+  }, [fetchNotifications, isConnected, token]);
 
   return (
     <>

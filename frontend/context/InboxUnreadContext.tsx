@@ -5,11 +5,17 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useEffectEvent,
   useMemo,
   useState,
 } from "react";
 import { getConversations, getNotifications } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useSocket } from "@/context/SocketContext";
+import {
+  SOCKET_EVENTS,
+  type InboxUnreadCountsEvent,
+} from "@/lib/socket-events";
 
 type InboxUnreadContextType = {
   unreadNotificationsCount: number;
@@ -31,6 +37,7 @@ export function InboxUnreadProvider({
   children: React.ReactNode;
 }) {
   const { token } = useAuth();
+  const { socket, isConnected } = useSocket();
   const [unreadNotificationsCount, setUnreadNotificationsCountState] = useState(0);
   const [unreadMessagesCount, setUnreadMessagesCountState] = useState(0);
 
@@ -84,6 +91,11 @@ export function InboxUnreadProvider({
     ]);
   }, [refreshUnreadMessagesCount, refreshUnreadNotificationsCount]);
 
+  const handleUnreadCountsEvent = useEffectEvent((payload: InboxUnreadCountsEvent) => {
+    setUnreadMessagesCountState(Math.max(0, payload.unreadMessagesCount));
+    setUnreadNotificationsCountState(Math.max(0, payload.unreadNotificationsCount));
+  });
+
   useEffect(() => {
     if (!token) {
       return;
@@ -93,6 +105,30 @@ export function InboxUnreadProvider({
       void refreshUnreadCounts();
     });
   }, [refreshUnreadCounts, token]);
+
+  useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
+    const handleCounts = (payload: InboxUnreadCountsEvent) => {
+      handleUnreadCountsEvent(payload);
+    };
+
+    socket.on(SOCKET_EVENTS.INBOX_UNREAD_COUNTS, handleCounts);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.INBOX_UNREAD_COUNTS, handleCounts);
+    };
+  }, [handleUnreadCountsEvent, socket]);
+
+  useEffect(() => {
+    if (!token || !isConnected) {
+      return;
+    }
+
+    void refreshUnreadCounts();
+  }, [isConnected, refreshUnreadCounts, token]);
 
   useEffect(() => {
     if (!token) {

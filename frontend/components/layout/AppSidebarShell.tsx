@@ -9,6 +9,7 @@ import { NewPostDialog } from "@/components/posts/NewPostDialog";
 import { archiveToaster } from "@/components/ui/toaster";
 import { useAuth } from "@/context/AuthContext";
 import { InboxUnreadProvider, useInboxUnread } from "@/context/InboxUnreadContext";
+import { SocketProvider } from "@/context/SocketContext";
 import { cn } from "@/lib/utils";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -21,9 +22,11 @@ export default function AppSidebarShell({
   const { token } = useAuth();
 
   return (
-    <InboxUnreadProvider key={token ?? "anonymous"}>
-      <AppSidebarShellContent>{children}</AppSidebarShellContent>
-    </InboxUnreadProvider>
+    <SocketProvider key={token ?? "anonymous"}>
+      <InboxUnreadProvider>
+        <AppSidebarShellContent>{children}</AppSidebarShellContent>
+      </InboxUnreadProvider>
+    </SocketProvider>
   );
 }
 
