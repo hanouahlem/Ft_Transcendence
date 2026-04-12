@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
 	Bookmark02Icon,
 	Delete02Icon,
@@ -12,6 +11,7 @@ import { RelativeTime } from "@/components/ui/relative-time";
 import type { FeedComment } from "@/lib/feed-types";
 import { SocialToggle } from "@/components/posts/SocialToggle";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 
 type CommentCardProps = {
 	comment: FeedComment;
@@ -40,13 +40,19 @@ export function CommentCard({
 	const isFavoriting = favoritingCommentId === comment.id;
 	const authorDisplayName =
 		comment.author.displayName?.trim() || comment.author.username;
+	const authorPreview = {
+		id: comment.author.id,
+		username: comment.author.username,
+		displayName: comment.author.displayName,
+		avatar: comment.author.avatar,
+	};
 
 	return (
 		<div className="relative w-full min-w-0 max-w-full overflow-hidden border border-black/10 bg-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
 			<div className="flex items-start justify-between gap-3">
 				<div className="flex min-w-0 flex-1 items-center gap-3">
-					<Link
-						href={`/profile/${encodeURIComponent(comment.author.username)}`}
+					<UserIdentityLink
+						user={authorPreview}
 						className="shrink-0"
 					>
 						<ProfilePicture
@@ -55,19 +61,22 @@ export function CommentCard({
 							alt={authorDisplayName}
 							className="h-8 w-8 -rotate-2"
 						/>
-					</Link>
+					</UserIdentityLink>
 
 					<div className="min-w-0 flex-1">
 						<div className="flex flex-wrap items-center gap-3">
-							<Link
-								href={`/profile/${encodeURIComponent(comment.author.username)}`}
+							<UserIdentityLink
+								user={authorPreview}
 								className="max-w-full truncate font-mono text-ink transition hover:text-accent-blue"
 							>
 								{authorDisplayName}
-							</Link>
-							<span className="max-w-full truncate font-mono text-[15px] text-label">
+							</UserIdentityLink>
+							<UserIdentityLink
+								user={authorPreview}
+								className="max-w-full truncate font-mono text-[15px] text-label"
+							>
 								@{comment.author.username.toLowerCase()}
-							</span>
+							</UserIdentityLink>
 						</div>
 					</div>
 				</div>

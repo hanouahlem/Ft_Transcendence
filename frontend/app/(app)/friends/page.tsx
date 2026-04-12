@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { Button } from "@/components/ui/button";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import { RightRail } from "@/components/layout/RightRail";
 import { archiveToaster } from "@/components/ui/toaster";
 import type { RightRailSuggestion } from "@/lib/right-rail";
@@ -291,9 +292,16 @@ export default function FriendsPage() {
 								{requests.map((req) => (
 									<div key={req.id} className="flex items-center justify-between border border-black/15 bg-white/40 p-4">
 										<div className="flex items-center gap-4">
-											<ProfilePicture name={req.sender.username} src={req.sender.avatar} />
+											<UserIdentityLink user={req.sender} className="shrink-0">
+												<ProfilePicture name={req.sender.username} src={req.sender.avatar} />
+											</UserIdentityLink>
 											<div>
-												<p className="font-bold text-ink">{req.sender.username}</p>
+												<UserIdentityLink
+													user={req.sender}
+													className="block font-bold text-ink"
+												>
+													{req.sender.username}
+												</UserIdentityLink>
 												<p className="font-mono text-[10px] uppercase text-label">Wants to connect</p>
 											</div>
 										</div>
@@ -330,12 +338,22 @@ export default function FriendsPage() {
 									return (
 										<div key={u.id} className="flex items-center justify-between border-b border-black/10 p-4 last:border-b-0 hover:bg-black/5 transition-colors">
 											<div className="flex items-center gap-4">
-												<ProfilePicture name={u.username} src={u.avatar} size="default" className={i % 2 === 0 ? "rotate-2" : "-rotate-2"} />
+												<UserIdentityLink user={u} className="shrink-0">
+													<ProfilePicture name={u.username} src={u.avatar} size="default" className={i % 2 === 0 ? "rotate-2" : "-rotate-2"} />
+												</UserIdentityLink>
 												<div>
-													<p className="font-bold text-ink">{u.username}</p>
-													<p className="font-mono text-[10px] uppercase text-label">
+													<UserIdentityLink
+														user={u}
+														className="block font-bold text-ink"
+													>
+														{u.username}
+													</UserIdentityLink>
+													<UserIdentityLink
+														user={u}
+														className="block font-mono text-[10px] uppercase text-label"
+													>
 														{u.displayName || "Observer profile"}
-													</p>
+													</UserIdentityLink>
 												</div>
 											</div>
 											<div>

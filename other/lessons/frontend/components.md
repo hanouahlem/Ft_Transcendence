@@ -28,6 +28,9 @@ Current files:
 - `frontend/components/posts/NewPostDialog.tsx`
 - `frontend/components/posts/SocialToggle.tsx`
 - `frontend/components/profile/ProfileBanner.tsx`
+- `frontend/components/users/UserArchiveCard.tsx`
+- `frontend/components/users/UserIdentityLink.tsx`
+- `frontend/components/users/UserPreviewCard.tsx`
 - `frontend/components/ui/button.tsx`
 - `frontend/components/ui/ProfilePicture.tsx`
 - `frontend/components/ui/dialog.tsx`
@@ -37,6 +40,7 @@ Current files:
 - `frontend/hooks/usePostInteractions.ts`
 - `frontend/lib/feed-types.ts`
 - `frontend/lib/feed-utils.ts`
+- `frontend/lib/user-preview.ts`
 - `frontend/lib/user-utils.ts`
 
 The important rule is:
@@ -302,6 +306,45 @@ Why this matters:
 - profiles still have a stable visual identity even when no banner URL is saved
 - the same component covers both the editable banner feature and the archive fallback style
 
+### `frontend/components/users/UserIdentityLink.tsx` and `frontend/components/users/UserPreviewCard.tsx`
+
+Purpose:
+
+- make user identity surfaces consistent across the app
+- ensure avatar, display name, and `@username` can navigate to the same profile route
+- show the same hover preview when the user hovers those identity triggers
+
+How it works:
+
+- `UserIdentityLink` wraps any trigger content in a normal Next.js profile link
+- when hover preview is enabled, it mounts Ark UI `HoverCard` around that link
+- the hover content renders `UserPreviewCard`, which now reuses the same `UserArchiveCard` layout as `SearchUserCard`
+- `UserPreviewCard` accepts whatever partial data it is given first, so the hover card can open immediately
+- on first hover open, `UserIdentityLink` lazy-loads richer user data with:
+  - `GET /users/:id`
+  - `GET /users/:id/friends`
+  - `GET /users/:id/posts`
+- it derives `postCount`, `friendCount`, `totalLikes`, and `totalComments` from those responses
+- it stores the enriched preview in a module-level in-memory cache keyed by `user.id`, so repeated hovers do not refetch during the same session
+- the shared helpers in `frontend/lib/user-preview.ts` centralize:
+  - profile href generation
+  - display name fallback
+  - bio/status fallback
+  - compact number formatting
+  - joined-date formatting
+
+Why this matters:
+
+- we stop duplicating manual `/profile/${username}` links everywhere
+- identity behavior becomes consistent across posts, comments, search cards, right rail, notifications, friends, and message thread headers
+- hover previews stay reusable because the preview card tolerates both rich and minimal user shapes
+- owners like `RightRailSuggestions` can stay lightweight because the hover card no longer depends on them preloading bio, banner, or stats
+
+Important implementation limit:
+
+- this wrapper should not be placed inside existing `<button>`-driven shells like the conversation rail rows, because nesting links inside buttons would be invalid HTML
+- in those cases, the row structure must be redesigned first if we want clickable identity triggers there
+
 Real code:
 
 ```tsx
@@ -530,6 +573,7 @@ Important detail:
 
 - the card prefers `displayName` for the visible name and for the `ProfilePicture` fallback seed
 - it still keeps `@username` as the handle line
+- the avatar, visible name, and handle now all reuse `UserIdentityLink`, so suggestion identity surfaces are both clickable and hover-previewable
 - that keeps generated fallback avatars consistent with post cards, dialogs, comments, profile, and sidebar
 - the feed page must preserve `displayName` when normalizing `/friends/suggestions`; otherwise the right rail falls back to `username` and the generated avatar changes only on the feed screen
 
@@ -558,6 +602,7 @@ How it works:
   - the local search/filter matching text
   - when raw notifications should be grouped into a frontend-only ledger row
 - `NotificationCard` renders one paper-style record and the whole card acts as the click target
+- the actor avatar, display name, and handle now reuse `UserIdentityLink`, so they still open the actor profile and show the hover preview without breaking the card-level notification click
 - `LikeNotificationGroupCard` renders the special grouped-like summary with stacked avatars and marks all grouped like rows as read on click
 - `NotificationsRail` owns local search text, local category toggles, and the bulk “mark all as read” action
 
@@ -714,6 +759,7 @@ Important UI detail:
 
 - `SearchUserCard` is no longer one big link because it now contains a real friendship button
 - profile navigation stays on the banner/text/stat links
+- its identity surfaces now use `UserIdentityLink`, so hovering the banner/avatar/name opens the same preview card pattern as other user surfaces
 - the friend CTA reuses the same `FriendActionButton` logic as the profile page, so add/accept/pending/remove behavior stays consistent
 - search cards intentionally hide the friendship CTA for users who are already connected, so the search grid stays discovery-focused instead of becoming a friend-management screen
 - the 5 decorative card variants are now chosen from `user.id % 5`, so a given user keeps the same visual treatment even if search ordering or pagination changes

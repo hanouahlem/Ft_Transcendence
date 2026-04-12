@@ -1,7 +1,6 @@
 "use client";
 
 import type { KeyboardEvent, MouseEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AtIcon,
@@ -15,6 +14,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { NotificationItem } from "@/lib/api";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import ArchiveTape from "@/components/decor/ArchiveTape";
 import ArchiveStar from "@/components/decor/ArchiveStar";
 import {
@@ -127,7 +127,12 @@ export function NotificationCard({
   const actorDisplayName =
     notification.actor.displayName?.trim() || notification.actor.username;
   const actorHandle = `@${notification.actor.username.toLowerCase()}`;
-  const actorProfileHref = `/profile/${encodeURIComponent(notification.actor.username)}`;
+  const actorPreview = {
+    id: notification.actor.id,
+    username: notification.actor.username,
+    displayName: notification.actor.displayName,
+    avatar: notification.actor.avatar,
+  };
 
   const navigateToRecord = () => {
     if (!notification.read) {
@@ -185,7 +190,7 @@ export function NotificationCard({
           <div className="mb-2 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <Link href={actorProfileHref} onClick={handleActorLinkClick}>
+                <UserIdentityLink user={actorPreview} onClick={handleActorLinkClick}>
                   <ProfilePicture
                     name={actorDisplayName}
                     src={notification.actor.avatar}
@@ -193,21 +198,21 @@ export function NotificationCard({
                     withShadow={false}
                     className="h-6 w-6 border border-label/50 bg-paper p-0"
                   />
-                </Link>
-                <Link
-                  href={actorProfileHref}
+                </UserIdentityLink>
+                <UserIdentityLink
+                  user={actorPreview}
                   onClick={handleActorLinkClick}
                   className="truncate text-[1.2rem] font-bold text-ink transition-colors hover:text-accent-blue"
                 >
                   {actorDisplayName}
-                </Link>
-                <Link
-                  href={actorProfileHref}
+                </UserIdentityLink>
+                <UserIdentityLink
+                  user={actorPreview}
                   onClick={handleActorLinkClick}
                   className="truncate font-mono text-[0.8rem] text-label transition-colors hover:text-accent-blue"
                 >
                   {actorHandle}
-                </Link>
+                </UserIdentityLink>
               </div>
             </div>
 

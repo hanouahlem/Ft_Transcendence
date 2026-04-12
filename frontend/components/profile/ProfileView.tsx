@@ -371,7 +371,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-paper/90">
                         <div className="flex flex-wrap items-center gap-3">
                           {profile.location ? (
-                            <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] bg-ink p-1">
+                            <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] bg-ink p-1 px-2">
                               <MapPin className="h-3.5 w-3.5" />
                               {profile.location}
                             </span>

@@ -5,6 +5,7 @@ import { MessageCircle } from "lucide-react";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { NatureCanvas } from "@/components/layout/NatureCanvas";
 import { SocialComposer } from "@/components/ui/SocialComposer";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import { cn } from "@/lib/utils";
 import type { ConversationItem, ConversationMessage } from "@/lib/api";
 
@@ -39,6 +40,7 @@ export function ConversationThread({
 }: ConversationThreadProps) {
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const selectedConversationId = selectedConversation?.id ?? null;
+  const selectedPeer = selectedConversation?.peer ?? null;
 
   useEffect(() => {
     if (!selectedConversationId) {
@@ -57,26 +59,40 @@ export function ConversationThread({
       <header className="mb-5 flex items-center justify-center gap-3">
         {selectedConversation ? (
           <>
-            <ProfilePicture
-              name={
-                selectedConversation.peer?.displayName ||
-                selectedConversation.peer?.username ||
-                "User"
-              }
-              src={selectedConversation.peer?.avatar}
-						  withShadow={true}
-						  size="lg"
-						  className="-rotate-3 min-h-12 min-w-12"
-            />
+            {selectedPeer ? (
+              <UserIdentityLink user={selectedPeer} className="shrink-0">
+                <ProfilePicture
+                  name={
+                    selectedPeer.displayName ||
+                    selectedPeer.username ||
+                    "User"
+                  }
+                  src={selectedPeer.avatar}
+                  withShadow={true}
+                  size="lg"
+                  className="-rotate-3 min-h-12 min-w-12"
+                />
+              </UserIdentityLink>
+            ) : null}
             <div className="min-w-0">
-              <p className="truncate text-3xl font-semibold text-ink">
-                {selectedConversation.peer?.displayName ||
-                  selectedConversation.peer?.username ||
-                  "Unknown user"}
-              </p>
-              <p className="truncate font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                @{selectedConversation.peer?.username || "unknown"}
-              </p>
+              {selectedPeer ? (
+                <>
+                  <UserIdentityLink
+                    user={selectedPeer}
+                    className="block truncate text-3xl font-semibold text-ink"
+                  >
+                    {selectedPeer.displayName ||
+                      selectedPeer.username ||
+                      "Unknown user"}
+                  </UserIdentityLink>
+                  <UserIdentityLink
+                    user={selectedPeer}
+                    className="block truncate font-mono text-[10px] uppercase tracking-[0.18em] text-label"
+                  >
+                    @{selectedPeer.username || "unknown"}
+                  </UserIdentityLink>
+                </>
+              ) : null}
             </div>
           </>
         ) : (

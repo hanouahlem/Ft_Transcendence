@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
 	Bookmark02Icon,
 	Comment01Icon,
@@ -12,6 +11,7 @@ import { RelativeTime } from "@/components/ui/relative-time";
 import { cn } from "@/lib/utils";
 import { SocialToggle } from "@/components/posts/SocialToggle";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import ArchiveStar from "@/components/decor/ArchiveStar";
 
 type PostCardProps = {
@@ -171,6 +171,12 @@ export function PostCard({
 	const isFavoriting = favoritingPostId === post.id;
 	const authorDisplayName =
 		post.author.displayName?.trim() || post.author.username;
+	const authorPreview = {
+		id: post.author.id,
+		username: post.author.username,
+		displayName: post.author.displayName,
+		avatar: post.author.avatar,
+	};
 
 	return (
 		<div className={variant.wrapper}>
@@ -206,8 +212,8 @@ export function PostCard({
 					)}
 				>
 					<div className="flex min-w-0 items-center gap-3">
-						<Link
-							href={`/profile/${encodeURIComponent(post.author.username)}`}
+						<UserIdentityLink
+							user={authorPreview}
 							className="shrink-0"
 						>
 							<ProfilePicture
@@ -220,12 +226,12 @@ export function PostCard({
 										: "h-10 w-10 -rotate-2",
 								)}
 							/>
-						</Link>
+						</UserIdentityLink>
 
 						<div className="min-w-0">
 							<div className="flex flex-wrap items-center gap-3">
-								<Link
-									href={`/profile/${encodeURIComponent(post.author.username)}`}
+								<UserIdentityLink
+									user={authorPreview}
 									className={cn(
 										"truncate font-bold uppercase tracking-wide text-ink",
 										variantKey === 2
@@ -234,10 +240,13 @@ export function PostCard({
 									)}
 								>
 									{authorDisplayName}
-								</Link>
-								<span className="font-mono text-xs text-label">
+								</UserIdentityLink>
+								<UserIdentityLink
+									user={authorPreview}
+									className="font-mono text-xs text-label"
+								>
 									@{post.author.username.toLowerCase()}
-								</span>
+								</UserIdentityLink>
 							</div>
 						</div>
 					</div>
