@@ -2,7 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { Bookmark, Heart, MessageCircle, Trash2 } from "lucide-react";
+import {
+	Bookmark02Icon,
+	Comment01Icon,
+	Delete02Icon,
+	FavouriteIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { FeedComment, FeedPost } from "@/lib/feed-types";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -154,7 +160,7 @@ export function PostDialog({
 												onClick={() => onDelete(post.id)}
 												disabled={isDeleting}
 											>
-												<Trash2 className="h-3.5 w-3.5" />
+												<HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.9} />
 												{isDeleting ? "Deleting" : "Delete"}
 											</Button>
 										) : null}
@@ -183,7 +189,7 @@ export function PostDialog({
 								<div className="mt-6 border-t border-ink/10 pt-4">
 									<div className="flex flex-wrap items-center gap-2 sm:gap-4">
 										<SocialToggle
-											icon={MessageCircle}
+											icon={Comment01Icon}
 											label="Comment count"
 											count={post.commentsCount}
 											accent="blue"
@@ -193,7 +199,7 @@ export function PostDialog({
 											onClick={queueReplyFocus}
 										/>
 										<SocialToggle
-											icon={Bookmark}
+											icon={Bookmark02Icon}
 											label="Favorite post"
 											count={post.favoritesCount}
 											accent="green"
@@ -202,7 +208,7 @@ export function PostDialog({
 											onClick={() => onToggleFavorite(post)}
 										/>
 										<SocialToggle
-											icon={Heart}
+											icon={FavouriteIcon}
 											label="Like post"
 											count={post.likesCount}
 											accent="red"

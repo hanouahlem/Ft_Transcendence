@@ -1,6 +1,7 @@
 "use client";
 
-import { KeyRound } from "lucide-react";
+import { ResetPasswordIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import { SettingsField } from "@/components/settings/SettingsField";
 
@@ -81,7 +82,7 @@ export function SettingsPasswordSection({
           onClick={onSubmit}
           disabled={saving}
         >
-          <KeyRound className="h-3.5 w-3.5" />
+          <HugeiconsIcon icon={ResetPasswordIcon} size={18} strokeWidth={1.9} />
           {saving
             ? "Writing..."
             : hasPassword

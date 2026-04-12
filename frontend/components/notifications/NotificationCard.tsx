@@ -4,14 +4,15 @@ import type { KeyboardEvent, MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowRightLeft,
-  AtSign,
-  BellRing,
-  CheckCheck,
-  Heart,
-  MessageCircleMore,
-  UserPlus,
-} from "lucide-react";
+  AtIcon,
+  Comment01Icon,
+  FavouriteIcon,
+  HeartbreakIcon,
+  MessageMultiple01Icon,
+  UserAdd01Icon,
+  UserCheck01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { NotificationItem } from "@/lib/api";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import ArchiveTape from "@/components/decor/ArchiveTape";
@@ -96,20 +97,20 @@ function getCardTone(notification: NotificationItem) {
 function NotificationGlyph({ type }: { type: string }) {
   switch (type) {
     case "FOLLOW":
-      return <UserPlus className="h-5 w-5" />;
+      return <HugeiconsIcon icon={UserAdd01Icon} size={20} strokeWidth={1.9} />;
     case "FOLLOW_ACCEPT":
-      return <CheckCheck className="h-5 w-5" />;
+      return <HugeiconsIcon icon={UserCheck01Icon} size={20} strokeWidth={1.9} />;
     case "UNFOLLOW":
-      return <ArrowRightLeft className="h-5 w-5" />;
+      return <HugeiconsIcon icon={HeartbreakIcon} size={20} strokeWidth={1.9} />;
     case "COMMENT":
-      return <MessageCircleMore className="h-5 w-5" />;
+      return <HugeiconsIcon icon={Comment01Icon} size={20} strokeWidth={1.9} />;
     case "MENTION":
-      return <AtSign className="h-5 w-5" />;
+      return <HugeiconsIcon icon={AtIcon} size={20} strokeWidth={1.9} />;
     case "MESSAGE":
-      return <BellRing className="h-5 w-5" />;
+      return <HugeiconsIcon icon={MessageMultiple01Icon} size={20} strokeWidth={1.9} />;
     case "LIKE":
     default:
-      return <Heart className="h-5 w-5 fill-current" />;
+      return <HugeiconsIcon icon={FavouriteIcon} size={20} strokeWidth={1.9} />;
   }
 }
 
@@ -222,14 +223,16 @@ export function NotificationCard({
             {copy.quote && copy.inlineQuote ? (
               <>
                 {" "}
-                <span className="font-serif italic text-ink">"{copy.quote}"</span>
+                <span className="font-serif italic text-ink">
+                  &quot;{copy.quote}&quot;
+                </span>
               </>
             ) : null}
           </p>
 
           {copy.quote && !copy.inlineQuote ? (
             <div className="mt-3 border-l-2 border-accent-green bg-stage/40 px-3 py-2 font-serif text-[1.2rem] italic leading-relaxed text-ink">
-              "{copy.quote}"
+              &quot;{copy.quote}&quot;
             </div>
           ) : null}
         </div>

@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@ark-ui/react": "^5.35.0",
+    "@hugeicons/core-free-icons": "^4.1.1",
+    "@hugeicons/react": "^1.1.6",
     "@prisma/adapter-pg": "^7.4.2",
     "boring-avatars": "^2.0.4",
     "class-variance-authority": "^0.7.1",

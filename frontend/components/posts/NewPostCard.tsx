@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Image as ImageIcon } from "lucide-react";
+import { ImageAdd02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 
 type NewPostCardProps = {
@@ -75,7 +76,7 @@ export function NewPostCard({
             onClick={onOpenFilePicker}
             className="inline-flex items-center gap-2 font-mono text-xs text-label transition-colors hover:text-ink"
           >
-            <ImageIcon className="h-4 w-4" />[ ADD SKETCH ]
+            <HugeiconsIcon icon={ImageAdd02Icon} size={16} strokeWidth={1.9} />[ ADD FILE ]
           </button>
           <Button
             type="button"

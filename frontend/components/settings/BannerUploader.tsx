@@ -1,6 +1,10 @@
 "use client";
 
-import { Trash2, Upload } from "lucide-react";
+import {
+  Delete02Icon,
+  Upload01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { FileUpload, useFileUpload } from "@ark-ui/react/file-upload";
 import { useEffect } from "react";
 import { NatureCanvas } from "@/components/layout/NatureCanvas";
@@ -111,7 +115,7 @@ export function BannerUploader({
               disabled={disabled}
               aria-label="Replace banner"
             >
-              <Upload className="h-3.5 w-3.5" />
+              <HugeiconsIcon icon={Upload01Icon} size={14} strokeWidth={1.9} />
             </Button>
             <Button
               type="button"
@@ -126,7 +130,7 @@ export function BannerUploader({
               disabled={disabled || !imageUrl}
               aria-label="Clear banner"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.9} />
             </Button>
           </div>
         </div>

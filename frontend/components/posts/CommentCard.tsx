@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, Heart, Trash2 } from "lucide-react";
+import {
+	Bookmark02Icon,
+	Delete02Icon,
+	FavouriteIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/ui/relative-time";
 import type { FeedComment } from "@/lib/feed-types";
@@ -81,7 +86,7 @@ export function CommentCard({
 							onClick={() => onDeleteComment(comment.id)}
 							disabled={isDeleting}
 						>
-							<Trash2 className="h-3.5 w-3.5" />
+							<HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.9} />
 						</Button>
 					) : null}
 				</div>
@@ -93,7 +98,7 @@ export function CommentCard({
 
 			<div className="mt-2 flex flex-wrap items-center gap-2">
 				<SocialToggle
-					icon={Heart}
+					icon={FavouriteIcon}
 					label="Like comment"
 					count={comment.likesCount}
 					accent="red"
@@ -102,7 +107,7 @@ export function CommentCard({
 					onClick={() => onToggleCommentLike(comment)}
 				/>
 				<SocialToggle
-					icon={Bookmark}
+					icon={Bookmark02Icon}
 					label="Favorite comment"
 					count={comment.favoritesCount}
 					accent="green"

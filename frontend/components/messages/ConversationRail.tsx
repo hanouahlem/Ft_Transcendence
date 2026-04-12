@@ -1,5 +1,7 @@
 "use client";
 
+import { MailEdit01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { ConversationItem } from "@/lib/api";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { Button } from "@/components/ui/button";
@@ -103,14 +105,7 @@ export function ConversationRail({
           className="w-full tracking-[0.18em] font-sans"
           onClick={onOpenNewConversation}
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
+          <HugeiconsIcon icon={MailEdit01Icon} size={16} strokeWidth={1.9} />
           New Message
         </Button>
       </div>
