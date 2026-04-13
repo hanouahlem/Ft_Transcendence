@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { LiveInboxToasts } from "@/components/layout/LiveInboxToasts";
 import { NatureCanvas } from "@/components/layout/NatureCanvas";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { NewPostDialog } from "@/components/posts/NewPostDialog";
@@ -188,6 +189,8 @@ function AppSidebarShellContent({
         <NatureCanvas />
 
         <div className="relative z-10 min-h-screen lg:pl-[76px]">
+          <LiveInboxToasts />
+
           <Sidebar
             user={user}
             unreadMessagesCount={unreadMessagesCount}

@@ -49,6 +49,7 @@ Frontend:
 - `frontend/hooks/useMessages.ts`
 - `frontend/app/(app)/notifications/page.tsx`
 - `frontend/components/layout/AppSidebarShell.tsx`
+- `frontend/components/layout/LiveInboxToasts.tsx`
 - `frontend/lib/socket-events.ts`
 
 Dependency:
@@ -673,8 +674,70 @@ Main architectural choices:
 - one authenticated socket connection per app shell
 - one private room per user
 - event subscriptions placed in the actual state owner
+- a separate passive toast listener for transient UI feedback
 - REST still owns initial load and recovery
 - minimal event list instead of event spam
+
+### Why `LiveInboxToasts.tsx` Is Separate
+
+The global toast listener now lives in:
+
+- `frontend/components/layout/LiveInboxToasts.tsx`
+
+It listens to:
+
+- `message:created`
+- `notification:created`
+
+But it does **not** own durable state.
+
+That separation is intentional:
+
+- `useMessages.ts` owns message data
+- `notifications/page.tsx` owns notification data
+- `InboxUnreadContext.tsx` owns sidebar badge counts
+- `LiveInboxToasts.tsx` only turns socket events into temporary toasts
+
+This is a good evaluation point:
+
+- a toast is UI feedback, not source-of-truth state
+- so it should not replace the real state owner
+
+Current route guards:
+
+- message toasts are suppressed on `/message`
+- notification toasts are suppressed on `/notifications`
+- `MESSAGE` notifications do not create a second toast because chat toasts already use `message:created`
+
+Why:
+
+- if the user is already on the page that visibly receives the live update, the extra toast is redundant noise
+- for direct messages, one backend action produces both a message event and a notification row, so we intentionally avoid duplicate UI feedback
+
+### Why Toasts Send Metadata Instead of Final Text Only
+
+`LiveInboxToasts.tsx` now sends a `meta` payload into the shared Ark toaster:
+
+- notification toasts send the full `notification`
+- message toasts send the `conversation` summary plus the new `message`
+
+Why:
+
+- the toaster can render notification toasts like a compact `NotificationCard`
+- the toaster can render message toasts like a compact `ConversationRail` item
+- the state owner still stays the same, but the renderer has enough real data to choose the right visual treatment
+
+This is the important distinction:
+
+- socket listeners decide **whether** to show a toast
+- the toaster decides **how** that toast should look
+
+Current behavior:
+
+- notification toasts auto-dismiss after 5 seconds
+- message toasts persist until the user dismisses them
+- clicking a notification toast opens the same href as the corresponding notification card
+- clicking a message toast opens `/message?userId=<peerId>`
 
 This is a good evaluation answer because it shows:
 
