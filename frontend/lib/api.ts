@@ -1,10 +1,20 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import type { FeedPost } from "./feed-types";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export type RegisterData = {
   username: string;
   email: string;
   password: string;
+};
+
+export type RegisterResponse = {
+  message: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+  };
 };
 
 export type LoginData =
@@ -31,6 +41,24 @@ export type CurrentUser = {
   createdAt?: string;
   hasPassword?: boolean;
 };
+
+export type PublicUser = {
+  id: number;
+  username: string;
+  displayName?: string | null;
+  banner?: string | null;
+  avatar?: string | null;
+  bio?: string | null;
+  status?: string | null;
+  location?: string | null;
+  website?: string | null;
+  createdAt?: string;
+};
+
+export type PublicUserListItem = Pick<
+  PublicUser,
+  "id" | "username" | "displayName" | "avatar"
+>;
 
 export type UpdateProfileData = {
   username: string;
@@ -67,6 +95,130 @@ export type ApiFailure = {
 
 export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
 
+export type FriendListItem = PublicUserListItem & {
+  friendshipId: number;
+};
+
+export type FriendRequest = {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  status: string;
+  sender?: PublicUserListItem | null;
+  receiver?: PublicUserListItem | null;
+};
+
+export type FriendSuggestionsResponse = {
+  connectedUserIds: number[];
+  suggestions: PublicUserListItem[];
+};
+
+export type ConversationMessage = {
+  id: number;
+  conversationId: number;
+  senderId: number;
+  content: string;
+  createdAt: string;
+  sender: PublicUserListItem;
+};
+
+export type ConversationItem = {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  lastMessageAt: string | null;
+  unreadCount: number;
+  peer: PublicUserListItem | null;
+  lastMessage: ConversationMessage | null;
+};
+
+export type FeedScope = "all" | "friends";
+
+export const NOTIFICATION_TYPES = [
+  "FOLLOW",
+  "UNFOLLOW",
+  "FOLLOW_ACCEPT",
+  "LIKE",
+  "COMMENT",
+  "MENTION",
+  "MESSAGE",
+] as const;
+
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
+export type NotificationActor = {
+  id: number;
+  username: string;
+  displayName?: string | null;
+  avatar?: string | null;
+};
+
+export type NotificationItem = {
+  id: number;
+  type: NotificationType | string;
+  read: boolean;
+  createdAt: string;
+  userId: number;
+  actorId: number;
+  actor: NotificationActor;
+  postId: number | null;
+  post?: {
+    id: number;
+    content?: string | null;
+  } | null;
+};
+
+export type NotificationsResponse = {
+  allNotifs: NotificationItem[];
+};
+
+export type NotificationActionResponse = {
+  notification: NotificationItem;
+};
+
+export type ConversationListResponse = {
+  conversations: ConversationItem[];
+};
+
+export type ConversationMessagesResponse = {
+  messages: ConversationMessage[];
+};
+
+export type CreateDirectConversationResponse = {
+  conversation: ConversationItem;
+};
+
+export type SendMessageResponse = {
+  message: ConversationMessage;
+};
+
+export type MarkConversationReadResponse = {
+  read: {
+    conversationId: number;
+    lastReadMessageId: number | null;
+    unreadCount: number;
+  };
+};
+
+function getStoredToken() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return localStorage.getItem("token");
+}
+
+function withAuthHeaders(token?: string | null, headers?: HeadersInit) {
+  const resolvedHeaders = new Headers(headers);
+  const resolvedToken = token ?? getStoredToken();
+
+  if (resolvedToken) {
+    resolvedHeaders.set("Authorization", `Bearer ${resolvedToken}`);
+  }
+
+  return resolvedHeaders;
+}
+
 async function handleResponse<T>(response: Response): Promise<ApiResult<T>> {
   const data = await response.json();
 
@@ -84,40 +236,63 @@ async function handleResponse<T>(response: Response): Promise<ApiResult<T>> {
   };
 }
 
-export async function registerUser(userData: RegisterData) {
-  const response = await fetch(`${API_URL}/registerUser`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
+async function requestJson<T>(
+  path: string,
+  options: {
+    method?: string;
+    token?: string | null;
+    headers?: HeadersInit;
+    body?: unknown;
+  } = {},
+) {
+  const { method = "GET", token, headers, body } = options;
+  const resolvedHeaders = withAuthHeaders(token, headers);
+  resolvedHeaders.set("Content-Type", "application/json");
+
+  const response = await fetch(`${API_URL}${path}`, {
+    method,
+    headers: resolvedHeaders,
+    body: body === undefined ? undefined : JSON.stringify(body),
   });
 
-  return handleResponse(response);
+  return handleResponse<T>(response);
+}
+
+async function requestWithAuth<T>(
+  path: string,
+  options: {
+    method?: string;
+    token?: string | null;
+    headers?: HeadersInit;
+    body?: BodyInit;
+  } = {},
+) {
+  const { method = "GET", token, headers, body } = options;
+  const response = await fetch(`${API_URL}${path}`, {
+    method,
+    headers: withAuthHeaders(token, headers),
+    body,
+  });
+
+  return handleResponse<T>(response);
+}
+
+export async function registerUser(userData: RegisterData) {
+  return requestJson<RegisterResponse>("/registerUser", {
+    method: "POST",
+    body: userData,
+  });
 }
 
 export async function loginUser(userData: LoginData) {
-  const response = await fetch(`${API_URL}/login`, {
+  return requestJson<{ token: string }>("/login", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
+    body: userData,
   });
-
-  return handleResponse<{ token: string }>(response);
 }
 
 export async function getCurrentUser(token: string) {
-  const response = await fetch(`${API_URL}/user`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return handleResponse<CurrentUser>(response);
+  return requestWithAuth<CurrentUser>("/user", { token });
 }
 
 export async function updateUserProfile(
@@ -125,122 +300,207 @@ export async function updateUserProfile(
   token: string,
   profileData: UpdateProfileData,
 ) {
-  const response = await fetch(`${API_URL}/users/${userId}`, {
+  return requestJson<CurrentUser>(`/users/${userId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(profileData),
+    token,
+    body: profileData,
   });
-
-  return handleResponse<CurrentUser>(response);
 }
 
 export async function uploadSettingsMedia(file: File, token: string) {
   const formData = new FormData();
   formData.append("media", file);
 
-  const response = await fetch(`${API_URL}/settings/media`, {
+  return requestWithAuth<{ url: string }>("/settings/media", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: formData,
   });
-
-  return handleResponse<{ url: string }>(response);
 }
 
 export async function setLocalPassword(
   token: string,
   payload: SetPasswordData,
 ) {
-  const response = await fetch(`${API_URL}/settings/setpassword`, {
+  return requestJson<{ message: string }>("/settings/setpassword", {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
+    token,
+    body: payload,
   });
-
-  return handleResponse<{ message: string }>(response);
 }
 
 export async function changeLocalPassword(
   token: string,
   payload: ChangePasswordData,
 ) {
-  const response = await fetch(`${API_URL}/settings/security`, {
+  return requestJson<{ message: string }>("/settings/security", {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
+    token,
+    body: payload,
   });
-
-  return handleResponse<{ message: string }>(response);
 }
 
-export async function addFriend(receiverId: number) {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/friends`, {
+export async function getUsers(token?: string | null) {
+  return requestWithAuth<PublicUserListItem[]>("/users", { token });
+}
+
+export async function searchUser(username: string, token?: string | null) {
+  const query = encodeURIComponent(username);
+  return requestWithAuth<PublicUserListItem[]>(`/users/search?username=${query}`, {
+    token,
+  });
+}
+
+export async function getUserById(userId: number, token?: string | null) {
+  return requestWithAuth<PublicUser>(`/users/${userId}`, { token });
+}
+
+export async function getUserByUsername(username: string, token?: string | null) {
+  const encodedUsername = encodeURIComponent(username);
+  return requestWithAuth<PublicUser>(`/users/by-username/${encodedUsername}`, { token });
+}
+
+export async function getUserPosts(userId: number, token?: string | null) {
+  return requestWithAuth<FeedPost[]>(`/users/${userId}/posts`, { token });
+}
+
+export async function getUserFriends(userId: number, token?: string | null) {
+  return requestWithAuth<PublicUserListItem[]>(`/users/${userId}/friends`, { token });
+}
+
+export async function getFeedPosts(
+  scope: FeedScope = "all",
+  token?: string | null,
+) {
+  const path = scope === "friends" ? "/posts/friends" : "/posts";
+  return requestWithAuth<FeedPost[]>(path, { token });
+}
+
+export async function getFriendsPosts(token?: string | null) {
+  return getFeedPosts("friends", token);
+}
+
+export async function getPosts(token?: string | null) {
+  return getFeedPosts("all", token);
+}
+
+export async function addFriend(receiverId: number, token?: string | null) {
+  return requestJson<{ message: string; request: FriendRequest }>("/friends", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ receiverId }),
+    token,
+    body: { receiverId },
   });
-
-  return handleResponse(response);
 }
 
-export async function getFriends() {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/friends`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  return handleResponse(response);
+export async function getFriends(token?: string | null) {
+  return requestWithAuth<FriendListItem[]>("/friends", { token });
 }
 
-export async function acceptFriend(requestId: number) {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/friends/${requestId}`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  return handleResponse(response);
+export async function getFriendRequests(token?: string | null) {
+  return requestWithAuth<FriendRequest[]>("/friends/requests", { token });
 }
 
-export async function deleteFriend(requestId: number) {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/friends/${requestId}`, {
+export async function getSentFriendRequests(token?: string | null) {
+  return requestWithAuth<FriendRequest[]>("/friends/requests/sent", { token });
+}
+
+export async function getFriendSuggestions(
+  token?: string | null,
+  limit?: number,
+) {
+  const query = typeof limit === "number" ? `?limit=${limit}` : "";
+  return requestWithAuth<FriendSuggestionsResponse>(`/friends/suggestions${query}`, {
+    token,
+  });
+}
+
+export async function acceptFriend(requestId: number, token?: string | null) {
+  return requestWithAuth<{ friend: FriendRequest }>(`/friends/${requestId}/accept`, {
+    method: "PATCH",
+    token,
+  });
+}
+
+export async function deleteFriend(requestId: number, token?: string | null) {
+  return requestWithAuth<{ message: string }>(`/friends/${requestId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+    token,
   });
-
-  return handleResponse(response);
 }
 
-export async function getFriendRequests() {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/friends/requests`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  return handleResponse(response);
+export async function getNotifications(token?: string | null) {
+  return requestWithAuth<NotificationsResponse>("/notifications", { token });
 }
 
-export async function searchUser(username: string) {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/users/search?username=${username}`, {
-    headers: { Authorization: `Bearer ${token}` },
+export async function createDirectConversation(
+  targetUserId: number,
+  token?: string | null,
+) {
+  return requestJson<CreateDirectConversationResponse>("/conversations/direct", {
+    method: "POST",
+    token,
+    body: { targetUserId },
   });
+}
 
-  return handleResponse(response);
+export async function getConversations(token?: string | null) {
+  return requestWithAuth<ConversationListResponse>("/conversations", { token });
+}
+
+export async function getConversationMessages(
+  conversationId: number,
+  token?: string | null,
+) {
+  return requestWithAuth<ConversationMessagesResponse>(
+    `/conversations/${conversationId}/messages`,
+    { token },
+  );
+}
+
+export async function sendConversationMessage(
+  conversationId: number,
+  content: string,
+  token?: string | null,
+) {
+  return requestJson<SendMessageResponse>(`/conversations/${conversationId}/messages`, {
+    method: "POST",
+    token,
+    body: { content },
+  });
+}
+
+export async function markConversationAsRead(
+  conversationId: number,
+  token?: string | null,
+) {
+  return requestWithAuth<MarkConversationReadResponse>(
+    `/conversations/${conversationId}/read`,
+    {
+      method: "POST",
+      token,
+    },
+  );
+}
+
+export async function markNotificationAsRead(
+  notificationId: number,
+  token?: string | null,
+) {
+  return requestWithAuth<NotificationActionResponse>(
+    `/notifications/${notificationId}/read`,
+    {
+      method: "PATCH",
+      token,
+    },
+  );
+}
+
+export async function deleteNotification(
+  notificationId: number,
+  token?: string | null,
+) {
+  return requestWithAuth<{ message: string }>(`/notifications/${notificationId}`, {
+    method: "DELETE",
+    token,
+  });
 }

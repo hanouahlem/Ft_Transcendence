@@ -28,6 +28,9 @@ Current files:
 - `frontend/components/posts/NewPostDialog.tsx`
 - `frontend/components/posts/SocialToggle.tsx`
 - `frontend/components/profile/ProfileBanner.tsx`
+- `frontend/components/users/UserArchiveCard.tsx`
+- `frontend/components/users/UserIdentityLink.tsx`
+- `frontend/components/users/UserPreviewCard.tsx`
 - `frontend/components/ui/button.tsx`
 - `frontend/components/ui/ProfilePicture.tsx`
 - `frontend/components/ui/dialog.tsx`
@@ -37,6 +40,7 @@ Current files:
 - `frontend/hooks/usePostInteractions.ts`
 - `frontend/lib/feed-types.ts`
 - `frontend/lib/feed-utils.ts`
+- `frontend/lib/user-preview.ts`
 - `frontend/lib/user-utils.ts`
 
 The important rule is:
@@ -75,7 +79,9 @@ This is the controller for the page.
 It owns:
 
 - authenticated user access through `useAuth()`
-- composer state with `useState`
+- publish state, file state, and composer reset state with `useState`
+- feed scope state for `All Posts` vs `Friends`
+- feed pagination state for the visible post slice
 - derived values with `useMemo`
 - data loading with `fetchPosts()` and `fetchExistingFriendRelations()`
 - publish and friend-request mutations
@@ -99,9 +105,10 @@ const { posts, setPosts, handleToggleLike, handleAddComment, ... } =
 Main state:
 
 ```tsx
-const [postContent, setPostContent] = useState("");
 const [selectedFile, setSelectedFile] = useState<File | null>(null);
 const [previewUrl, setPreviewUrl] = useState("");
+const [currentPage, setCurrentPage] = useState(1);
+const [composerResetToken, setComposerResetToken] = useState(0);
 
 const { posts, setPosts, handleToggleLike, handleAddComment, ... } =
   usePostInteractions({ token });
@@ -123,6 +130,8 @@ Explain this during evaluation:
 - `useFriendRequests()` keeps the follow/request behavior consistent between feed and profile
 - `useFriendRequests()` reloads outgoing pending requests so `Sent` survives a refresh
 - post/comment interaction logic is shared with the profile page through `usePostInteractions()`
+- the feed is paginated client-side with the shared Ark-based `Pagination` wrapper
+- the text state for `NewPostCard` is local to the composer component, so typing does not rerender every visible post card
 
 API base:
 
@@ -133,6 +142,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 The page calls backend routes directly with `fetch`, for example:
 
 - `GET /posts`
+- `GET /posts/friends`
 - `POST /posts`
 - `DELETE /posts/:id`
 - `POST` or `DELETE /posts/:id/like`
@@ -144,6 +154,16 @@ The page calls backend routes directly with `fetch`, for example:
 - `GET /friends`
 - `GET /friends/suggestions`
 - `POST /friends`
+- `PATCH /friends/:id/accept`
+
+The feed scope toggle is important:
+
+- `All Posts` uses `GET /posts`
+- `Friends` uses `GET /posts/friends`
+- the backend filters that friends feed to accepted friendships only
+- when the page is in `Friends` mode, creating your own post does not inject it into the visible list because that endpoint is intentionally friend-only
+- comments are sent as JSON to `POST /posts/:id/comments` because the duplicate upload-based comment route was removed during the backend contract cleanup
+- moderation rejections from comment creation are shown as normal UI errors and are not logged as frontend console errors anymore
 
 ## 3. Shared Data Types
 
@@ -157,7 +177,7 @@ These types define the shape expected by the UI:
 export type FeedAuthor = {
   id: number;
   username: string;
-  email: string;
+  displayName?: string | null;
   avatar?: string | null;
 };
 
@@ -208,16 +228,16 @@ How it works:
 - uses `class-variance-authority` (`cva`)
 - keeps the stable import path `@/components/ui/button`
 - uses archive visual classes as the real button language
-- exposes both standard app variants (`default`, `outline`, `secondary`, `destructive`) and archive-specific aliases (`paper`, `stamp`, `subtle`, `delete`, `black`, `bluesh`)
+- exposes both standard app variants (`default`, `outline`, `secondary`, `destructive`) and archive-specific aliases (`paper`, `stamp`, `subtle`, `delete`, `black`, `bluesh`, `correspondence`)
 - exposes sizes like `sm`, `default`, `lg`, `icon`
 
 ### `frontend/components/ui/avatar.tsx`
 
 Purpose:
 
-- keep one stable avatar wrapper API while removing the old `radix-ui` backing
+- provide one stable avatar wrapper API for the app
 
-How it works now:
+How it works:
 
 - uses Ark UI Avatar internally
 - keeps the same public imports:
@@ -230,9 +250,9 @@ How it works now:
 
 Why this matters:
 
-- active archive pages still import the same local wrapper
-- fallback avatars are no longer just raw initials text
-- the wrapper moved one more shared primitive away from `radix-ui`
+- pages import one local avatar API
+- image fallback behavior stays consistent across the app
+- the visual fallback is deterministic because it is seeded from the user name
 
 ### `frontend/components/ui/ProfilePicture.tsx`
 
@@ -245,7 +265,7 @@ How it works:
 - wraps `@/components/ui/avatar`
 - applies the archive image treatment by default
 - is intentionally square-only for the current design system
-- uses one shared paper frame instead of page-specific border colors
+- uses one shared paper frame
 - accepts normal Tailwind size classes through `className`, so pages can render it at any scale
 - accepts optional `frameClassName` when one screen needs a thicker paper border around the same shared picture component
 - enables a subtle paper-frame shadow by default so white-framed pictures still read against white cards; pages can disable it with `withShadow={false}`
@@ -262,7 +282,7 @@ Real usage:
 
 Why this matters:
 
-- post cards, post dialogs, comment cards, sidebar, right rail, and profile hero no longer duplicate avatar styling
+- post cards, post dialogs, comment cards, sidebar, right rail, and profile hero share one avatar styling rule
 - the lower-level Avatar wrapper stays focused on behavior and fallback rendering
 - `ProfilePicture` becomes the actual archive-facing reusable component for people across the app
 
@@ -286,6 +306,45 @@ Why this matters:
 - profiles still have a stable visual identity even when no banner URL is saved
 - the same component covers both the editable banner feature and the archive fallback style
 
+### `frontend/components/users/UserIdentityLink.tsx` and `frontend/components/users/UserPreviewCard.tsx`
+
+Purpose:
+
+- make user identity surfaces consistent across the app
+- ensure avatar, display name, and `@username` can navigate to the same profile route
+- show the same hover preview when the user hovers those identity triggers
+
+How it works:
+
+- `UserIdentityLink` wraps any trigger content in a normal Next.js profile link
+- when hover preview is enabled, it mounts Ark UI `HoverCard` around that link
+- the hover content renders `UserPreviewCard`, which now reuses the same `UserArchiveCard` layout as `SearchUserCard`
+- `UserPreviewCard` accepts whatever partial data it is given first, so the hover card can open immediately
+- on first hover open, `UserIdentityLink` lazy-loads richer user data with:
+  - `GET /users/:id`
+  - `GET /users/:id/friends`
+  - `GET /users/:id/posts`
+- it derives `postCount`, `friendCount`, `totalLikes`, and `totalComments` from those responses
+- it stores the enriched preview in a module-level in-memory cache keyed by `user.id`, so repeated hovers do not refetch during the same session
+- the shared helpers in `frontend/lib/user-preview.ts` centralize:
+  - profile href generation
+  - display name fallback
+  - bio/status fallback
+  - compact number formatting
+  - joined-date formatting
+
+Why this matters:
+
+- we stop duplicating manual `/profile/${username}` links everywhere
+- identity behavior becomes consistent across posts, comments, search cards, right rail, notifications, friends, and message thread headers
+- hover previews stay reusable because the preview card tolerates both rich and minimal user shapes
+- owners like `RightRailSuggestions` can stay lightweight because the hover card no longer depends on them preloading bio, banner, or stats
+
+Important implementation limit:
+
+- this wrapper should not be placed inside existing `<button>`-driven shells like the conversation rail rows, because nesting links inside buttons would be invalid HTML
+- in those cases, the row structure must be redesigned first if we want clickable identity triggers there
+
 Real code:
 
 ```tsx
@@ -305,17 +364,18 @@ Explain it like this:
 
 - `Button` is not a feed action
 - it is the canonical button primitive for the project
-- the archive style is now the default button language instead of a separate wrapper
+- the archive style belongs in the shared button primitive, not in page-specific wrappers
 - business meaning comes from the parent through props like `onClick` and `disabled`
 
-## 5. Profile Archive View
+## 5. Profile View
 
-The profile routes now reuse the same shell and post components as the feed instead of maintaining a second UI stack.
+The profile routes use the same shell and post components as the rest of the app.
 
 Current files:
 
-- `frontend/app/(app)/profil/page.tsx`
-- `frontend/app/(app)/profil/[id]/page.tsx`
+- `frontend/app/(app)/profile/page.tsx`
+- `frontend/app/(app)/profile/[username]/page.tsx`
+- `frontend/components/profile/FriendActionButton.tsx`
 - `frontend/components/profile/ProfileView.tsx`
 - `frontend/components/layout/RightRail.tsx`
 - `frontend/components/posts/PostCard.tsx`
@@ -326,28 +386,48 @@ Current files:
 How it works:
 
 - both routes render the same client component: `ProfileView`
-- `/profil` resolves the current authenticated user from `useAuth()`
-- `/profil/[id]` parses the dynamic route parameter and passes it into `ProfileView`
+- `/profile` resolves the current authenticated user
+- `/profile/[username]` resolves the public profile user first, then loads posts/friends from that user id
 - `ProfileView` fetches:
-  - `GET /users/:id` for the profile metadata
+  - `GET /user` for the authenticated self route or `GET /users/by-username/:username` for a public profile
 - `GET /users/:id/posts` for the archive entries
 - `GET /users/:id/friends` for the right-rail suggestions and the fellows count
-- `ProfileView` reuses `useFriendRequests()` for follow/request state and mutations
-- `ProfileView` reuses `usePostInteractions()` for delete, like, favorite, comment, and post-dialog state
+- `ProfileView` uses `useFriendRequests()` for follow/request state and mutations
+- `ProfileView` delegates the other-user friendship CTA to `FriendActionButton`
+- `ProfileView` uses `usePostInteractions()` for delete, like, favorite, comment, and post-dialog state
+- on another user's profile, the secondary hero CTA is labeled `Message` and is rendered beside the friendship action
 
 Important design rule:
 
 - the profile page does not recreate post cards, likes, favorites, or comments
-- it reuses `PostCard` and `PostDialog`
+- it uses `PostCard` and `PostDialog`
 - this keeps interaction logic consistent between feed and profile
+- the friendship CTA is isolated in `FriendActionButton`, so `ProfileView` stays focused on page data and layout instead of button-state branching
+
+`FriendActionButton` explanation:
+
+- it receives already-derived state for the displayed profile:
+  - connected friend
+  - incoming request
+  - outgoing pending request
+  - request currently submitting
+- it chooses the right archive button variant:
+  - `default` for add
+  - `bluesh` for accept
+  - `subtle` for pending
+  - `destructive` for remove
+- it also chooses the visible label:
+  - `Add`, `Accept`, `Pending`, `Remove`
+  - or transition labels like `Adding`, `Accepting`, `Removing`
+- it calls the matching mutation handler from `useFriendRequests()`
 
 Real route composition:
 
 ```tsx
-<ProfileView profileId={profileId} />
+<ProfileView profileUsername={username} />
 ```
 
-Real post reuse:
+Real post rendering:
 
 ```tsx
 {posts.map((post) => (
@@ -368,11 +448,13 @@ Explain it during evaluation like this:
 - the app shell is shared by the `(app)` layout through `AppSidebarShell`
 - the profile page only owns profile-specific data loading and hero/stats layout
 - the actual post interaction system is the same shared hook and components already used in the feed
+- decorative archive stars are now centralized in `frontend/components/decor/ArchiveStar.tsx`, so profile, notifications, and post variants reuse the same SVG asset
 
 Real hero-layout detail from `frontend/components/profile/ProfileView.tsx`:
 
 - the hero now prefers `displayName` for the large title while keeping `@username` as the stable handle
 - the banner component receives `src={profile.banner}` so saved banner URLs render directly in the hero
+- the red archive star used around the profile picture now lives in `frontend/components/decor/ArchiveStar.tsx` instead of being declared inline in the page component
 - the location chip and the profile action buttons are rendered inside one shared flex row with `justify-between`
 - this keeps metadata on the left and actions on the right instead of stacking them as unrelated blocks
 - `flex-wrap` is still enabled so the row can break safely on narrower screens
@@ -431,16 +513,98 @@ Important detail:
 ```tsx
 const NAV_ITEMS = [
   { href: "/feed", label: "Timeline", icon: Home },
-  { href: "/friends", label: "Discoveries", icon: Search },
-  { href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
+  { href: "/search", label: "Search", icon: Search },
+  { href: "/notifications", label: "Notifications", icon: Bell },
 ```
 
 Explain during evaluation:
 
 - the sidebar owns navigation configuration in `NAV_ITEMS`
 - `NavButton` is the row renderer
-- `Button` from `frontend/components/ui/button.tsx` is reused for “Log Entry” and “Logout”
-- the sidebar now prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
+- `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” and “Logout”
+- the search page is a first-class route in the main sidebar, not only a control inside the right rail
+- the sidebar prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
+- unread badges are not hardcoded anymore; `AppSidebarShell` reads them from `InboxUnreadProvider`, which is shared by the protected app pages
+
+### Sidebar Unread Count Flow
+
+Files:
+
+- `frontend/context/InboxUnreadContext.tsx`
+- `frontend/components/layout/AppSidebarShell.tsx`
+- `frontend/app/(app)/notifications/page.tsx`
+- `frontend/hooks/useMessages.ts`
+
+What this does:
+
+- keeps one shared unread notification count and one shared unread message count for the sidebar
+- avoids hardcoding badge values inside `Sidebar.tsx`
+- lets pages that already loaded the source data push exact counts into the shared store
+
+How it works:
+
+- `InboxUnreadProvider` is mounted inside `AppSidebarShell`, so every protected app page and the sidebar share the same context
+- on initial app-shell load, the provider fetches:
+  - `GET /notifications`, then counts rows where `read === false`
+  - `GET /conversations`, then sums every conversation `unreadCount`
+- the notifications page calls `setUnreadNotificationsCount(...)` whenever its local notification list changes
+- `useMessages` calls `setUnreadMessagesCount(...)` whenever its local conversation list changes
+- the profile page "Message" CTA links to `/message?userId=[profileId]`, and the message page consumes that query param to open or reuse the correct direct conversation on arrival
+
+Why this design is useful:
+
+- the sidebar stays dumb: it only renders numbers passed into it
+- unread logic stays close to the business data that already exists
+- opening a conversation or marking a notification as read updates the sidebar immediately without waiting for a full page reload
+
+Key terms an evaluator may ask:
+
+- React context: shared client state available to the sidebar and app pages
+- derived state: total unread messages is the sum of per-conversation `unreadCount`
+- optimistic UI: the notifications page marks items read locally first, then confirms with the backend
+
+### Conversation Rail Rows
+
+Files:
+
+- `frontend/components/messages/ConversationRail.tsx`
+- `frontend/lib/api.ts`
+
+What this does:
+
+- renders one direct-message row per `ConversationItem`
+- prefers the peer `displayName` as the only visible identity line in the row
+- keeps the avatar visually centered and larger so the list reads more like a people ledger than a metadata table
+- uses a larger last-message preview to make the actual conversation content easier to scan
+- places the unread-count pill on the row's upper-right corner so it sits on the edge instead of taking space inside the content area
+
+Real code:
+
+```tsx
+<div className="flex items-center gap-4">
+  <ProfilePicture
+    name={conversation.peer?.displayName || conversation.peer?.username || "User"}
+    src={conversation.peer?.avatar}
+    size="lg"
+    withShadow={false}
+    className="shrink-0 self-center"
+  />
+  <div className="min-w-0 flex-1">
+    <p className="truncate text-sm font-bold text-ink">
+      {conversation.peer?.displayName || conversation.peer?.username || "Unknown user"}
+    </p>
+    <p className="mt-1 truncate font-serif text-sm italic leading-5 text-ink/75">
+      {conversation.lastMessage?.content || "No message yet."}
+    </p>
+  </div>
+</div>
+```
+
+Why this matters:
+
+- the backend still sends both `displayName` and `username`, but this rail treats `displayName` as the primary reading label
+- removing the extra handle line reduces vertical clutter in a dense inbox list
+- the row remains purely presentational: conversation selection still comes from the parent message page and `useMessages`
 
 ### `frontend/components/layout/RightRailSuggestions.tsx`
 
@@ -450,10 +614,46 @@ Purpose:
 
 Important detail:
 
-- the card now prefers `displayName` for the visible name and for the `ProfilePicture` fallback seed
+- the card prefers `displayName` for the visible name and for the `ProfilePicture` fallback seed
 - it still keeps `@username` as the handle line
+- the avatar, visible name, and handle now all reuse `UserIdentityLink`, so suggestion identity surfaces are both clickable and hover-previewable
 - that keeps generated fallback avatars consistent with post cards, dialogs, comments, profile, and sidebar
 - the feed page must preserve `displayName` when normalizing `/friends/suggestions`; otherwise the right rail falls back to `username` and the generated avatar changes only on the feed screen
+
+### Notifications Ledger
+
+Current files:
+
+- `frontend/app/(app)/notifications/page.tsx`
+- `frontend/components/notifications/NotificationCard.tsx`
+- `frontend/components/notifications/NotificationsRail.tsx`
+- `frontend/lib/notification-utils.ts`
+
+What this does:
+
+- replaces the deprecated notifications screen with the real archive-style page used by the app
+- renders each notification from structured backend fields instead of trusting a stored sentence
+- deep-links post-related notifications into profile post dialogs through `?post=[postId]`, with `LIKE` and `COMMENT` opening the recipient's own profile view and `MENTION` preserving the actor-profile context
+- groups dense like activity on the same post into one summary card when more than 5 raw `LIKE` notifications target that post
+
+How it works:
+
+- `page.tsx` fetches `GET /notifications` through `frontend/lib/api.ts`
+- `notification-utils.ts` decides:
+  - the display copy for each `type`
+  - the destination URL for each notification
+  - the local search/filter matching text
+  - when raw notifications should be grouped into a frontend-only ledger row
+- `NotificationCard` renders one paper-style record and the whole card acts as the click target
+- the actor avatar, display name, and handle now reuse `UserIdentityLink`, so they still open the actor profile and show the hover preview without breaking the card-level notification click
+- `LikeNotificationGroupCard` renders the special grouped-like summary with stacked avatars and marks all grouped like rows as read on click
+- `NotificationsRail` owns local search text, local category toggles, and the bulk “mark all as read” action
+
+Important evaluation point:
+
+- the backend does not send notification display text anymore
+- the frontend builds the sentence and the target link from `type`, `actor`, and optional `postId`
+- the grouped like card is a presentation rule in the notifications page, not a new backend notification type
 
 ### Sidebar "Log Entry" -> `NewPostDialog` Flow
 
@@ -546,15 +746,15 @@ const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
 
 Key point:
 
-- `RightRail` is now mostly shell composition
-- `RightRailSearch` owns future search-route navigation
+- `RightRail` is mostly shell composition
+- `RightRailSearch` owns route navigation to the real `/search` page
 - `RightRailTrends` owns static trend links
 - `RightRailSuggestions` owns the observer/friends UI and follow action rendering
 - observer suggestions are still real data coming from `page.tsx`
 - the component only needs `id`, `username`, and optional `avatar`, not full user records
 - the search bar does not filter suggestions locally
-- the search bar is a route-navigation control for the future `/search` page
-- trend chips also link to the future search route with a prefilled query
+- the search bar mirrors the active `/search?q=...` query when you are already on the search page
+- trend chips also link to `/search` with a prefilled query
 - `sectionTitle` changes by route:
   - `You Might Know` on feed
   - `My Friends` on your own profile
@@ -568,6 +768,107 @@ Key point:
   - `Add` for no existing request
   - `Accept` for incoming pending requests
   - `Sent` for outgoing pending requests
+
+### `frontend/app/(app)/search/page.tsx`
+
+Purpose:
+
+- provide one protected search page for posts and users
+- reuse the same archive shell as the rest of the app
+- keep real post interactions by rendering the shared `PostCard`
+
+Main pieces:
+
+- `frontend/app/(app)/search/page.tsx`
+- `frontend/components/search/SearchUserCard.tsx`
+- `frontend/components/ui/pagination.tsx`
+- `frontend/components/ui/tabs.tsx`
+- `frontend/components/posts/PostCard.tsx`
+- `frontend/components/layout/RightRail.tsx`
+
+How it works:
+
+- the page reads `q` and `tab` from the URL
+- the page also reads `page` from the URL, so pagination state is shareable and survives refreshes
+- it fetches all posts plus all users, then enriches user cards with public profile data and friend counts
+- post search matches post content, author names, and comment text
+- user search matches only username and display name
+- the `posts` tab reuses `PostCard`, so likes, favorites, deletes, and the post dialog still use the same real handlers as the feed
+- the `users` tab renders `SearchUserCard`, which reuses `ProfileBanner`, `ProfilePicture`, and `FriendActionButton`
+- the visible results are paginated client-side, while the active page is still controlled from the URL
+- user-card enrichment is deferred to the visible users page, so the first search render no longer waits on profile and friends requests for every user
+
+Important UI detail:
+
+- `SearchUserCard` is no longer one big link because it now contains a real friendship button
+- profile navigation stays on the banner/text/stat links
+- its identity surfaces now use `UserIdentityLink`, so hovering the banner/avatar/name opens the same preview card pattern as other user surfaces
+- the friend CTA reuses the same `FriendActionButton` logic as the profile page, so add/accept/pending/remove behavior stays consistent
+- search cards intentionally hide the friendship CTA for users who are already connected, so the search grid stays discovery-focused instead of becoming a friend-management screen
+- the 5 decorative card variants are now chosen from `user.id % 5`, so a given user keeps the same visual treatment even if search ordering or pagination changes
+
+Real code:
+
+```tsx
+<Tabs value={activeTab} onValueChange={(details) => handleTabChange(readSearchTab(details.value))}>
+  <TabsList variant="archive">
+    <TabsTrigger value="posts" variant="archive">Posts</TabsTrigger>
+    <TabsTrigger value="users" variant="archive">Users</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="posts">
+    {paginatedPosts.map((post) => (
+      <PostCard ... />
+    ))}
+  </TabsContent>
+</Tabs>
+```
+
+Evaluator terms:
+
+- URL search params: values like `?q=alice&tab=users`
+- controlled tabs: the active tab is owned by page state/URL instead of local uncontrolled DOM state
+- UI wrapper: `frontend/components/ui/tabs.tsx` hides the Ark primitive behind the app's own API
+- pagination state: the active page is stored in `?page=2`, not only in React memory
+- client-side pagination: we fetch the dataset once, then slice the filtered results per page in the browser
+- lazy enrichment: profile details for user cards are fetched only for the visible page and then cached in local state
+
+### `frontend/components/ui/pagination.tsx`
+
+Purpose:
+
+- provide one archive-styled pagination wrapper backed by Ark UI
+- keep page buttons, ellipsis, and prev/next controls consistent across pages
+
+Why it exists:
+
+- Ark gives us page state, page range, and ellipsis logic
+- the app still needs its own wrapper so pages import from `@/components/ui/*`, not directly from the library
+
+How it works:
+
+- `Pagination` wraps Ark's root component
+- `PaginationItems` reads `pagination.pages` from `Pagination.Context` and renders either numbered items or ellipsis slots
+- `PaginationSummary` reads `pageRange` so the UI can say which slice of results is visible
+
+Real code:
+
+```tsx
+<Pagination count={resultCount} page={currentPage} pageSize={pageSize} onPageChange={handlePageChange}>
+  <PaginationSummary itemLabel={`${resultLabel} results`} />
+  <PaginationControls>
+    <PaginationPrevTrigger />
+    <PaginationItems />
+    <PaginationNextTrigger />
+  </PaginationControls>
+</Pagination>
+```
+
+Evaluator terms:
+
+- controlled pagination: the current page comes from props and changes through `onPageChange`
+- page range: Ark computes the visible item indexes for the current page
+- ellipsis logic: the component automatically shortens long page lists instead of rendering every page number
 
 ### `frontend/components/layout/NatureCanvas.tsx`
 
@@ -622,12 +923,12 @@ Why we use it:
 - the repo already follows a shadcn-style pattern with local UI wrappers
 - dialogs need focus trapping, escape handling, overlay behavior, and accessibility
 - this is better than hand-writing modal behavior with plain `<div>` elements
-- Ark is now the primitive layer for dialogs, while the app still imports our local wrapper
+- Ark provides the low-level dialog primitive while the app imports one local wrapper API
 
 Important evaluation sentence:
 
 - the app still imports `@/components/ui/dialog`
-- only the hidden implementation backing changed from Radix to Ark
+- the route and feature code stay isolated from the underlying dialog library
 
 Real code:
 
@@ -678,7 +979,7 @@ Why:
 
 - like and favorite are true toggled states
 - comment count uses the same visual treatment so the action row stays consistent
-- the component now lives with the post UI instead of a fake `feed` components folder
+- the component belongs to the post interaction domain
 
 ### `NewPostCard.tsx`
 
@@ -704,7 +1005,7 @@ Key detail:
 
 - this component does not upload anything itself
 - it only exposes user actions back to the page
-- the hidden file input now lives once in `frontend/app/feed/page.tsx`
+- the hidden file input lives in `frontend/app/feed/page.tsx`
 
 That means the page still controls:
 
@@ -722,7 +1023,7 @@ Important difference from `NewPostCard`:
 
 - the dialog adds `open` and `onClose`
 - it is rendered through the shared dialog wrapper
-- it reuses the exact same `NewPostCard` UI instead of duplicating a second file input
+- it uses the same `NewPostCard` UI so the publishing flow stays consistent
 
 Real code:
 
@@ -735,8 +1036,8 @@ Explain this clearly:
 
 - the dialog is controlled by the page
 - it does not own the text/file state
-- the same data can be reused between the inline composer and dialog if we want to evolve the design later
-- accessibility behavior now comes from Ark instead of custom modal markup
+- the same data can be shared between the inline composer and dialog
+- accessibility behavior comes from the shared dialog primitive rather than custom modal markup
 
 ### `PostDialog.tsx`
 
@@ -901,7 +1202,8 @@ Why this is separate:
 2. `useEffect` calls `fetchPosts()`
 3. `fetchPosts()` requests `GET /posts`
 4. the result is stored in `posts`
-5. `posts.map(...)` renders one `PostCard` per post
+5. the page slices `posts` for the active page
+6. `paginatedPosts.map(...)` renders one `PostCard` per visible post
 
 ### Publish a post
 
@@ -969,7 +1271,7 @@ Meaning:
 - shared input focus/placeholder style
 - desaturated archive photo treatment
 
-This is why components can stay mostly focused on structure and props instead of repeating custom CSS in every file.
+This lets components stay mostly focused on structure and props instead of repeating custom CSS in every file.
 
 ## 8. Questions You Are Likely To Get
 
@@ -979,7 +1281,7 @@ Because it owns all backend communication and page state. We extracted rendering
 
 ### Why separate `layout`, `ui`, `posts`, and `lib`?
 
-Because shell components now live in `frontend/components/layout` (`Sidebar`, `RightRail`, `NatureCanvas`, `NavButton`), shared primitives live in `frontend/components/ui` (`button`, `dialog`, `tooltip`), post interaction UI lives in `frontend/components/posts` (`PostCard`, `PostDialog`, `CommentCard`, `CommentComposer`, `NewPostCard`, `NewPostDialog`, `SocialToggle`), and non-component helpers/types live in `frontend/lib` (`feed-types`, `feed-utils`, `user-utils`).
+Because shell components belong in `frontend/components/layout` (`Sidebar`, `RightRail`, `NatureCanvas`, `NavButton`), shared primitives belong in `frontend/components/ui` (`button`, `dialog`, `tooltip`), post interaction UI belongs in `frontend/components/posts` (`PostCard`, `PostDialog`, `CommentCard`, `CommentComposer`, `NewPostCard`, `NewPostDialog`, `SocialToggle`), and non-component helpers/types belong in `frontend/lib` (`feed-types`, `feed-utils`, `user-utils`).
 
 ### Why does the right rail not fetch its own data?
 
@@ -1002,9 +1304,9 @@ Because children should stay reusable and predictable. If every component fetche
 
 Because dialogs are accessibility-heavy primitives and Ark gives us focus handling, dismissal behavior, and keyboard support without forcing the app to import Ark directly. We keep our own wrapper in `frontend/components/ui/dialog.tsx`, so the app stays stable while the primitive layer changes underneath.
 
-### Why do actions feel instant now instead of reloading the feed?
+### Why do actions feel instant?
 
-Because the page no longer refetches all posts after every successful mutation. After actions like like, favorite, publish, add comment, and delete post, `page.tsx` updates `posts` locally with `setPosts(...)`.
+Because `page.tsx` updates `posts` locally with `setPosts(...)` after actions like like, favorite, publish, add comment, and delete post, instead of refetching the whole feed after every mutation.
 
 That means:
 

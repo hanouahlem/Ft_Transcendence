@@ -1,16 +1,14 @@
 # 8. Reusable UI Components and Styling System
 
-Goal: understand how the new archive-style feed is split into reusable components and why some design choices moved into global styles.
+Goal: understand how the archive-style feed is split into reusable components and why some design choices live in global styles.
 
-## What Changed
+## Component Split
 
-The feed page no longer renders everything in one file.
-
-Instead, the route file:
+The route file:
 
 - keeps the data fetching and action handlers
 - passes state and callbacks into reusable feed components
-- uses global archive classes from `Frontend/app/globals.css`
+- uses global archive classes from `frontend/app/globals.css`
 
 That split matters because the same visual language is intended to be reused later on profile and other app pages.
 
@@ -18,9 +16,9 @@ That split matters because the same visual language is intended to be reused lat
 
 The global file:
 
-- `Frontend/app/globals.css`
+- `frontend/app/globals.css`
 
-now contains archive-style utility classes such as:
+contains archive-style utility classes such as:
 
 - `.archive-page`
 - `.archive-paper`
@@ -34,7 +32,7 @@ It also registers custom font families (for example the stamp font) so Tailwind 
 
 The app-only sans font is loaded separately in:
 
-- `Frontend/app/(app)/layout.tsx`
+- `frontend/app/(app)/layout.tsx`
 
 and uses `preload: false` because the archive app shell does not need the browser to preload an italic Inter face on first paint. This avoids noisy preload warnings while keeping `font-sans` available for the few UI elements that still use it.
 
@@ -69,22 +67,22 @@ Why this is useful:
 
 - the feed does not need to redefine the paper/grid look on every component
 - later pages can adopt the same design without copying CSS
-- the login page and feed page now share the same palette and font tokens
+- app pages can share the same palette and font tokens
 
 ## Feed Component Split
 
-The route file is still:
+The route file is:
 
-- `Frontend/app/feed/page.tsx`
+- `frontend/app/feed/page.tsx`
 
-But the archive UI is now composed from:
+The archive UI is composed from:
 
-- `Frontend/components/layout/Sidebar.tsx`
-- `Frontend/components/posts/PostCard.tsx`
-- `Frontend/components/posts/NewPostDialog.tsx`
-- `Frontend/components/layout/RightRail.tsx`
-- `Frontend/components/posts/SocialToggle.tsx`
-- `Frontend/components/ui/button.tsx`
+- `frontend/components/layout/Sidebar.tsx`
+- `frontend/components/posts/PostCard.tsx`
+- `frontend/components/posts/NewPostDialog.tsx`
+- `frontend/components/layout/RightRail.tsx`
+- `frontend/components/posts/SocialToggle.tsx`
+- `frontend/components/ui/button.tsx`
 
 Example from the page:
 
@@ -141,7 +139,7 @@ So the rule to remember is:
 
 ## Relative Time Formatting
 
-Post and comment timestamps now use Ark UI's relative-time utility through:
+Post and comment timestamps use one shared relative-time component built on:
 
 - `frontend/components/ui/relative-time.tsx`
 - `frontend/components/ui/tooltip.tsx`
@@ -158,17 +156,17 @@ Real code:
 
 Why this matters:
 
-- posts and comments now share one time-formatting component
-- the UI shows relative time like "2 min ago" instead of fixed date strings
-- the exact timestamp is shown through an archive-styled Ark tooltip instead of the native browser `title`
+- posts and comments share one time-formatting rule
+- the UI can show relative time like "2 min ago" while still exposing the exact timestamp
+- the tooltip keeps timestamp display consistent with the rest of the design system
 
-## One Small Type Fix That Matters
+## API Type Alignment
 
-The backend current-user route already returns `avatar`, so the frontend type in:
+The frontend user type should match the backend current-user payload. For example, if the backend returns `avatar`, the frontend type must include it.
 
-- `Frontend/lib/api.ts`
+- `frontend/lib/api.ts`
 
-was updated to include it:
+Example:
 
 ```ts
 export type CurrentUser = {
@@ -213,13 +211,46 @@ New files:
 What this shows:
 
 - the route file still owns fetches, saves, uploads, and auth refresh
-- the new settings components own the archive paper layout and section-level presentation
-- the page still reuses the existing app shell pieces like `RightRail` and `Button`
+- the settings components own the archive paper layout and section-level presentation
+- the page reuses shared app shell pieces like `RightRail` and `Button`
+- the old split settings routes were removed, so this component set only serves `frontend/app/(app)/settings/page.tsx`
 
-One new button variant was added in:
+The `ledger` button variant lives in:
 
 - `frontend/components/ui/button.tsx`
 
-The new `ledger` variant is the stronger black-and-orange commit button used by the settings paper.
+It is the stronger black-and-orange commit button used by the settings paper.
 
-This matters during evaluation because it shows the archive style is now a reusable system, not a one-page feed experiment.
+This matters during evaluation because it shows the archive style is a reusable system, not a one-page experiment.
+
+## Ark PasswordInput Integration
+
+Password fields now use Ark UI's dedicated password primitive instead of plain `<input type="password">` in the places users expect show/hide behavior:
+
+- `frontend/components/ui/FieldInput.tsx` (used by login/register password fields)
+- `frontend/components/settings/SettingsField.tsx` (used by settings password fields)
+
+Real code pattern:
+
+```tsx
+<PasswordInput.Root>
+  <PasswordInput.Input
+    type="password"
+    value={value}
+    onChange={onChange}
+  />
+  <PasswordInput.VisibilityTrigger type="button">
+    <PasswordInput.Indicator fallback="Show">Hide</PasswordInput.Indicator>
+  </PasswordInput.VisibilityTrigger>
+</PasswordInput.Root>
+```
+
+Why this is useful:
+
+- one consistent show/hide interaction across login, register, and settings
+- less custom password-toggle logic to maintain in page components
+- keeps existing validation and submit flow unchanged, because the same controlled `value` and `onChange` are still used
+
+Key term:
+
+- controlled input: form input value is owned by React state (`value` + `onChange`), not unmanaged DOM state

@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
-import { Bookmark, Heart, MessageCircle, Trash2 } from "lucide-react";
+import {
+	Bookmark02Icon,
+	Comment01Icon,
+	Delete02Icon,
+	FavouriteIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { FeedComment, FeedPost } from "@/lib/feed-types";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -11,6 +16,7 @@ import { CommentComposer } from "@/components/posts/CommentComposer";
 import { SocialToggle } from "@/components/posts/SocialToggle";
 import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import {
 	ScrollArea,
 	ScrollAreaContent,
@@ -104,6 +110,14 @@ export function PostDialog({
 	const isCommenting = post ? commentingPostId === post.id : false;
 	const authorDisplayName =
 		post?.author.displayName?.trim() || post?.author.username || "Observer";
+	const authorPreview = post
+		? {
+				id: post.author.id,
+				username: post.author.username,
+				displayName: post.author.displayName,
+				avatar: post.author.avatar,
+			}
+		: null;
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -114,29 +128,38 @@ export function PostDialog({
 							<section className="-rotate-1 archive-paper relative overflow-hidden border border-black/10 bg-paper px-5 py-5 lg:self-center">
 								<div className="mb-5 flex items-start justify-between gap-4 border-b border-dashed border-black/20 pb-4">
 									<div className="flex min-w-0 items-center gap-3">
-										<Link
-											href={`/profil/${post.author.id}`}
-											className="shrink-0"
-										>
-											<ProfilePicture
-												name={authorDisplayName}
-												src={post.author.avatar}
-												alt={authorDisplayName}
-												className="h-11 w-11 -rotate-2"
-											/>
-										</Link>
+										{authorPreview ? (
+											<UserIdentityLink
+												user={authorPreview}
+												className="shrink-0"
+											>
+												<ProfilePicture
+													name={authorDisplayName}
+													src={post.author.avatar}
+													alt={authorDisplayName}
+													className="h-11 w-11 -rotate-2"
+												/>
+											</UserIdentityLink>
+										) : null}
 
 										<div className="min-w-0">
 											<div className="flex flex-wrap items-center gap-3">
-												<Link
-													href={`/profil/${post.author.id}`}
-													className="truncate text-lg font-display uppercase tracking-wide text-ink"
-												>
-													{authorDisplayName}
-												</Link>
-												<span className="font-mono text-xs text-label">
-													@{post.author.username.toLowerCase()}
-												</span>
+												{authorPreview ? (
+													<UserIdentityLink
+														user={authorPreview}
+														className="truncate text-lg font-display tracking-wide text-ink"
+													>
+														{authorDisplayName}
+													</UserIdentityLink>
+												) : null}
+												{authorPreview ? (
+													<UserIdentityLink
+														user={authorPreview}
+														className="font-mono text-xs text-label"
+													>
+														@{post.author.username.toLowerCase()}
+													</UserIdentityLink>
+												) : null}
 											</div>
 										</div>
 									</div>
@@ -154,7 +177,7 @@ export function PostDialog({
 												onClick={() => onDelete(post.id)}
 												disabled={isDeleting}
 											>
-												<Trash2 className="h-3.5 w-3.5" />
+												<HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.9} />
 												{isDeleting ? "Deleting" : "Delete"}
 											</Button>
 										) : null}
@@ -183,7 +206,7 @@ export function PostDialog({
 								<div className="mt-6 border-t border-ink/10 pt-4">
 									<div className="flex flex-wrap items-center gap-2 sm:gap-4">
 										<SocialToggle
-											icon={MessageCircle}
+											icon={Comment01Icon}
 											label="Comment count"
 											count={post.commentsCount}
 											accent="blue"
@@ -193,7 +216,7 @@ export function PostDialog({
 											onClick={queueReplyFocus}
 										/>
 										<SocialToggle
-											icon={Bookmark}
+											icon={Bookmark02Icon}
 											label="Favorite post"
 											count={post.favoritesCount}
 											accent="green"
@@ -202,7 +225,7 @@ export function PostDialog({
 											onClick={() => onToggleFavorite(post)}
 										/>
 										<SocialToggle
-											icon={Heart}
+											icon={FavouriteIcon}
 											label="Like post"
 											count={post.likesCount}
 											accent="red"

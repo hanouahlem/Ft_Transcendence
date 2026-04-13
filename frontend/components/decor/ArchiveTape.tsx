@@ -2,6 +2,8 @@ import { cn } from "@/lib/utils";
 
 const TAPE_TONES = {
   "accent-red": "bg-accent-red",
+  "accent-blue": "bg-accent-blue",
+  "accent-green": "bg-accent-green",
   "paper-muted": "bg-paper-muted",
   stage: "bg-stage",
 } as const;

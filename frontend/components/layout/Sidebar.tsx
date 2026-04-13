@@ -4,17 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-	Bell,
-	Bookmark,
-	Home,
-	LogOut,
-	MessageCircle,
-	Search,
-	SlidersHorizontal,
-	UserRound,
-	Settings,
-	Handshake,
-} from "lucide-react";
+	Home08Icon,
+	Search01Icon,
+	UserCircleIcon,
+	Notification01Icon,
+	UserGroupIcon,
+	Message01Icon,
+	Settings02Icon,
+	Logout02Icon,
+	QuillWrite02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { CurrentUser } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { NavButton } from "@/components/layout/NavButton";
@@ -23,23 +23,26 @@ import { ProfilePicture } from "@/components/ui/ProfilePicture";
 
 type SidebarProps = {
 	user: CurrentUser | null;
+	unreadNotificationsCount: number;
+	unreadMessagesCount: number;
 	onCreatePost: () => void;
 	onLogout: () => void;
 };
 
 const NAV_ITEMS = [
-	{ href: "/feed", label: "Timeline", icon: Home },
-	// { href: "/friends", label: "Discoveries", icon: Search },
-	{ href: "/friends", label: "Friends", icon: Handshake },
-	{ href: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
-	{ href: "/settings/notifications", label: "Settings", icon: Settings },
-	{ href: "/message", label: "Message", icon: MessageCircle },
-	{ href: "/settings/profile", label: "Bookmarks", icon: Bookmark },
-	{ href: "/profil", label: "Profile", icon: UserRound },
+	{ href: "/feed", label: "Timeline", icon: Home08Icon },
+	{ href: "/search", label: "Search", icon: Search01Icon },
+	{ href: "/profile", label: "Profile", icon: UserCircleIcon },
+	{ href: "/notifications", label: "Notifications", icon: Notification01Icon },
+	{ href: "/friends", label: "Friends", icon: UserGroupIcon },
+	{ href: "/message", label: "Message", icon: Message01Icon },
+	{ href: "/settings", label: "Settings", icon: Settings02Icon },
 ];
 
 export function Sidebar({
 	user,
+	unreadNotificationsCount,
+	unreadMessagesCount,
 	onCreatePost,
 	onLogout,
 }: SidebarProps) {
@@ -93,7 +96,13 @@ export function Sidebar({
 						icon={item.icon}
 						active={pathname === item.href}
 						expanded={expanded}
-						badge={item.badge}
+						badge={
+							item.href === "/notifications"
+								? unreadNotificationsCount
+								: item.href === "/message"
+									? unreadMessagesCount
+									: undefined
+						}
 					/>
 				))}
 
@@ -101,41 +110,29 @@ export function Sidebar({
 					type="button"
 					variant="black"
 					className={cn(
-						"mt-4 w-full font-sans",
+						"mt-4 w-full font-sans font-semibold",
 						expanded
-							? "justify-start gap-3 px-3"
-							: "justify-start px-3",
+							? "justify-start gap-3 px-4"
+							: "justify-start px-4",
 					)}
 					onClick={onCreatePost}
 				>
-					<svg
-						className="h-5 w-5 shrink-0"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<HugeiconsIcon icon={QuillWrite02Icon} size={20} strokeWidth={1.9} />
 					<span
-						className="overflow-hidden whitespace-nowrap transition-all duration-150"
+						className="overflow-hidden whitespace-nowrap transition-all duration-150 ml-2 text-sm"
 						style={{
 							opacity: expanded ? 1 : 0,
 							maxWidth: expanded ? "200px" : "0px",
 						}}
 					>
-						Log Entry
+						New Post
 					</span>
 				</Button>
 			</nav>
 
 			<div className="mt-auto space-y-3">
 				<Link
-					href="/profil"
+					href="/profile"
 					className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-black/5"
 				>
 					<ProfilePicture
@@ -169,7 +166,7 @@ export function Sidebar({
 					)}
 					onClick={onLogout}
 				>
-					<LogOut className="h-4 w-4" />
+					<HugeiconsIcon icon={Logout02Icon} size={16} strokeWidth={1.7} />
 					<span
 						className="overflow-hidden whitespace-nowrap transition-all duration-150"
 						style={{

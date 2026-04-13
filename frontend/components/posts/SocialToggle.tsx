@@ -2,13 +2,13 @@
 
 import type { MouseEventHandler } from "react";
 import { Toggle } from "@ark-ui/react/toggle";
-import type { LucideIcon } from "lucide-react";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { cn } from "@/lib/utils";
 
 type AccentTone = "blue" | "green" | "red";
 
 type SocialToggleProps = {
-  icon: LucideIcon;
+  icon: IconSvgElement;
   label: string;
   count: number;
   accent: AccentTone;
@@ -65,9 +65,11 @@ export function SocialToggle({
       )}
       aria-label={label}
     >
-      <Icon
-        className={cn("h-4.5 w-4.5", pressed && palette.iconActive)}
+      <HugeiconsIcon
+        icon={Icon}
+        size={18}
         strokeWidth={1.9}
+        className={cn(pressed && palette.iconActive)}
       />
       <span>{count}</span>
     </Toggle.Root>

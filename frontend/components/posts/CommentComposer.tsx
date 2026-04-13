@@ -1,9 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
-import { Field } from "@ark-ui/react/field";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { SocialComposer } from "@/components/ui/SocialComposer";
 
 type CommentComposerProps = {
 	postId: number;
@@ -21,39 +19,17 @@ export const CommentComposer = forwardRef<
 	ref,
 ) {
 	return (
-		<section className="relative overflow-hidden border border-black/10 bg-paper-muted px-3 py-3">
-			<div className="archive-thread hidden sm:block" />
-			<div className="flex items-end gap-3 sm:pl-8">
-				<Field.Root className="flex-1">
-					<Field.Label className="sr-only">
-						Add a comment to this post
-					</Field.Label>
-					<Field.Textarea
-						ref={ref}
-						autoresize
-						value={value}
-						onChange={(event) =>
-							onChange(postId, event.target.value)
-						}
-						placeholder="Add a comment..."
-						className="archive-input archive-lines min-h-11 w-full resize-none border-0 bg-transparent p-0 text-sm leading-6 text-ink"
-					/>
-				</Field.Root>
-
-				<div className="shrink-0">
-					<Button
-						type="button"
-						variant="bluesh"
-						onClick={() => onSubmit(postId)}
-						disabled={submitting}
-						aria-label={
-							submitting ? "Sending comment" : "Submit comment"
-						}
-					>
-						<ArrowRight className="h-4 w-4" />
-					</Button>
-				</div>
-			</div>
-		</section>
+		<SocialComposer
+			ref={ref}
+			value={value}
+			submitting={submitting}
+			onChange={(nextValue) => onChange(postId, nextValue)}
+			onSubmit={() => onSubmit(postId)}
+			placeholder="Add a comment..."
+			label="Add a comment to this post"
+			submitLabel={submitting ? "Sending comment" : "Submit comment"}
+			rows={1}
+			textareaClassName="min-h-8"
+		/>
 	);
 });

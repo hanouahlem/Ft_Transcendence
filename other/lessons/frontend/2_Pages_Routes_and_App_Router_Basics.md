@@ -27,14 +27,14 @@ Current route files include:
 frontend/app/page.tsx
 frontend/app/(auth)/login/page.tsx
 frontend/app/(auth)/register/page.tsx
-frontend/app/feed/page.tsx
-frontend/app/friends/page.tsx
-frontend/app/notifications/page.tsx
-frontend/app/profil/page.tsx
-frontend/app/profil/[id]/page.tsx
-frontend/app/settings/profile/page.tsx
-frontend/app/settings/security/page.tsx
-frontend/app/settings/notifications/page.tsx
+frontend/app/(app)/feed/page.tsx
+frontend/app/(app)/search/page.tsx
+frontend/app/(app)/friends/page.tsx
+frontend/app/(app)/message/page.tsx
+frontend/app/(app)/notifications/page.tsx
+frontend/app/(app)/profile/page.tsx
+frontend/app/(app)/profile/[username]/page.tsx
+frontend/app/(app)/settings/page.tsx
 ```
 
 That means the current frontend URLs are:
@@ -43,13 +43,13 @@ That means the current frontend URLs are:
 - `/login`
 - `/register`
 - `/feed`
+- `/search`
 - `/friends`
+- `/message`
 - `/notifications`
-- `/profil`
-- `/profil/:id`
-- `/settings/profile`
-- `/settings/security`
-- `/settings/notifications`
+- `/profile`
+- `/profile/:username`
+- `/settings`
 
 ## The Homepage Route
 
@@ -100,11 +100,13 @@ That is why route files are not just "HTML pages". They can contain route-specif
 
 Several pages are intended for logged-in users:
 
-- `frontend/app/feed/page.tsx`
-- `frontend/app/friends/page.tsx`
-- `frontend/app/notifications/page.tsx`
-- `frontend/app/profil/page.tsx`
-- `frontend/app/profil/[id]/page.tsx`
+- `frontend/app/(app)/feed/page.tsx`
+- `frontend/app/(app)/search/page.tsx`
+- `frontend/app/(app)/friends/page.tsx`
+- `frontend/app/(app)/notifications/page.tsx`
+- `frontend/app/(app)/message/page.tsx`
+- `frontend/app/(app)/profile/page.tsx`
+- `frontend/app/(app)/profile/[username]/page.tsx`
 
 These pages usually wrap their content with `ProtectedRoute`.
 
@@ -116,9 +118,14 @@ Nested folders create nested URLs.
 
 Example:
 
-- `frontend/app/settings/profile/page.tsx` -> `/settings/profile`
-- `frontend/app/settings/security/page.tsx` -> `/settings/security`
-- `frontend/app/settings/notifications/page.tsx` -> `/settings/notifications`
+- `frontend/app/(app)/profile/[username]/page.tsx` -> `/profile/:username`
+- `frontend/app/(app)/settings/page.tsx` -> `/settings`
+
+The new search route is:
+
+- `frontend/app/(app)/search/page.tsx` -> `/search`
+
+It stays inside the protected app shell, so it keeps the same sidebar, nature background, and right rail as `/feed`, `/friends`, `/notifications`, `/profile`, and `/settings`.
 
 This is one of the main benefits of the App Router: the folder structure already shows the URL structure.
 
@@ -128,11 +135,11 @@ In the App Router, `page.tsx` is the entry file for a route segment.
 
 So when someone visits `/friends`, Next.js renders:
 
-- `frontend/app/friends/page.tsx`
+- `frontend/app/(app)/friends/page.tsx`
 
-When someone visits `/settings/security`, Next.js renders:
+When someone visits `/settings`, Next.js renders:
 
-- `frontend/app/settings/security/page.tsx`
+- `frontend/app/(app)/settings/page.tsx`
 
 This is the core routing convention to remember.
 
@@ -170,7 +177,7 @@ A shared component is reused by multiple routes.
 Examples in this repo:
 
 - route files:
-  - `frontend/app/feed/page.tsx`
+  - `frontend/app/(app)/feed/page.tsx`
   - `frontend/app/(auth)/login/page.tsx`
 - shared components:
   - `frontend/components/layout/AppSidebarShell.tsx`
@@ -197,20 +204,25 @@ So routing gives the path, but the page component still contains behavior.
 
 ## Current Routing Reality In This Repo
 
-The route structure is clean, but page completeness varies.
+In this repo, a route tells you where the page lives, but not how much real backend behavior is wired into it yet.
 
 Examples:
 
-- `/feed` is connected to real backend post routes
-- `/profil` and `/profil/:id` now render the archive profile view with real backend data:
-  - `GET /users/:id`
+- `/feed` is connected to real backend post routes and can switch between the global feed and the accepted-friends feed
+- `/profile` and `/profile/:username` read profile-related backend data:
+  - `GET /user` for the authenticated user route or `GET /users/by-username/:username` for a public profile
   - `GET /users/:id/posts`
   - `GET /users/:id/friends`
-- `/friends` has real UI but incomplete backend wiring in places
-- `/notifications` is currently mostly mock/demo UI
-- some settings pages still contain placeholder/demo data
+- `/friends` has real backend wiring for requests, acceptance, and removal through friendship ids
+- `/message` is wired to the direct-message backend and split into small parts:
+  - route entry: `frontend/app/(app)/message/page.tsx`
+  - state/actions hook: `frontend/hooks/useMessages.ts`
+  - presentational parts in `frontend/components/messages/` (`ConversationThread`, `ConversationRail`, `NewConversationDialog`)
+  - route-entry deep link: `/message?userId=[targetUserId]` opens or reuses the direct conversation for that profile
+- `/notifications` now uses real backend notification rows and builds navigation targets from `type`, `actor.username`, and `postId`
+- `/settings` is the single active account route and owns profile edits, media uploads, and password updates
 
-So understanding routes is not enough by itself. You also need to know how complete each page is.
+So route knowledge is only the first layer. You also need to know which backend calls and shared components each active page owns.
 
 ## Key Terms
 
@@ -235,7 +247,7 @@ shared components are reused inside pages
 
 - Which file maps to the `/friends` route?
 - Why does `frontend/app/page.tsx` map to `/`?
-- What URL does `frontend/app/settings/security/page.tsx` create?
+- What URL does `frontend/app/(app)/settings/page.tsx` create?
 - What is the difference between a route file and a shared component?
 - Why do many route files in this repo use `"use client"`?
 

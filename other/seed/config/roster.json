@@ -1,104 +1,1944 @@
 {
   "users": [
-    { "username": "alice", "avatarId": 1, "cluster": "builders", "tier": "showcase", "tone": "warm", "themes": ["shipping", "qa", "bug_hunt"], "habits": ["writes the rollback note before lunch", "likes a quiet first hour before chat"], "location": "Paris, FR", "imageBias": "medium" },
-    { "username": "bob", "avatarId": 2, "cluster": "builders", "tier": "showcase", "tone": "enthusiastic", "themes": ["docker", "docs", "realtime"], "habits": ["keeps a scratchpad of odd edge cases", "ships small fixes between bigger threads"], "location": "Marseille, FR", "imageBias": "low", "bridgeClusters": ["misc", "nightshift"] },
-    { "username": "charlie", "avatarId": 3, "cluster": "builders", "tier": "active", "tone": "tired", "themes": ["qa", "bug_hunt", "release_day"], "habits": ["likes a quiet first hour before chat", "checks logs before opening messages"], "location": "Lille, FR", "imageBias": "medium" },
-    { "username": "diana", "avatarId": 4, "cluster": "builders", "tier": "active", "tone": "focused", "themes": ["docs", "realtime", "shipping"], "habits": ["ships small fixes between bigger threads", "writes the rollback note before lunch"], "location": "Nice, FR", "imageBias": "low" },
-    { "username": "emma", "avatarId": 5, "cluster": "builders", "tier": "active", "tone": "dry", "themes": ["bug_hunt", "release_day", "docker"], "habits": ["checks logs before opening messages", "keeps a scratchpad of odd edge cases"], "location": "Montpellier, FR", "imageBias": "medium" },
-    { "username": "ethan", "avatarId": 6, "cluster": "builders", "tier": "active", "tone": "calm", "themes": ["realtime", "shipping", "qa"], "habits": ["writes the rollback note before lunch", "likes a quiet first hour before chat"], "location": "Grenoble, FR", "imageBias": "low" },
-    { "username": "farah", "avatarId": 7, "cluster": "builders", "tier": "active", "tone": "sarcastic", "themes": ["release_day", "docker", "docs"], "habits": ["keeps a scratchpad of odd edge cases", "ships small fixes between bigger threads"], "location": "Annecy, FR", "imageBias": "medium" },
-    { "username": "gavin", "avatarId": 8, "cluster": "builders", "tier": "regular", "tone": "warm", "themes": ["shipping", "qa", "bug_hunt"], "habits": ["likes a quiet first hour before chat", "checks logs before opening messages"], "location": "Dijon, FR", "imageBias": "low" },
-    { "username": "heidi", "avatarId": 9, "cluster": "builders", "tier": "regular", "tone": "enthusiastic", "themes": ["docker", "docs", "realtime"], "habits": ["ships small fixes between bigger threads", "writes the rollback note before lunch"], "location": "Tours, FR", "imageBias": "medium" },
-    { "username": "isaac", "avatarId": 10, "cluster": "builders", "tier": "regular", "tone": "tired", "themes": ["qa", "bug_hunt", "release_day"], "habits": ["checks logs before opening messages", "keeps a scratchpad of odd edge cases"], "location": "Clermont-Ferrand, FR", "imageBias": "low" },
-    { "username": "julia", "avatarId": 11, "cluster": "builders", "tier": "regular", "tone": "focused", "themes": ["docs", "realtime", "shipping"], "habits": ["writes the rollback note before lunch", "likes a quiet first hour before chat"], "location": "Paris, FR", "imageBias": "medium", "bridgeClusters": ["designers"] },
-    { "username": "kevin", "avatarId": 12, "cluster": "builders", "tier": "regular", "tone": "dry", "themes": ["bug_hunt", "release_day", "docker"], "habits": ["keeps a scratchpad of odd edge cases", "ships small fixes between bigger threads"], "location": "Marseille, FR", "imageBias": "low" },
-    { "username": "lena", "avatarId": 13, "cluster": "builders", "tier": "regular", "tone": "calm", "themes": ["realtime", "shipping", "qa"], "habits": ["likes a quiet first hour before chat", "checks logs before opening messages"], "location": "Lille, FR", "imageBias": "medium" },
-    { "username": "marco", "avatarId": 14, "cluster": "builders", "tier": "light", "tone": "sarcastic", "themes": ["release_day", "docker", "docs"], "habits": ["ships small fixes between bigger threads", "writes the rollback note before lunch"], "location": "Nice, FR", "imageBias": "low" },
-    { "username": "nina", "avatarId": 15, "cluster": "builders", "tier": "light", "tone": "warm", "themes": ["shipping", "qa", "bug_hunt"], "habits": ["checks logs before opening messages", "keeps a scratchpad of odd edge cases"], "location": "Montpellier, FR", "imageBias": "medium" },
-    { "username": "oscar", "avatarId": 16, "cluster": "builders", "tier": "light", "tone": "enthusiastic", "themes": ["docker", "docs", "realtime"], "habits": ["writes the rollback note before lunch", "likes a quiet first hour before chat"], "location": "Grenoble, FR", "imageBias": "low" },
-    { "username": "priya", "avatarId": 17, "cluster": "builders", "tier": "light", "tone": "tired", "themes": ["qa", "bug_hunt", "release_day"], "habits": ["keeps a scratchpad of odd edge cases", "ships small fixes between bigger threads"], "location": "Annecy, FR", "imageBias": "medium" },
-    { "username": "grace", "avatarId": 18, "cluster": "designers", "tier": "showcase", "tone": "calm", "themes": ["ui_polish", "photography", "weekend_plan"], "habits": ["takes screenshots before changing spacing", "walks a block before the second draft"], "location": "Metz, FR", "imageBias": "high", "bridgeClusters": ["campus", "misc"] },
-    { "username": "iris", "avatarId": 19, "cluster": "designers", "tier": "active", "tone": "sarcastic", "themes": ["design_system", "coffee", "makerspace"], "habits": ["saves color notes in a tiny notebook", "collects reference photos on the commute"], "location": "Perpignan, FR", "imageBias": "medium" },
-    { "username": "jack", "avatarId": 20, "cluster": "designers", "tier": "active", "tone": "warm", "themes": ["photography", "weekend_plan", "release_day"], "habits": ["walks a block before the second draft", "iterates in public with quick mock posts"], "location": "Lyon, FR", "imageBias": "high" },
-    { "username": "kira", "avatarId": 21, "cluster": "designers", "tier": "active", "tone": "enthusiastic", "themes": ["coffee", "makerspace", "ui_polish"], "habits": ["collects reference photos on the commute", "takes screenshots before changing spacing"], "location": "Bordeaux, FR", "imageBias": "medium" },
-    { "username": "luca", "avatarId": 22, "cluster": "designers", "tier": "active", "tone": "tired", "themes": ["weekend_plan", "release_day", "design_system"], "habits": ["iterates in public with quick mock posts", "saves color notes in a tiny notebook"], "location": "Nantes, FR", "imageBias": "high" },
-    { "username": "maya", "avatarId": 23, "cluster": "designers", "tier": "regular", "tone": "focused", "themes": ["makerspace", "ui_polish", "photography"], "habits": ["takes screenshots before changing spacing", "walks a block before the second draft"], "location": "Toulouse, FR", "imageBias": "medium" },
-    { "username": "nora", "avatarId": 24, "cluster": "designers", "tier": "regular", "tone": "dry", "themes": ["release_day", "design_system", "coffee"], "habits": ["saves color notes in a tiny notebook", "collects reference photos on the commute"], "location": "Rennes, FR", "imageBias": "high" },
-    { "username": "otis", "avatarId": 25, "cluster": "designers", "tier": "regular", "tone": "calm", "themes": ["ui_polish", "photography", "weekend_plan"], "habits": ["walks a block before the second draft", "iterates in public with quick mock posts"], "location": "Strasbourg, FR", "imageBias": "medium" },
-    { "username": "paula", "avatarId": 26, "cluster": "designers", "tier": "regular", "tone": "sarcastic", "themes": ["design_system", "coffee", "makerspace"], "habits": ["collects reference photos on the commute", "takes screenshots before changing spacing"], "location": "Rouen, FR", "imageBias": "high" },
-    { "username": "quincy", "avatarId": 27, "cluster": "designers", "tier": "regular", "tone": "warm", "themes": ["photography", "weekend_plan", "release_day"], "habits": ["iterates in public with quick mock posts", "saves color notes in a tiny notebook"], "location": "Reims, FR", "imageBias": "medium" },
-    { "username": "ruby", "avatarId": 28, "cluster": "designers", "tier": "regular", "tone": "enthusiastic", "themes": ["coffee", "makerspace", "ui_polish"], "habits": ["takes screenshots before changing spacing", "walks a block before the second draft"], "location": "Metz, FR", "imageBias": "high", "bridgeClusters": ["designers", "campus"] },
-    { "username": "sasha", "avatarId": 29, "cluster": "designers", "tier": "regular", "tone": "tired", "themes": ["weekend_plan", "release_day", "design_system"], "habits": ["saves color notes in a tiny notebook", "collects reference photos on the commute"], "location": "Perpignan, FR", "imageBias": "medium" },
-    { "username": "theo", "avatarId": 30, "cluster": "designers", "tier": "light", "tone": "focused", "themes": ["makerspace", "ui_polish", "photography"], "habits": ["walks a block before the second draft", "iterates in public with quick mock posts"], "location": "Lyon, FR", "imageBias": "high" },
-    { "username": "uma", "avatarId": 31, "cluster": "designers", "tier": "light", "tone": "dry", "themes": ["release_day", "design_system", "coffee"], "habits": ["collects reference photos on the commute", "takes screenshots before changing spacing"], "location": "Bordeaux, FR", "imageBias": "medium" },
-    { "username": "valen", "avatarId": 32, "cluster": "designers", "tier": "light", "tone": "calm", "themes": ["ui_polish", "photography", "weekend_plan"], "habits": ["iterates in public with quick mock posts", "saves color notes in a tiny notebook"], "location": "Nantes, FR", "imageBias": "high" },
-    { "username": "wendy", "avatarId": 33, "cluster": "designers", "tier": "light", "tone": "sarcastic", "themes": ["design_system", "coffee", "makerspace"], "habits": ["takes screenshots before changing spacing", "walks a block before the second draft"], "location": "Toulouse, FR", "imageBias": "medium" },
-    { "username": "xavier", "avatarId": 34, "cluster": "designers", "tier": "light", "tone": "warm", "themes": ["photography", "weekend_plan", "release_day"], "habits": ["saves color notes in a tiny notebook", "collects reference photos on the commute"], "location": "Rennes, FR", "imageBias": "high" },
-    { "username": "pablo", "avatarId": 35, "cluster": "nightshift", "tier": "showcase", "tone": "focused", "themes": ["bug_hunt", "game_night", "commute"], "habits": ["starts the hard task after everyone signs off", "writes status notes at strange hours"], "location": "Dijon, FR", "imageBias": "low" },
-    { "username": "quinn", "avatarId": 36, "cluster": "nightshift", "tier": "active", "tone": "dry", "themes": ["docker", "coffee", "realtime"], "habits": ["keeps tea nearby for the late window", "uses headphones as a do-not-disturb sign"], "location": "Tours, FR", "imageBias": "medium", "bridgeClusters": ["campus"] },
-    { "username": "sam", "avatarId": 37, "cluster": "nightshift", "tier": "active", "tone": "calm", "themes": ["game_night", "commute", "release_day"], "habits": ["writes status notes at strange hours", "tests reconnect flows when the room is empty"], "location": "Clermont-Ferrand, FR", "imageBias": "low" },
-    { "username": "tina", "avatarId": 38, "cluster": "nightshift", "tier": "active", "tone": "sarcastic", "themes": ["coffee", "realtime", "bug_hunt"], "habits": ["uses headphones as a do-not-disturb sign", "starts the hard task after everyone signs off"], "location": "Paris, FR", "imageBias": "medium" },
-    { "username": "ulysses", "avatarId": 39, "cluster": "nightshift", "tier": "active", "tone": "warm", "themes": ["commute", "release_day", "docker"], "habits": ["tests reconnect flows when the room is empty", "keeps tea nearby for the late window"], "location": "Marseille, FR", "imageBias": "low" },
-    { "username": "vera", "avatarId": 40, "cluster": "nightshift", "tier": "regular", "tone": "enthusiastic", "themes": ["realtime", "bug_hunt", "game_night"], "habits": ["starts the hard task after everyone signs off", "writes status notes at strange hours"], "location": "Lille, FR", "imageBias": "medium" },
-    { "username": "will", "avatarId": 41, "cluster": "nightshift", "tier": "regular", "tone": "tired", "themes": ["release_day", "docker", "coffee"], "habits": ["keeps tea nearby for the late window", "uses headphones as a do-not-disturb sign"], "location": "Nice, FR", "imageBias": "low" },
-    { "username": "xena", "avatarId": 42, "cluster": "nightshift", "tier": "regular", "tone": "focused", "themes": ["bug_hunt", "game_night", "commute"], "habits": ["writes status notes at strange hours", "tests reconnect flows when the room is empty"], "location": "Montpellier, FR", "imageBias": "medium" },
-    { "username": "yves", "avatarId": 43, "cluster": "nightshift", "tier": "regular", "tone": "dry", "themes": ["docker", "coffee", "realtime"], "habits": ["uses headphones as a do-not-disturb sign", "starts the hard task after everyone signs off"], "location": "Grenoble, FR", "imageBias": "low" },
-    { "username": "zora", "avatarId": 44, "cluster": "nightshift", "tier": "regular", "tone": "calm", "themes": ["game_night", "commute", "release_day"], "habits": ["tests reconnect flows when the room is empty", "keeps tea nearby for the late window"], "location": "Annecy, FR", "imageBias": "medium" },
-    { "username": "andres", "avatarId": 45, "cluster": "nightshift", "tier": "regular", "tone": "sarcastic", "themes": ["coffee", "realtime", "bug_hunt"], "habits": ["starts the hard task after everyone signs off", "writes status notes at strange hours"], "location": "Dijon, FR", "imageBias": "low" },
-    { "username": "bianca", "avatarId": 46, "cluster": "nightshift", "tier": "light", "tone": "warm", "themes": ["commute", "release_day", "docker"], "habits": ["keeps tea nearby for the late window", "uses headphones as a do-not-disturb sign"], "location": "Tours, FR", "imageBias": "medium" },
-    { "username": "cedric", "avatarId": 47, "cluster": "nightshift", "tier": "light", "tone": "enthusiastic", "themes": ["realtime", "bug_hunt", "game_night"], "habits": ["writes status notes at strange hours", "tests reconnect flows when the room is empty"], "location": "Clermont-Ferrand, FR", "imageBias": "low" },
-    { "username": "daria", "avatarId": 48, "cluster": "nightshift", "tier": "light", "tone": "tired", "themes": ["release_day", "docker", "coffee"], "habits": ["uses headphones as a do-not-disturb sign", "starts the hard task after everyone signs off"], "location": "Paris, FR", "imageBias": "medium" },
-    { "username": "elio", "avatarId": 49, "cluster": "nightshift", "tier": "light", "tone": "focused", "themes": ["bug_hunt", "game_night", "commute"], "habits": ["tests reconnect flows when the room is empty", "keeps tea nearby for the late window"], "location": "Marseille, FR", "imageBias": "low" },
-    { "username": "freya", "avatarId": 50, "cluster": "nightshift", "tier": "light", "tone": "dry", "themes": ["docker", "coffee", "realtime"], "habits": ["starts the hard task after everyone signs off", "writes status notes at strange hours"], "location": "Lille, FR", "imageBias": "medium" },
-    { "username": "mia", "avatarId": 51, "cluster": "campus", "tier": "showcase", "tone": "dry", "themes": ["study_group", "weekend_plan", "food_spot"], "habits": ["books tables near outlets early", "treats coffee runs like standups"], "location": "Grenoble, FR", "imageBias": "high", "bridgeClusters": ["builders", "misc"] },
-    { "username": "olivia", "avatarId": 52, "cluster": "campus", "tier": "showcase", "tone": "calm", "themes": ["campus_life", "coffee", "makerspace"], "habits": ["leaves with the last study group", "catches up between classes"], "location": "Annecy, FR", "imageBias": "medium", "bridgeClusters": ["sports", "designers"] },
-    { "username": "parker", "avatarId": 53, "cluster": "campus", "tier": "active", "tone": "sarcastic", "themes": ["weekend_plan", "food_spot", "qa"], "habits": ["treats coffee runs like standups", "shares tiny wins after workshops"], "location": "Dijon, FR", "imageBias": "high" },
-    { "username": "rina", "avatarId": 54, "cluster": "campus", "tier": "active", "tone": "warm", "themes": ["coffee", "makerspace", "study_group"], "habits": ["catches up between classes", "books tables near outlets early"], "location": "Tours, FR", "imageBias": "medium" },
-    { "username": "sean", "avatarId": 55, "cluster": "campus", "tier": "active", "tone": "enthusiastic", "themes": ["food_spot", "qa", "campus_life"], "habits": ["shares tiny wins after workshops", "leaves with the last study group"], "location": "Clermont-Ferrand, FR", "imageBias": "high" },
-    { "username": "tessa", "avatarId": 56, "cluster": "campus", "tier": "regular", "tone": "tired", "themes": ["makerspace", "study_group", "weekend_plan"], "habits": ["books tables near outlets early", "treats coffee runs like standups"], "location": "Paris, FR", "imageBias": "medium" },
-    { "username": "uri", "avatarId": 57, "cluster": "campus", "tier": "regular", "tone": "focused", "themes": ["qa", "campus_life", "coffee"], "habits": ["leaves with the last study group", "catches up between classes"], "location": "Marseille, FR", "imageBias": "high" },
-    { "username": "vivian", "avatarId": 58, "cluster": "campus", "tier": "regular", "tone": "dry", "themes": ["study_group", "weekend_plan", "food_spot"], "habits": ["treats coffee runs like standups", "shares tiny wins after workshops"], "location": "Lille, FR", "imageBias": "medium" },
-    { "username": "wes", "avatarId": 59, "cluster": "campus", "tier": "regular", "tone": "calm", "themes": ["campus_life", "coffee", "makerspace"], "habits": ["catches up between classes", "books tables near outlets early"], "location": "Nice, FR", "imageBias": "high" },
-    { "username": "yasmin", "avatarId": 60, "cluster": "campus", "tier": "regular", "tone": "sarcastic", "themes": ["weekend_plan", "food_spot", "qa"], "habits": ["shares tiny wins after workshops", "leaves with the last study group"], "location": "Montpellier, FR", "imageBias": "medium" },
-    { "username": "zane", "avatarId": 61, "cluster": "campus", "tier": "regular", "tone": "warm", "themes": ["coffee", "makerspace", "study_group"], "habits": ["books tables near outlets early", "treats coffee runs like standups"], "location": "Grenoble, FR", "imageBias": "high" },
-    { "username": "alma", "avatarId": 62, "cluster": "campus", "tier": "regular", "tone": "enthusiastic", "themes": ["food_spot", "qa", "campus_life"], "habits": ["leaves with the last study group", "catches up between classes"], "location": "Annecy, FR", "imageBias": "medium" },
-    { "username": "bruno", "avatarId": 63, "cluster": "campus", "tier": "light", "tone": "tired", "themes": ["makerspace", "study_group", "weekend_plan"], "habits": ["treats coffee runs like standups", "shares tiny wins after workshops"], "location": "Dijon, FR", "imageBias": "high" },
-    { "username": "clara", "avatarId": 64, "cluster": "campus", "tier": "light", "tone": "focused", "themes": ["qa", "campus_life", "coffee"], "habits": ["catches up between classes", "books tables near outlets early"], "location": "Tours, FR", "imageBias": "medium" },
-    { "username": "diego", "avatarId": 65, "cluster": "campus", "tier": "light", "tone": "dry", "themes": ["study_group", "weekend_plan", "food_spot"], "habits": ["shares tiny wins after workshops", "leaves with the last study group"], "location": "Clermont-Ferrand, FR", "imageBias": "high" },
-    { "username": "elsa", "avatarId": 66, "cluster": "campus", "tier": "light", "tone": "calm", "themes": ["campus_life", "coffee", "makerspace"], "habits": ["books tables near outlets early", "treats coffee runs like standups"], "location": "Paris, FR", "imageBias": "medium" },
-    { "username": "flora", "avatarId": 67, "cluster": "campus", "tier": "light", "tone": "sarcastic", "themes": ["weekend_plan", "food_spot", "qa"], "habits": ["leaves with the last study group", "catches up between classes"], "location": "Marseille, FR", "imageBias": "high" },
-    { "username": "hugo", "avatarId": 68, "cluster": "sports", "tier": "showcase", "tone": "tired", "themes": ["running", "wellness", "commute"], "habits": ["uses training blocks to reset after bugs", "likes early-morning momentum"], "location": "Toulouse, FR", "imageBias": "medium" },
-    { "username": "liam", "avatarId": 69, "cluster": "sports", "tier": "active", "tone": "focused", "themes": ["football", "weekend_plan", "game_night"], "habits": ["tracks streaks on a paper note", "swaps playlists before evening sessions"], "location": "Rennes, FR", "imageBias": "low", "bridgeClusters": ["campus", "nightshift"] },
-    { "username": "mona", "avatarId": 70, "cluster": "sports", "tier": "active", "tone": "dry", "themes": ["wellness", "commute", "small_routine"], "habits": ["likes early-morning momentum", "thinks through features on long walks"], "location": "Strasbourg, FR", "imageBias": "medium" },
-    { "username": "nico", "avatarId": 1, "cluster": "sports", "tier": "active", "tone": "calm", "themes": ["weekend_plan", "game_night", "running"], "habits": ["swaps playlists before evening sessions", "uses training blocks to reset after bugs"], "location": "Rouen, FR", "imageBias": "low" },
-    { "username": "opal", "avatarId": 2, "cluster": "sports", "tier": "regular", "tone": "sarcastic", "themes": ["commute", "small_routine", "football"], "habits": ["thinks through features on long walks", "tracks streaks on a paper note"], "location": "Reims, FR", "imageBias": "medium" },
-    { "username": "petra", "avatarId": 3, "cluster": "sports", "tier": "regular", "tone": "warm", "themes": ["game_night", "running", "wellness"], "habits": ["uses training blocks to reset after bugs", "likes early-morning momentum"], "location": "Metz, FR", "imageBias": "low" },
-    { "username": "remy", "avatarId": 4, "cluster": "sports", "tier": "regular", "tone": "enthusiastic", "themes": ["small_routine", "football", "weekend_plan"], "habits": ["tracks streaks on a paper note", "swaps playlists before evening sessions"], "location": "Perpignan, FR", "imageBias": "medium", "bridgeClusters": ["campus"] },
-    { "username": "soren", "avatarId": 5, "cluster": "sports", "tier": "regular", "tone": "tired", "themes": ["running", "wellness", "commute"], "habits": ["likes early-morning momentum", "thinks through features on long walks"], "location": "Lyon, FR", "imageBias": "low" },
-    { "username": "tala", "avatarId": 6, "cluster": "sports", "tier": "regular", "tone": "focused", "themes": ["football", "weekend_plan", "game_night"], "habits": ["swaps playlists before evening sessions", "uses training blocks to reset after bugs"], "location": "Bordeaux, FR", "imageBias": "medium" },
-    { "username": "ulric", "avatarId": 7, "cluster": "sports", "tier": "regular", "tone": "dry", "themes": ["wellness", "commute", "small_routine"], "habits": ["thinks through features on long walks", "tracks streaks on a paper note"], "location": "Nantes, FR", "imageBias": "low" },
-    { "username": "vince", "avatarId": 8, "cluster": "sports", "tier": "light", "tone": "calm", "themes": ["weekend_plan", "game_night", "running"], "habits": ["uses training blocks to reset after bugs", "likes early-morning momentum"], "location": "Toulouse, FR", "imageBias": "medium" },
-    { "username": "willa", "avatarId": 9, "cluster": "sports", "tier": "light", "tone": "sarcastic", "themes": ["commute", "small_routine", "football"], "habits": ["tracks streaks on a paper note", "swaps playlists before evening sessions"], "location": "Rennes, FR", "imageBias": "low" },
-    { "username": "ximena", "avatarId": 10, "cluster": "sports", "tier": "light", "tone": "warm", "themes": ["game_night", "running", "wellness"], "habits": ["likes early-morning momentum", "thinks through features on long walks"], "location": "Strasbourg, FR", "imageBias": "medium" },
-    { "username": "yohan", "avatarId": 11, "cluster": "sports", "tier": "light", "tone": "enthusiastic", "themes": ["small_routine", "football", "weekend_plan"], "habits": ["swaps playlists before evening sessions", "uses training blocks to reset after bugs"], "location": "Rouen, FR", "imageBias": "low" },
-    { "username": "zoe", "avatarId": 12, "cluster": "sports", "tier": "light", "tone": "tired", "themes": ["running", "wellness", "commute"], "habits": ["thinks through features on long walks", "tracks streaks on a paper note"], "location": "Reims, FR", "imageBias": "medium" },
-    { "username": "aron", "avatarId": 13, "cluster": "sports", "tier": "light", "tone": "focused", "themes": ["football", "weekend_plan", "game_night"], "habits": ["uses training blocks to reset after bugs", "likes early-morning momentum"], "location": "Metz, FR", "imageBias": "low" },
-    { "username": "ava", "avatarId": 14, "cluster": "misc", "tier": "showcase", "tone": "focused", "themes": ["docs", "food_spot", "climbing"], "habits": ["keeps a running list of side quests", "tries one weird idea every week"], "location": "Bordeaux, FR", "imageBias": "medium", "bridgeClusters": ["builders", "campus"] },
-    { "username": "karen", "avatarId": 15, "cluster": "misc", "tier": "active", "tone": "dry", "themes": ["side_project", "coffee", "weekend_plan"], "habits": ["drops useful links into bookmarks fast", "rotates work spots to stay fresh"], "location": "Nantes, FR", "imageBias": "low" },
-    { "username": "leo", "avatarId": 16, "cluster": "misc", "tier": "active", "tone": "calm", "themes": ["food_spot", "climbing", "makerspace"], "habits": ["tries one weird idea every week", "documents useful shortcuts for later"], "location": "Toulouse, FR", "imageBias": "medium" },
-    { "username": "bella", "avatarId": 17, "cluster": "misc", "tier": "active", "tone": "sarcastic", "themes": ["coffee", "weekend_plan", "docs"], "habits": ["rotates work spots to stay fresh", "keeps a running list of side quests"], "location": "Rennes, FR", "imageBias": "low" },
-    { "username": "chloe", "avatarId": 18, "cluster": "misc", "tier": "regular", "tone": "warm", "themes": ["climbing", "makerspace", "side_project"], "habits": ["documents useful shortcuts for later", "drops useful links into bookmarks fast"], "location": "Strasbourg, FR", "imageBias": "medium" },
-    { "username": "dev", "avatarId": 19, "cluster": "misc", "tier": "regular", "tone": "enthusiastic", "themes": ["weekend_plan", "docs", "food_spot"], "habits": ["keeps a running list of side quests", "tries one weird idea every week"], "location": "Rouen, FR", "imageBias": "low" },
-    { "username": "eden", "avatarId": 20, "cluster": "misc", "tier": "regular", "tone": "tired", "themes": ["makerspace", "side_project", "coffee"], "habits": ["drops useful links into bookmarks fast", "rotates work spots to stay fresh"], "location": "Reims, FR", "imageBias": "medium" },
-    { "username": "felix", "avatarId": 21, "cluster": "misc", "tier": "regular", "tone": "focused", "themes": ["docs", "food_spot", "climbing"], "habits": ["tries one weird idea every week", "documents useful shortcuts for later"], "location": "Metz, FR", "imageBias": "low" },
-    { "username": "gemma", "avatarId": 22, "cluster": "misc", "tier": "regular", "tone": "dry", "themes": ["side_project", "coffee", "weekend_plan"], "habits": ["rotates work spots to stay fresh", "keeps a running list of side quests"], "location": "Perpignan, FR", "imageBias": "medium" },
-    { "username": "harper", "avatarId": 23, "cluster": "misc", "tier": "regular", "tone": "calm", "themes": ["food_spot", "climbing", "makerspace"], "habits": ["documents useful shortcuts for later", "drops useful links into bookmarks fast"], "location": "Lyon, FR", "imageBias": "low" },
-    { "username": "imani", "avatarId": 24, "cluster": "misc", "tier": "regular", "tone": "sarcastic", "themes": ["coffee", "weekend_plan", "docs"], "habits": ["keeps a running list of side quests", "tries one weird idea every week"], "location": "Bordeaux, FR", "imageBias": "medium" },
-    { "username": "jules", "avatarId": 25, "cluster": "misc", "tier": "regular", "tone": "warm", "themes": ["climbing", "makerspace", "side_project"], "habits": ["drops useful links into bookmarks fast", "rotates work spots to stay fresh"], "location": "Nantes, FR", "imageBias": "low" },
-    { "username": "kai", "avatarId": 26, "cluster": "misc", "tier": "light", "tone": "enthusiastic", "themes": ["weekend_plan", "docs", "food_spot"], "habits": ["tries one weird idea every week", "documents useful shortcuts for later"], "location": "Toulouse, FR", "imageBias": "medium", "bridgeClusters": ["builders"] },
-    { "username": "laila", "avatarId": 27, "cluster": "misc", "tier": "light", "tone": "tired", "themes": ["makerspace", "side_project", "coffee"], "habits": ["rotates work spots to stay fresh", "keeps a running list of side quests"], "location": "Rennes, FR", "imageBias": "low" },
-    { "username": "mason", "avatarId": 28, "cluster": "misc", "tier": "light", "tone": "focused", "themes": ["docs", "food_spot", "climbing"], "habits": ["documents useful shortcuts for later", "drops useful links into bookmarks fast"], "location": "Strasbourg, FR", "imageBias": "medium" },
-    { "username": "nova", "avatarId": 29, "cluster": "misc", "tier": "light", "tone": "dry", "themes": ["side_project", "coffee", "weekend_plan"], "habits": ["keeps a running list of side quests", "tries one weird idea every week"], "location": "Rouen, FR", "imageBias": "low" },
-    { "username": "orion", "avatarId": 30, "cluster": "misc", "tier": "light", "tone": "calm", "themes": ["food_spot", "climbing", "makerspace"], "habits": ["drops useful links into bookmarks fast", "rotates work spots to stay fresh"], "location": "Reims, FR", "imageBias": "medium" }
+    {
+      "username": "alice",
+      "avatarId": 1,
+      "cluster": "builders",
+      "tier": "showcase",
+      "tone": "warm",
+      "themes": [
+        "shipping",
+        "qa",
+        "bug_hunt"
+      ],
+      "habits": [
+        "writes the rollback note before lunch",
+        "likes a quiet first hour before chat"
+      ],
+      "location": "Paris, FR",
+      "imageBias": "medium",
+      "displayName": "Alice Mercier"
+    },
+    {
+      "username": "bob",
+      "avatarId": 2,
+      "cluster": "builders",
+      "tier": "showcase",
+      "tone": "enthusiastic",
+      "themes": [
+        "docker",
+        "docs",
+        "realtime"
+      ],
+      "habits": [
+        "keeps a scratchpad of odd edge cases",
+        "ships small fixes between bigger threads"
+      ],
+      "location": "Marseille, FR",
+      "imageBias": "low",
+      "bridgeClusters": [
+        "misc",
+        "nightshift"
+      ],
+      "displayName": "Bob Lefevre"
+    },
+    {
+      "username": "charlie",
+      "avatarId": 3,
+      "cluster": "builders",
+      "tier": "active",
+      "tone": "tired",
+      "themes": [
+        "qa",
+        "bug_hunt",
+        "release_day"
+      ],
+      "habits": [
+        "likes a quiet first hour before chat",
+        "checks logs before opening messages"
+      ],
+      "location": "Lille, FR",
+      "imageBias": "medium",
+      "displayName": "Charlie Dubois"
+    },
+    {
+      "username": "diana",
+      "avatarId": 4,
+      "cluster": "builders",
+      "tier": "active",
+      "tone": "focused",
+      "themes": [
+        "docs",
+        "realtime",
+        "shipping"
+      ],
+      "habits": [
+        "ships small fixes between bigger threads",
+        "writes the rollback note before lunch"
+      ],
+      "location": "Nice, FR",
+      "imageBias": "low",
+      "displayName": "Diana Rousseau"
+    },
+    {
+      "username": "emma",
+      "avatarId": 5,
+      "cluster": "builders",
+      "tier": "active",
+      "tone": "dry",
+      "themes": [
+        "bug_hunt",
+        "release_day",
+        "docker"
+      ],
+      "habits": [
+        "checks logs before opening messages",
+        "keeps a scratchpad of odd edge cases"
+      ],
+      "location": "Montpellier, FR",
+      "imageBias": "medium",
+      "displayName": "Emma Laurent"
+    },
+    {
+      "username": "ethan",
+      "avatarId": 6,
+      "cluster": "builders",
+      "tier": "active",
+      "tone": "calm",
+      "themes": [
+        "realtime",
+        "shipping",
+        "qa"
+      ],
+      "habits": [
+        "writes the rollback note before lunch",
+        "likes a quiet first hour before chat"
+      ],
+      "location": "Grenoble, FR",
+      "imageBias": "low",
+      "displayName": "Ethan Moreau"
+    },
+    {
+      "username": "farah",
+      "avatarId": 7,
+      "cluster": "builders",
+      "tier": "active",
+      "tone": "sarcastic",
+      "themes": [
+        "release_day",
+        "docker",
+        "docs"
+      ],
+      "habits": [
+        "keeps a scratchpad of odd edge cases",
+        "ships small fixes between bigger threads"
+      ],
+      "location": "Annecy, FR",
+      "imageBias": "medium",
+      "displayName": "Farah Simon"
+    },
+    {
+      "username": "gavin",
+      "avatarId": 8,
+      "cluster": "builders",
+      "tier": "regular",
+      "tone": "warm",
+      "themes": [
+        "shipping",
+        "qa",
+        "bug_hunt"
+      ],
+      "habits": [
+        "likes a quiet first hour before chat",
+        "checks logs before opening messages"
+      ],
+      "location": "Dijon, FR",
+      "imageBias": "low",
+      "displayName": "Gavin Martin"
+    },
+    {
+      "username": "heidi",
+      "avatarId": 9,
+      "cluster": "builders",
+      "tier": "regular",
+      "tone": "enthusiastic",
+      "themes": [
+        "docker",
+        "docs",
+        "realtime"
+      ],
+      "habits": [
+        "ships small fixes between bigger threads",
+        "writes the rollback note before lunch"
+      ],
+      "location": "Tours, FR",
+      "imageBias": "medium",
+      "displayName": "Heidi Bernard"
+    },
+    {
+      "username": "isaac",
+      "avatarId": 10,
+      "cluster": "builders",
+      "tier": "regular",
+      "tone": "tired",
+      "themes": [
+        "qa",
+        "bug_hunt",
+        "release_day"
+      ],
+      "habits": [
+        "checks logs before opening messages",
+        "keeps a scratchpad of odd edge cases"
+      ],
+      "location": "Clermont-Ferrand, FR",
+      "imageBias": "low",
+      "displayName": "Isaac Thomas"
+    },
+    {
+      "username": "julia",
+      "avatarId": 11,
+      "cluster": "builders",
+      "tier": "regular",
+      "tone": "focused",
+      "themes": [
+        "docs",
+        "realtime",
+        "shipping"
+      ],
+      "habits": [
+        "writes the rollback note before lunch",
+        "likes a quiet first hour before chat"
+      ],
+      "location": "Paris, FR",
+      "imageBias": "medium",
+      "bridgeClusters": [
+        "designers"
+      ],
+      "displayName": "Julia Petit"
+    },
+    {
+      "username": "kevin",
+      "avatarId": 12,
+      "cluster": "builders",
+      "tier": "regular",
+      "tone": "dry",
+      "themes": [
+        "bug_hunt",
+        "release_day",
+        "docker"
+      ],
+      "habits": [
+        "keeps a scratchpad of odd edge cases",
+        "ships small fixes between bigger threads"
+      ],
+      "location": "Marseille, FR",
+      "imageBias": "low",
+      "displayName": "Kevin Robert"
+    },
+    {
+      "username": "lena",
+      "avatarId": 13,
+      "cluster": "builders",
+      "tier": "regular",
+      "tone": "calm",
+      "themes": [
+        "realtime",
+        "shipping",
+        "qa"
+      ],
+      "habits": [
+        "likes a quiet first hour before chat",
+        "checks logs before opening messages"
+      ],
+      "location": "Lille, FR",
+      "imageBias": "medium",
+      "displayName": "Lena Richard"
+    },
+    {
+      "username": "marco",
+      "avatarId": 14,
+      "cluster": "builders",
+      "tier": "light",
+      "tone": "sarcastic",
+      "themes": [
+        "release_day",
+        "docker",
+        "docs"
+      ],
+      "habits": [
+        "ships small fixes between bigger threads",
+        "writes the rollback note before lunch"
+      ],
+      "location": "Nice, FR",
+      "imageBias": "low",
+      "displayName": "Marco Durand"
+    },
+    {
+      "username": "nina",
+      "avatarId": 15,
+      "cluster": "builders",
+      "tier": "light",
+      "tone": "warm",
+      "themes": [
+        "shipping",
+        "qa",
+        "bug_hunt"
+      ],
+      "habits": [
+        "checks logs before opening messages",
+        "keeps a scratchpad of odd edge cases"
+      ],
+      "location": "Montpellier, FR",
+      "imageBias": "medium",
+      "displayName": "Nina Michel"
+    },
+    {
+      "username": "oscar",
+      "avatarId": 16,
+      "cluster": "builders",
+      "tier": "light",
+      "tone": "enthusiastic",
+      "themes": [
+        "docker",
+        "docs",
+        "realtime"
+      ],
+      "habits": [
+        "writes the rollback note before lunch",
+        "likes a quiet first hour before chat"
+      ],
+      "location": "Grenoble, FR",
+      "imageBias": "low",
+      "displayName": "Oscar Garcia"
+    },
+    {
+      "username": "priya",
+      "avatarId": 17,
+      "cluster": "builders",
+      "tier": "light",
+      "tone": "tired",
+      "themes": [
+        "qa",
+        "bug_hunt",
+        "release_day"
+      ],
+      "habits": [
+        "keeps a scratchpad of odd edge cases",
+        "ships small fixes between bigger threads"
+      ],
+      "location": "Annecy, FR",
+      "imageBias": "medium",
+      "displayName": "Priya Fournier"
+    },
+    {
+      "username": "grace",
+      "avatarId": 18,
+      "cluster": "designers",
+      "tier": "showcase",
+      "tone": "calm",
+      "themes": [
+        "ui_polish",
+        "photography",
+        "weekend_plan"
+      ],
+      "habits": [
+        "takes screenshots before changing spacing",
+        "walks a block before the second draft"
+      ],
+      "location": "Metz, FR",
+      "imageBias": "high",
+      "bridgeClusters": [
+        "campus",
+        "misc"
+      ],
+      "displayName": "Grace Girard"
+    },
+    {
+      "username": "iris",
+      "avatarId": 19,
+      "cluster": "designers",
+      "tier": "active",
+      "tone": "sarcastic",
+      "themes": [
+        "design_system",
+        "coffee",
+        "makerspace"
+      ],
+      "habits": [
+        "saves color notes in a tiny notebook",
+        "collects reference photos on the commute"
+      ],
+      "location": "Perpignan, FR",
+      "imageBias": "medium",
+      "displayName": "Iris Leclerc"
+    },
+    {
+      "username": "jack",
+      "avatarId": 20,
+      "cluster": "designers",
+      "tier": "active",
+      "tone": "warm",
+      "themes": [
+        "photography",
+        "weekend_plan",
+        "release_day"
+      ],
+      "habits": [
+        "walks a block before the second draft",
+        "iterates in public with quick mock posts"
+      ],
+      "location": "Lyon, FR",
+      "imageBias": "high",
+      "displayName": "Jack Bonnet"
+    },
+    {
+      "username": "kira",
+      "avatarId": 21,
+      "cluster": "designers",
+      "tier": "active",
+      "tone": "enthusiastic",
+      "themes": [
+        "coffee",
+        "makerspace",
+        "ui_polish"
+      ],
+      "habits": [
+        "collects reference photos on the commute",
+        "takes screenshots before changing spacing"
+      ],
+      "location": "Bordeaux, FR",
+      "imageBias": "medium",
+      "displayName": "Kira Dupont"
+    },
+    {
+      "username": "luca",
+      "avatarId": 22,
+      "cluster": "designers",
+      "tier": "active",
+      "tone": "tired",
+      "themes": [
+        "weekend_plan",
+        "release_day",
+        "design_system"
+      ],
+      "habits": [
+        "iterates in public with quick mock posts",
+        "saves color notes in a tiny notebook"
+      ],
+      "location": "Nantes, FR",
+      "imageBias": "high",
+      "displayName": "Luca Lemaire"
+    },
+    {
+      "username": "maya",
+      "avatarId": 23,
+      "cluster": "designers",
+      "tier": "regular",
+      "tone": "focused",
+      "themes": [
+        "makerspace",
+        "ui_polish",
+        "photography"
+      ],
+      "habits": [
+        "takes screenshots before changing spacing",
+        "walks a block before the second draft"
+      ],
+      "location": "Toulouse, FR",
+      "imageBias": "medium",
+      "displayName": "Maya Faure"
+    },
+    {
+      "username": "nora",
+      "avatarId": 24,
+      "cluster": "designers",
+      "tier": "regular",
+      "tone": "dry",
+      "themes": [
+        "release_day",
+        "design_system",
+        "coffee"
+      ],
+      "habits": [
+        "saves color notes in a tiny notebook",
+        "collects reference photos on the commute"
+      ],
+      "location": "Rennes, FR",
+      "imageBias": "high",
+      "displayName": "Nora Andre"
+    },
+    {
+      "username": "otis",
+      "avatarId": 25,
+      "cluster": "designers",
+      "tier": "regular",
+      "tone": "calm",
+      "themes": [
+        "ui_polish",
+        "photography",
+        "weekend_plan"
+      ],
+      "habits": [
+        "walks a block before the second draft",
+        "iterates in public with quick mock posts"
+      ],
+      "location": "Strasbourg, FR",
+      "imageBias": "medium",
+      "displayName": "Otis Blanc"
+    },
+    {
+      "username": "paula",
+      "avatarId": 26,
+      "cluster": "designers",
+      "tier": "regular",
+      "tone": "sarcastic",
+      "themes": [
+        "design_system",
+        "coffee",
+        "makerspace"
+      ],
+      "habits": [
+        "collects reference photos on the commute",
+        "takes screenshots before changing spacing"
+      ],
+      "location": "Rouen, FR",
+      "imageBias": "high",
+      "displayName": "Paula Guerin"
+    },
+    {
+      "username": "quincy",
+      "avatarId": 27,
+      "cluster": "designers",
+      "tier": "regular",
+      "tone": "warm",
+      "themes": [
+        "photography",
+        "weekend_plan",
+        "release_day"
+      ],
+      "habits": [
+        "iterates in public with quick mock posts",
+        "saves color notes in a tiny notebook"
+      ],
+      "location": "Reims, FR",
+      "imageBias": "medium",
+      "displayName": "Quincy Renard"
+    },
+    {
+      "username": "ruby",
+      "avatarId": 28,
+      "cluster": "designers",
+      "tier": "regular",
+      "tone": "enthusiastic",
+      "themes": [
+        "coffee",
+        "makerspace",
+        "ui_polish"
+      ],
+      "habits": [
+        "takes screenshots before changing spacing",
+        "walks a block before the second draft"
+      ],
+      "location": "Metz, FR",
+      "imageBias": "high",
+      "bridgeClusters": [
+        "designers",
+        "campus"
+      ],
+      "displayName": "Ruby Morel"
+    },
+    {
+      "username": "sasha",
+      "avatarId": 29,
+      "cluster": "designers",
+      "tier": "regular",
+      "tone": "tired",
+      "themes": [
+        "weekend_plan",
+        "release_day",
+        "design_system"
+      ],
+      "habits": [
+        "saves color notes in a tiny notebook",
+        "collects reference photos on the commute"
+      ],
+      "location": "Perpignan, FR",
+      "imageBias": "medium",
+      "displayName": "Sasha Perrin"
+    },
+    {
+      "username": "theo",
+      "avatarId": 30,
+      "cluster": "designers",
+      "tier": "light",
+      "tone": "focused",
+      "themes": [
+        "makerspace",
+        "ui_polish",
+        "photography"
+      ],
+      "habits": [
+        "walks a block before the second draft",
+        "iterates in public with quick mock posts"
+      ],
+      "location": "Lyon, FR",
+      "imageBias": "high",
+      "displayName": "Theo Barbier"
+    },
+    {
+      "username": "uma",
+      "avatarId": 31,
+      "cluster": "designers",
+      "tier": "light",
+      "tone": "dry",
+      "themes": [
+        "release_day",
+        "design_system",
+        "coffee"
+      ],
+      "habits": [
+        "collects reference photos on the commute",
+        "takes screenshots before changing spacing"
+      ],
+      "location": "Bordeaux, FR",
+      "imageBias": "medium",
+      "displayName": "Uma Chevalier"
+    },
+    {
+      "username": "valen",
+      "avatarId": 32,
+      "cluster": "designers",
+      "tier": "light",
+      "tone": "calm",
+      "themes": [
+        "ui_polish",
+        "photography",
+        "weekend_plan"
+      ],
+      "habits": [
+        "iterates in public with quick mock posts",
+        "saves color notes in a tiny notebook"
+      ],
+      "location": "Nantes, FR",
+      "imageBias": "high",
+      "displayName": "Valen Lemoine"
+    },
+    {
+      "username": "wendy",
+      "avatarId": 33,
+      "cluster": "designers",
+      "tier": "light",
+      "tone": "sarcastic",
+      "themes": [
+        "design_system",
+        "coffee",
+        "makerspace"
+      ],
+      "habits": [
+        "takes screenshots before changing spacing",
+        "walks a block before the second draft"
+      ],
+      "location": "Toulouse, FR",
+      "imageBias": "medium",
+      "displayName": "Wendy Marchand"
+    },
+    {
+      "username": "xavier",
+      "avatarId": 34,
+      "cluster": "designers",
+      "tier": "light",
+      "tone": "warm",
+      "themes": [
+        "photography",
+        "weekend_plan",
+        "release_day"
+      ],
+      "habits": [
+        "saves color notes in a tiny notebook",
+        "collects reference photos on the commute"
+      ],
+      "location": "Rennes, FR",
+      "imageBias": "high",
+      "displayName": "Xavier Muller"
+    },
+    {
+      "username": "pablo",
+      "avatarId": 35,
+      "cluster": "nightshift",
+      "tier": "showcase",
+      "tone": "focused",
+      "themes": [
+        "bug_hunt",
+        "game_night",
+        "commute"
+      ],
+      "habits": [
+        "starts the hard task after everyone signs off",
+        "writes status notes at strange hours"
+      ],
+      "location": "Dijon, FR",
+      "imageBias": "low",
+      "displayName": "Pablo Gauthier"
+    },
+    {
+      "username": "quinn",
+      "avatarId": 36,
+      "cluster": "nightshift",
+      "tier": "active",
+      "tone": "dry",
+      "themes": [
+        "docker",
+        "coffee",
+        "realtime"
+      ],
+      "habits": [
+        "keeps tea nearby for the late window",
+        "uses headphones as a do-not-disturb sign"
+      ],
+      "location": "Tours, FR",
+      "imageBias": "medium",
+      "bridgeClusters": [
+        "campus"
+      ],
+      "displayName": "Quinn Picard"
+    },
+    {
+      "username": "sam",
+      "avatarId": 37,
+      "cluster": "nightshift",
+      "tier": "active",
+      "tone": "calm",
+      "themes": [
+        "game_night",
+        "commute",
+        "release_day"
+      ],
+      "habits": [
+        "writes status notes at strange hours",
+        "tests reconnect flows when the room is empty"
+      ],
+      "location": "Clermont-Ferrand, FR",
+      "imageBias": "low",
+      "displayName": "Sam Colin"
+    },
+    {
+      "username": "tina",
+      "avatarId": 38,
+      "cluster": "nightshift",
+      "tier": "active",
+      "tone": "sarcastic",
+      "themes": [
+        "coffee",
+        "realtime",
+        "bug_hunt"
+      ],
+      "habits": [
+        "uses headphones as a do-not-disturb sign",
+        "starts the hard task after everyone signs off"
+      ],
+      "location": "Paris, FR",
+      "imageBias": "medium",
+      "displayName": "Tina Vidal"
+    },
+    {
+      "username": "ulysses",
+      "avatarId": 39,
+      "cluster": "nightshift",
+      "tier": "active",
+      "tone": "warm",
+      "themes": [
+        "commute",
+        "release_day",
+        "docker"
+      ],
+      "habits": [
+        "tests reconnect flows when the room is empty",
+        "keeps tea nearby for the late window"
+      ],
+      "location": "Marseille, FR",
+      "imageBias": "low",
+      "displayName": "Ulysses Royer"
+    },
+    {
+      "username": "vera",
+      "avatarId": 40,
+      "cluster": "nightshift",
+      "tier": "regular",
+      "tone": "enthusiastic",
+      "themes": [
+        "realtime",
+        "bug_hunt",
+        "game_night"
+      ],
+      "habits": [
+        "starts the hard task after everyone signs off",
+        "writes status notes at strange hours"
+      ],
+      "location": "Lille, FR",
+      "imageBias": "medium",
+      "displayName": "Vera Meyer"
+    },
+    {
+      "username": "will",
+      "avatarId": 41,
+      "cluster": "nightshift",
+      "tier": "regular",
+      "tone": "tired",
+      "themes": [
+        "release_day",
+        "docker",
+        "coffee"
+      ],
+      "habits": [
+        "keeps tea nearby for the late window",
+        "uses headphones as a do-not-disturb sign"
+      ],
+      "location": "Nice, FR",
+      "imageBias": "low",
+      "displayName": "Will Bertrand"
+    },
+    {
+      "username": "xena",
+      "avatarId": 42,
+      "cluster": "nightshift",
+      "tier": "regular",
+      "tone": "focused",
+      "themes": [
+        "bug_hunt",
+        "game_night",
+        "commute"
+      ],
+      "habits": [
+        "writes status notes at strange hours",
+        "tests reconnect flows when the room is empty"
+      ],
+      "location": "Montpellier, FR",
+      "imageBias": "medium",
+      "displayName": "Xena Noel"
+    },
+    {
+      "username": "yves",
+      "avatarId": 43,
+      "cluster": "nightshift",
+      "tier": "regular",
+      "tone": "dry",
+      "themes": [
+        "docker",
+        "coffee",
+        "realtime"
+      ],
+      "habits": [
+        "uses headphones as a do-not-disturb sign",
+        "starts the hard task after everyone signs off"
+      ],
+      "location": "Grenoble, FR",
+      "imageBias": "low",
+      "displayName": "Yves Roche"
+    },
+    {
+      "username": "zora",
+      "avatarId": 44,
+      "cluster": "nightshift",
+      "tier": "regular",
+      "tone": "calm",
+      "themes": [
+        "game_night",
+        "commute",
+        "release_day"
+      ],
+      "habits": [
+        "tests reconnect flows when the room is empty",
+        "keeps tea nearby for the late window"
+      ],
+      "location": "Annecy, FR",
+      "imageBias": "medium",
+      "displayName": "Zora Maillard"
+    },
+    {
+      "username": "andres",
+      "avatarId": 45,
+      "cluster": "nightshift",
+      "tier": "regular",
+      "tone": "sarcastic",
+      "themes": [
+        "coffee",
+        "realtime",
+        "bug_hunt"
+      ],
+      "habits": [
+        "starts the hard task after everyone signs off",
+        "writes status notes at strange hours"
+      ],
+      "location": "Dijon, FR",
+      "imageBias": "low",
+      "displayName": "Andres Clement"
+    },
+    {
+      "username": "bianca",
+      "avatarId": 46,
+      "cluster": "nightshift",
+      "tier": "light",
+      "tone": "warm",
+      "themes": [
+        "commute",
+        "release_day",
+        "docker"
+      ],
+      "habits": [
+        "keeps tea nearby for the late window",
+        "uses headphones as a do-not-disturb sign"
+      ],
+      "location": "Tours, FR",
+      "imageBias": "medium",
+      "displayName": "Bianca Prevost"
+    },
+    {
+      "username": "cedric",
+      "avatarId": 47,
+      "cluster": "nightshift",
+      "tier": "light",
+      "tone": "enthusiastic",
+      "themes": [
+        "realtime",
+        "bug_hunt",
+        "game_night"
+      ],
+      "habits": [
+        "writes status notes at strange hours",
+        "tests reconnect flows when the room is empty"
+      ],
+      "location": "Clermont-Ferrand, FR",
+      "imageBias": "low",
+      "displayName": "Cedric Breton"
+    },
+    {
+      "username": "daria",
+      "avatarId": 48,
+      "cluster": "nightshift",
+      "tier": "light",
+      "tone": "tired",
+      "themes": [
+        "release_day",
+        "docker",
+        "coffee"
+      ],
+      "habits": [
+        "uses headphones as a do-not-disturb sign",
+        "starts the hard task after everyone signs off"
+      ],
+      "location": "Paris, FR",
+      "imageBias": "medium",
+      "displayName": "Daria Boucher"
+    },
+    {
+      "username": "elio",
+      "avatarId": 49,
+      "cluster": "nightshift",
+      "tier": "light",
+      "tone": "focused",
+      "themes": [
+        "bug_hunt",
+        "game_night",
+        "commute"
+      ],
+      "habits": [
+        "tests reconnect flows when the room is empty",
+        "keeps tea nearby for the late window"
+      ],
+      "location": "Marseille, FR",
+      "imageBias": "low",
+      "displayName": "Elio Carpentier"
+    },
+    {
+      "username": "freya",
+      "avatarId": 50,
+      "cluster": "nightshift",
+      "tier": "light",
+      "tone": "dry",
+      "themes": [
+        "docker",
+        "coffee",
+        "realtime"
+      ],
+      "habits": [
+        "starts the hard task after everyone signs off",
+        "writes status notes at strange hours"
+      ],
+      "location": "Lille, FR",
+      "imageBias": "medium",
+      "displayName": "Freya Joly"
+    },
+    {
+      "username": "mia",
+      "avatarId": 51,
+      "cluster": "campus",
+      "tier": "showcase",
+      "tone": "dry",
+      "themes": [
+        "study_group",
+        "weekend_plan",
+        "food_spot"
+      ],
+      "habits": [
+        "books tables near outlets early",
+        "treats coffee runs like standups"
+      ],
+      "location": "Grenoble, FR",
+      "imageBias": "high",
+      "bridgeClusters": [
+        "builders",
+        "misc"
+      ],
+      "displayName": "Mia Berger"
+    },
+    {
+      "username": "olivia",
+      "avatarId": 52,
+      "cluster": "campus",
+      "tier": "showcase",
+      "tone": "calm",
+      "themes": [
+        "campus_life",
+        "coffee",
+        "makerspace"
+      ],
+      "habits": [
+        "leaves with the last study group",
+        "catches up between classes"
+      ],
+      "location": "Annecy, FR",
+      "imageBias": "medium",
+      "bridgeClusters": [
+        "sports",
+        "designers"
+      ],
+      "displayName": "Olivia Rey"
+    },
+    {
+      "username": "parker",
+      "avatarId": 53,
+      "cluster": "campus",
+      "tier": "active",
+      "tone": "sarcastic",
+      "themes": [
+        "weekend_plan",
+        "food_spot",
+        "qa"
+      ],
+      "habits": [
+        "treats coffee runs like standups",
+        "shares tiny wins after workshops"
+      ],
+      "location": "Dijon, FR",
+      "imageBias": "high",
+      "displayName": "Parker Adam"
+    },
+    {
+      "username": "rina",
+      "avatarId": 54,
+      "cluster": "campus",
+      "tier": "active",
+      "tone": "warm",
+      "themes": [
+        "coffee",
+        "makerspace",
+        "study_group"
+      ],
+      "habits": [
+        "catches up between classes",
+        "books tables near outlets early"
+      ],
+      "location": "Tours, FR",
+      "imageBias": "medium",
+      "displayName": "Rina Brun"
+    },
+    {
+      "username": "sean",
+      "avatarId": 55,
+      "cluster": "campus",
+      "tier": "active",
+      "tone": "enthusiastic",
+      "themes": [
+        "food_spot",
+        "qa",
+        "campus_life"
+      ],
+      "habits": [
+        "shares tiny wins after workshops",
+        "leaves with the last study group"
+      ],
+      "location": "Clermont-Ferrand, FR",
+      "imageBias": "high",
+      "displayName": "Sean Pichon"
+    },
+    {
+      "username": "tessa",
+      "avatarId": 56,
+      "cluster": "campus",
+      "tier": "regular",
+      "tone": "tired",
+      "themes": [
+        "makerspace",
+        "study_group",
+        "weekend_plan"
+      ],
+      "habits": [
+        "books tables near outlets early",
+        "treats coffee runs like standups"
+      ],
+      "location": "Paris, FR",
+      "imageBias": "medium",
+      "displayName": "Tessa Masson"
+    },
+    {
+      "username": "uri",
+      "avatarId": 57,
+      "cluster": "campus",
+      "tier": "regular",
+      "tone": "focused",
+      "themes": [
+        "qa",
+        "campus_life",
+        "coffee"
+      ],
+      "habits": [
+        "leaves with the last study group",
+        "catches up between classes"
+      ],
+      "location": "Marseille, FR",
+      "imageBias": "high",
+      "displayName": "Uri Roux"
+    },
+    {
+      "username": "vivian",
+      "avatarId": 58,
+      "cluster": "campus",
+      "tier": "regular",
+      "tone": "dry",
+      "themes": [
+        "study_group",
+        "weekend_plan",
+        "food_spot"
+      ],
+      "habits": [
+        "treats coffee runs like standups",
+        "shares tiny wins after workshops"
+      ],
+      "location": "Lille, FR",
+      "imageBias": "medium",
+      "displayName": "Vivian Guillot"
+    },
+    {
+      "username": "wes",
+      "avatarId": 59,
+      "cluster": "campus",
+      "tier": "regular",
+      "tone": "calm",
+      "themes": [
+        "campus_life",
+        "coffee",
+        "makerspace"
+      ],
+      "habits": [
+        "catches up between classes",
+        "books tables near outlets early"
+      ],
+      "location": "Nice, FR",
+      "imageBias": "high",
+      "displayName": "Wes Collet"
+    },
+    {
+      "username": "yasmin",
+      "avatarId": 60,
+      "cluster": "campus",
+      "tier": "regular",
+      "tone": "sarcastic",
+      "themes": [
+        "weekend_plan",
+        "food_spot",
+        "qa"
+      ],
+      "habits": [
+        "shares tiny wins after workshops",
+        "leaves with the last study group"
+      ],
+      "location": "Montpellier, FR",
+      "imageBias": "medium",
+      "displayName": "Yasmin Aubert"
+    },
+    {
+      "username": "zane",
+      "avatarId": 61,
+      "cluster": "campus",
+      "tier": "regular",
+      "tone": "warm",
+      "themes": [
+        "coffee",
+        "makerspace",
+        "study_group"
+      ],
+      "habits": [
+        "books tables near outlets early",
+        "treats coffee runs like standups"
+      ],
+      "location": "Grenoble, FR",
+      "imageBias": "high",
+      "displayName": "Zane Charpentier"
+    },
+    {
+      "username": "alma",
+      "avatarId": 62,
+      "cluster": "campus",
+      "tier": "regular",
+      "tone": "enthusiastic",
+      "themes": [
+        "food_spot",
+        "qa",
+        "campus_life"
+      ],
+      "habits": [
+        "leaves with the last study group",
+        "catches up between classes"
+      ],
+      "location": "Annecy, FR",
+      "imageBias": "medium",
+      "displayName": "Alma Dumas"
+    },
+    {
+      "username": "bruno",
+      "avatarId": 63,
+      "cluster": "campus",
+      "tier": "light",
+      "tone": "tired",
+      "themes": [
+        "makerspace",
+        "study_group",
+        "weekend_plan"
+      ],
+      "habits": [
+        "treats coffee runs like standups",
+        "shares tiny wins after workshops"
+      ],
+      "location": "Dijon, FR",
+      "imageBias": "high",
+      "displayName": "Bruno Moulin"
+    },
+    {
+      "username": "clara",
+      "avatarId": 64,
+      "cluster": "campus",
+      "tier": "light",
+      "tone": "focused",
+      "themes": [
+        "qa",
+        "campus_life",
+        "coffee"
+      ],
+      "habits": [
+        "catches up between classes",
+        "books tables near outlets early"
+      ],
+      "location": "Tours, FR",
+      "imageBias": "medium",
+      "displayName": "Clara Caron"
+    },
+    {
+      "username": "diego",
+      "avatarId": 65,
+      "cluster": "campus",
+      "tier": "light",
+      "tone": "dry",
+      "themes": [
+        "study_group",
+        "weekend_plan",
+        "food_spot"
+      ],
+      "habits": [
+        "shares tiny wins after workshops",
+        "leaves with the last study group"
+      ],
+      "location": "Clermont-Ferrand, FR",
+      "imageBias": "high",
+      "displayName": "Diego Benoit"
+    },
+    {
+      "username": "elsa",
+      "avatarId": 66,
+      "cluster": "campus",
+      "tier": "light",
+      "tone": "calm",
+      "themes": [
+        "campus_life",
+        "coffee",
+        "makerspace"
+      ],
+      "habits": [
+        "books tables near outlets early",
+        "treats coffee runs like standups"
+      ],
+      "location": "Paris, FR",
+      "imageBias": "medium",
+      "displayName": "Elsa Legrand"
+    },
+    {
+      "username": "flora",
+      "avatarId": 67,
+      "cluster": "campus",
+      "tier": "light",
+      "tone": "sarcastic",
+      "themes": [
+        "weekend_plan",
+        "food_spot",
+        "qa"
+      ],
+      "habits": [
+        "leaves with the last study group",
+        "catches up between classes"
+      ],
+      "location": "Marseille, FR",
+      "imageBias": "high",
+      "displayName": "Flora Hubert"
+    },
+    {
+      "username": "hugo",
+      "avatarId": 68,
+      "cluster": "sports",
+      "tier": "showcase",
+      "tone": "tired",
+      "themes": [
+        "running",
+        "wellness",
+        "commute"
+      ],
+      "habits": [
+        "uses training blocks to reset after bugs",
+        "likes early-morning momentum"
+      ],
+      "location": "Toulouse, FR",
+      "imageBias": "medium",
+      "displayName": "Hugo Lacroix"
+    },
+    {
+      "username": "liam",
+      "avatarId": 69,
+      "cluster": "sports",
+      "tier": "active",
+      "tone": "focused",
+      "themes": [
+        "football",
+        "weekend_plan",
+        "game_night"
+      ],
+      "habits": [
+        "tracks streaks on a paper note",
+        "swaps playlists before evening sessions"
+      ],
+      "location": "Rennes, FR",
+      "imageBias": "low",
+      "bridgeClusters": [
+        "campus",
+        "nightshift"
+      ],
+      "displayName": "Liam Ferry"
+    },
+    {
+      "username": "mona",
+      "avatarId": 70,
+      "cluster": "sports",
+      "tier": "active",
+      "tone": "dry",
+      "themes": [
+        "wellness",
+        "commute",
+        "small_routine"
+      ],
+      "habits": [
+        "likes early-morning momentum",
+        "thinks through features on long walks"
+      ],
+      "location": "Strasbourg, FR",
+      "imageBias": "medium",
+      "displayName": "Mona Arnaud"
+    },
+    {
+      "username": "nico",
+      "avatarId": 1,
+      "cluster": "sports",
+      "tier": "active",
+      "tone": "calm",
+      "themes": [
+        "weekend_plan",
+        "game_night",
+        "running"
+      ],
+      "habits": [
+        "swaps playlists before evening sessions",
+        "uses training blocks to reset after bugs"
+      ],
+      "location": "Rouen, FR",
+      "imageBias": "low",
+      "displayName": "Nico Leroy"
+    },
+    {
+      "username": "opal",
+      "avatarId": 2,
+      "cluster": "sports",
+      "tier": "regular",
+      "tone": "sarcastic",
+      "themes": [
+        "commute",
+        "small_routine",
+        "football"
+      ],
+      "habits": [
+        "thinks through features on long walks",
+        "tracks streaks on a paper note"
+      ],
+      "location": "Reims, FR",
+      "imageBias": "medium",
+      "displayName": "Opal Schmitt"
+    },
+    {
+      "username": "petra",
+      "avatarId": 3,
+      "cluster": "sports",
+      "tier": "regular",
+      "tone": "warm",
+      "themes": [
+        "game_night",
+        "running",
+        "wellness"
+      ],
+      "habits": [
+        "uses training blocks to reset after bugs",
+        "likes early-morning momentum"
+      ],
+      "location": "Metz, FR",
+      "imageBias": "low",
+      "displayName": "Petra Gonzalez"
+    },
+    {
+      "username": "remy",
+      "avatarId": 4,
+      "cluster": "sports",
+      "tier": "regular",
+      "tone": "enthusiastic",
+      "themes": [
+        "small_routine",
+        "football",
+        "weekend_plan"
+      ],
+      "habits": [
+        "tracks streaks on a paper note",
+        "swaps playlists before evening sessions"
+      ],
+      "location": "Perpignan, FR",
+      "imageBias": "medium",
+      "bridgeClusters": [
+        "campus"
+      ],
+      "displayName": "Remy Barre"
+    },
+    {
+      "username": "soren",
+      "avatarId": 5,
+      "cluster": "sports",
+      "tier": "regular",
+      "tone": "tired",
+      "themes": [
+        "running",
+        "wellness",
+        "commute"
+      ],
+      "habits": [
+        "likes early-morning momentum",
+        "thinks through features on long walks"
+      ],
+      "location": "Lyon, FR",
+      "imageBias": "low",
+      "displayName": "Soren Leduc"
+    },
+    {
+      "username": "tala",
+      "avatarId": 6,
+      "cluster": "sports",
+      "tier": "regular",
+      "tone": "focused",
+      "themes": [
+        "football",
+        "weekend_plan",
+        "game_night"
+      ],
+      "habits": [
+        "swaps playlists before evening sessions",
+        "uses training blocks to reset after bugs"
+      ],
+      "location": "Bordeaux, FR",
+      "imageBias": "medium",
+      "displayName": "Tala Tessier"
+    },
+    {
+      "username": "ulric",
+      "avatarId": 7,
+      "cluster": "sports",
+      "tier": "regular",
+      "tone": "dry",
+      "themes": [
+        "wellness",
+        "commute",
+        "small_routine"
+      ],
+      "habits": [
+        "thinks through features on long walks",
+        "tracks streaks on a paper note"
+      ],
+      "location": "Nantes, FR",
+      "imageBias": "low",
+      "displayName": "Ulric Pons"
+    },
+    {
+      "username": "vince",
+      "avatarId": 8,
+      "cluster": "sports",
+      "tier": "light",
+      "tone": "calm",
+      "themes": [
+        "weekend_plan",
+        "game_night",
+        "running"
+      ],
+      "habits": [
+        "uses training blocks to reset after bugs",
+        "likes early-morning momentum"
+      ],
+      "location": "Toulouse, FR",
+      "imageBias": "medium",
+      "displayName": "Vince Langlois"
+    },
+    {
+      "username": "willa",
+      "avatarId": 9,
+      "cluster": "sports",
+      "tier": "light",
+      "tone": "sarcastic",
+      "themes": [
+        "commute",
+        "small_routine",
+        "football"
+      ],
+      "habits": [
+        "tracks streaks on a paper note",
+        "swaps playlists before evening sessions"
+      ],
+      "location": "Rennes, FR",
+      "imageBias": "low",
+      "displayName": "Willa Corre"
+    },
+    {
+      "username": "ximena",
+      "avatarId": 10,
+      "cluster": "sports",
+      "tier": "light",
+      "tone": "warm",
+      "themes": [
+        "game_night",
+        "running",
+        "wellness"
+      ],
+      "habits": [
+        "likes early-morning momentum",
+        "thinks through features on long walks"
+      ],
+      "location": "Strasbourg, FR",
+      "imageBias": "medium",
+      "displayName": "Ximena Gaillard"
+    },
+    {
+      "username": "yohan",
+      "avatarId": 11,
+      "cluster": "sports",
+      "tier": "light",
+      "tone": "enthusiastic",
+      "themes": [
+        "small_routine",
+        "football",
+        "weekend_plan"
+      ],
+      "habits": [
+        "swaps playlists before evening sessions",
+        "uses training blocks to reset after bugs"
+      ],
+      "location": "Rouen, FR",
+      "imageBias": "low",
+      "displayName": "Yohan Riviere"
+    },
+    {
+      "username": "zoe",
+      "avatarId": 12,
+      "cluster": "sports",
+      "tier": "light",
+      "tone": "tired",
+      "themes": [
+        "running",
+        "wellness",
+        "commute"
+      ],
+      "habits": [
+        "thinks through features on long walks",
+        "tracks streaks on a paper note"
+      ],
+      "location": "Reims, FR",
+      "imageBias": "medium",
+      "displayName": "Zoe Mathieu"
+    },
+    {
+      "username": "aron",
+      "avatarId": 13,
+      "cluster": "sports",
+      "tier": "light",
+      "tone": "focused",
+      "themes": [
+        "football",
+        "weekend_plan",
+        "game_night"
+      ],
+      "habits": [
+        "uses training blocks to reset after bugs",
+        "likes early-morning momentum"
+      ],
+      "location": "Metz, FR",
+      "imageBias": "low",
+      "displayName": "Aron Poirier"
+    },
+    {
+      "username": "ava",
+      "avatarId": 14,
+      "cluster": "misc",
+      "tier": "showcase",
+      "tone": "focused",
+      "themes": [
+        "docs",
+        "food_spot",
+        "climbing"
+      ],
+      "habits": [
+        "keeps a running list of side quests",
+        "tries one weird idea every week"
+      ],
+      "location": "Bordeaux, FR",
+      "imageBias": "medium",
+      "bridgeClusters": [
+        "builders",
+        "campus"
+      ],
+      "displayName": "Ava David"
+    },
+    {
+      "username": "karen",
+      "avatarId": 15,
+      "cluster": "misc",
+      "tier": "active",
+      "tone": "dry",
+      "themes": [
+        "side_project",
+        "coffee",
+        "weekend_plan"
+      ],
+      "habits": [
+        "drops useful links into bookmarks fast",
+        "rotates work spots to stay fresh"
+      ],
+      "location": "Nantes, FR",
+      "imageBias": "low",
+      "displayName": "Karen Tanguy"
+    },
+    {
+      "username": "leo",
+      "avatarId": 16,
+      "cluster": "misc",
+      "tier": "active",
+      "tone": "calm",
+      "themes": [
+        "food_spot",
+        "climbing",
+        "makerspace"
+      ],
+      "habits": [
+        "tries one weird idea every week",
+        "documents useful shortcuts for later"
+      ],
+      "location": "Toulouse, FR",
+      "imageBias": "medium",
+      "displayName": "Leo Philippe"
+    },
+    {
+      "username": "bella",
+      "avatarId": 17,
+      "cluster": "misc",
+      "tier": "active",
+      "tone": "sarcastic",
+      "themes": [
+        "coffee",
+        "weekend_plan",
+        "docs"
+      ],
+      "habits": [
+        "rotates work spots to stay fresh",
+        "keeps a running list of side quests"
+      ],
+      "location": "Rennes, FR",
+      "imageBias": "low",
+      "displayName": "Bella Bouvier"
+    },
+    {
+      "username": "chloe",
+      "avatarId": 18,
+      "cluster": "misc",
+      "tier": "regular",
+      "tone": "warm",
+      "themes": [
+        "climbing",
+        "makerspace",
+        "side_project"
+      ],
+      "habits": [
+        "documents useful shortcuts for later",
+        "drops useful links into bookmarks fast"
+      ],
+      "location": "Strasbourg, FR",
+      "imageBias": "medium",
+      "displayName": "Chloe Fleury"
+    },
+    {
+      "username": "dev",
+      "avatarId": 19,
+      "cluster": "misc",
+      "tier": "regular",
+      "tone": "enthusiastic",
+      "themes": [
+        "weekend_plan",
+        "docs",
+        "food_spot"
+      ],
+      "habits": [
+        "keeps a running list of side quests",
+        "tries one weird idea every week"
+      ],
+      "location": "Rouen, FR",
+      "imageBias": "low",
+      "displayName": "Dev Navarro"
+    },
+    {
+      "username": "eden",
+      "avatarId": 20,
+      "cluster": "misc",
+      "tier": "regular",
+      "tone": "tired",
+      "themes": [
+        "makerspace",
+        "side_project",
+        "coffee"
+      ],
+      "habits": [
+        "drops useful links into bookmarks fast",
+        "rotates work spots to stay fresh"
+      ],
+      "location": "Reims, FR",
+      "imageBias": "medium",
+      "displayName": "Eden Delorme"
+    },
+    {
+      "username": "felix",
+      "avatarId": 21,
+      "cluster": "misc",
+      "tier": "regular",
+      "tone": "focused",
+      "themes": [
+        "docs",
+        "food_spot",
+        "climbing"
+      ],
+      "habits": [
+        "tries one weird idea every week",
+        "documents useful shortcuts for later"
+      ],
+      "location": "Metz, FR",
+      "imageBias": "low",
+      "displayName": "Felix Fontaine"
+    },
+    {
+      "username": "gemma",
+      "avatarId": 22,
+      "cluster": "misc",
+      "tier": "regular",
+      "tone": "dry",
+      "themes": [
+        "side_project",
+        "coffee",
+        "weekend_plan"
+      ],
+      "habits": [
+        "rotates work spots to stay fresh",
+        "keeps a running list of side quests"
+      ],
+      "location": "Perpignan, FR",
+      "imageBias": "medium",
+      "displayName": "Gemma Pasquier"
+    },
+    {
+      "username": "harper",
+      "avatarId": 23,
+      "cluster": "misc",
+      "tier": "regular",
+      "tone": "calm",
+      "themes": [
+        "food_spot",
+        "climbing",
+        "makerspace"
+      ],
+      "habits": [
+        "documents useful shortcuts for later",
+        "drops useful links into bookmarks fast"
+      ],
+      "location": "Lyon, FR",
+      "imageBias": "low",
+      "displayName": "Harper Deschamps"
+    },
+    {
+      "username": "imani",
+      "avatarId": 24,
+      "cluster": "misc",
+      "tier": "regular",
+      "tone": "sarcastic",
+      "themes": [
+        "coffee",
+        "weekend_plan",
+        "docs"
+      ],
+      "habits": [
+        "keeps a running list of side quests",
+        "tries one weird idea every week"
+      ],
+      "location": "Bordeaux, FR",
+      "imageBias": "medium",
+      "displayName": "Imani Renaud"
+    },
+    {
+      "username": "jules",
+      "avatarId": 25,
+      "cluster": "misc",
+      "tier": "regular",
+      "tone": "warm",
+      "themes": [
+        "climbing",
+        "makerspace",
+        "side_project"
+      ],
+      "habits": [
+        "drops useful links into bookmarks fast",
+        "rotates work spots to stay fresh"
+      ],
+      "location": "Nantes, FR",
+      "imageBias": "low",
+      "displayName": "Jules Marin"
+    },
+    {
+      "username": "kai",
+      "avatarId": 26,
+      "cluster": "misc",
+      "tier": "light",
+      "tone": "enthusiastic",
+      "themes": [
+        "weekend_plan",
+        "docs",
+        "food_spot"
+      ],
+      "habits": [
+        "tries one weird idea every week",
+        "documents useful shortcuts for later"
+      ],
+      "location": "Toulouse, FR",
+      "imageBias": "medium",
+      "bridgeClusters": [
+        "builders"
+      ],
+      "displayName": "Kai Bouchet"
+    },
+    {
+      "username": "laila",
+      "avatarId": 27,
+      "cluster": "misc",
+      "tier": "light",
+      "tone": "tired",
+      "themes": [
+        "makerspace",
+        "side_project",
+        "coffee"
+      ],
+      "habits": [
+        "rotates work spots to stay fresh",
+        "keeps a running list of side quests"
+      ],
+      "location": "Rennes, FR",
+      "imageBias": "low",
+      "displayName": "Laila Sauvage"
+    },
+    {
+      "username": "mason",
+      "avatarId": 28,
+      "cluster": "misc",
+      "tier": "light",
+      "tone": "focused",
+      "themes": [
+        "docs",
+        "food_spot",
+        "climbing"
+      ],
+      "habits": [
+        "documents useful shortcuts for later",
+        "drops useful links into bookmarks fast"
+      ],
+      "location": "Strasbourg, FR",
+      "imageBias": "medium",
+      "displayName": "Mason Cordier"
+    },
+    {
+      "username": "nova",
+      "avatarId": 29,
+      "cluster": "misc",
+      "tier": "light",
+      "tone": "dry",
+      "themes": [
+        "side_project",
+        "coffee",
+        "weekend_plan"
+      ],
+      "habits": [
+        "keeps a running list of side quests",
+        "tries one weird idea every week"
+      ],
+      "location": "Rouen, FR",
+      "imageBias": "low",
+      "displayName": "Nova Jourdain"
+    },
+    {
+      "username": "orion",
+      "avatarId": 30,
+      "cluster": "misc",
+      "tier": "light",
+      "tone": "calm",
+      "themes": [
+        "food_spot",
+        "climbing",
+        "makerspace"
+      ],
+      "habits": [
+        "drops useful links into bookmarks fast",
+        "rotates work spots to stay fresh"
+      ],
+      "location": "Reims, FR",
+      "imageBias": "medium",
+      "displayName": "Orion Hartmann"
+    }
   ]
 }

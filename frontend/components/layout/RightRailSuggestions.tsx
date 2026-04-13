@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import { cn } from "@/lib/utils";
 import type { RightRailSuggestion } from "@/lib/right-rail";
 
@@ -64,28 +64,36 @@ export function RightRailSuggestions({
 								key={author.id}
 								className="flex items-center gap-3 border-b border-dashed border-black/15 pb-4 last:border-b-0 last:pb-0"
 							>
-								<ProfilePicture
-									name={authorDisplayName}
-									src={author.avatar}
-									alt={authorDisplayName}
-									className={cn(
-										"h-9 w-9",
-										tileClasses[
-											author.id % tileClasses.length
-										],
-									)}
-								/>
+								<UserIdentityLink
+									user={author}
+									className="shrink-0"
+								>
+									<ProfilePicture
+										name={authorDisplayName}
+										src={author.avatar}
+										alt={authorDisplayName}
+										className={cn(
+											"h-9 w-9",
+											tileClasses[
+												author.id % tileClasses.length
+											],
+										)}
+									/>
+								</UserIdentityLink>
 
 								<div className="min-w-0 flex-1">
-									<Link
-										href={`/profil/${author.id}`}
-										className="truncate text-sm font-bold text-ink transition-colors hover:text-accent-blue"
+									<UserIdentityLink
+										user={author}
+										className="block truncate text-sm font-bold text-ink transition-colors hover:text-accent-blue"
 									>
 										{authorDisplayName}
-									</Link>
-									<p className="truncate font-mono text-[10px] text-label">
+									</UserIdentityLink>
+									<UserIdentityLink
+										user={author}
+										className="block truncate font-mono text-[10px] text-label"
+									>
 										@{author.username.toLowerCase()}
-									</p>
+									</UserIdentityLink>
 								</div>
 
 								{allowFollow ? (

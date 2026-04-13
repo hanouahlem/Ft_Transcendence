@@ -34,6 +34,8 @@ const buttonVariants = cva(
           "border-black/10 bg-ink text-paper hover:bg-black/70 hover:text-paper/90",
         ledger:
           "border-ink bg-ink text-paper shadow-[4px_4px_0_#ff4a1c] hover:bg-accent-orange hover:text-paper hover:shadow-[4px_4px_0_#ff4a1c]",
+        correspondence:
+          "border-label/30 bg-paper text-ink shadow-[3px_4px_0_#ff4a1c] hover:bg-paper-muted hover:shadow-[2px_3px_0_#ff4a1c]",
       },
       size: {
         xs: "min-h-8 px-2.5 py-1.5 text-[10px]",

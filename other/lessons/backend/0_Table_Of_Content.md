@@ -81,6 +81,20 @@ Study file:
 
 - `lessons/backend/4b_OAuth_and_External_Authentication.md`
 
+## 4c. WebSockets and Socket.io
+
+Goal: understand how the backend is prepared for real-time features.
+
+- why `app.listen(...)` was replaced by a Node HTTP server
+- why Socket.io attaches to the HTTP server instead of the Express app
+- socket-side JWT authentication during the handshake
+- difference between `req.user` and `socket.data.user`
+- why CORS also matters for socket connections
+
+Study file:
+
+- `lessons/backend/4c_WebSockets_and_Socket_IO.md`
+
 ## 5. Prisma and Database Layer
 
 Goal: understand how backend code talks to Postgres.
@@ -147,10 +161,11 @@ Study file:
 3. Routing and Request Flow
 4. Authentication and Authorization
 5. OAuth and External Authentication
-6. Prisma and Database Layer
-7. Business Logic by Feature
-8. File Uploads and Static Media
-9. Dev Workflow and Failure Modes
+6. WebSockets and Socket.io
+7. Prisma and Database Layer
+8. Business Logic by Feature
+9. File Uploads and Static Media
+10. Dev Workflow and Failure Modes
 
 ## Notes
 

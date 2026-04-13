@@ -26,7 +26,7 @@ rg -n 'from "radix-ui"' frontend/components/ui frontend/components
 Current wrapper usage:
 
 ```bash
-rg -n '@/components/ui/(avatar|badge|button|dialog|label|separator|switch|tabs)\b' frontend/app frontend/components
+rg -n '@/components/ui/(avatar|badge|button|dialog|label|pagination|separator|switch|tabs)\b' frontend/app frontend/components
 ```
 
 ## Inventory
@@ -38,9 +38,10 @@ rg -n '@/components/ui/(avatar|badge|button|dialog|label|separator|switch|tabs)\
 | Button | `frontend/components/ui/button.tsx` | native React | feed shell, feed posts, old home, old profile/settings/notifications | `native` | Low | `radix-free` | Canonical project button now carries the archive style directly; old `ArchiveButton` wrapper was removed |
 | Dialog | `frontend/components/ui/dialog.tsx` | `@ark-ui/react` Dialog | feed dialogs | `ark` | Highest | `radix-free` | Rewritten as a thin Ark wrapper with shared classes and a boolean `onOpenChange` adapter |
 | Label | `frontend/components/ui/label.tsx` | `radix-ui` Label | only local demo/helper usage | `ark` | Low | `audit` | No final-page dependency right now |
+| Pagination | `frontend/components/ui/pagination.tsx` | `@ark-ui/react` Pagination | search page | `ark` | Medium | `radix-free` | Shared wrapper keeps archive button styling while using Ark page state and range helpers |
 | Separator | `frontend/components/ui/separator.tsx` | `radix-ui` Separator | old settings pages | `ark` | Low | `audit` | No final-page dependency right now |
 | Switch | `frontend/components/ui/switch.tsx` | `radix-ui` Switch | old settings pages | `ark` | Medium | `audit` | Good behavior-heavy Ark candidate if settings survives redesign |
-| Tabs | `frontend/components/ui/tabs.tsx` | `radix-ui` Tabs | old profile page | `ark` | Medium | `audit` | Good behavior-heavy Ark candidate if profile survives redesign |
+| Tabs | `frontend/components/ui/tabs.tsx` | `@ark-ui/react` Tabs | search page | `ark` | Medium | `radix-free` | Shared wrapper now uses Ark primitives with archive-style trigger variants |
 
 ## Migration Order
 
@@ -48,10 +49,11 @@ rg -n '@/components/ui/(avatar|badge|button|dialog|label|separator|switch|tabs)\
 2. `avatar`
 3. `switch`
 4. `tabs`
-5. `button`
-6. `badge`
-7. `label`
-8. `separator`
+5. `pagination`
+6. `button`
+7. `badge`
+8. `label`
+9. `separator`
 
 ## Exit Criteria
 

@@ -1,6 +1,7 @@
 import {
   createPost,
   getAllPosts,
+  getFriendsPosts,
   deletePost,
   likePost,
   unlikePost,
@@ -14,6 +15,10 @@ import {
   unfavoriteComment,
 } from "../services/postService.js";
 import { getOptionalEnv } from "../env.js";
+import {
+  createNotificationIfRelevant,
+  NOTIFICATION_TYPES,
+} from "../services/notificationService.js";
 
 export const getPostsHandler = async (req, res) => {
   try {
@@ -23,6 +28,17 @@ export const getPostsHandler = async (req, res) => {
   } catch (error) {
     console.error("Erreur getPostsHandler :", error);
     res.status(500).json({ message: "Unable to fetch posts." });
+  }
+};
+
+export const getFriendsPostsHandler = async (req, res) => {
+  try {
+    const currentUserId = req.user?.id ?? req.user?.userId;
+    const posts = await getFriendsPosts(currentUserId);
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Erreur getFriendsPostsHandler :", error);
+    res.status(500).json({ message: "Unable to fetch friends posts." });
   }
 };
 
@@ -158,7 +174,16 @@ export const likePostHandler = async (req, res) => {
       });
     }
 
-    await likePost(postId, userId);
+    const likeResult = await likePost(postId, userId);
+
+    if (likeResult.created) {
+      await createNotificationIfRelevant({
+        userId: likeResult.postAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.LIKE,
+        postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Post liked successfully.",
@@ -219,28 +244,29 @@ export const createCommentHandler = async (req, res) => {
       });
     }
 
-    if ((!content || !content.trim()) && !req.file) {
+    if (!content || !content.trim()) {
       return res.status(400).json({
-        message: "Comment content or media is required.",
+        message: "Comment content is required.",
       });
-    }
-
-    let mediaUrl = null;
-
-    if (req.file) {
-      mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
     }
 
     const seedScriptKey = getOptionalEnv("SEED_SCRIPT_KEY");
     const skipModeration =
       Boolean(seedScriptKey) && req.get("x-seed-script-key") === seedScriptKey;
 
-    const comment = await createComment({
+    const { comment, postAuthorId } = await createComment({
       postId,
       userId,
-      content: content?.trim() || "",
-      mediaUrl,
+      content: content.trim(),
+      mediaUrl: null,
       skipModeration,
+    });
+
+    await createNotificationIfRelevant({
+      userId: postAuthorId,
+      actorId: userId,
+      type: NOTIFICATION_TYPES.COMMENT,
+      postId,
     });
 
     return res.status(201).json({
@@ -248,6 +274,18 @@ export const createCommentHandler = async (req, res) => {
       comment,
     });
   } catch (error) {
+    if (error.message === "This comment contains inappropriate content.") {
+      return res.status(422).json({
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Post not found" || error.message === "User not found") {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
+
     console.error("Erreur createCommentHandler :", error);
     return res.status(500).json({
       message: error.message || "Unable to create comment.",
@@ -438,6 +476,7 @@ export const unfavoriteCommentHandler = async (req, res) => {
 export default {
   createPostHandler,
   getPostsHandler,
+  getFriendsPostsHandler,
   deletePostHandler,
   likePostHandler,
   unlikePostHandler,

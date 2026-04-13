@@ -25,6 +25,7 @@ Use this folder as a guided study path for the backend.
 - Write concise, scannable notes.
 - Use examples from the real codebase, not generic examples when avoidable.
 - Include the goal of the section, the main ideas, and a short self-check.
+- A lesson should still make sense if the reader never saw the previous version of the codebase. If a sentence depends on knowing "before vs after," it is probably refactor history, not core teaching.
 - File naming pattern:
   - `1_Runtime_Architechture.md`
   - `2_HTTP_and_Express_Basics.md`

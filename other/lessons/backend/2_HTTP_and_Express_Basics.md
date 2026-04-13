@@ -144,14 +144,15 @@ Common ones in your project:
 
 - `GET` -> read data
 - `POST` -> create something or send form data
-- `PUT` -> update something
+- `PUT` -> replace or fully update something
+- `PATCH` -> partially update something
 - `DELETE` -> remove something
 
 Examples from your routes:
 
 - `POST /login`
 - `GET /friends`
-- `PUT /friends/:id`
+- `PATCH /friends/:id/accept`
 - `DELETE /posts/:id`
 
 These are defined in `backend/src/routes/routes.js`.

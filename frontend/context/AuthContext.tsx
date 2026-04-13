@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { getCurrentUser, type CurrentUser } from "@/lib/api";
 
 type AuthContextType = {
@@ -15,19 +15,61 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function decodeBase64Url(value: string) {
+  const normalizedValue = value.replace(/-/g, "+").replace(/_/g, "/");
+  const paddedValue = normalizedValue.padEnd(
+    normalizedValue.length + ((4 - (normalizedValue.length % 4)) % 4),
+    "=",
+  );
+
+  return atob(paddedValue);
+}
+
+function getTokenExpiryTimestamp(token: string) {
+  try {
+    const [, payload] = token.split(".");
+
+    if (!payload) {
+      return null;
+    }
+
+    const decodedPayload = JSON.parse(decodeBase64Url(payload)) as { exp?: number };
+
+    if (typeof decodedPayload.exp !== "number") {
+      return null;
+    }
+
+    return decodedPayload.exp * 1000;
+  } catch (error) {
+    console.error("Invalid JWT payload:", error);
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearAuthState = useCallback(() => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setUser(null);
+    setIsAuthLoading(false);
+
+    if (logoutTimerRef.current) {
+      clearTimeout(logoutTimerRef.current);
+      logoutTimerRef.current = null;
+    }
+  }, []);
 
   const loadUserFromToken = useCallback(async (activeToken: string) => {
     try {
       const result = await getCurrentUser(activeToken);
 
       if (!result.ok) {
-        localStorage.removeItem("token");
-        setToken(null);
-        setUser(null);
+        clearAuthState();
         return null;
       }
 
@@ -35,12 +77,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return result.data;
     } catch (error) {
       console.error("Erreur chargement utilisateur :", error);
-      localStorage.removeItem("token");
-      setToken(null);
-      setUser(null);
+      clearAuthState();
       return null;
     }
-  }, []);
+  }, [clearAuthState]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -50,6 +90,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(null);
         setUser(null);
         setIsAuthLoading(false);
+        return;
+      }
+
+      const expiryTimestamp = getTokenExpiryTimestamp(storedToken);
+
+      if (expiryTimestamp !== null && expiryTimestamp <= Date.now()) {
+        clearAuthState();
         return;
       }
 
@@ -63,9 +110,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     loadUser();
-  }, [loadUserFromToken]);
+  }, [clearAuthState, loadUserFromToken]);
+
+  useEffect(() => {
+    if (logoutTimerRef.current) {
+      clearTimeout(logoutTimerRef.current);
+      logoutTimerRef.current = null;
+    }
+
+    if (!token) {
+      return;
+    }
+
+    const expiryTimestamp = getTokenExpiryTimestamp(token);
+
+    if (expiryTimestamp === null) {
+      return;
+    }
+
+    const delay = expiryTimestamp - Date.now();
+
+    if (delay <= 0) {
+      clearAuthState();
+      return;
+    }
+
+    logoutTimerRef.current = setTimeout(() => {
+      clearAuthState();
+    }, delay);
+
+    return () => {
+      if (logoutTimerRef.current) {
+        clearTimeout(logoutTimerRef.current);
+        logoutTimerRef.current = null;
+      }
+    };
+  }, [clearAuthState, token]);
 
   const login = async (newToken: string) => {
+    const expiryTimestamp = getTokenExpiryTimestamp(newToken);
+
+    if (expiryTimestamp !== null && expiryTimestamp <= Date.now()) {
+      clearAuthState();
+      return false;
+    }
+
     localStorage.setItem("token", newToken);
     setToken(newToken);
     setIsAuthLoading(true);
@@ -79,10 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
-    setIsAuthLoading(false);
+    clearAuthState();
   };
 
   const refreshUser = useCallback(async () => {

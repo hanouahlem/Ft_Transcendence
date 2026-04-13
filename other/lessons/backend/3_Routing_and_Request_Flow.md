@@ -165,19 +165,44 @@ Some routes contain dynamic parts in the path.
 Example:
 
 ```js
-router.put("/friends/:id", authMiddleware, friend.acceptFriend);
+router.patch("/friends/:id/accept", authMiddleware, friend.acceptFriend);
 ```
 
 The `:id` part means:
 
 - Express extracts that part of the URL
 - the controller can read it through `req.params.id`
+- here `:id` is the `Friends` table row id, not a user id
 
 Same idea for:
 
 - `DELETE /posts/:id`
 - `POST /posts/:id/like`
 - `DELETE /posts/:id/like`
+
+## Current Social Contract Snapshot
+
+Phase 1 of the refactor tightened the route contract in `backend/src/routes/routes.js`:
+
+```js
+router.get("/users/by-username/:username", authMiddleware, ctrl.getUserByUsername);
+router.patch("/friends/:id/accept", authMiddleware, friend.acceptFriend);
+router.get("/posts", authMiddleware, post.getPostsHandler);
+router.get("/posts/friends", authMiddleware, post.getFriendsPostsHandler);
+```
+
+What changed:
+
+- public user payloads no longer include `email` on `GET /users` and `GET /users/:id`
+- `GET /users/by-username/:username` exists so the frontend can move to username-based profile URLs later
+- friend acceptance now uses a verb and path that describe the action clearly
+- `GET /posts` is the global feed and `GET /posts/friends` is reserved for accepted-friends posts only
+- `POST /notifications` still exists at the route level, but it is now blocked for normal clients so notifications can only come from backend event logic
+
+Why route order matters here:
+
+- `/users/by-username/:username` must be declared before `/users/:id`
+- otherwise Express could treat `by-username` as the `:id` value and hit the wrong controller
 
 ## Request Data Sources
 

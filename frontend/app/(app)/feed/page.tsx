@@ -2,6 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Plus } from "lucide-react";
+import {
+  Pagination,
+  PaginationControls,
+  PaginationItems,
+  PaginationNextTrigger,
+  PaginationPrevTrigger,
+  PaginationSummary,
+} from "@/components/ui/pagination";
 import type { FeedPost } from "@/lib/feed-types";
 import { RightRail } from "@/components/layout/RightRail";
 import { NewPostCard } from "@/components/posts/NewPostCard";
@@ -14,17 +22,22 @@ import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { usePostInteractions } from "@/hooks/usePostInteractions";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const POSTS_PER_PAGE = 50;
+
+type FeedScope = "all" | "friends";
 
 export default function FeedPage() {
   const { user, token } = useAuth();
   const { notifyError, notifySuccess } = useArchiveToasts();
 
-  const [postContent, setPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
+  const [feedScope, setFeedScope] = useState<FeedScope>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [composerResetToken, setComposerResetToken] = useState(0);
 
   const {
     sentRequests,
@@ -79,6 +92,14 @@ export default function FeedPage() {
     [posts],
   );
 
+  const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
+
+  const paginatedPosts = useMemo(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+
+    return posts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+  }, [currentPage, posts]);
+
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -95,7 +116,17 @@ export default function FeedPage() {
     fetchPosts();
     fetchRightRailSuggestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, user?.id]);
+  }, [token, user?.id, feedScope]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [feedScope]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     const handlePostCreated = (event: Event) => {
@@ -103,6 +134,10 @@ export default function FeedPage() {
       const createdPost = customEvent.detail;
 
       if (!createdPost) {
+        return;
+      }
+
+      if (feedScope === "friends") {
         return;
       }
 
@@ -116,10 +151,10 @@ export default function FeedPage() {
     return () => {
       window.removeEventListener("archive:post-created", handlePostCreated);
     };
-  }, [setPosts]);
+  }, [feedScope, setPosts]);
 
   const resetComposer = () => {
-    setPostContent("");
+    setComposerResetToken((previous) => previous + 1);
     handleRemoveFile();
   };
 
@@ -128,8 +163,9 @@ export default function FeedPage() {
 
     try {
       setLoading(true);
+      const endpoint = feedScope === "friends" ? "/posts/friends" : "/posts";
 
-      const res = await fetch(`${API_URL}/posts`, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -225,8 +261,10 @@ export default function FeedPage() {
     }
   };
 
-  const handlePublish = async () => {
-    if (!postContent.trim()) {
+  const handlePublish = async (content: string) => {
+    const trimmedContent = content.trim();
+
+    if (!trimmedContent) {
       notifyError("You need to write something before publishing.");
       return;
     }
@@ -240,7 +278,7 @@ export default function FeedPage() {
       setPublishing(true);
 
       const formData = new FormData();
-      formData.append("content", postContent);
+      formData.append("content", trimmedContent);
 
       if (selectedFile) {
         formData.append("media", selectedFile);
@@ -262,7 +300,9 @@ export default function FeedPage() {
 
       notifySuccess("Post published successfully.");
       if (data.post) {
-        setPosts((prevPosts) => [data.post, ...prevPosts]);
+        if (feedScope === "all") {
+          setPosts((prevPosts) => [data.post, ...prevPosts]);
+        }
       }
       resetComposer();
     } catch (err) {
@@ -281,31 +321,59 @@ export default function FeedPage() {
         <section className="min-w-0 w-full max-w-[800px]">
           <div className="flex flex-col gap-8 lg:gap-12">
             <NewPostCard
-              content={postContent}
+              key={composerResetToken}
               previewUrl={previewUrl}
               selectedFileName={selectedFile?.name || ""}
               publishing={publishing}
               onPublish={handlePublish}
-              onContentChange={setPostContent}
               onOpenFilePicker={handleOpenFilePicker}
               onRemoveFile={handleRemoveFile}
             />
 
+                <div className="-rotate-1 self-end w-fit inline-flex border border-ink/0 bg-paper-muted p-1 -my-6">
+                  <button
+                    type="button"
+                    onClick={() => setFeedScope("all")}
+                    className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
+                      feedScope === "all"
+                        ? "bg-accent-blue text-paper"
+                        : "text-label hover:bg-black/5"
+                    }`}
+                  >
+                    All Posts
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFeedScope("friends")}
+                    className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
+                      feedScope === "friends"
+                        ? "bg-accent-green text-paper"
+                        : "text-label hover:bg-black/5"
+                    }`}
+                  >
+                    Friends
+                  </button>
+                </div>
+
             {loading ? (
               <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                  Loading feed archive...
+                  {feedScope === "friends"
+                    ? "Loading friends archive..."
+                    : "Loading feed archive..."}
                 </p>
               </section>
             ) : posts.length === 0 ? (
               <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                  No posts have been recorded yet.
+                  {feedScope === "friends"
+                    ? "No accepted-friends posts have been recorded yet."
+                    : "No posts have been recorded yet."}
                 </p>
               </section>
             ) : (
               <div className="flex flex-col gap-10">
-                {posts.map((post) => (
+                {paginatedPosts.map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}
@@ -321,6 +389,24 @@ export default function FeedPage() {
                 ))}
               </div>
             )}
+
+            {posts.length > POSTS_PER_PAGE ? (
+              <Pagination
+                count={posts.length}
+                page={currentPage}
+                pageSize={POSTS_PER_PAGE}
+                siblingCount={1}
+                onPageChange={(details) => setCurrentPage(details.page)}
+                className="border-t border-dashed border-label/30 py-8"
+              >
+                <PaginationSummary itemLabel="posts" />
+                <PaginationControls>
+                  <PaginationPrevTrigger />
+                  <PaginationItems />
+                  <PaginationNextTrigger />
+                </PaginationControls>
+              </Pagination>
+            ) : null}
 
             <div className="border-t border-dashed border-label py-8 text-center font-mono text-sm text-label">
               --- END OF RECENT LOGS ---

@@ -186,8 +186,8 @@ export function useFriendRequests({
     try {
       setSendingFriendId(senderId);
 
-      const res = await fetch(`${API_URL}/friends/${requestId}`, {
-        method: "PUT",
+      const res = await fetch(`${API_URL}/friends/${requestId}/accept`, {
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
         },

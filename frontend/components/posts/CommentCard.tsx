@@ -1,12 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { Bookmark, Heart, Trash2 } from "lucide-react";
+import {
+	Bookmark02Icon,
+	Delete02Icon,
+	FavouriteIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/ui/relative-time";
 import type { FeedComment } from "@/lib/feed-types";
 import { SocialToggle } from "@/components/posts/SocialToggle";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 
 type CommentCardProps = {
 	comment: FeedComment;
@@ -35,13 +40,19 @@ export function CommentCard({
 	const isFavoriting = favoritingCommentId === comment.id;
 	const authorDisplayName =
 		comment.author.displayName?.trim() || comment.author.username;
+	const authorPreview = {
+		id: comment.author.id,
+		username: comment.author.username,
+		displayName: comment.author.displayName,
+		avatar: comment.author.avatar,
+	};
 
 	return (
 		<div className="relative w-full min-w-0 max-w-full overflow-hidden border border-black/10 bg-paper-muted px-4 py-4 shadow-[4px_6px_18px_rgba(26,26,26,0.08)]">
 			<div className="flex items-start justify-between gap-3">
 				<div className="flex min-w-0 flex-1 items-center gap-3">
-					<Link
-						href={`/profil/${comment.author.id}`}
+					<UserIdentityLink
+						user={authorPreview}
 						className="shrink-0"
 					>
 						<ProfilePicture
@@ -50,19 +61,22 @@ export function CommentCard({
 							alt={authorDisplayName}
 							className="h-8 w-8 -rotate-2"
 						/>
-					</Link>
+					</UserIdentityLink>
 
 					<div className="min-w-0 flex-1">
 						<div className="flex flex-wrap items-center gap-3">
-							<Link
-								href={`/profil/${comment.author.id}`}
-								className="max-w-full truncate font-mono text-ink transition hover:text-accent-blue"
+							<UserIdentityLink
+								user={authorPreview}
+								className="max-w-full truncate font-display text-ink transition hover:text-accent-blue"
 							>
 								{authorDisplayName}
-							</Link>
-							<span className="max-w-full truncate font-mono text-[15px] text-label">
+							</UserIdentityLink>
+							<UserIdentityLink
+								user={authorPreview}
+								className="max-w-full truncate font-mono text-xs text-label"
+							>
 								@{comment.author.username.toLowerCase()}
-							</span>
+							</UserIdentityLink>
 						</div>
 					</div>
 				</div>
@@ -81,7 +95,7 @@ export function CommentCard({
 							onClick={() => onDeleteComment(comment.id)}
 							disabled={isDeleting}
 						>
-							<Trash2 className="h-3.5 w-3.5" />
+							<HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.9} />
 						</Button>
 					) : null}
 				</div>
@@ -93,7 +107,7 @@ export function CommentCard({
 
 			<div className="mt-2 flex flex-wrap items-center gap-2">
 				<SocialToggle
-					icon={Heart}
+					icon={FavouriteIcon}
 					label="Like comment"
 					count={comment.likesCount}
 					accent="red"
@@ -102,7 +116,7 @@ export function CommentCard({
 					onClick={() => onToggleCommentLike(comment)}
 				/>
 				<SocialToggle
-					icon={Bookmark}
+					icon={Bookmark02Icon}
 					label="Favorite comment"
 					count={comment.favoritesCount}
 					accent="green"

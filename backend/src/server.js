@@ -1,8 +1,10 @@
 import express from "express";
 import cors from "cors";
+import { createServer } from "http";
 import path from "path";
 import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
+import { attachSocketServer } from "./socket.js";
 
 try {
   validateEnv();
@@ -23,7 +25,10 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.use("/", route);
 
+const httpServer = createServer(app);
+attachSocketServer(httpServer);
+
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

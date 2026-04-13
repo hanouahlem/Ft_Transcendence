@@ -1,6 +1,11 @@
 "use client";
 
-import { Camera, Trash2, Upload } from "lucide-react";
+import { Camera } from "lucide-react";
+import {
+  Delete02Icon,
+  Upload01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { FileUpload, useFileUpload } from "@ark-ui/react/file-upload";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -93,7 +98,7 @@ export function ProfilePhotoUploader({
               disabled={disabled}
               aria-label="Replace profile photo"
             >
-              <Upload className="h-3.5 w-3.5" />
+              <HugeiconsIcon icon={Upload01Icon} size={14} strokeWidth={1.9} />
             </Button>
             <Button
               type="button"
@@ -108,7 +113,7 @@ export function ProfilePhotoUploader({
               disabled={disabled || !imageUrl}
               aria-label="Clear profile photo"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.9} />
             </Button>
           </div>
         </div>

@@ -64,6 +64,7 @@ The important distinction is:
 - `docker compose up --build` rebuilds images before starting
 - bind mounts handle live source changes, so rebuilding is not required for ordinary edits
 - `make db-clean` runs `npx prisma migrate reset --force` inside the running `backend` container, so the database is reset in place while containers keep running
+- `make fclean` runs `find backend/uploads -mindepth 1 -delete`, which clears every uploaded media file while preserving the `backend/uploads` directory expected by Multer
 - `make seed` first runs `make db-clean`, then runs the older `bash other/seed.sh` host script
 - `make superseed` first runs `make db-clean`, then runs `bash other/superseed.sh` on the host
 - [`other/superseed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/superseed.sh) only resolves the repo root, reads `SEED_SCRIPT_KEY`, and launches [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/seed.mjs)

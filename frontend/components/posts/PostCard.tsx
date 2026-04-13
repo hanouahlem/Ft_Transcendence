@@ -1,11 +1,18 @@
-import Link from "next/link";
-import { Bookmark, Heart, MessageCircle, Trash2 } from "lucide-react";
+import {
+	Bookmark02Icon,
+	Comment01Icon,
+	Delete02Icon,
+	FavouriteIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { FeedPost } from "@/lib/feed-types";
 import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { cn } from "@/lib/utils";
 import { SocialToggle } from "@/components/posts/SocialToggle";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { UserIdentityLink } from "@/components/users/UserIdentityLink";
+import ArchiveStar from "@/components/decor/ArchiveStar";
 
 type PostCardProps = {
 	post: FeedPost;
@@ -30,6 +37,7 @@ type PostVariant = {
 	actionJustify: string;
 	accentDot?: boolean;
 	star?: boolean;
+	starClass?: string;
 };
 
 const POST_VARIANTS: PostVariant[] = [
@@ -78,6 +86,7 @@ const POST_VARIANTS: PostVariant[] = [
 			"text-2xl font-bold italic leading-snug text-center py-4 opacity-90",
 		actionJustify: "justify-start gap-8",
 		star: true,
+		starClass: "right-6 top-2 h-8 w-8 rotate-90 scale-50",
 	},
 	{
 		wrapper: "",
@@ -90,27 +99,13 @@ const POST_VARIANTS: PostVariant[] = [
 		headerBorder: "border-dashed border-label/40",
 		contentClass: "text-lg leading-relaxed",
 		actionJustify: "justify-between",
+		star: true,
+		starClass: "bottom-[20%] -left-4 h-10 w-10 rotate-[12deg] scale-75",
 	},
 ];
 
 function getVariantKeyFromPostId(postId: number) {
 	return postId % POST_VARIANTS.length;
-}
-
-function OrangeStar() {
-	return (
-		<svg
-			viewBox="0 0 50 50"
-			className="h-full w-full fill-none stroke-accent"
-			strokeWidth="1.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<polygon points="25,5 30,20 45,25 30,30 25,45 20,30 5,25 20,20" />
-			<line x1="15" y1="15" x2="35" y2="35" />
-			<line x1="15" y1="35" x2="35" y2="15" />
-		</svg>
-	);
 }
 
 function renderBody(
@@ -176,6 +171,12 @@ export function PostCard({
 	const isFavoriting = favoritingPostId === post.id;
 	const authorDisplayName =
 		post.author.displayName?.trim() || post.author.username;
+	const authorPreview = {
+		id: post.author.id,
+		username: post.author.username,
+		displayName: post.author.displayName,
+		avatar: post.author.avatar,
+	};
 
 	return (
 		<div className={variant.wrapper}>
@@ -192,8 +193,13 @@ export function PostCard({
 				) : null}
 
 				{variant.star ? (
-					<div className="absolute right-6 top-2 h-8 w-8 rotate-90 scale-50 pointer-events-none">
-						<OrangeStar />
+					<div
+						className={cn(
+							"pointer-events-none absolute z-20",
+							variant.starClass,
+						)}
+					>
+						<ArchiveStar />
 					</div>
 				) : null}
 
@@ -206,8 +212,8 @@ export function PostCard({
 					)}
 				>
 					<div className="flex min-w-0 items-center gap-3">
-						<Link
-							href={`/profil/${post.author.id}`}
+						<UserIdentityLink
+							user={authorPreview}
 							className="shrink-0"
 						>
 							<ProfilePicture
@@ -220,24 +226,27 @@ export function PostCard({
 										: "h-10 w-10 -rotate-2",
 								)}
 							/>
-						</Link>
+						</UserIdentityLink>
 
 						<div className="min-w-0">
 							<div className="flex flex-wrap items-center gap-3">
-								<Link
-									href={`/profil/${post.author.id}`}
+								<UserIdentityLink
+									user={authorPreview}
 									className={cn(
-										"truncate font-bold uppercase tracking-wide text-ink",
+										"truncate font-bold tracking-wide text-ink",
 										variantKey === 2
 											? "text-base"
 											: "text-lg",
 									)}
 								>
 									{authorDisplayName}
-								</Link>
-								<span className="font-mono text-xs text-label">
+								</UserIdentityLink>
+								<UserIdentityLink
+									user={authorPreview}
+									className="font-mono text-xs text-label"
+								>
 									@{post.author.username.toLowerCase()}
-								</span>
+								</UserIdentityLink>
 							</div>
 						</div>
 					</div>
@@ -255,7 +264,7 @@ export function PostCard({
 								onClick={() => onDelete(post.id)}
 								disabled={isDeleting}
 							>
-								<Trash2 className="h-3.5 w-3.5" />
+								<HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.9} />
 							</Button>
 						) : null}
 					</div>
@@ -293,7 +302,7 @@ export function PostCard({
 								) : null}
 								{variantKey === 0 ? (
 									<div className="pointer-events-none absolute -left-4 -top-4 h-8 w-8 rotate-12 scale-75">
-										<OrangeStar />
+										<ArchiveStar />
 									</div>
 								) : null}
 							</div>
@@ -309,14 +318,14 @@ export function PostCard({
 						)}
 					>
 						<SocialToggle
-							icon={MessageCircle}
+							icon={Comment01Icon}
 							label="Comment count"
 							count={post.commentsCount}
 							accent="blue"
 							onClick={() => onOpenPost(post.id, true)}
 						/>
 						<SocialToggle
-							icon={Bookmark}
+							icon={Bookmark02Icon}
 							label="Favorite post"
 							count={post.favoritesCount}
 							accent="green"
@@ -325,7 +334,7 @@ export function PostCard({
 							onClick={() => onToggleFavorite(post)}
 						/>
 						<SocialToggle
-							icon={Heart}
+							icon={FavouriteIcon}
 							label="Like post"
 							count={post.likesCount}
 							accent="red"

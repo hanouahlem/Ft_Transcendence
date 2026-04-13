@@ -2,14 +2,26 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { MapPin, MessageCircle } from "lucide-react";
-import type { CurrentUser } from "@/lib/api";
+import { useSearchParams } from "next/navigation";
+import { MessageAdd01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MapPin } from "lucide-react";
+import {
+  getCurrentUser,
+  getUserByUsername,
+  getUserFriends,
+  getUserPosts,
+  type CurrentUser,
+  type PublicUser,
+} from "@/lib/api";
 import { RightRail } from "@/components/layout/RightRail";
 import { PostCard } from "@/components/posts/PostCard";
 import { PostDialog } from "@/components/posts/PostDialog";
 import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
+import { FriendActionButton } from "@/components/profile/FriendActionButton";
+import ArchiveStar from "@/components/decor/ArchiveStar";
 import {
   buildProfileSuggestions,
   getRightRailTitle,
@@ -20,37 +32,15 @@ import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { usePostInteractions } from "@/hooks/usePostInteractions";
 import { cn } from "@/lib/utils";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
-type ProfileUser = CurrentUser & {
-  bio?: string | null;
-  status?: string | null;
-  location?: string | null;
-  website?: string | null;
+type ProfileUser = PublicUser & {
   createdAt: string;
 };
 
 type ProfileFriend = RightRailSuggestion;
 
 type ProfileViewProps = {
-  profileId?: number | null;
+  profileUsername?: string | null;
 };
-
-function ArchiveStar() {
-  return (
-    <svg
-      viewBox="0 0 50 50"
-      className="h-full w-full fill-none stroke-accent-red"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="25,5 30,20 45,25 30,30 25,45 20,30 5,25 20,20" />
-      <line x1="15" y1="15" x2="35" y2="35" />
-      <line x1="15" y1="35" x2="35" y2="15" />
-    </svg>
-  );
-}
 
 function formatJoinedDate(dateString: string) {
   const date = new Date(dateString);
@@ -72,17 +62,18 @@ function formatCompactCount(value: number) {
   }).format(value);
 }
 
-export function ProfileView({ profileId = null }: ProfileViewProps) {
+export function ProfileView({ profileUsername = null }: ProfileViewProps) {
   const { user, token, isAuthLoading } = useAuth();
-
-  const resolvedProfileId = profileId ?? user?.id ?? null;
-  const isOwnProfile =
-    resolvedProfileId !== null && resolvedProfileId === user?.id;
+  const searchParams = useSearchParams();
+  const isOwnProfile = profileUsername === null;
 
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [friends, setFriends] = useState<ProfileFriend[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
+  const [handledDeepLinkedPostId, setHandledDeepLinkedPostId] = useState<
+    number | null
+  >(null);
 
   const {
     sentRequests,
@@ -140,6 +131,16 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
     () => posts.reduce((sum, post) => sum + post.commentsCount, 0),
     [posts],
   );
+  const deepLinkedPostId = useMemo(() => {
+    const value = searchParams.get("post");
+
+    if (!value) {
+      return null;
+    }
+
+    const parsedValue = Number.parseInt(value, 10);
+    return Number.isNaN(parsedValue) ? null : parsedValue;
+  }, [searchParams]);
 
   const rightRailTitle = useMemo(
     () =>
@@ -166,7 +167,17 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
       return;
     }
 
-    if (resolvedProfileId === null) {
+    if (isOwnProfile && user?.id === undefined) {
+      if (isAuthLoading) {
+        return;
+      }
+
+      setLoading(false);
+      setPageError("Unable to resolve the observer record.");
+      return;
+    }
+
+    if (!isOwnProfile && !profileUsername) {
       if (isAuthLoading) {
         return;
       }
@@ -185,41 +196,35 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
         setFriends([]);
         resetInteractionState();
 
-        const [userRes, postsRes, friendsRes] = await Promise.all([
-          fetch(`${API_URL}/users/${resolvedProfileId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${API_URL}/users/${resolvedProfileId}/posts`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${API_URL}/users/${resolvedProfileId}/friends`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+        const userResult = isOwnProfile
+          ? await getCurrentUser(token)
+          : await getUserByUsername(profileUsername, token);
 
-        const [userData, postsData, friendsData] = await Promise.all([
-          userRes.json(),
-          postsRes.json(),
-          friendsRes.json(),
-        ]);
-
-        if (!userRes.ok) {
-          throw new Error(userData.message || "Unable to fetch user.");
+        if (!userResult.ok) {
+          throw new Error(userResult.message || "Unable to fetch user.");
         }
 
-        if (!postsRes.ok) {
-          throw new Error(postsData.message || "Unable to fetch posts.");
+        const resolvedProfile = userResult.data as CurrentUser | PublicUser;
+        const resolvedProfileId = resolvedProfile.id;
+
+        const [postsResult, friendsResult] = await Promise.all([
+          getUserPosts(resolvedProfileId, token),
+          getUserFriends(resolvedProfileId, token),
+        ]);
+
+        if (!postsResult.ok) {
+          throw new Error(postsResult.message || "Unable to fetch posts.");
         }
 
-        if (!friendsRes.ok) {
+        if (!friendsResult.ok) {
           throw new Error(
-            friendsData.message || "Unable to fetch observer fellows.",
+            friendsResult.message || "Unable to fetch observer fellows.",
           );
         }
 
-        setProfile(userData);
-        setPosts(Array.isArray(postsData) ? postsData : []);
-        setFriends(Array.isArray(friendsData) ? friendsData : []);
+        setProfile(resolvedProfile as ProfileUser);
+        setPosts(Array.isArray(postsResult.data) ? postsResult.data : []);
+        setFriends(Array.isArray(friendsResult.data) ? friendsResult.data : []);
       } catch (error) {
         console.error("fetchProfile error:", error);
         setPageError(
@@ -235,11 +240,47 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
     fetchProfile();
   }, [
     token,
-    resolvedProfileId,
+    profileUsername,
+    isOwnProfile,
     isAuthLoading,
     resetInteractionState,
     setPosts,
+    user?.id,
   ]);
+
+  useEffect(() => {
+    setHandledDeepLinkedPostId(null);
+  }, [deepLinkedPostId, profileUsername]);
+
+  useEffect(() => {
+    if (
+      loading ||
+      deepLinkedPostId === null ||
+      postDialogOpen ||
+      handledDeepLinkedPostId === deepLinkedPostId
+    ) {
+      return;
+    }
+
+    const targetPost = posts.find((post) => post.id === deepLinkedPostId);
+
+    if (!targetPost) {
+      setHandledDeepLinkedPostId(deepLinkedPostId);
+      return;
+    }
+
+    handleOpenPost(targetPost.id);
+    setHandledDeepLinkedPostId(deepLinkedPostId);
+  }, [
+    deepLinkedPostId,
+    handleOpenPost,
+    handledDeepLinkedPostId,
+    loading,
+    postDialogOpen,
+    posts,
+  ]);
+
+  const resolvedProfileId = profile?.id ?? (isOwnProfile ? user?.id ?? null : null);
 
   const profileSent = resolvedProfileId
     ? sentRequests.includes(resolvedProfileId)
@@ -330,7 +371,7 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
                       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-paper/90">
                         <div className="flex flex-wrap items-center gap-3">
                           {profile.location ? (
-                            <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] bg-ink p-1">
+                            <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] bg-ink p-1 px-2">
                               <MapPin className="h-3.5 w-3.5" />
                               {profile.location}
                             </span>
@@ -349,60 +390,24 @@ export function ProfileView({ profileId = null }: ProfileViewProps) {
                             </>
                           ) : (
                             <>
-                              <Button
-                                type="button"
-                                variant={
-                                  profileConnected
-                                    ? "destructive"
-                                    : profileIncomingRequestId
-                                      ? "bluesh"
-                                      : profileSent
-                                        ? "subtle"
-                                        : "default"
-                                }
-                                size="lg"
-                                disabled={
-                                  profileSent ||
-                                  sendingFriendId === resolvedProfileId
-                                }
-                                onClick={() => {
-                                  if (!resolvedProfileId) {
-                                    return;
-                                  }
-
-                                  if (profileConnected) {
-                                    handleRemoveFriend(resolvedProfileId);
-                                    return;
-                                  }
-
-                                  if (profileIncomingRequestId) {
-                                    handleAcceptFriend(resolvedProfileId);
-                                    return;
-                                  }
-
-                                  if (!profileSent) {
-                                    handleAddFriend(resolvedProfileId);
-                                  }
-                                }}
-                              >
-                                {sendingFriendId === resolvedProfileId
-                                  ? profileConnected
-                                    ? "Removing"
-                                    : profileIncomingRequestId
-                                      ? "Accepting"
-                                      : "Adding"
-                                  : profileConnected
-                                    ? "Remove"
-                                    : profileIncomingRequestId
-                                      ? "Accept"
-                                      : profileSent
-                                        ? "Pending"
-                                        : "Add"}
-                              </Button>
+                              <FriendActionButton
+                                profileUserId={resolvedProfileId}
+                                isConnected={profileConnected}
+                                incomingRequestId={profileIncomingRequestId}
+                                isPending={profileSent}
+                                sendingFriendId={sendingFriendId}
+                                onAddFriend={handleAddFriend}
+                                onAcceptFriend={handleAcceptFriend}
+                                onRemoveFriend={handleRemoveFriend}
+                              />
                               <Button asChild variant="paper" size="lg">
-                                <Link href="/friends">
-                                  <MessageCircle className="h-4 w-4" />
-                                  Network
+                                <Link href={`/message?userId=${resolvedProfileId}`}>
+                                  <HugeiconsIcon
+                                    icon={MessageAdd01Icon}
+                                    size={18}
+                                    strokeWidth={1.9}
+                                  />
+                                  Message
                                 </Link>
                               </Button>
                             </>

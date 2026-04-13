@@ -173,21 +173,20 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
     try {
       setCommentingPostId(postId);
 
-      const formData = new FormData();
-      formData.append("content", content);
-
       const res = await fetch(`${API_URL}/posts/${postId}/comments`, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({ content }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to add the comment.");
+        notifyError(data.message || "Unable to add the comment.");
+        return;
       }
 
       setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
@@ -199,7 +198,6 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
         }));
       }
     } catch (error) {
-      console.error("handleAddComment error:", error);
       notifyError(error instanceof Error ? error.message : "Failed to add the comment.");
     } finally {
       setCommentingPostId(null);

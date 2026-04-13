@@ -1,6 +1,6 @@
 # 7. File Uploads and Static Media
 
-Goal: understand how image uploads are received, stored, served back by the backend, and now seeded without committing image assets into git.
+Goal: understand how image uploads are received, stored, served back by the backend, and seeded without committing image assets into git.
 
 ## Big Picture
 
@@ -11,7 +11,7 @@ That involves two separate things:
 - receiving the uploaded file
 - serving the stored file later over HTTP
 
-The seed script now uses that same real upload flow for post images, while profile avatars stay simple remote URLs.
+The seed script uses that same real upload flow for post images, while profile avatars stay simple remote URLs.
 
 ## Multer
 
@@ -227,7 +227,7 @@ The seed script now avoids checking source images into git, but uploaded post me
 
 ## Settings Media Uploads
 
-The centralized settings page now reuses the same upload pipeline for avatar and banner images.
+Avatar and banner uploads use the same backend upload pipeline as other image features.
 
 Files:
 
@@ -235,13 +235,12 @@ Files:
 - `backend/src/routes/routes.js`
 - `backend/src/controllers/userController.js`
 
-What changed:
+How it works:
 
-- the Multer setup now exposes `createImageUpload(prefix)`
-- posts still use `post-*` filenames
-- settings uploads use `user-*` filenames
-- a new route `POST /settings/media` accepts one image under `media`
-- the controller returns a public URL like `/uploads/user-...`
+- `createImageUpload(prefix)` creates a Multer upload middleware with naming rules for one image category
+- the settings route uses a `user` prefix, so uploaded files get `user-*` filenames
+- `POST /settings/media` accepts one file under the `media` field
+- the controller returns a public URL that the frontend can store as the avatar or banner path
 
 Real route:
 

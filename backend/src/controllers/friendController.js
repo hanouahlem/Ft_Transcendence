@@ -1,4 +1,8 @@
 import prisma from "../prisma.js";
+import {
+    createNotificationIfRelevant,
+    NOTIFICATION_TYPES,
+} from "../services/notificationService.js";
 
 function toFriendPreview(user) {
     return {
@@ -85,17 +89,10 @@ export async function addFriend(req, res) {
             }
         });
 
-        const sender = await prisma.user.findUnique({
-            where: { id: senderId },
-            select: { username: true }
-        });
-
-        await prisma.notification.create({
-            data: {
-                userId: receiverId,
-                content: `${sender?.username ?? "Someone"} sent you a friend request.`,
-                read: false,
-            }
+        await createNotificationIfRelevant({
+            userId: receiverId,
+            actorId: senderId,
+            type: NOTIFICATION_TYPES.FOLLOW,
         });
 
         return res.status(201).json({
@@ -181,6 +178,12 @@ export async function acceptFriend(req, res) {
             data: { status: "accepted" }
         });
 
+        await createNotificationIfRelevant({
+            userId: friends.senderId,
+            actorId: userId,
+            type: NOTIFICATION_TYPES.FOLLOW_ACCEPT,
+        });
+
         return res.status(200).json({ friend: updatedFriend });
     } catch (error) {
         console.error("acceptFriend error:", error);
@@ -209,9 +212,19 @@ export async function deleteFriend(req, res) {
             return res.status(404).json({ message: "Friend not found" });
         }
 
+        const otherUserId = friend.senderId === userId ? friend.receiverId : friend.senderId;
+
         await prisma.friends.delete({
             where: { id: friend.id }
         });
+
+        if (friend.status === "accepted") {
+            await createNotificationIfRelevant({
+                userId: otherUserId,
+                actorId: userId,
+                type: NOTIFICATION_TYPES.UNFOLLOW,
+            });
+        }
 
         return res.status(200).json({ message: "Friend removed" });
     } catch (error) {

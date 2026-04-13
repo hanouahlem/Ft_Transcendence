@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { LiveInboxToasts } from "@/components/layout/LiveInboxToasts";
 import { NatureCanvas } from "@/components/layout/NatureCanvas";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { NewPostDialog } from "@/components/posts/NewPostDialog";
 import { archiveToaster } from "@/components/ui/toaster";
 import { useAuth } from "@/context/AuthContext";
+import { InboxUnreadProvider, useInboxUnread } from "@/context/InboxUnreadContext";
+import { SocketProvider } from "@/context/SocketContext";
+import { cn } from "@/lib/utils";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -16,14 +20,33 @@ export default function AppSidebarShell({
 }: {
   children: React.ReactNode;
 }) {
+  const { token } = useAuth();
+
+  return (
+    <SocketProvider key={token ?? "anonymous"}>
+      <InboxUnreadProvider>
+        <AppSidebarShellContent>{children}</AppSidebarShellContent>
+      </InboxUnreadProvider>
+    </SocketProvider>
+  );
+}
+
+function AppSidebarShellContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, token, logout } = useAuth();
+  const { unreadMessagesCount, unreadNotificationsCount } = useInboxUnread();
+  const isMessagePage = pathname === "/message";
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [postContent, setPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [publishing, setPublishing] = useState(false);
+  const [composerResetToken, setComposerResetToken] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -96,13 +119,15 @@ export default function AppSidebarShell({
   };
 
   const resetComposer = () => {
-    setPostContent("");
+    setComposerResetToken((previous) => previous + 1);
     handleRemoveFile();
     setCreateOpen(false);
   };
 
-  const handlePublish = async () => {
-    if (!postContent.trim()) {
+  const handlePublish = async (content: string) => {
+    const trimmedContent = content.trim();
+
+    if (!trimmedContent) {
       notifyError("You need to write something before publishing.");
       return;
     }
@@ -116,7 +141,7 @@ export default function AppSidebarShell({
       setPublishing(true);
 
       const formData = new FormData();
-      formData.append("content", postContent);
+      formData.append("content", trimmedContent);
 
       if (selectedFile) {
         formData.append("media", selectedFile);
@@ -164,25 +189,35 @@ export default function AppSidebarShell({
         <NatureCanvas />
 
         <div className="relative z-10 min-h-screen lg:pl-[76px]">
+          <LiveInboxToasts />
+
           <Sidebar
             user={user}
+            unreadMessagesCount={unreadMessagesCount}
+            unreadNotificationsCount={unreadNotificationsCount}
             onCreatePost={() => setCreateOpen(true)}
             onLogout={handleLogout}
           />
 
-          <div className="mx-auto w-full max-w-[1132px] px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
+          <div
+            className={cn(
+              "w-full",
+              isMessagePage
+                ? "min-h-screen max-w-none px-0 py-0"
+                : "mx-auto max-w-[1132px] px-4 py-10 sm:px-6 lg:px-10 lg:py-12",
+            )}
+          >
             {children}
           </div>
 
           <NewPostDialog
             open={createOpen}
-            content={postContent}
+            resetToken={composerResetToken}
             previewUrl={previewUrl}
             selectedFileName={selectedFile?.name || ""}
             publishing={publishing}
             onClose={resetComposer}
             onPublish={handlePublish}
-            onContentChange={setPostContent}
             onOpenFilePicker={handleOpenFilePicker}
             onRemoveFile={handleRemoveFile}
           />

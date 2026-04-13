@@ -25,3 +25,7 @@ if [ ! -e "$HOME/.gitconfig" ]; then
   touch "$HOME/.gitconfig"
   echo "ensure-mounts: created $HOME/.gitconfig"
 fi
+
+# On Linux with rootless Docker, /var/run/docker.sock may not exist.
+# Users can set DOCKER_SOCK in their shell profile to override (e.g. $XDG_RUNTIME_DIR/docker.sock).
+# On macOS (Docker Desktop) and Linux with regular Docker, /var/run/docker.sock is used directly.

@@ -7,7 +7,7 @@ Quick study checklist:
 - [ ] I understand how auth state is shared with `AuthContext`
 - [ ] I can explain the difference between `AuthProvider`, `useAuth`, and `ProtectedRoute`
 - [ ] I know how frontend code talks to the backend through `frontend/lib/api.ts`
-- [ ] I can explain how the main pages are structured: login, register, feed, friends, profile, settings
+- [ ] I can explain how the main pages are structured: login, register, feed, search, friends, profile, notifications, settings
 - [ ] I understand how reusable UI components are composed
 - [ ] I know which frontend sections are fully wired and which are still mock/demo UI
 - [ ] I know which section I still need to review in depth
@@ -31,7 +31,7 @@ Study file:
 Goal: understand how pages map to URLs in this repo.
 
 - `page.tsx` file-based routing
-- root pages: `/`, `/login`, `/register`, `/feed`, `/friends`, `/notifications`, `/profil`
+- root pages: `/`, `/login`, `/register`, `/feed`, `/search`, `/friends`, `/notifications`, `/profile`
 - nested routes under `/settings/...`
 - what each current page is responsible for
 - when a page needs to be a client component
@@ -101,8 +101,8 @@ Goal: understand what each major frontend page currently does and how complete i
 
 - feed page: posts, likes, comments, uploads
 - friends page: user list, search, current integration gaps
-- notifications page: mock UI vs real backend routes
-- profile and settings pages: real data vs placeholder/demo data
+- notifications page: real structured notification ledger and deep-link behavior
+- profile and settings pages: how the real routed pages map to backend data and mutations
 - how to identify frontend drift from backend capabilities
 
 Study file:
