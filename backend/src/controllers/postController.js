@@ -7,6 +7,10 @@ import {
   createComment,
 } from "../services/postService.js";
 
+export const getAllUsersPublicAPI = async (req, res) => {
+  return allusers
+} 
+
 export const getPostsHandler = async (req, res) => {
   try {
     const currentUserId = req.user?.id ?? req.user?.userId;

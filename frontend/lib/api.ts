@@ -79,36 +79,38 @@ export async function registerUser(userData: RegisterData) {
   return handleResponse(response);
 }
 
-export async function loginUser(userData: LoginData) {
-  const response = await fetch(`${API_URL}/login`, {
+export async function loginUser(data: { email: string; password: string }) {
+  const res = await fetch("http://localhost:3001/api/v1/login", {
     method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify(userData),
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": "super_secret_key",
+    },
+    body: JSON.stringify(data),
   });
 
-  return handleResponse<{ token: string }>(response);
+  const json = await res.json();
+
+  return {
+    ok: res.ok,
+    data: json,
+    message: json.message,
+  };
 }
 
 
 // ✅ Accepte un token optionnel (utile juste après le login)
-export async function getCurrentUser(overrideToken?: string) {
-  const headers = getHeaders();
-  if (overrideToken) {
-    headers["Authorization"] = `Bearer ${overrideToken}`;
-  }
-
+export async function getCurrentUser(token: string) {
   const response = await fetch(`${API_URL}/user`, {
     method: "GET",
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "x-api-key": "super_secret_key",
+    },
   });
 
-  if (response.status === 401) {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-    return { ok: false, message: "Session expirée" } as ApiFailure;
-  }
-
-  return handleResponse<CurrentUser>(response);
+  return handleResponse(response);
 }
 
 export async function addFriend(receiverId: number) {

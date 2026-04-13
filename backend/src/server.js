@@ -5,6 +5,17 @@ import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
 import { apiKeyMiddleware } from "./middleware/apiKey.js";
 
+
+///publicRoute
+import publicRoutes from "./routes/publicApi.routes.js";
+
+app.use("/api/public", publicRoutes);
+
+///swagger
+import { swaggerUi, swaggerSpec } from "./swagger.js";
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 try {
   validateEnv();
 } catch (error) {

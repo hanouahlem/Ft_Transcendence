@@ -99,7 +99,6 @@ export const loginUser = async (req, res) => {
       getEnv("JWT_SECRET"),
       { expiresIn: "3h" }
     );
-
     return res.status(200).json({message: "Login successful",token,});
   }
 

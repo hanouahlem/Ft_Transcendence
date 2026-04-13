@@ -31,8 +31,8 @@ export default function LoginPage() {
     }
 
     if (result.data.token) {
-      localStorage.setItem("token", result.data.token);
-      window.location.href = "/profil";
+      await login(result.data.token);
+      router.push("/profil");
     } else {
       setError("Token not received.");
     }
