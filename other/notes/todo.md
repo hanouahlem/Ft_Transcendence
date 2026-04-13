@@ -3,14 +3,20 @@
 ## Pages And Features
 
 - [x] faire la page settings
-- [ ] faire la page notifs (peut etre modif la database pour que cca link a un user/request)
-- [ ] faire la messagerie et ensuite commencer les webhooks
+- [x] faire la page notifs (peut etre modif la database pour que cca link a un user/request)
+- [x] faire la messagerie
+- [x] bouton message
+- [x] huge icons
+- [ ] mentions
+- [x] profile hover
+- [x] websockets
+- [x] point rouge notif
 
 ## UI And Navigation
 
 - [x] rendre les posts plus beaux, texte meme taille
 - [ ] menu in the sidebar
-- [ ] test poppins and make the sans default in sidebar buttons
+- [x] test poppins and make the sans default in sidebar buttons
 - [x] mettre les avatar de boring avatars comme placeholders
 - [ ] ask about static route, weird for a twitter clone
 
@@ -24,6 +30,4 @@
 
 - [ ] marquee on /
 - [ ] 3d plane on /
-- [ ] multer vs ark file upload
-- [ ] ark editable for the setting page
-- [ ] signature ark sur les posts ?
+- [x] multer vs ark file upload
