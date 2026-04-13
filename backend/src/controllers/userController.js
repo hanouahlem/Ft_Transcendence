@@ -203,7 +203,18 @@ export const loginUser = async (req, res) => {
         },
       });
     }
-
+  
+    if (user.twoFactorEnabled) {
+      const code = crypto.randomInt(100000, 999999).toString();
+      const timeToExpireCode = new Date(Date.now() + 10 * 60 * 1000);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { twoFactorcode: code, twoFactorExpires: timeToExpireCode },
+      });
+      await Emailconfirmation(user.email, code);
+      return res.status(200).json({ requiresTwoFactor: true, userId: user.id });
+    }
+  
     const token = jwt.sign(
       { id: user.id, email: user.email },
       getEnv("JWT_SECRET"),
