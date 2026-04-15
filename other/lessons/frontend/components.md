@@ -527,7 +527,11 @@ Explain during evaluation:
 
 - the sidebar owns navigation configuration in `NAV_ITEMS`
 - `NavButton` is the row renderer
-- `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” and “Logout”
+- `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” (new post)
+- the bottom profile preview is an Ark UI menu trigger (`@ark-ui/react/menu`), not a direct route link
+- that menu now centralizes account quick actions
+- `Settings` in the menu navigates to `/settings`
+- `Disconnect` in the menu calls the existing `onLogout` flow from `AppSidebarShell`
 - the search page is a first-class route in the main sidebar, not only a control inside the right rail
 - the sidebar prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
 - unread badges are not hardcoded anymore; `AppSidebarShell` reads them from `InboxUnreadProvider`, which is shared by the protected app pages
