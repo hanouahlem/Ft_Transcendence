@@ -4,4 +4,5 @@ export const SOCKET_EVENTS = Object.freeze({
   CONVERSATION_READ: "conversation:read",
   NOTIFICATION_CREATED: "notification:created",
   NOTIFICATION_READ: "notification:read",
+  ONLINE_USERS: "presence:online-users",
 });

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useSocket } from "@/context/SocketContext";
 import { useMessages } from "@/hooks/useMessages";
 import { NewConversationDialog } from "@/components/messages/NewConversationDialog";
 import { ConversationThread } from "@/components/messages/ConversationThread";
@@ -12,6 +13,7 @@ export default function MessagePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, user } = useAuth();
+  const { onlineUserIds } = useSocket();
   const {
     conversations,
     messages,
@@ -87,6 +89,7 @@ export default function MessagePage() {
         <ConversationRail
           conversations={conversations}
           selectedConversationId={selectedConversationId}
+          onlineUserIds={onlineUserIds}
           isLoadingConversations={isLoadingConversations}
           onSelectConversation={setSelectedConversationId}
           onOpenNewConversation={() => setIsNewConversationOpen(true)}
@@ -94,6 +97,7 @@ export default function MessagePage() {
 
         <ConversationThread
           selectedConversation={selectedConversation}
+          onlineUserIds={onlineUserIds}
           messages={messages}
           currentUserId={user?.id}
           isLoadingMessages={isLoadingMessages}

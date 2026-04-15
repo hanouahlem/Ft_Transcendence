@@ -10,6 +10,7 @@ export const SOCKET_EVENTS = {
   CONVERSATION_READ: "conversation:read",
   NOTIFICATION_CREATED: "notification:created",
   NOTIFICATION_READ: "notification:read",
+  ONLINE_USERS: "presence:online-users",
 } as const;
 
 export type InboxUnreadCountsEvent = {
@@ -33,4 +34,8 @@ export type NotificationCreatedEvent = {
 
 export type NotificationReadEvent = {
   notificationId: number;
+};
+
+export type OnlineUsersEvent = {
+  onlineUserIds: number[];
 };

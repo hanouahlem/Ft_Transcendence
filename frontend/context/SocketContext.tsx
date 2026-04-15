@@ -10,12 +10,14 @@ import {
 } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useAuth } from "@/context/AuthContext";
+import { SOCKET_EVENTS, type OnlineUsersEvent } from "@/lib/socket-events";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 type SocketContextValue = {
   socket: Socket | null;
   isConnected: boolean;
+  onlineUserIds: Set<number>;
 };
 
 const SocketContext = createContext<SocketContextValue | undefined>(undefined);
@@ -24,11 +26,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const { token } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [onlineUserIds, setOnlineUserIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (!token) {
-      setSocket(null);
-      setIsConnected(false);
       return;
     }
 
@@ -40,24 +41,40 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     const handleConnect = () => {
       setIsConnected(true);
+      setSocket(nextSocket);
     };
 
     const handleDisconnect = () => {
       setIsConnected(false);
+      setOnlineUserIds(new Set());
+      setSocket(null);
     };
 
-    setSocket(nextSocket);
+    const handleOnlineUsers = (payload: OnlineUsersEvent) => {
+      if (!Array.isArray(payload?.onlineUserIds)) {
+        return;
+      }
+
+      const nextOnlineUserIds = payload.onlineUserIds.filter(
+        (userId) => Number.isInteger(userId) && userId > 0,
+      );
+      setOnlineUserIds(new Set(nextOnlineUserIds));
+    };
+
     nextSocket.on("connect", handleConnect);
     nextSocket.on("disconnect", handleDisconnect);
     nextSocket.on("connect_error", handleDisconnect);
+    nextSocket.on(SOCKET_EVENTS.ONLINE_USERS, handleOnlineUsers);
 
     return () => {
       nextSocket.off("connect", handleConnect);
       nextSocket.off("disconnect", handleDisconnect);
       nextSocket.off("connect_error", handleDisconnect);
+      nextSocket.off(SOCKET_EVENTS.ONLINE_USERS, handleOnlineUsers);
       nextSocket.disconnect();
       setSocket(null);
       setIsConnected(false);
+      setOnlineUserIds(new Set());
     };
   }, [token]);
 
@@ -65,8 +82,9 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     () => ({
       socket,
       isConnected,
+      onlineUserIds,
     }),
-    [isConnected, socket],
+    [isConnected, onlineUserIds, socket],
   );
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
