@@ -390,6 +390,8 @@ How it works:
 - both routes render the same client component: `ProfileView`
 - `/profile` resolves the current authenticated user
 - `/profile/[username]` resolves the public profile user first, then loads posts/friends from that user id
+- if `/profile/[username]` matches the logged-in user's own username, `ProfileView` normalizes the URL with `router.replace("/profile")`
+- this keeps one canonical self-profile route and avoids treating your own page like a public profile variant
 - `ProfileView` fetches:
   - `GET /user` for the authenticated self route or `GET /users/by-username/:username` for a public profile
 - `GET /users/:id/posts` for the archive entries
@@ -398,6 +400,8 @@ How it works:
 - `ProfileView` delegates the other-user friendship CTA to `FriendActionButton`
 - `ProfileView` uses `usePostInteractions()` for delete, like, favorite, comment, and post-dialog state
 - on another user's profile, the secondary hero CTA is labeled `Message` and is rendered beside the friendship action
+- on another user's profile, the right rail no longer drops mutual friends that are already connected to you
+- `buildProfileSuggestions()` keeps those shared friends in the dataset but sorts unconnected users first, so the rail stays discovery-first without hiding overlap
 
 Important design rule:
 
@@ -757,10 +761,14 @@ Key point:
 - the search bar does not filter suggestions locally
 - the search bar mirrors the active `/search?q=...` query when you are already on the search page
 - trend chips also link to `/search` with a prefilled query
+- the current static chips are `42`, `Tailwind CSS`, and `Development`, so the rail points to project-relevant search themes instead of generic archive labels
 - `sectionTitle` changes by route:
   - `You Might Know` on feed
   - `My Friends` on your own profile
   - `Alice's Friends` on another user profile
+- on another user's profile, the rail can contain two groups inside the same sorted list:
+  - users you are not connected to yet first
+  - users already connected to you after that, with lower priority
 - empty-state copy also changes by context:
   - active search: no search matches
   - feed: no recommendations yet
@@ -770,6 +778,7 @@ Key point:
   - `Add` for no existing request
   - `Accept` for incoming pending requests
   - `Sent` for outgoing pending requests
+- if the suggested user is already a connected friend, the rail now renders the remove-state CTA instead of hiding that row
 
 ### `frontend/app/(app)/search/page.tsx`
 

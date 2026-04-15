@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 const SEARCH_ROUTE = "/search";
 
 const TRENDS = [
-  { rank: "01", title: "#ArchiveDrop", meta: "Fresh entries / Daily" },
-  { rank: "02", title: "Guild Notes", meta: "Community / 84 logs" },
-  { rank: "03", title: "Retro Layouts", meta: "Design / 41 mentions" },
+  { rank: "01", title: "42", meta: "School / Subject" },
+  { rank: "02", title: "Tailwind CSS", meta: "Frontend / Styling" },
+  { rank: "03", title: "Development", meta: "Build / Workflow" },
 ];
 
 export function RightRailTrends() {

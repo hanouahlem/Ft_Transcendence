@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MessageAdd01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MapPin } from "lucide-react";
@@ -63,9 +63,16 @@ function formatCompactCount(value: number) {
 }
 
 export function ProfileView({ profileUsername = null }: ProfileViewProps) {
+  const router = useRouter();
   const { user, token, isAuthLoading } = useAuth();
   const searchParams = useSearchParams();
   const isOwnProfile = profileUsername === null;
+  const normalizedCurrentUsername = user?.username.trim().toLowerCase() ?? null;
+  const normalizedProfileUsername = profileUsername?.trim().toLowerCase() ?? null;
+  const shouldRedirectToOwnProfile =
+    !isOwnProfile &&
+    Boolean(normalizedCurrentUsername) &&
+    normalizedCurrentUsername === normalizedProfileUsername;
 
   const [profile, setProfile] = useState<ProfileUser | null>(null);
   const [friends, setFriends] = useState<ProfileFriend[]>([]);
@@ -163,7 +170,24 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
   );
 
   useEffect(() => {
+    if (!shouldRedirectToOwnProfile) {
+      return;
+    }
+
+    const queryString = searchParams.toString();
+    router.replace(queryString ? `/profile?${queryString}` : "/profile");
+  }, [router, searchParams, shouldRedirectToOwnProfile]);
+
+  useEffect(() => {
     if (!token) {
+      return;
+    }
+
+    if (!isOwnProfile && isAuthLoading) {
+      return;
+    }
+
+    if (shouldRedirectToOwnProfile) {
       return;
     }
 
@@ -245,6 +269,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
     isAuthLoading,
     resetInteractionState,
     setPosts,
+    shouldRedirectToOwnProfile,
     user?.id,
   ]);
 
@@ -549,9 +574,11 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
           suggestions={rightRailSuggestions}
           sentRequests={sentRequests}
           incomingRequestIdsBySender={incomingRequestIdsBySender}
+          connectedFriendshipIdsByUser={connectedFriendshipIdsByUser}
           sendingFriendId={sendingFriendId}
           onAddFriend={handleAddFriend}
           onAcceptFriend={handleAcceptFriend}
+          onRemoveFriend={handleRemoveFriend}
           allowFollow={!isOwnProfile}
         />
       </div>

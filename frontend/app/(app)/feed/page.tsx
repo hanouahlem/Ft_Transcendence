@@ -40,9 +40,11 @@ export default function FeedPage() {
   const {
     sentRequests,
     incomingRequestIdsBySender,
+    connectedFriendshipIdsByUser,
     sendingFriendId,
     handleAddFriend,
     handleAcceptFriend,
+    handleRemoveFriend,
   } = useFriendRequests({
     token,
     onFriendAccepted: (userId) => {
@@ -324,9 +326,11 @@ export default function FeedPage() {
           suggestions={suggestions}
           sentRequests={sentRequests}
           incomingRequestIdsBySender={incomingRequestIdsBySender}
+          connectedFriendshipIdsByUser={connectedFriendshipIdsByUser}
           sendingFriendId={sendingFriendId}
           onAddFriend={handleAddFriend}
           onAcceptFriend={handleAcceptFriend}
+          onRemoveFriend={handleRemoveFriend}
         />
       </div>
 

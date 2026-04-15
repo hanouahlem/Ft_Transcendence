@@ -25,18 +25,21 @@ export function buildProfileSuggestions({
   const connectedSet = new Set(connectedUserIds);
 
   return friends
-    .filter((friend) => {
-      if (currentUserId && friend.id === currentUserId) {
-        return false;
+    .filter(
+      (friend) => !(currentUserId && friend.id === currentUserId),
+    )
+    .sort((left, right) => {
+      if (!includeConnected) {
+        const leftConnected = connectedSet.has(left.id);
+        const rightConnected = connectedSet.has(right.id);
+
+        if (leftConnected !== rightConnected) {
+          return leftConnected ? 1 : -1;
+        }
       }
 
-      if (!includeConnected && connectedSet.has(friend.id)) {
-        return false;
-      }
-
-      return true;
+      return left.username.localeCompare(right.username);
     })
-    .sort((left, right) => left.username.localeCompare(right.username))
     .slice(0, limit);
 }
 

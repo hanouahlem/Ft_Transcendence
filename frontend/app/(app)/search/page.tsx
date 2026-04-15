@@ -625,9 +625,11 @@ export default function SearchPage() {
           suggestions={suggestions}
           sentRequests={sentRequests}
           incomingRequestIdsBySender={incomingRequestIdsBySender}
+          connectedFriendshipIdsByUser={connectedFriendshipIdsByUser}
           sendingFriendId={sendingFriendId}
           onAddFriend={handleAddFriend}
           onAcceptFriend={handleAcceptFriend}
+          onRemoveFriend={handleRemoveFriend}
         />
       </div>
 

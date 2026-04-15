@@ -87,6 +87,11 @@ function stableNumber(input) {
   return hash;
 }
 
+const POST_TRENDS = [
+  "42",
+  "Tailwind CSS",
+  "Development",
+];
 
 function pickSeededSubset(users, count, seedLabel) {
   return new Set(
@@ -562,24 +567,31 @@ function getImageSpec(user, postIndex) {
 
 function buildPostContent(user, postIndex, hasImage) {
   const focus = user.focus;
+  const trendWord =
+    stableNumber(`trend:${user.username}:${postIndex}`) % 4 === 0
+      ? POST_TRENDS[stableNumber(`trend-word:${user.username}:${postIndex}`) % POST_TRENDS.length]
+      : null;
+  const trendSentence = trendWord
+    ? ` Also leaving a note about ${trendWord} while it is still fresh.`
+    : "";
   const imageTemplates = [
-    `Quick reset between two long blocks on ${focus}. Keeping this one because the light on the way back from ${user.hangout} was too good.`,
-    `Took the longer route after working on ${focus}. ${capitalize(user.sideQuest)} usually clears my head faster than another hour at the desk.`,
-    `This felt worth saving in the middle of a busy day. ${capitalize(user.sideQuest)} is still the easiest way for me to come back sharper to ${focus}.`,
-    `Small reminder that stepping away helps. Picked this up on the way back to ${user.hangout} before getting back into ${focus}.`,
+    `Quick reset between two long blocks on ${focus}. Keeping this one because the light on the way back from ${user.hangout} was too good.${trendSentence}`,
+    `Took the longer route after working on ${focus}. ${capitalize(user.sideQuest)} usually clears my head faster than another hour at the desk.${trendSentence}`,
+    `This felt worth saving in the middle of a busy day. ${capitalize(user.sideQuest)} is still the easiest way for me to come back sharper to ${focus}.${trendSentence}`,
+    `Small reminder that stepping away helps. Picked this up on the way back to ${user.hangout} before getting back into ${focus}.${trendSentence}`,
   ];
 
   const textTemplates = [
-    `Starting the day at ${user.hangout} with ${user.ritual}. ${capitalize(focus)} is the main thread today.`,
-    `Most of the afternoon went into ${focus}. The good news: ${user.win}.`,
-    `Mini checkpoint for future me: ${user.win}. Writing it down now before I forget the clean version.`,
-    `If anyone is around ${user.hangout} later, I still want a second set of eyes on ${focus}.`,
-    `Took a short break for ${user.sideQuest} and came back with a cleaner approach to ${focus}. That trade keeps paying off.`,
-    `Current rule for the week: ${user.tip}. It already saved me from one avoidable mess today.`,
-    `I keep underestimating how much calmer ${user.ritual} makes the rest of the day. ${capitalize(focus)} feels a lot less dramatic after that.`,
-    `Wrapped one messy thread today: ${user.win}. Tomorrow can be about polish instead of panic.`,
-    `Leaving myself a note here: document ${focus} before handoff and the next pass will be much less annoying.`,
-    `Signing off from ${user.hangout}. ${capitalize(user.sideQuest)} was the right reset after chasing ${focus} all day.`,
+    `Starting the day at ${user.hangout} with ${user.ritual}. ${capitalize(focus)} is the main thread today.${trendSentence}`,
+    `Most of the afternoon went into ${focus}. The good news: ${user.win}.${trendSentence}`,
+    `Mini checkpoint for future me: ${user.win}. Writing it down now before I forget the clean version.${trendSentence}`,
+    `If anyone is around ${user.hangout} later, I still want a second set of eyes on ${focus}.${trendSentence}`,
+    `Took a short break for ${user.sideQuest} and came back with a cleaner approach to ${focus}. That trade keeps paying off.${trendSentence}`,
+    `Current rule for the week: ${user.tip}. It already saved me from one avoidable mess today.${trendSentence}`,
+    `I keep underestimating how much calmer ${user.ritual} makes the rest of the day. ${capitalize(focus)} feels a lot less dramatic after that.${trendSentence}`,
+    `Wrapped one messy thread today: ${user.win}. Tomorrow can be about polish instead of panic.${trendSentence}`,
+    `Leaving myself a note here: document ${focus} before handoff and the next pass will be much less annoying.${trendSentence}`,
+    `Signing off from ${user.hangout}. ${capitalize(user.sideQuest)} was the right reset after chasing ${focus} all day.${trendSentence}`,
   ];
 
   return hasImage
