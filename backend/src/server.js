@@ -4,17 +4,9 @@ import path from "path";
 import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
 import { apiKeyMiddleware } from "./middleware/apiKey.js";
-
-
-///publicRoute
 import publicRoutes from "./routes/publicApi.routes.js";
 
-app.use("/api/public", publicRoutes);
-
-///swagger
-import { swaggerUi, swaggerSpec } from "./swagger.js";
-
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const app = express(); // ✅ toujours en premier
 
 try {
   validateEnv();
@@ -23,7 +15,6 @@ try {
   process.exit(1);
 }
 
-const app = express();
 app.use(cors());
 app.use(express.json());
 
@@ -33,9 +24,11 @@ app.get("/health", (_req, res) => {
 
 app.use("/uploads", express.static(path.resolve("uploads")));
 
-// Ici, toutes les routes passent par API Key middleware
-app.use("/api/v1", apiKeyMiddleware, route);
-// app.use("/", route);
+// 🔓 API PUBLIC (AVEC API KEY)
+app.use("/api/public", apiKeyMiddleware, publicRoutes);
+
+// 🔐 API PRIVÉ (frontend)
+app.use("/api/v1", route);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
