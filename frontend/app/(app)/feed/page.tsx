@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import {
   Pagination,
@@ -18,6 +18,7 @@ import { PostDialog } from "@/components/posts/PostDialog";
 import { getRightRailTitle, type RightRailSuggestion } from "@/lib/right-rail";
 import { useAuth } from "@/context/AuthContext";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
+import { useCreatePost } from "@/hooks/useCreatePost";
 import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { usePostInteractions } from "@/hooks/usePostInteractions";
 
@@ -28,16 +29,13 @@ type FeedScope = "all" | "friends";
 
 export default function FeedPage() {
   const { user, token } = useAuth();
-  const { notifyError, notifySuccess } = useArchiveToasts();
+  const { notifyError } = useArchiveToasts();
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(true);
-  const [publishing, setPublishing] = useState(false);
   const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
   const [feedScope, setFeedScope] = useState<FeedScope>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [composerResetToken, setComposerResetToken] = useState(0);
+  const { createPost, publishing } = useCreatePost();
 
   const {
     sentRequests,
@@ -53,8 +51,6 @@ export default function FeedPage() {
       );
     },
   });
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
     posts,
@@ -101,14 +97,6 @@ export default function FeedPage() {
   }, [currentPage, posts]);
 
   useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  useEffect(() => {
     if (!token) {
       return;
     }
@@ -152,11 +140,6 @@ export default function FeedPage() {
       window.removeEventListener("archive:post-created", handlePostCreated);
     };
   }, [feedScope, setPosts]);
-
-  const resetComposer = () => {
-    setComposerResetToken((previous) => previous + 1);
-    handleRemoveFile();
-  };
 
   const fetchPosts = async () => {
     if (!token) return;
@@ -231,87 +214,11 @@ export default function FeedPage() {
     }
   };
 
-  const handleOpenFilePicker = () => {
-    fileInputRef.current?.click();
-  };
+  const handlePublish = async (content: string, file: File | null) => {
+    const post = await createPost(content, file);
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-  };
-
-  const handleRemoveFile = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-
-    setSelectedFile(null);
-    setPreviewUrl("");
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handlePublish = async (content: string) => {
-    const trimmedContent = content.trim();
-
-    if (!trimmedContent) {
-      notifyError("You need to write something before publishing.");
-      return;
-    }
-
-    if (!token) {
-      notifyError("You must be logged in to publish.");
-      return;
-    }
-
-    try {
-      setPublishing(true);
-
-      const formData = new FormData();
-      formData.append("content", trimmedContent);
-
-      if (selectedFile) {
-        formData.append("media", selectedFile);
-      }
-
-      const res = await fetch(`${API_URL}/posts`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Unable to publish the post.");
-      }
-
-      notifySuccess("Post published successfully.");
-      if (data.post) {
-        if (feedScope === "all") {
-          setPosts((prevPosts) => [data.post, ...prevPosts]);
-        }
-      }
-      resetComposer();
-    } catch (err) {
-      console.error("Erreur publish post :", err);
-      notifyError(
-        err instanceof Error ? err.message : "Failed to publish the post.",
-      );
-    } finally {
-      setPublishing(false);
+    if (feedScope === "all") {
+      setPosts((prevPosts) => [post, ...prevPosts]);
     }
   };
 
@@ -321,13 +228,8 @@ export default function FeedPage() {
         <section className="min-w-0 w-full max-w-[800px]">
           <div className="flex flex-col gap-8 lg:gap-12">
             <NewPostCard
-              key={composerResetToken}
-              previewUrl={previewUrl}
-              selectedFileName={selectedFile?.name || ""}
               publishing={publishing}
               onPublish={handlePublish}
-              onOpenFilePicker={handleOpenFilePicker}
-              onRemoveFile={handleRemoveFile}
             />
 
                 <div className="-rotate-1 self-end w-fit inline-flex border border-ink/0 bg-paper-muted p-1 -my-6">
@@ -436,14 +338,6 @@ export default function FeedPage() {
       >
         <Plus className="h-6 w-6" />
       </button>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
-      />
 
       <PostDialog
         open={postDialogOpen}

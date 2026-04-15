@@ -134,6 +134,11 @@ export type ConversationItem = {
 
 export type FeedScope = "all" | "friends";
 
+export type CreatePostResponse = {
+  message: string;
+  post: FeedPost;
+};
+
 export const NOTIFICATION_TYPES = [
   "FOLLOW",
   "UNFOLLOW",
@@ -382,6 +387,25 @@ export async function getFriendsPosts(token?: string | null) {
 
 export async function getPosts(token?: string | null) {
   return getFeedPosts("all", token);
+}
+
+export async function createPostRequest(
+  content: string,
+  file?: File | null,
+  token?: string | null,
+) {
+  const formData = new FormData();
+  formData.append("content", content);
+
+  if (file) {
+    formData.append("media", file);
+  }
+
+  return requestWithAuth<CreatePostResponse>("/posts", {
+    method: "POST",
+    token,
+    body: formData,
+  });
 }
 
 export async function addFriend(receiverId: number, token?: string | null) {

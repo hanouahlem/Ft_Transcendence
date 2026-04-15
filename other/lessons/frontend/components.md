@@ -36,6 +36,7 @@ Current files:
 - `frontend/components/ui/dialog.tsx`
 - `frontend/components/ui/tooltip.tsx`
 - `frontend/hooks/useArchiveToasts.ts`
+- `frontend/hooks/useCreatePost.ts`
 - `frontend/hooks/useFriendRequests.ts`
 - `frontend/hooks/usePostInteractions.ts`
 - `frontend/lib/feed-types.ts`
@@ -79,7 +80,7 @@ This is the controller for the page.
 It owns:
 
 - authenticated user access through `useAuth()`
-- publish state, file state, and composer reset state with `useState`
+- publish state with the shared create-post hook
 - feed scope state for `All Posts` vs `Friends`
 - feed pagination state for the visible post slice
 - derived values with `useMemo`
@@ -131,7 +132,8 @@ Explain this during evaluation:
 - `useFriendRequests()` reloads outgoing pending requests so `Sent` survives a refresh
 - post/comment interaction logic is shared with the profile page through `usePostInteractions()`
 - the feed is paginated client-side with the shared Ark-based `Pagination` wrapper
-- the text state for `NewPostCard` is local to the composer component, so typing does not rerender every visible post card
+- the text state for `NewPostCard` stays local to each composer instance, so the inline composer and dialog composer keep independent drafts
+- post creation request logic is shared through `useCreatePost()`, so the feed page and app shell do not duplicate the `POST /posts` mutation anymore
 
 API base:
 
@@ -990,28 +992,39 @@ Purpose:
 Data it uses:
 
 - current content text
-- preview URL
-- selected file name
+- local Ark file-upload state
 - publishing status
 
 Actions it receives:
 
 - `onPublish`
-- `onContentChange`
-- `onOpenFilePicker`
-- `onRemoveFile`
 
 Key detail:
 
-- this component does not upload anything itself
-- it only exposes user actions back to the page
-- the hidden file input lives in `frontend/app/feed/page.tsx`
+- this component now owns the local draft UI state
+- that includes the textarea state and the Ark file-upload state
+- it still does not own the network mutation itself
 
 That means the page still controls:
 
-- when a file is selected
-- when preview URLs are created/revoked
-- when the actual `POST /posts` request happens
+- what happens after a successful publish
+- whether the created post is inserted directly or broadcast through `archive:post-created`
+
+Real code:
+
+```tsx
+const fileUpload = useFileUpload({
+  maxFiles: 1,
+  accept: ["image/*", "application/pdf"],
+  maxFileSize: 10 * 1024 * 1024,
+});
+```
+
+Why this matters:
+
+- the composer no longer depends on a hidden native file input owned by the page
+- image and PDF validation happens immediately in the composer with Ark state plus toast feedback
+- successful publish resets only that composer instance, which keeps inline and dialog drafts independent
 
 ### `NewPostDialog.tsx`
 
@@ -1035,8 +1048,10 @@ Real code:
 Explain this clearly:
 
 - the dialog is controlled by the page
-- it does not own the text/file state
-- the same data can be shared between the inline composer and dialog
+- it stays a wrapper around `NewPostCard`
+- it does not own publish logic
+- its draft is preserved when the dialog closes on the same page because the dialog stays mounted
+- changing pages remounts the dialog composer, so that draft does not follow you across routes
 - accessibility behavior comes from the shared dialog primitive rather than custom modal markup
 
 ### `PostDialog.tsx`

@@ -6,6 +6,7 @@ import {
 	Comment01Icon,
 	Delete02Icon,
 	FavouriteIcon,
+	Pdf01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { FeedComment, FeedPost } from "@/lib/feed-types";
@@ -49,6 +50,19 @@ type PostDialogProps = {
 	favoritingCommentId: number | null;
 	commentingPostId: number | null;
 };
+
+function isPdfAttachment(url: string) {
+	return /\.pdf(?:$|[?#])/i.test(url);
+}
+
+function getAttachmentFileName(url: string) {
+	try {
+		const pathname = new URL(url).pathname;
+		return decodeURIComponent(pathname.split("/").pop() || "attachment.pdf");
+	} catch {
+		return "attachment.pdf";
+	}
+}
 
 export function PostDialog({
 	open,
@@ -110,6 +124,10 @@ export function PostDialog({
 	const isCommenting = post ? commentingPostId === post.id : false;
 	const authorDisplayName =
 		post?.author.displayName?.trim() || post?.author.username || "Observer";
+	const attachmentUrl = post?.media[0] ?? null;
+	const attachmentFileName = attachmentUrl
+		? getAttachmentFileName(attachmentUrl)
+		: null;
 	const authorPreview = post
 		? {
 				id: post.author.id,
@@ -192,13 +210,38 @@ export function PostDialog({
 
 								{post.media.length > 0 ? (
 									<div className="relative mt-6 w-full rotate-[-1deg] bg-white p-2 pb-8 shadow-lg">
-										<img
-											src={post.media[0]}
-											alt="Post media"
-											className="archive-photo max-h-[420px] w-full border border-label/20 object-cover"
-										/>
+										{attachmentUrl && isPdfAttachment(attachmentUrl) ? (
+											<div className="flex min-h-[220px] flex-col justify-between border border-label/20 bg-paper-muted px-5 py-5">
+												<div className="flex items-start gap-4">
+													<div className="flex h-14 w-14 shrink-0 items-center justify-center border border-label/25 bg-paper">
+														<HugeiconsIcon icon={Pdf01Icon} size={28} strokeWidth={1.8} />
+													</div>
+													<div className="min-w-0">
+														<p className="truncate font-display text-xl text-ink">
+															{attachmentFileName}
+														</p>
+														<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+															PDF Attachment
+														</p>
+													</div>
+												</div>
+
+												<p className="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+													Document preview not embedded
+												</p>
+											</div>
+										) : (
+											/* eslint-disable-next-line @next/next/no-img-element */
+											<img
+												src={attachmentUrl ?? undefined}
+												alt="Post media"
+												className="archive-photo max-h-[420px] w-full border border-label/20 object-cover"
+											/>
+										)}
 										<div className="absolute bottom-2 right-3 font-mono text-[10px] text-label">
-											FILM ROLL 42 - EXP {post.id}
+											{attachmentUrl && isPdfAttachment(attachmentUrl)
+												? `FIELD DOSSIER - EXP ${post.id}`
+												: `FILM ROLL 42 - EXP ${post.id}`}
 										</div>
 									</div>
 								) : null}
