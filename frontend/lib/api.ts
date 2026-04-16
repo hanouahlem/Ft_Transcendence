@@ -27,6 +27,20 @@ export type LoginData =
       password: string;
     };
 
+export type LoginSuccessResponse = {
+  message: string;
+  token: string;
+};
+
+export type LoginTwoFactorChallengeResponse = {
+  message: string;
+  twoFactorRequired: true;
+  pendingToken: string;
+  email: string;
+};
+
+export type LoginResponse = LoginSuccessResponse | LoginTwoFactorChallengeResponse;
+
 export type CurrentUser = {
   id: number;
   username: string;
@@ -40,6 +54,7 @@ export type CurrentUser = {
   website?: string | null;
   createdAt?: string;
   hasPassword?: boolean;
+  twoFactorEnabled?: boolean;
 };
 
 export type PublicUser = {
@@ -290,9 +305,26 @@ export async function registerUser(userData: RegisterData) {
 }
 
 export async function loginUser(userData: LoginData) {
-  return requestJson<{ token: string }>("/login", {
+  return requestJson<LoginResponse>("/login", {
     method: "POST",
     body: userData,
+  });
+}
+
+export async function verifyLoginTwoFactorCode(
+  pendingToken: string,
+  code: string,
+) {
+  return requestJson<{ message: string; token: string }>("/login/2fa/verify", {
+    method: "POST",
+    body: { pendingToken, code },
+  });
+}
+
+export async function resendLoginTwoFactorCode(pendingToken: string) {
+  return requestJson<{ message: string; email: string }>("/login/2fa/resend", {
+    method: "POST",
+    body: { pendingToken },
   });
 }
 
@@ -342,6 +374,28 @@ export async function changeLocalPassword(
     method: "PUT",
     token,
     body: payload,
+  });
+}
+
+export async function sendTwoFactorSetupCode(token: string) {
+  return requestWithAuth<{ message: string }>("/settings/auth/2fa/setup", {
+    method: "POST",
+    token,
+  });
+}
+
+export async function confirmTwoFactorSetup(token: string, code: string) {
+  return requestJson<{ message: string }>("/settings/auth/2fa/confirm", {
+    method: "POST",
+    token,
+    body: { code },
+  });
+}
+
+export async function disableTwoFactor(token: string) {
+  return requestWithAuth<{ message: string }>("/settings/auth/2fa/disable", {
+    method: "POST",
+    token,
   });
 }
 

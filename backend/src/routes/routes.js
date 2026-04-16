@@ -21,6 +21,8 @@ router.get("/auth/42/callback", oauth.handleFortyTwoCallback);
 router.post("/registerUser", ctrl.registerUser);
 router.get("/users", ctrl.allUsers);
 router.post("/login", ctrl.loginUser);
+router.post("/login/2fa/verify", ctrl.verifyLoginTwoFactor);
+router.post("/login/2fa/resend", ctrl.resendLoginTwoFactor);
 router.get("/user", authMiddleware, ctrl.getUser);
 router.get("/users/search", authMiddleware, ctrl.searchUser);
 router.get("/users/by-username/:username", authMiddleware, ctrl.getUserByUsername);

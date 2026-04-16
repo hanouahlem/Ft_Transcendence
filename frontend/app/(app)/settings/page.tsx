@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { PhoneCheckIcon, PhoneEraseIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Loader2, RefreshCcw } from "lucide-react";
 import ArchiveFilters from "@/components/decor/ArchiveFilters";
 import { BannerUploader } from "@/components/settings/BannerUploader";
@@ -8,9 +10,14 @@ import { ProfilePhotoUploader } from "@/components/settings/ProfilePhotoUploader
 import { SettingsField, SettingsTextarea } from "@/components/settings/SettingsField";
 import { SettingsPaper } from "@/components/settings/SettingsPaper";
 import { SettingsPasswordSection } from "@/components/settings/SettingsPasswordSection";
+import TwoFactorCodeDialog from "@/components/auth/shared/TwoFactorCodeDialog";
+import { Button } from "@/components/ui/button";
 import StampButton from "@/components/ui/StampButton";
 import {
   changeLocalPassword,
+  confirmTwoFactorSetup,
+  disableTwoFactor,
+  sendTwoFactorSetupCode,
   setLocalPassword,
   updateUserProfile,
   uploadSettingsMedia,
@@ -111,6 +118,13 @@ export default function SettingsPage() {
   const [passwordLine, setPasswordLine] = useState<string | null>(null);
   const [lastSyncAt, setLastSyncAt] = useState(Date.now());
   const [secondsSinceSync, setSecondsSinceSync] = useState(0);
+  const [twoFactorDialogOpen, setTwoFactorDialogOpen] = useState(false);
+  const [twoFactorCodeSent, setTwoFactorCodeSent] = useState(false);
+  const [twoFactorAutoSendAttempted, setTwoFactorAutoSendAttempted] = useState(false);
+  const [twoFactorBusy, setTwoFactorBusy] = useState(false);
+  const [twoFactorConfirming, setTwoFactorConfirming] = useState(false);
+  const [twoFactorSending, setTwoFactorSending] = useState(false);
+  const [twoFactorMessage, setTwoFactorMessage] = useState<string | null>(null);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -131,6 +145,13 @@ export default function SettingsPage() {
 
   const accountTags = useMemo(
     () => [
+      {
+        label: settingsUser?.twoFactorEnabled ? "#2FAEnabled" : "#2FADisabled",
+        active: Boolean(settingsUser?.twoFactorEnabled),
+        tone: settingsUser?.twoFactorEnabled
+          ? "border-accent-green/30 text-accent-green"
+          : "border-label/30 text-label",
+      },
       {
         label: settingsUser?.hasPassword ? "#LocalAuth" : "#OAuthOnly",
         active: Boolean(settingsUser?.hasPassword),
@@ -153,7 +174,7 @@ export default function SettingsPage() {
           : "border-label/30 text-label",
       },
     ],
-    [form.avatar, form.banner, settingsUser?.hasPassword],
+    [form.avatar, form.banner, settingsUser?.hasPassword, settingsUser?.twoFactorEnabled],
   );
 
   const updateFormField = <K extends keyof ProfileFormState>(
@@ -456,6 +477,157 @@ export default function SettingsPage() {
     }
   };
 
+  const handleTwoFactorDialogOpenChange = (open: boolean) => {
+    setTwoFactorDialogOpen(open);
+
+    if (!open) {
+      setTwoFactorCodeSent(false);
+      setTwoFactorAutoSendAttempted(false);
+      setTwoFactorMessage(null);
+    }
+  };
+
+  const handleSetupOrDisableTwoFactor = async () => {
+    if (!token || !settingsUser) {
+      notifyError("You must be logged in to update 2FA settings.");
+      return;
+    }
+
+    try {
+      setTwoFactorBusy(true);
+      setTwoFactorMessage(null);
+
+      if (settingsUser.twoFactorEnabled) {
+        const result = await disableTwoFactor(token);
+
+        if (!result.ok) {
+          throw new Error(result.message || "Unable to disable 2FA.");
+        }
+
+        setSettingsUser((previous) =>
+          previous
+            ? {
+                ...previous,
+                twoFactorEnabled: false,
+              }
+            : previous,
+        );
+        setStampText("2FA DISABLED");
+        setStatusLine("Two-factor authentication has been disabled.");
+        setLastSyncAt(Date.now());
+        await refreshUser();
+        notifySuccess(result.data.message);
+        return;
+      }
+
+      setTwoFactorDialogOpen(true);
+      setTwoFactorCodeSent(false);
+      setTwoFactorAutoSendAttempted(false);
+      setTwoFactorMessage("Sending your 4-digit verification code...");
+    } catch (error) {
+      notifyError(
+        error instanceof Error ? error.message : "Failed to update 2FA settings.",
+      );
+    } finally {
+      setTwoFactorBusy(false);
+    }
+  };
+
+  const handleConfirmTwoFactorSetup = async (code: string) => {
+    if (!token) {
+      notifyError("You must be logged in to confirm 2FA.");
+      return;
+    }
+
+    if (!twoFactorCodeSent) {
+      notifyError("Send a code first.");
+      return;
+    }
+
+    try {
+      setTwoFactorConfirming(true);
+
+      const result = await confirmTwoFactorSetup(token, code);
+
+      if (!result.ok) {
+        throw new Error(result.message || "Unable to confirm 2FA code.");
+      }
+
+      setSettingsUser((previous) =>
+        previous
+          ? {
+              ...previous,
+              twoFactorEnabled: true,
+            }
+          : previous,
+      );
+      setTwoFactorDialogOpen(false);
+      setTwoFactorMessage(null);
+      setStampText("2FA ENABLED");
+      setStatusLine("Two-factor authentication enabled for login.");
+      setLastSyncAt(Date.now());
+      await refreshUser();
+      notifySuccess(result.data.message);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to confirm 2FA code.";
+      setTwoFactorMessage(message);
+      notifyError(message);
+    } finally {
+      setTwoFactorConfirming(false);
+    }
+  };
+
+  const handleSendTwoFactorSetupCode = useCallback(async () => {
+    if (!token) {
+      notifyError("You must be logged in to send a 2FA code.");
+      return;
+    }
+
+    try {
+      setTwoFactorSending(true);
+
+      const result = await sendTwoFactorSetupCode(token);
+
+      if (!result.ok) {
+        throw new Error(result.message || "Unable to send 2FA code.");
+      }
+
+      setTwoFactorCodeSent(true);
+      setTwoFactorMessage(result.data.message);
+      notifySuccess(result.data.message);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to send 2FA code.";
+      setTwoFactorMessage(message);
+      notifyError(message);
+    } finally {
+      setTwoFactorSending(false);
+    }
+  }, [notifyError, notifySuccess, token]);
+
+  useEffect(() => {
+    if (
+      !twoFactorDialogOpen ||
+      twoFactorCodeSent ||
+      twoFactorSending ||
+      twoFactorAutoSendAttempted ||
+      settingsUser?.twoFactorEnabled
+    ) {
+      return;
+    }
+
+    setTwoFactorAutoSendAttempted(true);
+    void handleSendTwoFactorSetupCode();
+  }, [
+    handleSendTwoFactorSetupCode,
+    settingsUser?.twoFactorEnabled,
+    twoFactorAutoSendAttempted,
+    twoFactorCodeSent,
+    twoFactorDialogOpen,
+    twoFactorSending,
+  ]);
+
   return (
     <div className="flex justify-center">
       <ArchiveFilters />
@@ -591,6 +763,43 @@ export default function SettingsPage() {
                 />
               </div>
 
+              <div className="md:col-span-12">
+                <div className="border-y border-dashed border-label/40 py-6">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+                        08. Two-factor authentication
+                      </p>
+                      <p className="mt-1 text-sm italic text-label">
+                        {settingsUser.twoFactorEnabled
+                          ? "2FA is active. Login requires email code confirmation."
+                          : "Enable 2FA to require a 4-digit email code at login."}
+                      </p>
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant={settingsUser.twoFactorEnabled ? "redsh" : "bluesh"}
+                      size="sm"
+                      className="rounded-none"
+                      onClick={handleSetupOrDisableTwoFactor}
+                      disabled={twoFactorBusy || twoFactorConfirming || twoFactorSending}
+                    >
+                      {settingsUser.twoFactorEnabled ? (
+                        <HugeiconsIcon icon={PhoneEraseIcon} size={16} strokeWidth={1.9} />
+                      ) : (
+                        <HugeiconsIcon icon={PhoneCheckIcon} size={16} strokeWidth={1.9} />
+                      )}
+                      {twoFactorBusy
+                        ? "Writing..."
+                        : settingsUser.twoFactorEnabled
+                          ? "Disable 2FA"
+                          : "Setup 2FA"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
               <div className="border-t border-dashed border-label/40 pt-6 md:col-span-12">
                 <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                   <div className="flex-1">
@@ -648,6 +857,20 @@ export default function SettingsPage() {
           </section>
         )}
       </section>
+
+      <TwoFactorCodeDialog
+        open={twoFactorDialogOpen}
+        onOpenChange={handleTwoFactorDialogOpenChange}
+        title="Two-Factor Setup"
+        subtitle="Security Confirmation / Step 2"
+        email={settingsUser?.email || "Unknown email"}
+        codeSent={twoFactorCodeSent}
+        confirming={twoFactorConfirming}
+        sending={twoFactorSending}
+        message={twoFactorMessage}
+        onConfirm={handleConfirmTwoFactorSetup}
+        onSendCode={handleSendTwoFactorSetupCode}
+      />
 
     </div>
   );
