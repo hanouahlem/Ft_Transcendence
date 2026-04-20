@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ImageAdd02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type NewPostCardProps = {
   initialContent?: string;
@@ -25,6 +26,7 @@ export function NewPostCard({
   onRemoveFile,
 }: NewPostCardProps) {
   const [content, setContent] = useState(initialContent);
+  const { t } = useI18n();
 
   return (
     <section
@@ -36,14 +38,14 @@ export function NewPostCard({
 
       <div className="pl-10">
         <div className="mb-4 flex justify-between gap-3 border-b border-dashed border-label/30 pb-2 font-mono text-xs text-label">
-          <span>NEW LOG [ENTRY: PENDING]</span>
-          <span>DATE: --/--/----</span>
+          <span>{t("newPostCard.title")}</span>
+          <span>{t("newPostCard.date")}</span>
         </div>
 
         <textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
-          placeholder="What have you observed today?"
+          placeholder={t("newPostCard.placeholder")}
           className="archive-input archive-lines min-h-[114px] w-full resize-none border-0 bg-transparent px-0 py-0 text-3xl leading-7 text-ink"
           style={{ fontFamily: "var(--font-display)" }}
         />
@@ -56,7 +58,7 @@ export function NewPostCard({
               className="archive-photo max-h-[420px] w-full border border-label/20 object-cover"
             />
             <div className="absolute bottom-2 right-3 font-mono text-[10px] text-label">
-              {selectedFileName || "FILM ROLL 42"}
+              {selectedFileName || t("newPostCard.filmRoll")}
             </div>
             <Button
               type="button"
@@ -65,7 +67,7 @@ export function NewPostCard({
               onClick={onRemoveFile}
               className="absolute left-3 top-3"
             >
-              Remove
+              {t("newPostCard.remove")}
             </Button>
           </div>
         ) : null}
@@ -76,7 +78,8 @@ export function NewPostCard({
             onClick={onOpenFilePicker}
             className="inline-flex items-center gap-2 font-mono text-xs text-label transition-colors hover:text-ink"
           >
-            <HugeiconsIcon icon={ImageAdd02Icon} size={16} strokeWidth={1.9} />[ ADD FILE ]
+            <HugeiconsIcon icon={ImageAdd02Icon} size={16} strokeWidth={1.9} />
+            {t("newPostCard.addFile")}
           </button>
           <Button
             type="button"
@@ -85,7 +88,7 @@ export function NewPostCard({
             disabled={publishing}
             className="-rotate-2 border-accent-red px-4 py-1 text-sm"
           >
-            {publishing ? "RECORDING..." : "RECORD ->"}
+            {publishing ? t("newPostCard.recording") : t("newPostCard.record")}
           </Button>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { InboxUnreadProvider, useInboxUnread } from "@/context/InboxUnreadContext";
 import { SocketProvider } from "@/context/SocketContext";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -40,6 +41,7 @@ function AppSidebarShellContent({
   const pathname = usePathname();
   const { user, token, logout } = useAuth();
   const { unreadMessagesCount, unreadNotificationsCount } = useInboxUnread();
+  const { isRtl, t } = useI18n();
   const isMessagePage = pathname === "/message";
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -70,7 +72,7 @@ function AppSidebarShellContent({
 
   const notifyError = (description: string) => {
     archiveToaster.error({
-      title: "Error",
+      title: t("common.error"),
       description,
       duration: 6000,
     });
@@ -78,7 +80,7 @@ function AppSidebarShellContent({
 
   const notifySuccess = (description: string) => {
     archiveToaster.success({
-      title: "Field Notice",
+      title: t("common.fieldNotice"),
       description,
     });
   };
@@ -128,12 +130,12 @@ function AppSidebarShellContent({
     const trimmedContent = content.trim();
 
     if (!trimmedContent) {
-      notifyError("You need to write something before publishing.");
+      notifyError(t("toasts.needContent"));
       return;
     }
 
     if (!token) {
-      notifyError("You must be logged in to publish.");
+      notifyError(t("toasts.needLogin"));
       return;
     }
 
@@ -159,11 +161,11 @@ function AppSidebarShellContent({
 
       if (!res.ok) {
         throw new Error(
-          data.message || "Unable to publish the post.",
+          data.message || t("toasts.publishFailed"),
         );
       }
 
-      notifySuccess("Post published successfully.");
+      notifySuccess(t("toasts.published"));
       if (data.post) {
         window.dispatchEvent(
           new CustomEvent("archive:post-created", {
@@ -176,7 +178,7 @@ function AppSidebarShellContent({
       notifyError(
         err instanceof Error
           ? err.message
-          : "Failed to publish the post.",
+          : t("toasts.publishFailed"),
       );
     } finally {
       setPublishing(false);
@@ -188,7 +190,12 @@ function AppSidebarShellContent({
       <main className="archive-page relative min-h-screen overflow-x-hidden text-ink">
         <NatureCanvas />
 
-        <div className="relative z-10 min-h-screen lg:pl-[76px]">
+        <div
+          className={cn(
+            "relative z-10 min-h-screen",
+            isRtl ? "lg:pr-[76px]" : "lg:pl-[76px]",
+          )}
+        >
           <LiveInboxToasts />
 
           <Sidebar

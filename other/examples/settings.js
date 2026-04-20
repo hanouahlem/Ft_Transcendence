@@ -361,7 +361,7 @@ const ProfilePage = () => {
             <FormInput label="04. email" type="email" value={formData.email} readOnly onChange={() => {}} />
             <div style={{ marginTop: '16px' }}>
               <label style={{ fontFamily: 'Courier Prime, monospace', fontSize: '10px', color: '#5A564C', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>
-                05. Visual Capture
+                {t("settingsPage.fields.avatarLabel")}
               </label>
               <div
                 style={{

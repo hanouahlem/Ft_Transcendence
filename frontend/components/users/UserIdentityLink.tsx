@@ -42,19 +42,14 @@ function mergeUserPreview(
   current: UserPreviewIdentity,
   incoming: Partial<UserPreviewIdentity>,
 ): UserPreviewIdentity {
-  const next = { ...current };
+  const sanitizedIncoming = Object.fromEntries(
+    Object.entries(incoming).filter(([, value]) => value !== undefined && value !== null),
+  ) as Partial<UserPreviewIdentity>;
 
-  (
-    Object.keys(incoming) as Array<keyof UserPreviewIdentity>
-  ).forEach((key) => {
-    const value = incoming[key];
-
-    if (value !== undefined && value !== null) {
-      next[key] = value;
-    }
-  });
-
-  return next;
+  return {
+    ...current,
+    ...sanitizedIncoming,
+  };
 }
 
 async function loadUserPreview(

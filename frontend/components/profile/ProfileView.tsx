@@ -31,6 +31,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { usePostInteractions } from "@/hooks/usePostInteractions";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type ProfileUser = PublicUser & {
   createdAt: string;
@@ -42,21 +43,21 @@ type ProfileViewProps = {
   profileUsername?: string | null;
 };
 
-function formatJoinedDate(dateString: string) {
+function formatJoinedDate(dateString: string, locale: string) {
   const date = new Date(dateString);
 
   if (Number.isNaN(date.getTime())) {
     return "Unknown";
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     year: "numeric",
   }).format(date);
 }
 
-function formatCompactCount(value: number) {
-  return new Intl.NumberFormat("en-US", {
+function formatCompactCount(value: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(value);
@@ -65,6 +66,7 @@ function formatCompactCount(value: number) {
 export function ProfileView({ profileUsername = null }: ProfileViewProps) {
   const { user, token, isAuthLoading } = useAuth();
   const searchParams = useSearchParams();
+  const { t, locale } = useI18n();
   const isOwnProfile = profileUsername === null;
 
   const [profile, setProfile] = useState<ProfileUser | null>(null);
@@ -147,8 +149,12 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
       getRightRailTitle({
         isOwnProfile,
         profileUsername: isOwnProfile ? null : (profile?.username ?? null),
+      }, {
+        myFriends: t("rightRail.myFriends"),
+        youMightKnow: t("rightRail.youMightKnow"),
+        friendsSuffix: t("rightRail.friendsSuffix"),
       }),
-    [isOwnProfile, profile?.username],
+    [isOwnProfile, profile?.username, t],
   );
 
   const rightRailSuggestions = useMemo(
@@ -173,7 +179,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
       }
 
       setLoading(false);
-      setPageError("Unable to resolve the observer record.");
+      setPageError(t("profile.errors.resolveObserver"));
       return;
     }
 
@@ -183,7 +189,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
       }
 
       setLoading(false);
-      setPageError("Unable to resolve the observer record.");
+      setPageError(t("profile.errors.resolveObserver"));
       return;
     }
 
@@ -201,7 +207,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
           : await getUserByUsername(profileUsername, token);
 
         if (!userResult.ok) {
-          throw new Error(userResult.message || "Unable to fetch user.");
+          throw new Error(userResult.message || t("profile.errors.fetchUser"));
         }
 
         const resolvedProfile = userResult.data as CurrentUser | PublicUser;
@@ -213,12 +219,12 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
         ]);
 
         if (!postsResult.ok) {
-          throw new Error(postsResult.message || "Unable to fetch posts.");
+          throw new Error(postsResult.message || t("profile.errors.fetchPosts"));
         }
 
         if (!friendsResult.ok) {
           throw new Error(
-            friendsResult.message || "Unable to fetch observer fellows.",
+            friendsResult.message || t("profile.errors.fetchFriends"),
           );
         }
 
@@ -230,7 +236,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
         setPageError(
           error instanceof Error
             ? error.message
-            : "Failed to load the observer record.",
+            : t("profile.errors.loadFallback"),
         );
       } finally {
         setLoading(false);
@@ -295,7 +301,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
     ? typeof profileFriendshipId === "number"
     : false;
   const profileDisplayName =
-    profile?.displayName?.trim() || profile?.username || "Observer";
+    profile?.displayName?.trim() || profile?.username || t("profile.fallbackName");
 
   return (
     <>
@@ -304,13 +310,13 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
           {loading ? (
             <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
               <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                Loading observer record...
+                {t("profile.loading")}
               </p>
             </section>
           ) : pageError || !profile ? (
             <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
               <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                {pageError || "Observer record not found."}
+                {pageError || t("profile.notFound")}
               </p>
             </section>
           ) : (
@@ -365,7 +371,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                         }}
                       >
                         {profile.bio ||
-                          "Field observer cataloguing fragments, patterns, and quiet evidence from the archive."}
+                          t("profile.fallbackBio")}
                       </p>
 
                       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-paper/90">
@@ -382,10 +388,10 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                           {isOwnProfile ? (
                             <>
                               <Button asChild variant="bluesh" size="lg">
-                                <Link href="/settings">Edit Profile</Link>
+                                <Link href="/settings">{t("profile.editProfile")}</Link>
                               </Button>
                               <Button asChild variant="paper" size="lg">
-                                <Link href="/friends">My Friends</Link>
+                                <Link href="/friends">{t("profile.myFriends")}</Link>
                               </Button>
                             </>
                           ) : (
@@ -422,7 +428,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
               <section className="px-2">
                 <div className="mb-6 flex items-center gap-4">
                   <h2 className="shrink-0 font-display text-[1.65rem] font-black uppercase tracking-[0.04em] text-ink">
-                    Observer Profile
+                    {t("profile.observerProfile")}
                   </h2>
                   <div className="flex-grow border-t-2 border-ink/20" />
                 </div>
@@ -430,35 +436,35 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
                   {[
                     {
-                      label: "Posts",
-                      value: formatCompactCount(posts.length),
+                      label: t("profile.stats.posts"),
+                      value: formatCompactCount(posts.length, locale),
                       tone: "text-ink text-6xl",
                       tape: "bg-accent-green",
                       rotate: "rotate-1",
                     },
                     {
-                      label: "Received Likes",
-                      value: formatCompactCount(totalLikes),
+                      label: t("profile.stats.likes"),
+                      value: formatCompactCount(totalLikes, locale),
                       tone: "text-accent-red text-6xl",
                       rotate: "-rotate-1",
                     },
                     {
-                      label: "Comments",
-                      value: formatCompactCount(totalComments),
+                      label: t("profile.stats.comments"),
+                      value: formatCompactCount(totalComments, locale),
                       tone: "text-accent-blue text-6xl",
                       rotate: "rotate-2",
                       star: true,
                     },
                     {
-                      label: "Friends",
-                      value: formatCompactCount(friends.length),
+                      label: t("profile.stats.friends"),
+                      value: formatCompactCount(friends.length, locale),
                       tone: "text-ink text-6xl",
                       rotate: "-rotate-2",
                       tape: "bg-accent-red",
                     },
                     {
-                      label: "Joined",
-                      value: formatJoinedDate(profile.createdAt),
+                      label: t("profile.stats.joined"),
+                      value: formatJoinedDate(profile.createdAt, locale),
                       tone: "text-ink text-4xl",
                       rotate: "rotate-1",
                     },
@@ -503,7 +509,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
               <section className="px-2">
                 <div className="mb-6 flex items-center gap-4">
                   <h2 className="shrink-0 font-display text-[1.65rem] font-black uppercase tracking-[0.04em] text-ink">
-                    Recent Entries
+                    {t("profile.recentEntries")}
                   </h2>
                   <div className="flex-grow border-t-2 border-ink/20" />
                 </div>
@@ -511,7 +517,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                 {posts.length === 0 ? (
                   <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
                     <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                      No posts have been recorded for this observer yet.
+                      {t("profile.emptyPosts")}
                     </p>
                   </section>
                 ) : (
@@ -534,7 +540,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                 )}
 
                 <div className="border-t border-dashed border-label py-8 text-center font-mono text-sm text-label mt-10">
-                  --- END OF PROFILE RECORD ---
+                  {t("profile.endOfRecord")}
                 </div>
               </section>
             </div>

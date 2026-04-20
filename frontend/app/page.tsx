@@ -17,10 +17,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function HomePage() {
 	const router = useRouter();
 	const { isLoggedIn, isAuthLoading } = useAuth();
+	const { t, isRtl } = useI18n();
 
 	useEffect(() => {
 		if (!isAuthLoading && isLoggedIn) {
@@ -34,6 +37,9 @@ export default function HomePage() {
 
 	return (
 		<main className="min-h-screen bg-gradient-to-br from-[#EAF1E6] via-[#dbe7d2] to-[#9CAF88] text-[#33412c]">
+			<div className="absolute top-6 z-20" style={{ insetInlineEnd: "1.5rem" }}>
+				<LocaleSwitcher compact />
+			</div>
 			<section className="relative overflow-hidden">
 				{/* Background decoration */}
 				<div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(74,100,64,0.20),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(156,175,136,0.28),transparent_30%)]" />
@@ -45,19 +51,11 @@ export default function HomePage() {
 						{/* Left side */}
 						<div className="max-w-2xl">
 							<h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-								A softer way to{" "}
-								<span className="text-[#4A6440]">
-									share stories
-								</span>
-								, connect with people, and grow a meaningful
-								blog community
+								{t("landing.heroTitle")}
 							</h1>
 
 							<p className="mt-6 max-w-xl text-base leading-8 text-[#4f5d49] sm:text-lg">
-								Publish your thoughts, capture moments, and
-								explore a curated social feed in a warm, elegant
-								interface inspired by modern editorial platforms
-								and lifestyle communities.
+								{t("landing.heroText")}
 							</p>
 
 							<div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -67,8 +65,8 @@ export default function HomePage() {
 									className="rounded-full bg-[#4A6440] px-7 text-white hover:bg-[#3a5230]"
 								>
 									<Link href="/register">
-										Start your journey
-										<ArrowRight className="ml-2 h-4 w-4" />
+										{t("landing.ctaStart")}
+										<ArrowRight className="h-4 w-4" style={{ marginInlineStart: "0.5rem", transform: isRtl ? "rotate(180deg)" : undefined }} />
 									</Link>
 								</Button>
 
@@ -90,11 +88,10 @@ export default function HomePage() {
 										</div>
 										<div>
 											<p className="text-sm font-semibold text-[#33412c]">
-												Community
+												{t("landing.communityTitle")}
 											</p>
 											<p className="text-xs leading-5 text-[#4f5d49]">
-												Follow creators and build
-												genuine connections
+												{t("landing.communityText")}
 											</p>
 										</div>
 									</CardContent>
@@ -107,11 +104,10 @@ export default function HomePage() {
 										</div>
 										<div>
 											<p className="text-sm font-semibold text-[#33412c]">
-												Reactions
+												{t("landing.reactionsTitle")}
 											</p>
 											<p className="text-xs leading-5 text-[#4f5d49]">
-												Engage through likes, comments
-												and saved posts
+												{t("landing.reactionsText")}
 											</p>
 										</div>
 									</CardContent>
@@ -124,11 +120,10 @@ export default function HomePage() {
 										</div>
 										<div>
 											<p className="text-sm font-semibold text-[#33412c]">
-												Updates
+												{t("landing.updatesTitle")}
 											</p>
 											<p className="text-xs leading-5 text-[#4f5d49]">
-												Stay in touch with activity and
-												new stories
+												{t("landing.updatesText")}
 											</p>
 										</div>
 									</CardContent>
@@ -195,7 +190,7 @@ export default function HomePage() {
 									<Card className="border-0 bg-white/90 shadow-md backdrop-blur">
 										<CardContent className="p-5">
 											<p className="mb-4 text-sm font-semibold text-[#33412c]">
-												Featured creators
+												{t("landing.featuredCreators")}
 											</p>
 
 											<div className="space-y-4">
@@ -241,7 +236,7 @@ export default function HomePage() {
 															size="sm"
 															className="rounded-full bg-[#EAF1E6] text-[#4A6440] hover:bg-[#d9e6d0]"
 														>
-															Follow
+															{t("common.add")}
 														</Button>
 													</div>
 												))}
@@ -252,7 +247,7 @@ export default function HomePage() {
 									<Card className="border-0 bg-white/90 shadow-md backdrop-blur">
 										<CardContent className="p-5">
 											<p className="mb-4 text-sm font-semibold text-[#33412c]">
-												This week’s mood
+												{t("landing.weeklyMood")}
 											</p>
 
 											<div className="space-y-3">
@@ -264,9 +259,7 @@ export default function HomePage() {
 														</p>
 													</div>
 													<p className="text-xs text-[#5a6b54]">
-														Gentle routines, mindful
-														sharing, and calm visual
-														storytelling
+														{t("landing.heroText")}
 													</p>
 												</div>
 
@@ -275,8 +268,7 @@ export default function HomePage() {
 														#NaturePalette
 													</p>
 													<p className="text-xs text-[#5a6b54]">
-														Sage, sand, olive and
-														warm neutral tones
+														Sage, sand, olive and warm neutral tones
 													</p>
 												</div>
 
@@ -285,9 +277,7 @@ export default function HomePage() {
 														#PersonalStories
 													</p>
 													<p className="text-xs text-[#5a6b54]">
-														Everyday moments shaped
-														into beautiful
-														narratives
+														Everyday moments shaped into beautiful narratives
 													</p>
 												</div>
 											</div>
@@ -303,16 +293,13 @@ export default function HomePage() {
 						<Card className="border-0 bg-white/90 shadow-md backdrop-blur">
 							<CardContent className="p-6">
 								<p className="text-sm font-semibold text-[#4A6440]">
-									Elegant content
+									{t("landing.communityTitle")}
 								</p>
 								<h3 className="mt-2 text-xl font-semibold text-[#33412c]">
-									Share visual posts and thoughtful writing
+									{t("landing.heroTitle")}
 								</h3>
 								<p className="mt-3 text-sm leading-6 text-[#4f5d49]">
-									A homepage designed to feel clean,
-									breathable, and editorial, while still
-									keeping the social energy of a modern
-									platform.
+									{t("landing.heroText")}
 								</p>
 							</CardContent>
 						</Card>
@@ -320,15 +307,13 @@ export default function HomePage() {
 						<Card className="border-0 bg-white/90 shadow-md backdrop-blur">
 							<CardContent className="p-6">
 								<p className="text-sm font-semibold text-[#4A6440]">
-									Soft interactions
+									{t("landing.reactionsTitle")}
 								</p>
 								<h3 className="mt-2 text-xl font-semibold text-[#33412c]">
-									Designed for calm engagement
+									{t("landing.reactionsText")}
 								</h3>
 								<p className="mt-3 text-sm leading-6 text-[#4f5d49]">
-									Likes, comments, saves, and notifications
-									are still present, but wrapped in a quieter
-									and more refined interface.
+									Likes, comments, saves, and notifications are still present, but wrapped in a quieter and more refined interface.
 								</p>
 							</CardContent>
 						</Card>
@@ -336,15 +321,13 @@ export default function HomePage() {
 						<Card className="border-0 bg-white/90 shadow-md backdrop-blur">
 							<CardContent className="p-6">
 								<p className="text-sm font-semibold text-[#4A6440]">
-									Lifestyle aesthetic
+									{t("landing.updatesTitle")}
 								</p>
 								<h3 className="mt-2 text-xl font-semibold text-[#33412c]">
-									A blog universe with a warmer identity
+									{t("landing.featuredCreators")}
 								</h3>
 								<p className="mt-3 text-sm leading-6 text-[#4f5d49]">
-									This direction works well if you want
-									something between a social app, a journal
-									platform, and an aesthetic content hub.
+									This direction works well if you want something between a social app, a journal platform, and an aesthetic content hub.
 								</p>
 							</CardContent>
 						</Card>

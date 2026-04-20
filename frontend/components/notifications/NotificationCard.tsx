@@ -7,6 +7,7 @@ import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import ArchiveTape from "@/components/decor/ArchiveTape";
 import ArchiveStar from "@/components/decor/ArchiveStar";
+import { useI18n } from "@/i18n/I18nProvider";
 import {
   getNotificationTone,
   NotificationGlyph,
@@ -32,7 +33,8 @@ export function NotificationCard({
   onMarkAsRead,
 }: NotificationCardProps) {
   const router = useRouter();
-  const copy = getNotificationCopy(notification);
+  const { locale, t } = useI18n();
+  const copy = getNotificationCopy(notification, t);
   const href = getNotificationHref(notification);
   const tone = getNotificationTone(notification.type);
   const rotation = ROTATIONS[index % ROTATIONS.length];
@@ -76,7 +78,7 @@ export function NotificationCard({
       onClick={navigateToRecord}
       onKeyDown={handleKeyDown}
       className={cn(
-        "group relative cursor-pointer border-2 border-label/30 p-5 text-left shadow-[8px_12px_25px_rgba(26,26,26,0.15)] transition-transform duration-200 hover:-translate-y-1",
+        "group relative cursor-pointer border-2 border-label/30 p-5 text-start shadow-[8px_12px_25px_rgba(26,26,26,0.15)] transition-transform duration-200 hover:-translate-y-1",
         notification.read ? "bg-paper-muted" : "bg-paper",
         rotation,
       )}
@@ -128,9 +130,9 @@ export function NotificationCard({
               </div>
             </div>
 
-            <div className="shrink-0 space-y-2 text-right">
+            <div className="shrink-0 space-y-2 text-end">
               <span className="inline-flex bg-stage px-1.5 py-0.5 font-mono text-[10px] text-label">
-                {formatNotificationTime(notification.createdAt)}
+                {formatNotificationTime(notification.createdAt, locale)}
               </span>
             </div>
           </div>

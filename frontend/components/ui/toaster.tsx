@@ -10,6 +10,7 @@ import {
   getNotificationTone,
   NotificationGlyph,
 } from "@/components/notifications/NotificationVisuals";
+import { useI18n } from "@/i18n/I18nProvider";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { getNotificationCopy, formatNotificationTime, getNotificationHref } from "@/lib/notification-utils";
 import { cn } from "@/lib/utils";
@@ -37,30 +38,30 @@ type ArchiveToastMeta = NotificationToastMeta | MessageToastMeta;
 function isNotificationToastMeta(meta: unknown): meta is NotificationToastMeta {
   return Boolean(
     meta &&
-      typeof meta === "object" &&
-      "kind" in meta &&
-      "notification" in meta &&
-      (meta as NotificationToastMeta).kind === "notification",
+    typeof meta === "object" &&
+    "kind" in meta &&
+    "notification" in meta &&
+    (meta as NotificationToastMeta).kind === "notification",
   );
 }
 
 function isMessageToastMeta(meta: unknown): meta is MessageToastMeta {
   return Boolean(
     meta &&
-      typeof meta === "object" &&
-      "kind" in meta &&
-      "conversation" in meta &&
-      "message" in meta &&
-      (meta as MessageToastMeta).kind === "message",
+    typeof meta === "object" &&
+    "kind" in meta &&
+    "conversation" in meta &&
+    "message" in meta &&
+    (meta as MessageToastMeta).kind === "message",
   );
 }
 
-function formatMessageToastTime(value?: string | null) {
+function formatMessageToastTime(value: string | null | undefined, locale: string) {
   if (!value) {
     return "";
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
@@ -68,11 +69,15 @@ function formatMessageToastTime(value?: string | null) {
 
 function NotificationToastContent({
   notification,
+  locale,
+  t,
 }: {
   notification: NotificationItem;
+  locale: string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }) {
   const tone = getNotificationTone(notification.type);
-  const copy = getNotificationCopy(notification);
+  const copy = getNotificationCopy(notification, t);
   const actorDisplayName =
     notification.actor.displayName?.trim() || notification.actor.username;
   const actorHandle = `@${notification.actor.username.toLowerCase()}`;
@@ -110,7 +115,7 @@ function NotificationToastContent({
             </div>
 
             <span className="shrink-0 bg-stage px-1.5 py-0.5 font-mono text-[10px] text-label">
-              {formatNotificationTime(notification.createdAt)}
+              {formatNotificationTime(notification.createdAt, locale)}
             </span>
           </div>
 
@@ -140,9 +145,11 @@ function NotificationToastContent({
 function MessageToastContent({
   conversation,
   message,
+  locale,
 }: {
   conversation: ConversationItem;
   message: ConversationMessage;
+  locale: string;
 }) {
   const peerName =
     conversation.peer?.displayName?.trim() ||
@@ -170,7 +177,7 @@ function MessageToastContent({
             </div>
 
             <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.08em] text-label">
-              {formatMessageToastTime(message.createdAt)}
+              {formatMessageToastTime(message.createdAt, locale)}
             </span>
           </div>
 
@@ -185,6 +192,7 @@ function MessageToastContent({
 
 export function AppToaster() {
   const router = useRouter();
+  const { locale, t } = useI18n();
 
   return (
     <Toaster toaster={archiveToaster}>
@@ -240,11 +248,12 @@ export function AppToaster() {
             className={navigationHref ? "cursor-pointer" : undefined}
           >
             {isNotificationToast ? (
-              <NotificationToastContent notification={meta.notification} />
+              <NotificationToastContent notification={meta.notification} locale={locale} t={t} />
             ) : isMessageToast ? (
               <MessageToastContent
                 conversation={meta.conversation}
                 message={meta.message}
+                locale={locale}
               />
             ) : (
               <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -255,10 +264,10 @@ export function AppToaster() {
 
             {!isNotificationToast ? (
               <Toast.CloseTrigger
-                aria-label="Dismiss notification"
+                aria-label={t("notifications.toastDismissAria")}
                 onClick={handleCloseClick}
               >
-                Dismiss
+                {t("notifications.toastDismiss")}
               </Toast.CloseTrigger>
             ) : null}
           </Toast.Root>
