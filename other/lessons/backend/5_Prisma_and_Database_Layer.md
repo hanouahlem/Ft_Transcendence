@@ -284,6 +284,42 @@ Foreign keys also enforce data integrity. The database ensures that `actorId: 5`
 
 When a user is deleted, you can configure the FK to cascade: automatically delete all notifications where `actorId` matched that user. This prevents broken references in the database.
 
+## Delete Order Matters
+
+One important real project case is post deletion.
+
+In our schema:
+
+- `Comment` points to `Post`
+- `CommentLike` points to `Comment`
+- `CommentFavorite` points to `Comment`
+
+That means deleting a post is not just `delete post`.
+If a comment still has child rows in `CommentLike` or `CommentFavorite`, PostgreSQL rejects the delete because the foreign keys would become invalid.
+
+Current backend logic in [backend/src/services/postService.js](/media/ahbey/%20HANOU/ahlem/backend/src/services/postService.js) deletes in this order:
+
+```js
+await tx.commentLike.deleteMany({ where: { commentId: { in: commentIds } } });
+await tx.commentFavorite.deleteMany({ where: { commentId: { in: commentIds } } });
+await tx.comment.deleteMany({ where: { postId: resolvedPostId } });
+await tx.post.delete({ where: { id: resolvedPostId } });
+```
+
+Why this is needed:
+
+- child rows must be removed before parent rows
+- otherwise the database blocks the request
+- doing it in a Prisma transaction keeps the delete consistent
+
+Evaluator keywords:
+
+- foreign key
+- parent row / child row
+- referential integrity
+- transaction
+- delete cascade vs manual cleanup
+
 ## Self-Check Questions
 
 - What is the difference between `schema.prisma` and a migration file?
