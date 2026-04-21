@@ -42,13 +42,13 @@ function mergeUserPreview(
   current: UserPreviewIdentity,
   incoming: Partial<UserPreviewIdentity>,
 ): UserPreviewIdentity {
-  const definedIncoming = Object.fromEntries(
+  const sanitizedIncoming = Object.fromEntries(
     Object.entries(incoming).filter(([, value]) => value !== undefined && value !== null),
   ) as Partial<UserPreviewIdentity>;
 
   return {
     ...current,
-    ...definedIncoming,
+    ...sanitizedIncoming,
   };
 }
 

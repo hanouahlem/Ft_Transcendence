@@ -21,6 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
 import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { usePostInteractions } from "@/hooks/usePostInteractions";
+import { useI18n } from "@/i18n/I18nProvider";
 import {
   getFriendSuggestions,
   getPosts,
@@ -75,6 +76,7 @@ function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, token } = useAuth();
+  const { t } = useI18n();
   const { notifyError } = useArchiveToasts();
 
   const currentQuery = searchParams.get("q")?.trim() || "";
@@ -132,6 +134,12 @@ function SearchPageContent() {
     },
   });
 
+  const rightRailLabels = {
+    myFriends: t("rightRail.myFriends"),
+    youMightKnow: t("rightRail.youMightKnow"),
+    friendsSuffix: t("rightRail.friendsSuffix"),
+  };
+
   const totalLikes = useMemo(
     () => posts.reduce((sum, post) => sum + post.likesCount, 0),
     [posts],
@@ -172,11 +180,11 @@ function SearchPageContent() {
         ]);
 
         if (!postsResult.ok) {
-          throw new Error(postsResult.message || "Unable to load archive posts.");
+          throw new Error(postsResult.message || t("search.errors.loadPosts"));
         }
 
         if (!usersResult.ok) {
-          throw new Error(usersResult.message || "Unable to load observers.");
+          throw new Error(usersResult.message || t("search.errors.loadUsers"));
         }
 
         const resolvedPosts = Array.isArray(postsResult.data)
@@ -228,20 +236,20 @@ function SearchPageContent() {
 
         const normalizedSuggestions =
           suggestionsResult.ok &&
-          suggestionsResult.data &&
-          Array.isArray(suggestionsResult.data.suggestions)
+            suggestionsResult.data &&
+            Array.isArray(suggestionsResult.data.suggestions)
             ? suggestionsResult.data.suggestions
-                .filter(
-                  (item): item is RightRailSuggestion =>
-                    typeof item?.id === "number" &&
-                    typeof item?.username === "string",
-                )
-                .map((item) => ({
-                  id: item.id,
-                  username: item.username,
-                  displayName: item.displayName || null,
-                  avatar: item.avatar || null,
-                }))
+              .filter(
+                (item): item is RightRailSuggestion =>
+                  typeof item?.id === "number" &&
+                  typeof item?.username === "string",
+              )
+              .map((item) => ({
+                id: item.id,
+                username: item.username,
+                displayName: item.displayName || null,
+                avatar: item.avatar || null,
+              }))
             : [];
 
         if (ignore) {
@@ -263,7 +271,7 @@ function SearchPageContent() {
         const message =
           error instanceof Error
             ? error.message
-            : "Failed to load the archive search page.";
+            : t("search.errors.loadFallback");
 
         setPageError(message);
         notifyError(message);
@@ -323,7 +331,10 @@ function SearchPageContent() {
 
   const resultCount =
     activeTab === "posts" ? filteredPosts.length : filteredUsers.length;
-  const resultLabel = activeTab === "posts" ? "post" : "user";
+  const resultLabel =
+    activeTab === "posts"
+      ? t("search.resultLabels.posts")
+      : t("search.resultLabels.users");
   const pageSize = activeTab === "posts" ? POSTS_PER_PAGE : USERS_PER_PAGE;
   const totalPages = Math.max(1, Math.ceil(resultCount / pageSize));
   const currentPage = Math.min(requestedPage, totalPages);
@@ -374,14 +385,14 @@ function SearchPageContent() {
             const profile = profileResult.ok
               ? profileResult.data
               : {
-                  ...baseUser,
-                  banner: null,
-                  bio: null,
-                  status: null,
-                  location: null,
-                  website: null,
-                  createdAt: undefined,
-                };
+                ...baseUser,
+                banner: null,
+                bio: null,
+                status: null,
+                location: null,
+                website: null,
+                createdAt: undefined,
+              };
 
             return {
               ...baseUser,
@@ -480,10 +491,10 @@ function SearchPageContent() {
               <div className="flex flex-col gap-6">
                 <div>
                   <h1 className="mt-4 font-display text-4xl font-black uppercase tracking-[-0.05em] text-ink sm:text-5xl">
-                    Search
+                    {t("search.title")}
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm leading-relaxed text-label">
-                    Search archive posts and observer records without leaving the current shell.
+                    {t("search.description")}
                   </p>
                 </div>
 
@@ -493,17 +504,17 @@ function SearchPageContent() {
                     type="text"
                     value={draftQuery}
                     onChange={(event) => setDraftQuery(event.target.value)}
-                    placeholder="SEARCH POSTS OR OBSERVERS..."
+                    placeholder={t("search.placeholder")}
                     className="archive-input w-full border-2 border-label/20 bg-paper-muted py-4 pl-12 pr-4 font-mono text-lg text-ink transition-colors outline-none focus:border-accent-orange"
                   />
                 </form>
 
                 <TabsList variant="archive" className="gap-8">
                   <TabsTrigger value="posts" variant="archive">
-                    Posts
+                    {t("search.tabs.posts")}
                   </TabsTrigger>
                   <TabsTrigger value="users" variant="archive">
-                    Users
+                    {t("search.tabs.users")}
                   </TabsTrigger>
                   <TabsIndicator />
                 </TabsList>
@@ -511,13 +522,13 @@ function SearchPageContent() {
                 <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-label">
                   <span>
                     {loading
-                      ? "Indexing archive records..."
-                      : `${resultCount} ${resultLabel} result${resultCount === 1 ? "" : "s"}`}
+                      ? t("search.loading.indexing")
+                      : t("search.resultsCount", { count: resultCount, label: resultLabel, s: resultCount === 1 ? "" : "s" })}
                   </span>
                   <span>
                     {normalizedQuery
-                      ? `Query: ${currentQuery}`
-                      : "Showing the latest archive records"}
+                      ? t("search.query", { query: currentQuery })
+                      : t("search.showingLatest")}
                   </span>
                 </div>
               </div>
@@ -534,7 +545,7 @@ function SearchPageContent() {
             {pageError ? null : loading ? (
               <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                  Loading archive records...
+                  {t("search.loading.records")}
                 </p>
               </section>
             ) : (
@@ -543,7 +554,7 @@ function SearchPageContent() {
                   {filteredPosts.length === 0 ? (
                     <section className="border border-dashed border-label/30 bg-paper/70 px-5 py-10 text-center">
                       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-label">
-                        No posts match this archive query.
+                        {t("search.empty.posts")}
                       </p>
                     </section>
                   ) : (
@@ -568,7 +579,7 @@ function SearchPageContent() {
                   {filteredUsers.length === 0 ? (
                     <section className="border border-dashed border-label/30 bg-paper/70 px-5 py-10 text-center">
                       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-label">
-                        No observers match this archive query.
+                        {t("search.empty.users")}
                       </p>
                     </section>
                   ) : (
@@ -600,7 +611,7 @@ function SearchPageContent() {
                     onPageChange={handlePageChange}
                     className="border-t border-dashed border-label/30 py-8"
                   >
-                    <PaginationSummary itemLabel={`${resultLabel} results`} />
+                    <PaginationSummary itemLabel={t("search.pagination", { label: resultLabel })} />
                     <PaginationControls>
                       <PaginationPrevTrigger />
                       <PaginationItems />
@@ -610,7 +621,7 @@ function SearchPageContent() {
                 ) : null}
 
                 <div className="border-t border-dashed border-label py-8 text-center font-mono text-sm text-label">
-                  --- END OF SEARCH RESULTS ---
+                  {t("search.endOfResults")}
                 </div>
               </>
             )}
@@ -621,7 +632,7 @@ function SearchPageContent() {
           totalPosts={posts.length}
           totalLikes={totalLikes}
           totalComments={totalComments}
-          sectionTitle={getRightRailTitle({})}
+          sectionTitle={getRightRailTitle({}, rightRailLabels)}
           suggestions={suggestions}
           sentRequests={sentRequests}
           incomingRequestIdsBySender={incomingRequestIdsBySender}

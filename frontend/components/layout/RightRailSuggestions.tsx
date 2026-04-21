@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button";
 
 type RightRailSuggestionsProps = {
 	sectionTitle: string;
+	emptyFriendsTitle: string;
+	emptySuggestionsTitle: string;
+	addLabel: string;
+	acceptLabel: string;
+	addingLabel: string;
+	acceptingLabel: string;
+	sentLabel: string;
+	friendLabel?: string;
+	removeLabel?: string;
+	removingLabel?: string;
 	suggestions: RightRailSuggestion[];
 	sentRequests: number[];
 	incomingRequestIdsBySender: Record<number, number>;
@@ -19,6 +29,16 @@ type RightRailSuggestionsProps = {
 
 export function RightRailSuggestions({
 	sectionTitle,
+	emptyFriendsTitle,
+	emptySuggestionsTitle,
+	addLabel,
+	acceptLabel,
+	addingLabel,
+	acceptingLabel,
+	sentLabel,
+	friendLabel = "Friend",
+	removeLabel = "Remove",
+	removingLabel = "Removing",
 	suggestions,
 	sentRequests,
 	incomingRequestIdsBySender,
@@ -29,17 +49,9 @@ export function RightRailSuggestions({
 	onRemoveFriend,
 	allowFollow = true,
 }: RightRailSuggestionsProps) {
-	const emptyState = (() => {
-		if (sectionTitle === "My Friends") {
-			return { title: "You have no friend.." };
-		}
-
-		if (sectionTitle === "You Might Know") {
-			return { title: "You are on your own.." };
-		}
-
-		return { title: "No Friend" };
-	})();
+	const emptyState = allowFollow
+		? { title: emptySuggestionsTitle }
+		: { title: emptyFriendsTitle };
 
 	return (
 		<section className="relative rotate-1 border border-black/10 bg-paper-muted px-6 py-6 shadow-sm">
@@ -70,17 +82,17 @@ export function RightRailSuggestions({
 							author.displayName?.trim() || author.username;
 						const actionLabel = isSubmitting
 							? isConnected
-								? "Removing"
+								? removingLabel
 								: incomingRequestId
-									? "Accepting"
-									: "Adding"
+									? acceptingLabel
+									: addingLabel
 							: isConnected
-								? "Remove"
+								? removeLabel
 								: incomingRequestId
-									? "Accept"
+									? acceptLabel
 									: sent
-										? "Sent"
-										: "Add";
+										? sentLabel
+										: addLabel;
 						const actionVariant = isConnected
 							? "destructive"
 							: sent
@@ -120,7 +132,7 @@ export function RightRailSuggestions({
 										className={cn(
 											"h-9 w-9",
 											tileClasses[
-												author.id % tileClasses.length
+											author.id % tileClasses.length
 											],
 										)}
 									/>
@@ -144,7 +156,7 @@ export function RightRailSuggestions({
 								{allowFollow ? (
 									isConnected && !canRemoveFriend ? (
 										<span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-label">
-											Friend
+											{friendLabel}
 										</span>
 									) : (
 										<Button

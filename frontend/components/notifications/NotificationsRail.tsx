@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import type { NotificationFilterState } from "@/lib/notification-utils";
 
@@ -17,28 +18,6 @@ type NotificationsRailProps = {
   onMarkAllAsRead: () => Promise<void>;
 };
 
-const FILTER_LABELS: Array<{
-  key: keyof NotificationFilterState;
-  label: string;
-  description: string;
-}> = [
-  {
-    key: "social",
-    label: "Field followers",
-    description: "Follow and archive-connection activity",
-  },
-  {
-    key: "post",
-    label: "Entry reactions",
-    description: "Likes, comments, and mentions tied to posts",
-  },
-  {
-    key: "message",
-    label: "Direct notes",
-    description: "Message-style records and fallback alerts",
-  },
-];
-
 export function NotificationsRail({
   searchValue,
   onSearchChange,
@@ -50,31 +29,54 @@ export function NotificationsRail({
   markingAll,
   onMarkAllAsRead,
 }: NotificationsRailProps) {
+  const { t } = useI18n();
   const readCount = Math.max(0, totalCount - unreadCount);
+
+  const filterCopy = [
+    {
+      key: "social" as const,
+      label: t("notifications.filters.social.label"),
+      description: t("notifications.filters.social.description"),
+    },
+    {
+      key: "post" as const,
+      label: t("notifications.filters.post.label"),
+      description: t("notifications.filters.post.description"),
+    },
+    {
+      key: "message" as const,
+      label: t("notifications.filters.message.label"),
+      description: t("notifications.filters.message.description"),
+    },
+  ];
 
   return (
     <aside className="hidden w-[260px] shrink-0 xl:flex xl:flex-col xl:gap-10">
       <div className="sticky top-12 flex h-fit flex-col gap-10 py-2">
         <label className="relative block">
-          <Search className="pointer-events-none absolute left-4 top-3 h-4 w-4 text-label" />
+          <Search className="pointer-events-none absolute top-3 h-4 w-4 text-label" style={{ insetInlineStart: "1rem" }} />
           <input
             type="text"
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search correspondence..."
-            className="archive-input w-full rounded-lg border-0 bg-paper-muted py-2.5 pl-11 pr-4 font-mono text-sm shadow-inner"
+            placeholder={t("notifications.searchPlaceholder")}
+            className="archive-input w-full rounded-lg border-0 bg-paper-muted py-2.5 font-mono text-sm shadow-inner"
+            style={{
+              paddingInlineStart: "2.75rem",
+              paddingInlineEnd: "1rem",
+            }}
           />
         </label>
 
         <section className="relative rotate-1 border border-black/10 bg-paper-muted px-6 py-6 shadow-sm">
           <div className="mb-4 border-b-2 border-ink pb-2 font-mono text-xs uppercase tracking-[0.24em] text-label">
-            Notification Ledger
+            {t("notifications.ledgerTitle")}
           </div>
 
           <div className="grid grid-cols-3 gap-3 text-center">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-label">
-                Total
+                {t("notifications.stats.total")}
               </p>
               <p className="mt-2 font-display text-3xl font-black text-ink">
                 {totalCount}
@@ -82,7 +84,7 @@ export function NotificationsRail({
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-label">
-                Unread
+                {t("notifications.stats.unread")}
               </p>
               <p className="mt-2 font-display text-3xl font-black text-accent-red">
                 {unreadCount}
@@ -90,7 +92,7 @@ export function NotificationsRail({
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-label">
-                Read
+                {t("notifications.stats.read")}
               </p>
               <p className="mt-2 font-display text-3xl font-black text-accent-blue">
                 {readCount}
@@ -99,7 +101,7 @@ export function NotificationsRail({
           </div>
 
           <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-label">
-            Visible records: {visibleCount}
+            {t("notifications.stats.visible", { count: visibleCount })}
           </p>
 
           <Button
@@ -112,17 +114,17 @@ export function NotificationsRail({
               void onMarkAllAsRead();
             }}
           >
-            {markingAll ? "Marking records" : "Mark all as read"}
+            {markingAll ? t("notifications.marking") : t("notifications.markAll")}
           </Button>
         </section>
 
         <section className="relative border border-black/10 bg-paper-muted px-6 py-6 shadow-sm -rotate-1">
           <div className="mb-4 border-b-2 border-ink pb-2 font-mono text-xs uppercase tracking-[0.24em] text-label">
-            Notification Settings
+            {t("notifications.settingsTitle")}
           </div>
 
           <div className="flex flex-col gap-3">
-            {FILTER_LABELS.map((item) => {
+            {filterCopy.map((item) => {
               const enabled = filters[item.key];
 
               return (
@@ -131,7 +133,7 @@ export function NotificationsRail({
                   type="button"
                   onClick={() => onToggleFilter(item.key)}
                   className={cn(
-                    "flex items-start gap-3 border border-transparent px-1 py-1 text-left transition-colors hover:text-accent-red",
+                    "flex items-start gap-3 border border-transparent px-1 py-1 text-start transition-colors hover:text-accent-red",
                     enabled ? "text-ink" : "text-label",
                   )}
                 >
@@ -153,24 +155,23 @@ export function NotificationsRail({
             })}
           </div>
 
-          <div className="absolute bottom-3 right-4 flex gap-1">
+          <div className="absolute bottom-3 flex gap-1" style={{ insetInlineEnd: "1rem" }}>
             <div className="h-1.5 w-1.5 rounded-full bg-accent-green shadow-[1px_1px_2px_rgba(0,0,0,0.3)]" />
           </div>
         </section>
 
         <section className="relative -rotate-1 border border-label/20 bg-white/40 px-4 py-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-label">
-            Field Advisory
+            {t("notifications.advisoryTitle")}
           </div>
           <p className="mt-2 text-sm italic leading-snug text-ink">
-            Search and filter stay local to this ledger. The backend remains the
-            source of truth for read state, deletion, and destination links.
+            {t("notifications.advisoryText")}
           </p>
         </section>
 
         <footer className="mt-auto font-mono text-[10px] leading-relaxed text-label">
-          <p>Terms · Privacy · Archive Access</p>
-          <p>Structured notifications · Phase 7</p>
+          <p>{t("notifications.footer.primary")}</p>
+          <p>{t("notifications.footer.secondary")}</p>
         </footer>
       </div>
     </aside>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type FriendActionButtonProps = {
   profileUserId: number | null;
@@ -18,37 +19,39 @@ function getFriendActionLabel({
   incomingRequestId,
   isPending,
   isSubmitting,
+  t,
 }: {
   isConnected: boolean;
   incomingRequestId?: number;
   isPending: boolean;
   isSubmitting: boolean;
+  t: (key: string) => string;
 }) {
   if (isSubmitting) {
     if (isConnected) {
-      return "Removing";
+      return t("common.removing");
     }
 
     if (incomingRequestId) {
-      return "Accepting";
+      return t("common.accepting");
     }
 
-    return "Adding";
+    return t("common.adding");
   }
 
   if (isConnected) {
-    return "Remove";
+    return t("common.remove");
   }
 
   if (incomingRequestId) {
-    return "Accept";
+    return t("common.accept");
   }
 
   if (isPending) {
-    return "Pending";
+    return t("common.pending");
   }
 
-  return "Add";
+  return t("common.add");
 }
 
 function getFriendActionVariant({
@@ -85,6 +88,7 @@ export function FriendActionButton({
   onAcceptFriend,
   onRemoveFriend,
 }: FriendActionButtonProps) {
+  const { t } = useI18n();
   const isSubmitting =
     profileUserId !== null && sendingFriendId === profileUserId;
 
@@ -125,6 +129,7 @@ export function FriendActionButton({
         incomingRequestId,
         isPending,
         isSubmitting,
+        t,
       })}
     </Button>
   );

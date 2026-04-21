@@ -10,6 +10,8 @@ import { FileUpload, useFileUpload } from "@ark-ui/react/file-upload";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nProvider";
+
 
 type ProfilePhotoUploaderProps = {
   name: string;
@@ -26,6 +28,7 @@ export function ProfilePhotoUploader({
   onSelect,
   onClear,
 }: ProfilePhotoUploaderProps) {
+  const { t } = useI18n();
   const fileUpload = useFileUpload({
     maxFiles: 1,
     accept: ["image/*"],
@@ -45,7 +48,7 @@ export function ProfilePhotoUploader({
   return (
     <FileUpload.RootProvider value={fileUpload}>
       <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-        05. Visual Capture
+        {t("settingsPage.fields.avatarLabel")}
       </span>
 
       <div className="flex flex-col items-start gap-3">

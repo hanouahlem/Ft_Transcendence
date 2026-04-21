@@ -6,6 +6,8 @@ import path from "path";
 import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
 import { attachSocketServer } from "./socket.js";
+import publicApiRoutes from "./routes/publicApi.routes.js";
+import { swaggerUi, swaggerSpec } from "./swagger.js";
 
 try {
   validateEnv();
@@ -24,6 +26,9 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/uploads", express.static(path.resolve("uploads")));
+
+app.use("/api/public", publicApiRoutes);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/", route);
 

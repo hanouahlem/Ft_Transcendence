@@ -4,6 +4,7 @@ import type { RightRailSuggestion } from "@/lib/right-rail";
 import { RightRailSearch } from "@/components/layout/RightRailSearch";
 import { RightRailSuggestions } from "@/components/layout/RightRailSuggestions";
 import { RightRailTrends } from "@/components/layout/RightRailTrends";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type RightRailProps = {
 	totalPosts: number;
@@ -40,19 +41,34 @@ export function RightRail({
 	reserveSpace = true,
 	rightAnchorBase = 604,
 }: RightRailProps) {
+	const { t } = useI18n();
+	const sectionTitleLabel = sectionTitle || t("rightRail.youMightKnow");
+	const searchLabel = (title: string) => `${t("rightRail.searchButtonLabel")} ${title}`;
+	const emptySuggestionsTitle = t("rightRail.emptySuggestions");
+	const emptyFriendsTitle = t("rightRail.emptyFriends");
 	return (
 		<aside
 			className={reserveSpace ? "hidden w-73 shrink-0 xl:block" : "hidden shrink-0 xl:block xl:w-0"}
 		>
 			<div
 				className="fixed inset-y-0 z-20 hidden w-77 py-8 xl:block"
-				style={{ right: `max(0px, calc(50vw - ${rightAnchorBase}px))` }}
+				style={{ insetInlineEnd: `max(0px, calc(50vw - ${rightAnchorBase}px))` }}
 			>
 				<div className="flex h-full w-full flex-col gap-10 overflow-y-auto pr-1">
 					<RightRailSearch />
-					<RightRailTrends />
+					<RightRailTrends title={t("rightRail.trendsTitle")} searchLabel={searchLabel} />
 					<RightRailSuggestions
-						sectionTitle={sectionTitle}
+						sectionTitle={sectionTitleLabel}
+						emptyFriendsTitle={emptyFriendsTitle}
+						emptySuggestionsTitle={emptySuggestionsTitle}
+						addLabel={t("common.add")}
+						acceptLabel={t("common.accept")}
+						addingLabel={t("common.adding")}
+						acceptingLabel={t("common.accepting")}
+						sentLabel={t("common.sent")}
+						friendLabel={t("friends.friend")}
+						removeLabel={t("friends.delete")}
+						removingLabel={t("friends.loading")}
 						suggestions={suggestions}
 						sentRequests={sentRequests}
 						incomingRequestIdsBySender={incomingRequestIdsBySender}
@@ -65,10 +81,8 @@ export function RightRail({
 					/>
 
 					<footer className="mt-auto pb-2 font-mono text-[10px] leading-relaxed text-label">
-						<p>Terms of Service · Privacy Policy · Cookie Policy</p>
-						<p>
-							{totalPosts} logs · {totalLikes} likes · {totalComments} notes
-						</p>
+						<p>{t("rightRail.footerTerms")}</p>
+						<p>{t("rightRail.stats", { posts: totalPosts, likes: totalLikes, comments: totalComments })}</p>
 					</footer>
 				</div>
 			</div>

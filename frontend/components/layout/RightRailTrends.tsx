@@ -1,25 +1,35 @@
+"use client";
+
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const SEARCH_ROUTE = "/search";
 
-const TRENDS = [
-  { rank: "01", title: "42", meta: "School / Subject" },
-  { rank: "02", title: "Tailwind CSS", meta: "Frontend / Styling" },
-  { rank: "03", title: "Development", meta: "Build / Workflow" },
-];
+type RightRailTrendsProps = {
+  title: string;
+  searchLabel: (title: string) => string;
+};
 
-export function RightRailTrends() {
+export function RightRailTrends({ title, searchLabel }: RightRailTrendsProps) {
+  const { t } = useI18n();
+
+  const trends = [
+    { rank: "01", title: t("rightRail.trends.drop.title"), meta: t("rightRail.trends.drop.meta") },
+    { rank: "02", title: t("rightRail.trends.guild.title"), meta: t("rightRail.trends.guild.meta") },
+    { rank: "03", title: t("rightRail.trends.retro.title"), meta: t("rightRail.trends.retro.meta") },
+  ];
+
   return (
     <section className="relative">
       <div className="mb-6 inline-block -rotate-1 bg-ink px-4 py-1 text-paper">
         <span className="font-display text-lg font-bold uppercase tracking-[0.08em]">
-          Current Trends
+          {title}
         </span>
       </div>
 
       <div className="flex flex-col">
-        {TRENDS.map((trend, index) => (
+        {trends.map((trend, index) => (
           <Link
             key={trend.rank}
             href={`${SEARCH_ROUTE}?q=${encodeURIComponent(trend.title)}`}
@@ -30,7 +40,7 @@ export function RightRailTrends() {
               index === 1 && "rotate-1",
               index === 2 && "-rotate-2",
             )}
-            aria-label={`Search for ${trend.title}`}
+            aria-label={searchLabel(trend.title)}
           >
             <span className="border-r border-black/15 pr-3 font-mono text-xs text-label">
               {trend.rank}
@@ -40,7 +50,7 @@ export function RightRailTrends() {
               <p className="mt-1 font-mono text-[10px] text-label">{trend.meta}</p>
             </div>
             <span className="font-mono text-xs text-label transition-colors group-hover:text-ink">
-              [+]
+              {t("rightRail.token")}
             </span>
           </Link>
         ))}

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useI18n } from "@/i18n/I18nProvider";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { Button } from "@/components/ui/button";
 import { UserIdentityLink } from "@/components/users/UserIdentityLink";
@@ -30,6 +31,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function FriendsPage() {
 	const { user, token } = useAuth();
+	const { t } = useI18n();
 
 	const [friends, setFriends] = useState<FriendListItem[]>([]);
 	const [requests, setRequests] = useState<FriendRequest[]>([]);
@@ -147,7 +149,7 @@ export default function FriendsPage() {
 
 	const handleAddFriend = async (receiverId: number) => {
 		if (!token) {
-			archiveToaster.error({ title: "Error", description: "You must be logged in to send a request." });
+			archiveToaster.error({ title: t("friends.toasts.titles.error"), description: t("friends.toasts.loginRequired") });
 			return;
 		}
 
@@ -165,15 +167,15 @@ export default function FriendsPage() {
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.message || "Unable to send friend request.");
+				throw new Error(data.message || t("friends.toasts.sendError"));
 			}
 
 			setSentRequests((prev) => [...prev, receiverId]);
-			archiveToaster.success({ title: "Sent", description: "Friend request sent." });
+			archiveToaster.success({ title: t("friends.toasts.titles.sent"), description: t("friends.toasts.sent") });
 		} catch (err) {
 			archiveToaster.error({
-				title: "Error",
-				description: err instanceof Error ? err.message : "Unable to send friend request.",
+				title: t("friends.toasts.titles.error"),
+				description: err instanceof Error ? err.message : t("friends.toasts.sendError"),
 			});
 		} finally {
 			setSendingId(null);
@@ -193,7 +195,7 @@ export default function FriendsPage() {
 			});
 			if (res.ok) {
 				setRequests((prev) => prev.filter((r) => r.id !== requestId));
-				archiveToaster.success({ title: "Accepted", description: "Friend request accepted." });
+				archiveToaster.success({ title: t("friends.toasts.titles.accepted"), description: t("friends.toasts.accepted") });
 				fetchFriends();
 			}
 		} catch (err) {
@@ -213,7 +215,7 @@ export default function FriendsPage() {
 			});
 			if (res.ok) {
 				setRequests((prev) => prev.filter((r) => r.id !== requestId));
-				archiveToaster.success({ title: "Declined", description: "Friend request declined." });
+				archiveToaster.success({ title: t("friends.toasts.titles.declined"), description: t("friends.toasts.declined") });
 			}
 		} catch (err) {
 			console.error("Decline error:", err);
@@ -227,7 +229,7 @@ export default function FriendsPage() {
 
 		const friend = friends.find((entry) => entry.id === userId);
 		if (!friend) {
-			archiveToaster.error({ title: "Error", description: "Friendship not found." });
+			archiveToaster.error({ title: t("friends.toasts.titles.error"), description: t("friends.toasts.notFound") });
 			return;
 		}
 
@@ -239,14 +241,14 @@ export default function FriendsPage() {
 			});
 			if (res.ok) {
 				setFriends((prev) => prev.filter((entry) => entry.id !== userId));
-				archiveToaster.success({ title: "Removed", description: "Friend removed." });
+				archiveToaster.success({ title: t("friends.toasts.titles.removed"), description: t("friends.toasts.removed") });
 			} else {
 				const data = await res.json();
-				throw new Error(data.message || "Failed to remove friend.");
+				throw new Error(data.message || t("friends.toasts.removeError"));
 			}
 		} catch (err) {
 			console.error("Remove friend error:", err);
-			archiveToaster.error({ title: "Error", description: "Unable to remove friend." });
+			archiveToaster.error({ title: t("friends.toasts.titles.error"), description: t("friends.toasts.removeUnable") });
 		} finally {
 			setProcessingId(null);
 		}
@@ -260,10 +262,10 @@ export default function FriendsPage() {
 
 					<header className="mb-8 border-b-2 border-ink pb-4">
 						<h1 className="font-display text-4xl font-black tracking-tight text-ink">
-							Directory
+							{t("friends.title")}
 						</h1>
 						<p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-label">
-							Search for observers & manage connections
+							{t("friends.subtitle")}
 						</p>
 					</header>
 
@@ -272,7 +274,7 @@ export default function FriendsPage() {
 						<Search className="absolute left-3 top-3.5 h-5 w-5 text-label" />
 						<input
 							type="text"
-							placeholder="Search observers..."
+							placeholder={t("friends.searchPlaceholder")}
 							value={searchQuery}
 							onChange={(e) => {
 								setSearchQuery(e.target.value);
@@ -286,7 +288,7 @@ export default function FriendsPage() {
 					{requests.length > 0 && (
 						<div className="mb-10">
 							<h2 className="mb-4 inline-block -rotate-1 bg-ink px-3 py-1 font-display text-lg font-bold text-paper">
-								Incoming Requests
+								{t("friends.incomingRequests")}
 							</h2>
 							<div className="flex flex-col gap-4">
 								{requests.map((req) => (
@@ -302,15 +304,15 @@ export default function FriendsPage() {
 												>
 													{req.sender.username}
 												</UserIdentityLink>
-												<p className="font-mono text-[10px] uppercase text-label">Wants to connect</p>
+												<p className="font-mono text-[10px] uppercase text-label">{t("friends.wantsToConnect")}</p>
 											</div>
 										</div>
 										<div className="flex gap-2">
 											<Button variant="stamp" size="sm" onClick={() => handleAcceptFriend(req.senderId)} disabled={processingId === req.id}>
-												Accept
+												{t("friends.accept")}
 											</Button>
 											<Button variant="subtle" size="sm" onClick={() => handleDeclineRequest(req.id)} disabled={processingId === req.id}>
-												Decline
+												{t("friends.decline")}
 											</Button>
 										</div>
 									</div>
@@ -322,13 +324,13 @@ export default function FriendsPage() {
 					{/* Search Results */}
 					<div>
 						<h2 className="mb-4 font-mono text-xs uppercase tracking-[0.28em] text-label">
-							{searchQuery ? "Search Results" : "All Observers"}
+							{searchQuery ? t("friends.searchResults") : t("friends.allObservers")}
 						</h2>
 						<div className="flex flex-col gap-0 border border-black/10 bg-paper-muted">
 							{loading ? (
-								<div className="p-8 text-center font-mono text-sm text-label">Loading...</div>
+								<div className="p-8 text-center font-mono text-sm text-label">{t("friends.loading")}</div>
 							) : searchedUsers.length === 0 ? (
-								<div className="p-8 text-center font-mono text-sm text-label">No observers found.</div>
+								<div className="p-8 text-center font-mono text-sm text-label">{t("friends.noObservers")}</div>
 							) : (
 								searchedUsers.map((u, i) => {
 									const isFriend = friendIds.has(u.id);
@@ -352,21 +354,21 @@ export default function FriendsPage() {
 														user={u}
 														className="block font-mono text-[10px] uppercase text-label"
 													>
-														{u.displayName || "Observer profile"}
+														{u.displayName || t("friends.observerProfile")}
 													</UserIdentityLink>
 												</div>
 											</div>
 											<div>
 												{isFriend ? (
 													<div className="flex items-center gap-3">
-														<span className="font-mono text-xs font-bold uppercase tracking-widest text-label">Friend</span>
+														<span className="font-mono text-xs font-bold uppercase tracking-widest text-label">{t("friends.friend")}</span>
 														<Button variant="delete" size="sm" onClick={() => handleRemoveFriend(u.id)} disabled={processingId === u.id}>
-															Delete
+															{t("friends.delete")}
 														</Button>
 													</div>
 												) : incomingReqId ? (
 													<Button variant="bluesh" size="sm" onClick={() => handleAcceptFriend(u.id)} disabled={processingId === incomingReqId}>
-														Accept
+														{t("friends.accept")}
 													</Button>
 												) : (
 													<Button
@@ -375,7 +377,7 @@ export default function FriendsPage() {
 														disabled={hasSent || sendingId === u.id}
 														onClick={() => handleAddFriend(u.id)}
 													>
-														{hasSent ? "Pending" : sendingId === u.id ? "Adding" : "Add"}
+														{hasSent ? t("friends.pending") : sendingId === u.id ? t("friends.adding") : t("friends.add")}
 													</Button>
 												)}
 											</div>
@@ -392,7 +394,7 @@ export default function FriendsPage() {
 				totalPosts={0}
 				totalLikes={0}
 				totalComments={0}
-				sectionTitle="My Friends"
+				sectionTitle={t("profile.myFriends")}
 				suggestions={friends}
 				sentRequests={sentRequests}
 				incomingRequestIdsBySender={incomingRequestIdsBySender}

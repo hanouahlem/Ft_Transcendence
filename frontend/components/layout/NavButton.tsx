@@ -33,7 +33,7 @@ export function NavButton({
         <HugeiconsIcon icon={Icon} size={28} strokeWidth={1.6} />
 
         {typeof badge === "number" && badge > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-paper-muted bg-accent-red px-1 text-[10px] font-bold text-paper">
+          <span className="absolute -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-paper-muted bg-accent-red px-1 text-[10px] font-bold text-paper" style={{ insetInlineEnd: "-0.25rem" }}>
             {badge}
           </span>
         )}

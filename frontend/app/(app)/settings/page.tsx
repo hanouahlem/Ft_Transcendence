@@ -25,6 +25,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -81,18 +82,18 @@ function toNullable(value: string | null) {
   return trimmed ? trimmed : null;
 }
 
-function formatJoinedDate(value?: string) {
+function formatJoinedDate(value: string | undefined, locale: string, fallback: string) {
   if (!value) {
-    return "Unknown";
+    return fallback;
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "Unknown";
+    return fallback;
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "2-digit",
     year: "numeric",
@@ -102,6 +103,7 @@ function formatJoinedDate(value?: string) {
 export default function SettingsPage() {
   const { user, token, refreshUser } = useAuth();
   const { notifyError, notifySuccess } = useArchiveToasts();
+  const { locale, t } = useI18n();
 
   const [settingsUser, setSettingsUser] = useState<SettingsUser | null>(null);
   const [form, setForm] = useState<ProfileFormState>(EMPTY_FORM);
@@ -113,8 +115,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
-  const [stampText, setStampText] = useState("PENDING VERIFICATION");
-  const [statusLine, setStatusLine] = useState("No changes recorded yet.");
+  const [stampText, setStampText] = useState(t("settingsPage.stamp.pending"));
+  const [statusLine, setStatusLine] = useState(t("settingsPage.status.idle"));
   const [passwordLine, setPasswordLine] = useState<string | null>(null);
   const [lastSyncAt, setLastSyncAt] = useState(Date.now());
   const [secondsSinceSync, setSecondsSinceSync] = useState(0);
@@ -186,7 +188,7 @@ export default function SettingsPage() {
       ...previous,
       [field]: value,
     }));
-    setStampText("PENDING VERIFICATION");
+    setStampText(t("settingsPage.stamp.pending"));
     setStatusLine(message);
   };
 
@@ -244,22 +246,22 @@ export default function SettingsPage() {
         ]);
 
         if (!currentUserRes.ok) {
-          throw new Error(currentUserData.message || "Unable to load settings.");
+          throw new Error(currentUserData.message || t("settingsPage.errors.loadSettings"));
         }
 
         if (!postsRes.ok) {
-          throw new Error(postsData.message || "Unable to load archive totals.");
+          throw new Error(postsData.message || t("settingsPage.errors.loadTotals"));
         }
 
         const nextUser = currentUserData as SettingsUser;
         setSettingsUser(nextUser);
         setForm(normalizeUserForm(nextUser));
         setPosts(Array.isArray(postsData) ? postsData : []);
-        setStampText("PENDING VERIFICATION");
+        setStampText(t("settingsPage.stamp.pending"));
       } catch (error) {
         console.error("settings fetch error:", error);
         notifyError(
-          error instanceof Error ? error.message : "Failed to load settings.",
+          error instanceof Error ? error.message : t("settingsPage.errors.loadFallback"),
         );
       } finally {
         setLoading(false);
@@ -271,7 +273,7 @@ export default function SettingsPage() {
 
   const handleAvatarSelect = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      notifyError("Only image files are allowed.");
+      notifyError(t("settingsPage.errors.imageOnly"));
       return;
     }
 
@@ -283,13 +285,13 @@ export default function SettingsPage() {
     setAvatarFile(file);
     setAvatarPreviewUrl(previewUrl);
     setForm((previous) => ({ ...previous, avatar: previewUrl }));
-    setStampText("MEDIA STAGED");
-    setStatusLine("Profile photo queued for the next commit.");
+    setStampText(t("settingsPage.stamp.media"));
+    setStatusLine(t("settingsPage.status.avatarQueued"));
   };
 
   const handleBannerSelect = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      notifyError("Only image files are allowed.");
+      notifyError(t("settingsPage.errors.imageOnly"));
       return;
     }
 
@@ -301,8 +303,8 @@ export default function SettingsPage() {
     setBannerFile(file);
     setBannerPreviewUrl(previewUrl);
     setForm((previous) => ({ ...previous, banner: previewUrl }));
-    setStampText("MEDIA STAGED");
-    setStatusLine("Banner update queued for the next commit.");
+    setStampText(t("settingsPage.stamp.media"));
+    setStatusLine(t("settingsPage.status.bannerQueued"));
   };
 
   const handleClearAvatar = () => {
@@ -313,8 +315,8 @@ export default function SettingsPage() {
     setAvatarFile(null);
     setAvatarPreviewUrl(null);
     setForm((previous) => ({ ...previous, avatar: null }));
-    setStampText("PENDING VERIFICATION");
-    setStatusLine("Profile photo cleared from the staged record.");
+    setStampText(t("settingsPage.stamp.pending"));
+    setStatusLine(t("settingsPage.status.avatarCleared"));
   };
 
   const handleClearBanner = () => {
@@ -325,26 +327,26 @@ export default function SettingsPage() {
     setBannerFile(null);
     setBannerPreviewUrl(null);
     setForm((previous) => ({ ...previous, banner: null }));
-    setStampText("PENDING VERIFICATION");
-    setStatusLine("Banner cleared from the staged record.");
+    setStampText(t("settingsPage.stamp.pending"));
+    setStatusLine(t("settingsPage.status.bannerCleared"));
   };
 
   const handleProfileSave = async () => {
     if (!token || !user?.id) {
-      notifyError("You must be logged in to update settings.");
+      notifyError(t("settingsPage.errors.loginRequired"));
       return;
     }
 
     const trimmedUsername = form.username.trim();
 
     if (!trimmedUsername) {
-      notifyError("Username is required.");
+      notifyError(t("settingsPage.errors.usernameRequired"));
       return;
     }
 
     try {
       setSavingProfile(true);
-      setStampText("WRITING TO LEDGER");
+      setStampText(t("settingsPage.stamp.writing"));
 
       let nextAvatar = form.avatar;
       let nextBanner = form.banner;
@@ -353,7 +355,7 @@ export default function SettingsPage() {
         const uploadResult = await uploadSettingsMedia(avatarFile, token);
 
         if (!uploadResult.ok) {
-          throw new Error(uploadResult.message || "Unable to upload profile photo.");
+          throw new Error(uploadResult.message || t("settingsPage.errors.uploadAvatar"));
         }
 
         nextAvatar = uploadResult.data.url;
@@ -363,7 +365,7 @@ export default function SettingsPage() {
         const uploadResult = await uploadSettingsMedia(bannerFile, token);
 
         if (!uploadResult.ok) {
-          throw new Error(uploadResult.message || "Unable to upload banner.");
+          throw new Error(uploadResult.message || t("settingsPage.errors.uploadBanner"));
         }
 
         nextBanner = uploadResult.data.url;
@@ -379,7 +381,7 @@ export default function SettingsPage() {
       });
 
       if (!updateResult.ok) {
-        throw new Error(updateResult.message || "Unable to save settings.");
+        throw new Error(updateResult.message || t("settingsPage.errors.save"));
       }
 
       const nextUser = updateResult.data as SettingsUser;
@@ -389,16 +391,16 @@ export default function SettingsPage() {
       setBannerFile(null);
       setAvatarPreviewUrl(null);
       setBannerPreviewUrl(null);
-      setStampText("COMMITTED");
-      setStatusLine("Profile configuration committed to the ledger.");
+      setStampText(t("settingsPage.stamp.committed"));
+      setStatusLine(t("settingsPage.status.profileCommitted"));
       setLastSyncAt(Date.now());
       await refreshUser();
-      notifySuccess("Settings saved.");
+      notifySuccess(t("settingsPage.toasts.saved"));
     } catch (error) {
       console.error("save settings error:", error);
-      setStampText("COMMIT FAILED");
+      setStampText(t("settingsPage.stamp.commitFailed"));
       notifyError(
-        error instanceof Error ? error.message : "Failed to save settings.",
+        error instanceof Error ? error.message : t("settingsPage.errors.saveFallback"),
       );
     } finally {
       setSavingProfile(false);
@@ -407,24 +409,24 @@ export default function SettingsPage() {
 
   const handlePasswordSubmit = async () => {
     if (!token) {
-      notifyError("You must be logged in to update the password.");
+      notifyError(t("settingsPage.errors.passwordLoginRequired"));
       return;
     }
 
     const { currentPassword, newPassword, confirmPassword } = passwordForm;
 
     if (!newPassword.trim()) {
-      notifyError("A new password is required.");
+      notifyError(t("settingsPage.errors.newPasswordRequired"));
       return;
     }
 
     if (settingsUser?.hasPassword && (!currentPassword || !confirmPassword)) {
-      notifyError("Complete all password fields.");
+      notifyError(t("settingsPage.errors.completePasswordFields"));
       return;
     }
 
     if (settingsUser?.hasPassword && newPassword !== confirmPassword) {
-      notifyError("New password and confirmation do not match.");
+      notifyError(t("settingsPage.errors.passwordMismatch"));
       return;
     }
 
@@ -434,17 +436,17 @@ export default function SettingsPage() {
 
       const result = settingsUser?.hasPassword
         ? await changeLocalPassword(token, {
-            currentPassword,
-            newPassword,
-            confirmPassword,
-          })
+          currentPassword,
+          newPassword,
+          confirmPassword,
+        })
         : await setLocalPassword(token, {
-            newPassword,
-            confirmPassword: newPassword,
-          });
+          newPassword,
+          confirmPassword: newPassword,
+        });
 
       if (!result.ok) {
-        throw new Error(result.message || "Unable to update the password.");
+        throw new Error(result.message || t("settingsPage.errors.passwordUpdate"));
       }
 
       setPasswordForm({
@@ -453,24 +455,24 @@ export default function SettingsPage() {
         confirmPassword: "",
       });
       setPasswordLine(result.data.message);
-      setStampText("PASSWORD SEALED");
-      setStatusLine("Local password state updated and sealed.");
+      setStampText(t("settingsPage.stamp.passwordSealed"));
+      setStatusLine(t("settingsPage.status.passwordSealed"));
       setLastSyncAt(Date.now());
       await refreshUser();
       setSettingsUser((previous) =>
         previous
           ? {
-              ...previous,
-              hasPassword: true,
-            }
+            ...previous,
+            hasPassword: true,
+          }
           : previous,
       );
       notifySuccess(result.data.message);
     } catch (error) {
       console.error("password update error:", error);
-      setStampText("PASSWORD FAILED");
+      setStampText(t("settingsPage.stamp.passwordFailed"));
       notifyError(
-        error instanceof Error ? error.message : "Failed to update the password.",
+        error instanceof Error ? error.message : t("settingsPage.errors.passwordUpdateFallback"),
       );
     } finally {
       setSavingPassword(false);
@@ -636,14 +638,14 @@ export default function SettingsPage() {
           <section className="archive-paper border border-black/10 px-6 py-8">
             <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-label">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading settings archive...
+              {t("settingsPage.loading")}
             </div>
           </section>
         ) : settingsUser ? (
           <>
             <SettingsPaper
-              title="Profile Configuration"
-              subtitle="User Settings / Registry Alpha"
+              title={t("settingsPage.paper.title")}
+              subtitle={t("settingsPage.paper.subtitle")}
               footer={
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex gap-2">
@@ -652,57 +654,62 @@ export default function SettingsPage() {
                     <div className="h-4 w-4 bg-ink" />
                   </div>
                   <p className="font-mono text-[8px] uppercase tracking-[0.42em] text-ink">
-                    AUTHENTIC FIELD DOCUMENTATION / PROPERTY OF FIELD NOTES
+                    {t("settingsPage.paper.footer")}
                   </p>
                 </div>
               }
             >
               <div className="space-y-6 md:col-span-4">
+                {/*
+                  Translation note:
+                  all visible field labels/placeholders route through `t(...)`
+                  so this settings page stays consistent across EN/FR/ES/AR.
+                */}
                 <SettingsField
-                  label="01. Display name"
-                  placeholder="Display name"
+                  label={t("settingsPage.fields.displayNameLabel")}
+                  placeholder={t("settingsPage.fields.displayNamePlaceholder")}
                   value={form.displayName}
                   onChange={(event) =>
                     updateFormField(
                       "displayName",
                       event.target.value,
-                      "Display name edited. Ready for commit.",
+                      t("settingsPage.status.displayNameEdited"),
                     )
                   }
                 />
                 <SettingsField
-                  label="02. Username"
-                  placeholder="@username"
+                  label={t("settingsPage.fields.usernameLabel")}
+                  placeholder={t("settingsPage.fields.usernamePlaceholder")}
                   value={form.username}
                   onChange={(event) =>
                     updateFormField(
                       "username",
                       event.target.value,
-                      "Username edited. Ready for commit.",
+                      t("settingsPage.status.usernameEdited"),
                     )
                   }
                   inputClassName="italic"
                 />
                 <SettingsField
-                  label="03. Location"
-                  placeholder="Paris, FR"
+                  label={t("settingsPage.fields.locationLabel")}
+                  placeholder={t("settingsPage.fields.locationPlaceholder")}
                   value={form.location}
                   onChange={(event) =>
                     updateFormField(
                       "location",
                       event.target.value,
-                      "Location edited. Ready for commit.",
+                      t("settingsPage.status.locationEdited"),
                     )
                   }
                 />
                 <SettingsField
-                  label="04. Email"
+                  label={t("settingsPage.fields.emailLabel")}
                   type="email"
                   value={form.email}
                   readOnly
                 />
                 <ProfilePhotoUploader
-                  name={form.displayName || form.username || "Field User"}
+                  name={form.displayName || form.username || t("sidebar.profileFallback")}
                   imageUrl={form.avatar}
                   disabled={savingProfile}
                   onSelect={handleAvatarSelect}
@@ -712,7 +719,7 @@ export default function SettingsPage() {
 
               <div className="space-y-6 md:col-span-8">
                 <BannerUploader
-                  name={form.displayName || form.username || "Field User"}
+                  name={form.displayName || form.username || t("sidebar.profileFallback")}
                   imageUrl={form.banner}
                   disabled={savingProfile}
                   onSelect={handleBannerSelect}
@@ -720,14 +727,14 @@ export default function SettingsPage() {
                 />
 
                 <SettingsTextarea
-                  label="07. Narrative field observations"
-                  placeholder="Describe behavior, habitat, and interactions..."
+                  label={t("settingsPage.fields.bioLabel")}
+                  placeholder={t("settingsPage.fields.bioPlaceholder")}
                   value={form.bio}
                   onChange={(event) =>
                     updateFormField(
                       "bio",
                       event.target.value,
-                      "Narrative observations edited. Ready for commit.",
+                      t("settingsPage.status.bioEdited"),
                     )
                   }
                 />
@@ -804,22 +811,27 @@ export default function SettingsPage() {
                 <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                   <div className="flex-1">
                     <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                      09. Account Markers
+                      {t("settingsPage.accountMarkers")}
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {accountTags.map((tag) => (
                         <span
                           key={tag.label}
-                          className={`rounded-sm border px-2 py-1 font-mono text-xs ${tag.tone} ${
-                            tag.active ? "bg-black/5" : "bg-transparent"
-                          }`}
+                          className={`rounded-sm border px-2 py-1 font-mono text-xs ${tag.tone} ${tag.active ? "bg-black/5" : "bg-transparent"
+                            }`}
                         >
                           {tag.label}
                         </span>
                       ))}
                     </div>
                     <p className="mt-4 text-sm italic text-label">
-                      Joined archive: {formatJoinedDate(settingsUser.createdAt)}
+                      {t("settingsPage.joinedArchive", {
+                        date: formatJoinedDate(
+                          settingsUser.createdAt,
+                          locale,
+                          t("settingsPage.unknown"),
+                        ),
+                      })}
                     </p>
                   </div>
 
@@ -830,7 +842,7 @@ export default function SettingsPage() {
                       onClick={handleProfileSave}
                       disabled={savingProfile}
                     >
-                      {savingProfile ? "Confirming..." : "Confirm"}
+                      {savingProfile ? t("settingsPage.confirming") : t("settingsPage.confirm")}
                     </StampButton>
                   </div>
                 </div>
@@ -840,7 +852,7 @@ export default function SettingsPage() {
             <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2 font-mono text-[10px] italic text-label">
                 <div className="h-2 w-2 rounded-full bg-accent-orange" />
-                Auto-save disabled: last sync {secondsSinceSync}s ago
+                {t("settingsPage.lastSync", { seconds: secondsSinceSync })}
               </div>
 
               <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-label">
@@ -852,7 +864,7 @@ export default function SettingsPage() {
         ) : (
           <section className="archive-paper border border-black/10 px-6 py-8">
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-              Unable to resolve the account record.
+              {t("settingsPage.unableToResolve")}
             </p>
           </section>
         )}

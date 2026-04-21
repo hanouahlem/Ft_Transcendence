@@ -3,6 +3,28 @@ import path from "path";
 import prisma from "../prisma.js";
 import { checkComment } from './commentChecker.js';
 
+const deleteUploadedFile = (mediaUrl) => {
+  if (!mediaUrl) {
+    return;
+  }
+
+  try {
+    const filename = mediaUrl.split("/uploads/")[1];
+
+    if (!filename) {
+      return;
+    }
+
+    const filePath = path.resolve("uploads", filename);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (error) {
+    console.error("Erreur suppression media :", error);
+  }
+};
+
 const formatComment = (comment, currentUserId) => {
   return {
     id: comment.id,
@@ -151,64 +173,43 @@ export const createPost = async (input) => {
 
 export const deletePost = async (postId, userId) => {
   const post = await prisma.post.findUnique({
-    where: {
-      id: Number(postId),
+    where: { id: Number(postId) },
+    include: {
+      comments: true,
     },
   });
 
-  if (!post) {
-    throw new Error("Post not found");
-  }
-
-  if (post.authorId !== Number(userId)) {
-    throw new Error("You are not allowed to delete this post");
-  }
+  if (!post) throw new Error("Post not found");
+  if (post.authorId !== Number(userId)) throw new Error("You are not allowed to delete this post");
 
   if (post.image) {
     try {
       const filename = post.image.split("/uploads/")[1];
-
       if (filename) {
         const filePath = path.resolve("uploads", filename);
-
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       }
     } catch (error) {
       console.error("Erreur suppression image :", error);
     }
   }
 
-  await prisma.favorite.deleteMany({
-    where: {
-      postId: Number(postId),
-    },
-  });
+  const commentIds = post.comments.map((c) => c.id);
 
-  await prisma.like.deleteMany({
-    where: {
-      postId: Number(postId),
-    },
-  });
+  if (commentIds.length > 0) {
+    await prisma.commentLike.deleteMany({
+      where: { commentId: { in: commentIds } },
+    });
+    await prisma.commentFavorite.deleteMany({
+      where: { commentId: { in: commentIds } },
+    });
+  }
 
-  await prisma.comment.deleteMany({
-    where: {
-      postId: Number(postId),
-    },
-  });
-
-  await prisma.repost.deleteMany({
-    where: {
-      postId: Number(postId),
-    },
-  });
-
-  await prisma.post.delete({
-    where: {
-      id: Number(postId),
-    },
-  });
+  await prisma.favorite.deleteMany({ where: { postId: Number(postId) } });
+  await prisma.like.deleteMany({ where: { postId: Number(postId) } });
+  await prisma.comment.deleteMany({ where: { postId: Number(postId) } });
+  await prisma.repost.deleteMany({ where: { postId: Number(postId) } });
+  await prisma.post.delete({ where: { id: Number(postId) } });
 
   return true;
 };
@@ -471,21 +472,7 @@ export const deleteComment = async (commentId, userId) => {
     throw new Error("You are not allowed to delete this comment");
   }
 
-  if (comment.image) {
-    try {
-      const filename = comment.image.split("/uploads/")[1];
-
-      if (filename) {
-        const filePath = path.resolve("uploads", filename);
-
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      }
-    } catch (error) {
-      console.error("Erreur suppression image commentaire :", error);
-    }
-  }
+  deleteUploadedFile(comment.image);
 
   await prisma.commentLike.deleteMany({
     where: {

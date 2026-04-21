@@ -12,6 +12,7 @@ import { InboxUnreadProvider, useInboxUnread } from "@/context/InboxUnreadContex
 import { SocketProvider } from "@/context/SocketContext";
 import { useCreatePost } from "@/hooks/useCreatePost";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function AppSidebarShell({
   children,
@@ -38,6 +39,7 @@ function AppSidebarShellContent({
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { unreadMessagesCount, unreadNotificationsCount } = useInboxUnread();
+  const { isRtl, t } = useI18n();
   const isMessagePage = pathname === "/message";
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -80,7 +82,12 @@ function AppSidebarShellContent({
       <main className="archive-page relative min-h-screen overflow-x-hidden text-ink">
         <NatureCanvas />
 
-        <div className="relative z-10 min-h-screen lg:pl-[76px]">
+        <div
+          className={cn(
+            "relative z-10 min-h-screen",
+            isRtl ? "lg:pr-[76px]" : "lg:pl-[76px]",
+          )}
+        >
           <LiveInboxToasts />
 
           <Sidebar

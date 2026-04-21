@@ -46,16 +46,26 @@ export function buildProfileSuggestions({
 export function getRightRailTitle(options: {
   isOwnProfile?: boolean;
   profileUsername?: string | null;
+}, labels?: {
+  myFriends: string;
+  youMightKnow: string;
+  friendsSuffix: string;
 }): string {
+  const resolvedLabels = labels ?? {
+    myFriends: "My Friends",
+    youMightKnow: "You Might Know",
+    friendsSuffix: "Friends",
+  };
+
   if (options.isOwnProfile) {
-    return "My Friends";
+    return resolvedLabels.myFriends;
   }
 
   if (options.profileUsername) {
-    return `${toPossessive(options.profileUsername)} Friends`;
+    return `${toPossessive(options.profileUsername)} ${resolvedLabels.friendsSuffix}`;
   }
 
-  return "You Might Know";
+  return resolvedLabels.youMightKnow;
 }
 
 function toPossessive(value: string) {

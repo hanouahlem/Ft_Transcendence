@@ -11,6 +11,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
+import { useI18n } from "@/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 
 const MAX_POST_ATTACHMENT_SIZE = 10 * 1024 * 1024;
@@ -44,6 +45,7 @@ export function NewPostCard({
   onPublish,
 }: NewPostCardProps) {
   const [content, setContent] = useState(initialContent);
+  const { t } = useI18n();
   const { notifyError } = useArchiveToasts();
   const fileUpload = useFileUpload({
     maxFiles: 1,
@@ -83,14 +85,14 @@ export function NewPostCard({
 
   const previewLabel = (() => {
     if (!selectedFile) {
-      return "FILM ROLL 42";
+      return t("newPostCard.filmRoll");
     }
 
     if (isPdf) {
       return "FIELD DOSSIER";
     }
 
-    return selectedFile.name || "FILM ROLL 42";
+    return selectedFile.name || t("newPostCard.filmRoll");
   })();
 
   const handlePublish = async () => {
@@ -134,14 +136,14 @@ export function NewPostCard({
 
           <div className="pl-10">
             <div className="mb-4 flex justify-between gap-3 border-b border-dashed border-label/30 pb-2 font-mono text-xs text-label">
-              <span>NEW LOG [ENTRY: PENDING]</span>
-              <span>DATE: --/--/----</span>
+              <span>{t("newPostCard.title")}</span>
+              <span>{t("newPostCard.date")}</span>
             </div>
 
             <textarea
               value={content}
               onChange={(event) => setContent(event.target.value)}
-              placeholder="What have you observed today?"
+              placeholder={t("newPostCard.placeholder")}
               disabled={publishing}
               className="archive-input archive-lines min-h-[114px] w-full resize-none border-0 bg-transparent px-0 py-0 text-3xl leading-7 text-ink disabled:cursor-not-allowed disabled:opacity-70"
               style={{ fontFamily: "var(--font-display)" }}
@@ -219,7 +221,8 @@ export function NewPostCard({
                   className="inline-flex items-center gap-2 font-mono text-xs text-label transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={publishing}
                 >
-                  <HugeiconsIcon icon={ImageAdd02Icon} size={16} strokeWidth={1.9} />[ ADD FILE ]
+                  <HugeiconsIcon icon={ImageAdd02Icon} size={16} strokeWidth={1.9} />
+                  {t("newPostCard.addFile")}
                 </button>
               </FileUpload.Trigger>
               <Button
@@ -229,7 +232,7 @@ export function NewPostCard({
                 disabled={publishing}
                 className="-rotate-2 border-accent-red px-4 py-1 text-sm"
               >
-                {publishing ? "RECORDING..." : "RECORD ->"}
+                {publishing ? t("newPostCard.recording") : t("newPostCard.record")}
               </Button>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { ResetPasswordIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import { SettingsField } from "@/components/settings/SettingsField";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type SettingsPasswordSectionProps = {
   hasPassword: boolean;
@@ -30,6 +31,8 @@ export function SettingsPasswordSection({
   onConfirmPasswordChange,
   onSubmit,
 }: SettingsPasswordSectionProps) {
+  const { t } = useI18n();
+
   return (
     <div>
       <div
@@ -42,21 +45,21 @@ export function SettingsPasswordSection({
         {hasPassword ? (
           <>
             <SettingsField
-              label="Current password"
+              label={t("settings.password.current")}
               type="password"
               value={currentPassword}
               onChange={(event) => onCurrentPasswordChange(event.target.value)}
               autoComplete="current-password"
             />
             <SettingsField
-              label="New password"
+              label={t("settings.password.new")}
               type="password"
               value={newPassword}
               onChange={(event) => onNewPasswordChange(event.target.value)}
               autoComplete="new-password"
             />
             <SettingsField
-              label="Confirm password"
+              label={t("settings.password.confirm")}
               type="password"
               value={confirmPassword}
               onChange={(event) => onConfirmPasswordChange(event.target.value)}
@@ -65,12 +68,12 @@ export function SettingsPasswordSection({
           </>
         ) : (
           <SettingsField
-            label="New password"
+            label={t("settings.password.new")}
             type="password"
             value={newPassword}
             onChange={(event) => onNewPasswordChange(event.target.value)}
             autoComplete="new-password"
-            placeholder="Enter a local password..."
+            placeholder={t("settings.password.placeholder")}
           />
         )}
 
@@ -84,7 +87,7 @@ export function SettingsPasswordSection({
         >
           <HugeiconsIcon icon={ResetPasswordIcon} size={18} strokeWidth={1.9} />
           {saving
-            ? "Writing..."
+            ? t("settings.password.saving")
             : hasPassword
               ? ""
               : "Set Password"}

@@ -21,6 +21,7 @@ import { useArchiveToasts } from "@/hooks/useArchiveToasts";
 import { useCreatePost } from "@/hooks/useCreatePost";
 import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { usePostInteractions } from "@/hooks/usePostInteractions";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const POSTS_PER_PAGE = 50;
@@ -29,6 +30,7 @@ type FeedScope = "all" | "friends";
 
 export default function FeedPage() {
   const { user, token } = useAuth();
+  const { t } = useI18n();
   const { notifyError } = useArchiveToasts();
 
   const [loading, setLoading] = useState(true);
@@ -89,6 +91,12 @@ export default function FeedPage() {
     () => posts.reduce((sum, post) => sum + post.commentsCount, 0),
     [posts],
   );
+
+  const rightRailLabels = {
+    myFriends: t("rightRail.myFriends"),
+    youMightKnow: t("rightRail.youMightKnow"),
+    friendsSuffix: t("rightRail.friendsSuffix"),
+  };
 
   const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
 
@@ -193,21 +201,21 @@ export default function FeedPage() {
 
       const normalizedSuggestions = Array.isArray(data?.suggestions)
         ? data.suggestions
-            .filter(
-              (item: unknown): item is RightRailSuggestion =>
-                typeof item === "object" &&
-                item !== null &&
-                "id" in item &&
-                "username" in item &&
-                typeof item.id === "number" &&
-                typeof item.username === "string",
-            )
-            .map((item: RightRailSuggestion) => ({
-              id: item.id,
-              username: item.username,
-              displayName: item.displayName || null,
-              avatar: item.avatar || null,
-            }))
+          .filter(
+            (item: unknown): item is RightRailSuggestion =>
+              typeof item === "object" &&
+              item !== null &&
+              "id" in item &&
+              "username" in item &&
+              typeof item.id === "number" &&
+              typeof item.username === "string",
+          )
+          .map((item: RightRailSuggestion) => ({
+            id: item.id,
+            username: item.username,
+            displayName: item.displayName || null,
+            avatar: item.avatar || null,
+          }))
         : [];
 
       setSuggestions(normalizedSuggestions);
@@ -234,45 +242,43 @@ export default function FeedPage() {
               onPublish={handlePublish}
             />
 
-                <div className="-rotate-1 self-end w-fit inline-flex border border-ink/0 bg-paper-muted p-1 -my-6">
-                  <button
-                    type="button"
-                    onClick={() => setFeedScope("all")}
-                    className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
-                      feedScope === "all"
-                        ? "bg-accent-blue text-paper"
-                        : "text-label hover:bg-black/5"
-                    }`}
-                  >
-                    All Posts
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFeedScope("friends")}
-                    className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
-                      feedScope === "friends"
-                        ? "bg-accent-green text-paper"
-                        : "text-label hover:bg-black/5"
-                    }`}
-                  >
-                    Friends
-                  </button>
-                </div>
+            <div className="-rotate-1 self-end w-fit inline-flex border border-ink/0 bg-paper-muted p-1 -my-6">
+              <button
+                type="button"
+                onClick={() => setFeedScope("all")}
+                className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${feedScope === "all"
+                  ? "bg-accent-blue text-paper"
+                  : "text-label hover:bg-black/5"
+                  }`}
+              >
+                {t("feed.scopeAll")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setFeedScope("friends")}
+                className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition ${feedScope === "friends"
+                  ? "bg-accent-green text-paper"
+                  : "text-label hover:bg-black/5"
+                  }`}
+              >
+                {t("feed.scopeFriends")}
+              </button>
+            </div>
 
             {loading ? (
               <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
                   {feedScope === "friends"
-                    ? "Loading friends archive..."
-                    : "Loading feed archive..."}
+                    ? t("feed.loadingFriends")
+                    : t("feed.loadingAll")}
                 </p>
               </section>
             ) : posts.length === 0 ? (
               <section className="border border-black/10 bg-paper px-5 py-6 shadow-[6px_8px_25px_rgba(26,26,26,0.12)]">
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
                   {feedScope === "friends"
-                    ? "No accepted-friends posts have been recorded yet."
-                    : "No posts have been recorded yet."}
+                    ? t("feed.emptyFriends")
+                    : t("feed.emptyAll")}
                 </p>
               </section>
             ) : (
@@ -303,7 +309,7 @@ export default function FeedPage() {
                 onPageChange={(details) => setCurrentPage(details.page)}
                 className="border-t border-dashed border-label/30 py-8"
               >
-                <PaginationSummary itemLabel="posts" />
+                <PaginationSummary itemLabel={t("feed.posts")} />
                 <PaginationControls>
                   <PaginationPrevTrigger />
                   <PaginationItems />
@@ -313,7 +319,7 @@ export default function FeedPage() {
             ) : null}
 
             <div className="border-t border-dashed border-label py-8 text-center font-mono text-sm text-label">
-              --- END OF RECENT LOGS ---
+              {t("feed.endOfLogs")}
             </div>
           </div>
         </section>
@@ -322,7 +328,7 @@ export default function FeedPage() {
           totalPosts={posts.length}
           totalLikes={totalLikes}
           totalComments={totalComments}
-          sectionTitle={getRightRailTitle({})}
+          sectionTitle={getRightRailTitle({}, rightRailLabels)}
           suggestions={suggestions}
           sentRequests={sentRequests}
           incomingRequestIdsBySender={incomingRequestIdsBySender}
@@ -338,7 +344,7 @@ export default function FeedPage() {
         type="button"
         onClick={() => window.dispatchEvent(new Event("archive:create-post"))}
         className="fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-ink bg-ink text-paper shadow-[3px_6px_0_#d32f2f] transition hover:scale-105 lg:hidden"
-        aria-label="Create a new post"
+        aria-label={t("feed.newPostAria")}
       >
         <Plus className="h-6 w-6" />
       </button>

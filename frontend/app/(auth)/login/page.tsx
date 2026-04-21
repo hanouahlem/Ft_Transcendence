@@ -19,6 +19,8 @@ import TwoFactorCodeDialog from "@/components/auth/shared/TwoFactorCodeDialog";
 import AuthPageShell from "@/components/auth/shared/AuthPageShell";
 import { archiveToaster } from "@/components/ui/toaster";
 import { useAuth } from "@/context/AuthContext";
+import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const OAUTH_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -37,6 +39,7 @@ function LoginPageContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { login, isLoggedIn, isAuthLoading } = useAuth();
+	const { isRtl, t, locale } = useI18n();
 
 	const [identifier, setIdentifier] = useState("");
 	const [password, setPassword] = useState("");
@@ -63,7 +66,7 @@ function LoginPageContent() {
 
 		if (oauthError) {
 			archiveToaster.error({
-				title: "Error",
+				title: t("common.error"),
 				description: oauthError,
 				duration: 6000,
 			});
@@ -71,7 +74,7 @@ function LoginPageContent() {
 	}, [searchParams]);
 
 	const dateLabel = new Date()
-		.toLocaleDateString("en-US", {
+		.toLocaleDateString(locale, {
 			month: "short",
 			day: "2-digit",
 			year: "numeric",
@@ -86,10 +89,10 @@ function LoginPageContent() {
 		const trimmedIdentifier = identifier.trim();
 		const nextIdentifierError = trimmedIdentifier
 			? ""
-			: "Login credentials are required.";
+			: t("auth.login.errors.required");
 		const nextPasswordError = password
 			? ""
-			: "Login credentials are required.";
+			: t("auth.login.errors.required");
 
 		if (nextIdentifierError || nextPasswordError) {
 			setIdentifierError(nextIdentifierError);
@@ -117,7 +120,7 @@ function LoginPageContent() {
 					!result.fieldErrors?.password
 				) {
 					archiveToaster.error({
-						title: "Error",
+						title: t("common.error"),
 						description: result.message,
 						duration: 6000,
 					});
@@ -140,8 +143,8 @@ function LoginPageContent() {
 
 				if (!loginSucceeded) {
 					archiveToaster.error({
-						title: "Error",
-						description: "Login failed while loading your account.",
+						title: t("common.error"),
+						description: t("auth.login.errors.failedLoading"),
 						duration: 6000,
 					});
 					return;
@@ -152,8 +155,8 @@ function LoginPageContent() {
 			}
 
 			archiveToaster.error({
-				title: "Error",
-				description: "Token not received.",
+				title: t("common.error"),
+				description: t("auth.login.errors.tokenMissing"),
 				duration: 6000,
 			});
 		} finally {
@@ -296,15 +299,17 @@ function LoginPageContent() {
 	return (
 		<>
 			<AuthPageShell
-			panelAlign="right"
+			localeSwitcher={<LocaleSwitcher />}
+			panelAlign={isRtl ? "left" : "right"}
 			footer={
 				<p className="inline-block border border-label/20 bg-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-ink/65">
-					Not a member?
+					{t("auth.login.footerPrefix")}
 					<Link
 						href="/register"
-						className="ml-2 font-bold text-accent-red underline decoration-dotted underline-offset-4"
+						className="font-bold text-accent-red underline decoration-dotted underline-offset-4"
+						style={{ marginInlineStart: "0.5rem" }}
 					>
-						Register
+						{t("auth.login.footerLink")}
 					</Link>
 				</p>
 			}

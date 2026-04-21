@@ -7,6 +7,7 @@ import AuthGreenPanel from "./AuthGreenPanel";
 type AuthPageShellProps = {
   children: ReactNode;
   footer?: ReactNode;
+  localeSwitcher?: ReactNode;
   panelAlign?: "left" | "right";
   panelMainTone?: "olive" | "accent-blue";
   panelAccentTone?: "accent-red" | "accent-red";
@@ -18,6 +19,7 @@ type AuthPageShellProps = {
 export default function AuthPageShell({
   children,
   footer,
+  localeSwitcher,
   panelAlign = "right",
   panelMainTone = "olive",
   panelAccentTone = "accent-red",
@@ -45,6 +47,12 @@ export default function AuthPageShell({
             containerClassName,
           )}
         >
+          {localeSwitcher ? (
+            <div className="absolute top-4 z-40" style={{ insetInlineEnd: "1rem" }}>
+              {localeSwitcher}
+            </div>
+          ) : null}
+
           <AuthGreenPanel
             align={panelAlign}
             mainTone={panelMainTone}
