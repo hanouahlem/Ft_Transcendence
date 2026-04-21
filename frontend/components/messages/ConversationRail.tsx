@@ -22,6 +22,7 @@ function formatRailTime(value: string | null | undefined, locale: string) {
 type ConversationRailProps = {
   conversations: ConversationItem[];
   selectedConversationId: number | null;
+  onlineUserIds: Set<number>;
   isLoadingConversations: boolean;
   onSelectConversation: (conversationId: number) => void;
   onOpenNewConversation: () => void;
@@ -30,6 +31,7 @@ type ConversationRailProps = {
 export function ConversationRail({
   conversations,
   selectedConversationId,
+  onlineUserIds,
   isLoadingConversations,
   onSelectConversation,
   onOpenNewConversation,
@@ -52,6 +54,9 @@ export function ConversationRail({
             const rotationClass =
               index % 3 === 0 ? "rotate-[0.5deg]" : index % 3 === 1 ? "-rotate-[0.6deg]" : "rotate-0";
             const isActive = selectedConversationId === conversation.id;
+            const peerUserId = conversation.peer?.id;
+            const isPeerOnline =
+              typeof peerUserId === "number" && peerUserId > 0 && onlineUserIds.has(peerUserId);
 
             return (
               <button
@@ -81,9 +86,19 @@ export function ConversationRail({
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-lg font-bold text-ink">
-                        {conversation.peer?.displayName || conversation.peer?.username || t("conversation.unknownUser")}
-                      </p>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <p className="truncate text-lg font-bold text-ink">
+                          {conversation.peer?.displayName || conversation.peer?.username || "Unknown user"}
+                        </p>
+                        <span
+                          aria-hidden="true"
+                          title={isPeerOnline ? "Online" : "Offline"}
+                          className={cn(
+                            "h-2.5 w-2.5 shrink-0 rounded-full border border-black/20",
+                            isPeerOnline ? "bg-emerald-500" : "bg-zinc-400",
+                          )}
+                        />
+                      </div>
                       <div className="shrink-0 self-start">
                         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-label">
                           {formatRailTime(conversation.lastMessageAt, locale)}

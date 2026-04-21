@@ -311,9 +311,38 @@ Current events:
 - `conversation:read`
 - `notification:created`
 - `notification:read`
+- `presence:online-users`
 
 These are intentionally few.
 We only added events the UI actually uses.
+
+### Online Presence Event Contract
+
+For message UI presence badges, we added one shared payload:
+
+```ts
+type OnlineUsersEvent = {
+  onlineUserIds: number[];
+};
+```
+
+Backend emits this from `backend/src/socket.js` on every connect/disconnect:
+
+```js
+io.emit(SOCKET_EVENTS.ONLINE_USERS, {
+  onlineUserIds: [...userSocketCounts.keys()],
+});
+```
+
+Frontend consumes it in `frontend/context/SocketContext.tsx` and exposes `onlineUserIds` through context.
+
+Why this contract is easy to explain:
+
+- one event gives the whole online snapshot
+- message UI only needs `Set.has(peerId)` to paint presence state:
+- `frontend/components/messages/ConversationRail.tsx` shows green/gray dots in the conversation list
+- `frontend/components/messages/ConversationThread.tsx` shows an Online/Offline pill in the header
+- no polling is required
 
 ## 9. Unread Count Service
 

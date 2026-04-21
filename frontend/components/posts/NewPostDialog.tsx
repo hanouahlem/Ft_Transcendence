@@ -11,49 +11,45 @@ import { NewPostCard } from "@/components/posts/NewPostCard";
 type NewPostDialogProps = {
   open: boolean;
   initialContent?: string;
-  resetToken?: number;
-	previewUrl: string;
-	selectedFileName: string;
-	publishing: boolean;
-	onClose: () => void;
-	onPublish: (content: string) => void;
-  onOpenFilePicker: () => void;
-  onRemoveFile: () => void;
+  publishing: boolean;
+  onClose: () => void;
+  onPublish: (content: string, file: File | null) => Promise<void>;
 };
 
 export function NewPostDialog({
   open,
-	initialContent,
-  resetToken,
-	previewUrl,
-	selectedFileName,
-	publishing,
-	onClose,
-	onPublish,
-  onOpenFilePicker,
-  onRemoveFile,
+  initialContent,
+  publishing,
+  onClose,
+  onPublish,
 }: NewPostDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+    <Dialog
+      open={open}
+      lazyMount={false}
+      unmountOnExit={false}
+      closeOnEscape={!publishing}
+      closeOnInteractOutside={!publishing}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen && !publishing) {
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="overflow-visible p-0">
-				<DialogTitle className="sr-only">Create a new post</DialogTitle>
-				<DialogDescription className="sr-only">
-					Compose a new feed post in the archive composer.
-				</DialogDescription>
+        <DialogTitle className="sr-only">Create a new post</DialogTitle>
+        <DialogDescription className="sr-only">
+          Compose a new feed post in the archive composer.
+        </DialogDescription>
 
         <div className="max-h-[90vh] overflow-auto px-4 py-8">
           <NewPostCard
-            key={resetToken}
             initialContent={initialContent}
-            previewUrl={previewUrl}
-						selectedFileName={selectedFileName}
-						publishing={publishing}
-						onPublish={onPublish}
-						onOpenFilePicker={onOpenFilePicker}
-						onRemoveFile={onRemoveFile}
-					/>
-				</div>
-			</DialogContent>
-		</Dialog>
-	);
+            publishing={publishing}
+            onPublish={onPublish}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }

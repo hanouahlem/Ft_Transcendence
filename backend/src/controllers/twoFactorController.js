@@ -1,6 +1,5 @@
 import prisma from "../prisma.js";
-import crypto from "crypto";
-import {Emailconfirmation} from "./mailSenderController.js";
+import { issueTwoFactorCode } from "../services/twoFactorService.js";
 
 
 export async function setupCodeTwoFa(req, res) {
@@ -10,18 +9,15 @@ export async function setupCodeTwoFa(req, res) {
         where: {id: userId}
     });
 
-    const code = crypto.randomInt(100000, 999999).toString();
-    const timeToExpireCode = new Date(Date.now()+ 10 * 60 * 1000);
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
 
-    await prisma.user.update({
-        where:{id: userId},
-        data:{
-            twoFactorcode: code,
-            twoFactorExpires: timeToExpireCode,
-        }
-    });
+    if (user.twoFactorEnabled) {
+        return res.status(400).json({ message: "2FA already enabled" });
+    }
 
-    await Emailconfirmation(user.email, code);
+    await issueTwoFactorCode(user);
     return res.json({message: "Code sent by email"});
 }
 
@@ -31,16 +27,25 @@ export async function checkTwoFaCode(req, res)
     try{
 
         const userId = req.user.id;
-        const { code } = req.body;
+        const code = typeof req.body?.code === "string" ? req.body.code.trim() : "";
+
+        if (!/^\d{4}$/.test(code)) {
+            return res.status(400).json({ message: "Code must contain exactly 4 digits" });
+        }
         
         const user = await prisma.user.findFirst({
             where:{id: userId}
         });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
         if(!user.twoFactorcode){
             return res.status(400).json({message: "No code sent"});
         }
         
-        if(new Date() > user.twoFactorExpires){
+        if(!user.twoFactorExpires || new Date() > user.twoFactorExpires){
             return res.status(400).json({ message: "Code expired"});
         }
         

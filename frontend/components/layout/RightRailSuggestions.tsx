@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import { cn } from "@/lib/utils";
 import type { RightRailSuggestion } from "@/lib/right-rail";
+import { Button } from "@/components/ui/button";
 
 type RightRailSuggestionsProps = {
 	sectionTitle: string;
@@ -16,9 +16,11 @@ type RightRailSuggestionsProps = {
 	suggestions: RightRailSuggestion[];
 	sentRequests: number[];
 	incomingRequestIdsBySender: Record<number, number>;
+	connectedFriendshipIdsByUser?: Record<number, number>;
 	sendingFriendId: number | null;
 	onAddFriend: (receiverId: number) => Promise<void>;
 	onAcceptFriend: (senderId: number) => Promise<void>;
+	onRemoveFriend?: (userId: number) => Promise<void>;
 	allowFollow?: boolean;
 };
 
@@ -34,9 +36,11 @@ export function RightRailSuggestions({
 	suggestions,
 	sentRequests,
 	incomingRequestIdsBySender,
+	connectedFriendshipIdsByUser = {},
 	sendingFriendId,
 	onAddFriend,
 	onAcceptFriend,
+	onRemoveFriend,
 	allowFollow = true,
 }: RightRailSuggestionsProps) {
 	const emptyState = allowFollow
@@ -61,9 +65,50 @@ export function RightRailSuggestions({
 						const sent = sentRequests.includes(author.id);
 						const incomingRequestId =
 							incomingRequestIdsBySender[author.id];
+						const isConnected =
+							typeof connectedFriendshipIdsByUser[author.id] ===
+							"number";
+						const isSubmitting = sendingFriendId === author.id;
+						const canRemoveFriend =
+							typeof onRemoveFriend === "function";
 						const tileClasses = ["-rotate-2", "rotate-1", "-rotate-1"];
 						const authorDisplayName =
 							author.displayName?.trim() || author.username;
+						const actionLabel = isSubmitting
+							? isConnected
+								? "Removing"
+								: incomingRequestId
+									? "Accepting"
+									: "Adding"
+							: isConnected
+								? "Remove"
+								: incomingRequestId
+									? "Accept"
+									: sent
+										? "Sent"
+										: "Add";
+						const actionVariant = isConnected
+							? "destructive"
+							: sent
+								? "subtle"
+								: incomingRequestId
+									? "bluesh"
+									: "paper";
+						const handleAction = () => {
+							if (isConnected) {
+								onRemoveFriend?.(author.id);
+								return;
+							}
+
+							if (incomingRequestId) {
+								onAcceptFriend(author.id);
+								return;
+							}
+
+							if (!sent) {
+								onAddFriend(author.id);
+							}
+						};
 
 						return (
 							<div
@@ -103,37 +148,24 @@ export function RightRailSuggestions({
 								</div>
 
 								{allowFollow ? (
-									<Button
-										type="button"
-										variant={
-											sent
-												? "subtle"
-												: incomingRequestId
-													? "bluesh"
-													: "paper"
-										}
-										size="sm"
-										disabled={
-											sent ||
-											sendingFriendId === author.id
-										}
-										onClick={() =>
-											incomingRequestId
-												? onAcceptFriend(author.id)
-												: onAddFriend(author.id)
-										}
-										className="hover:-rotate-1"
-									>
-										{sendingFriendId === author.id
-											? incomingRequestId
-												? acceptingLabel
-												: addingLabel
-											: incomingRequestId
-												? acceptLabel
-												: sent
-													? sentLabel
-													: addLabel}
-									</Button>
+									isConnected && !canRemoveFriend ? (
+										<span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-label">
+											Friend
+										</span>
+									) : (
+										<Button
+											type="button"
+											variant={actionVariant}
+											size="sm"
+											disabled={
+												(!isConnected && sent) || isSubmitting
+											}
+											onClick={handleAction}
+											className="hover:-rotate-1"
+										>
+											{actionLabel}
+										</Button>
+									)
 								) : null}
 							</div>
 						);

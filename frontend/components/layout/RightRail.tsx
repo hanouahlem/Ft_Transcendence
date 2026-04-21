@@ -14,9 +14,11 @@ type RightRailProps = {
 	suggestions: RightRailSuggestion[];
 	sentRequests: number[];
 	incomingRequestIdsBySender: Record<number, number>;
+	connectedFriendshipIdsByUser?: Record<number, number>;
 	sendingFriendId: number | null;
 	onAddFriend: (receiverId: number) => Promise<void>;
 	onAcceptFriend: (senderId: number) => Promise<void>;
+	onRemoveFriend?: (userId: number) => Promise<void>;
 	allowFollow?: boolean;
 	reserveSpace?: boolean;
 	rightAnchorBase?: number;
@@ -30,9 +32,11 @@ export function RightRail({
 	suggestions,
 	sentRequests,
 	incomingRequestIdsBySender,
+	connectedFriendshipIdsByUser,
 	sendingFriendId,
 	onAddFriend,
 	onAcceptFriend,
+	onRemoveFriend,
 	allowFollow = true,
 	reserveSpace = true,
 	rightAnchorBase = 604,
@@ -65,9 +69,11 @@ export function RightRail({
 						suggestions={suggestions}
 						sentRequests={sentRequests}
 						incomingRequestIdsBySender={incomingRequestIdsBySender}
+						connectedFriendshipIdsByUser={connectedFriendshipIdsByUser}
 						sendingFriendId={sendingFriendId}
 						onAddFriend={onAddFriend}
 						onAcceptFriend={onAcceptFriend}
+						onRemoveFriend={onRemoveFriend}
 						allowFollow={allowFollow}
 					/>
 

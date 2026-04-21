@@ -254,3 +254,32 @@ Why this is useful:
 Key term:
 
 - controlled input: form input value is owned by React state (`value` + `onChange`), not unmanaged DOM state
+
+## Ark PinInput 2FA Dialog (Shared UI)
+
+2FA confirmation now uses one shared dialog component for:
+
+- setup confirmation from settings
+- login confirmation when the backend requires 2FA
+
+File:
+
+- `frontend/components/auth/shared/TwoFactorCodeDialog.tsx`
+
+Where it is used:
+
+- `frontend/app/(app)/settings/page.tsx`
+- `frontend/app/(auth)/login/page.tsx`
+
+Real UI pieces used:
+
+- `Dialog` wrapper from `frontend/components/ui/dialog.tsx`
+- `PinInput` primitive from Ark UI (`@ark-ui/react`)
+- archive classes (`archive-paper`, mono labels, stamped paper-style buttons)
+
+Why this is useful:
+
+- one consistent 4-digit code entry UI
+- one automatic first send when the dialog opens
+- one reusable resend-code interaction after first send
+- same visual language in both auth contexts, easier to explain during evaluation

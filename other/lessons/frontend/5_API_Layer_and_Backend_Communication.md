@@ -192,6 +192,33 @@ So remember:
 - some feature pages and hooks still use direct `fetch(...)`
 - later phases can migrate those call sites without changing the route logic again
 
+## 2FA API Contract (Settings + Login)
+
+The API layer now centralizes both 2FA setup and 2FA login confirmation in:
+
+- `frontend/lib/api.ts`
+
+Settings helpers:
+
+- `sendTwoFactorSetupCode(token)` -> `POST /settings/auth/2fa/setup`
+- `confirmTwoFactorSetup(token, code)` -> `POST /settings/auth/2fa/confirm`
+- `disableTwoFactor(token)` -> `POST /settings/auth/2fa/disable`
+
+Login helpers:
+
+- `loginUser(...)` can now return either:
+  - `{ token }` when 2FA is not required
+  - `{ twoFactorRequired: true, pendingToken, email }` when code confirmation is required
+- after receiving `twoFactorRequired`, the UI opens the dialog and auto-sends the first code
+- `verifyLoginTwoFactorCode(pendingToken, code)` -> `POST /login/2fa/verify`
+- `resendLoginTwoFactorCode(pendingToken)` -> `POST /login/2fa/resend` (used for first send and resend)
+
+Why this matters:
+
+- login page and settings page use one typed contract for 2FA states
+- route strings and payloads stay centralized in one file
+- the app does not issue a real auth token until the 4-digit code is verified when 2FA is enabled
+
 ## Mental Model To Remember
 
 Think of `frontend/lib/api.ts` as the frontend-side adapter for backend contracts:

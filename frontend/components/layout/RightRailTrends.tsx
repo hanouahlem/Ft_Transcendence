@@ -6,19 +6,11 @@ import { useI18n } from "@/i18n/I18nProvider";
 
 const SEARCH_ROUTE = "/search";
 
-type RightRailTrendsProps = {
-  title: string;
-  searchLabel: (title: string) => string;
-};
-
-export function RightRailTrends({ title, searchLabel }: RightRailTrendsProps) {
-  const { t } = useI18n();
-
-  const TRENDS = [
-    { rank: "01", title: t("rightRail.trends.drop.title"), meta: t("rightRail.trends.drop.meta") },
-    { rank: "02", title: t("rightRail.trends.guild.title"), meta: t("rightRail.trends.guild.meta") },
-    { rank: "03", title: t("rightRail.trends.retro.title"), meta: t("rightRail.trends.retro.meta") },
-  ];
+const TRENDS = [
+  { rank: "01", title: "42", meta: "School / Subject" },
+  { rank: "02", title: "Tailwind CSS", meta: "Frontend / Styling" },
+  { rank: "03", title: "Development", meta: "Build / Workflow" },
+];
 
   return (
     <section className="relative">

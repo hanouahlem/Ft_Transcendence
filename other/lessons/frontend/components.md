@@ -36,6 +36,7 @@ Current files:
 - `frontend/components/ui/dialog.tsx`
 - `frontend/components/ui/tooltip.tsx`
 - `frontend/hooks/useArchiveToasts.ts`
+- `frontend/hooks/useCreatePost.ts`
 - `frontend/hooks/useFriendRequests.ts`
 - `frontend/hooks/usePostInteractions.ts`
 - `frontend/lib/feed-types.ts`
@@ -79,7 +80,7 @@ This is the controller for the page.
 It owns:
 
 - authenticated user access through `useAuth()`
-- publish state, file state, and composer reset state with `useState`
+- publish state with the shared create-post hook
 - feed scope state for `All Posts` vs `Friends`
 - feed pagination state for the visible post slice
 - derived values with `useMemo`
@@ -131,7 +132,8 @@ Explain this during evaluation:
 - `useFriendRequests()` reloads outgoing pending requests so `Sent` survives a refresh
 - post/comment interaction logic is shared with the profile page through `usePostInteractions()`
 - the feed is paginated client-side with the shared Ark-based `Pagination` wrapper
-- the text state for `NewPostCard` is local to the composer component, so typing does not rerender every visible post card
+- the text state for `NewPostCard` stays local to each composer instance, so the inline composer and dialog composer keep independent drafts
+- post creation request logic is shared through `useCreatePost()`, so the feed page and app shell do not duplicate the `POST /posts` mutation anymore
 
 API base:
 
@@ -388,6 +390,8 @@ How it works:
 - both routes render the same client component: `ProfileView`
 - `/profile` resolves the current authenticated user
 - `/profile/[username]` resolves the public profile user first, then loads posts/friends from that user id
+- if `/profile/[username]` matches the logged-in user's own username, `ProfileView` normalizes the URL with `router.replace("/profile")`
+- this keeps one canonical self-profile route and avoids treating your own page like a public profile variant
 - `ProfileView` fetches:
   - `GET /user` for the authenticated self route or `GET /users/by-username/:username` for a public profile
 - `GET /users/:id/posts` for the archive entries
@@ -396,6 +400,8 @@ How it works:
 - `ProfileView` delegates the other-user friendship CTA to `FriendActionButton`
 - `ProfileView` uses `usePostInteractions()` for delete, like, favorite, comment, and post-dialog state
 - on another user's profile, the secondary hero CTA is labeled `Message` and is rendered beside the friendship action
+- on another user's profile, the right rail no longer drops mutual friends that are already connected to you
+- `buildProfileSuggestions()` keeps those shared friends in the dataset but sorts unconnected users first, so the rail stays discovery-first without hiding overlap
 
 Important design rule:
 
@@ -521,7 +527,11 @@ Explain during evaluation:
 
 - the sidebar owns navigation configuration in `NAV_ITEMS`
 - `NavButton` is the row renderer
-- `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” and “Logout”
+- `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” (new post)
+- the bottom profile preview is an Ark UI menu trigger (`@ark-ui/react/menu`), not a direct route link
+- that menu now centralizes account quick actions
+- `Settings` in the menu navigates to `/settings`
+- `Disconnect` in the menu calls the existing `onLogout` flow from `AppSidebarShell`
 - the search page is a first-class route in the main sidebar, not only a control inside the right rail
 - the sidebar prefers `displayName` for the visible label while keeping `@username` as the stable handle and avatar fallback seed
 - unread badges are not hardcoded anymore; `AppSidebarShell` reads them from `InboxUnreadProvider`, which is shared by the protected app pages
@@ -755,10 +765,14 @@ Key point:
 - the search bar does not filter suggestions locally
 - the search bar mirrors the active `/search?q=...` query when you are already on the search page
 - trend chips also link to `/search` with a prefilled query
+- the current static chips are `42`, `Tailwind CSS`, and `Development`, so the rail points to project-relevant search themes instead of generic archive labels
 - `sectionTitle` changes by route:
   - `You Might Know` on feed
   - `My Friends` on your own profile
   - `Alice's Friends` on another user profile
+- on another user's profile, the rail can contain two groups inside the same sorted list:
+  - users you are not connected to yet first
+  - users already connected to you after that, with lower priority
 - empty-state copy also changes by context:
   - active search: no search matches
   - feed: no recommendations yet
@@ -768,6 +782,7 @@ Key point:
   - `Add` for no existing request
   - `Accept` for incoming pending requests
   - `Sent` for outgoing pending requests
+- if the suggested user is already a connected friend, the rail now renders the remove-state CTA instead of hiding that row
 
 ### `frontend/app/(app)/search/page.tsx`
 
@@ -990,28 +1005,39 @@ Purpose:
 Data it uses:
 
 - current content text
-- preview URL
-- selected file name
+- local Ark file-upload state
 - publishing status
 
 Actions it receives:
 
 - `onPublish`
-- `onContentChange`
-- `onOpenFilePicker`
-- `onRemoveFile`
 
 Key detail:
 
-- this component does not upload anything itself
-- it only exposes user actions back to the page
-- the hidden file input lives in `frontend/app/feed/page.tsx`
+- this component now owns the local draft UI state
+- that includes the textarea state and the Ark file-upload state
+- it still does not own the network mutation itself
 
 That means the page still controls:
 
-- when a file is selected
-- when preview URLs are created/revoked
-- when the actual `POST /posts` request happens
+- what happens after a successful publish
+- whether the created post is inserted directly or broadcast through `archive:post-created`
+
+Real code:
+
+```tsx
+const fileUpload = useFileUpload({
+  maxFiles: 1,
+  accept: ["image/*", "application/pdf"],
+  maxFileSize: 10 * 1024 * 1024,
+});
+```
+
+Why this matters:
+
+- the composer no longer depends on a hidden native file input owned by the page
+- image and PDF validation happens immediately in the composer with Ark state plus toast feedback
+- successful publish resets only that composer instance, which keeps inline and dialog drafts independent
 
 ### `NewPostDialog.tsx`
 
@@ -1035,8 +1061,10 @@ Real code:
 Explain this clearly:
 
 - the dialog is controlled by the page
-- it does not own the text/file state
-- the same data can be shared between the inline composer and dialog
+- it stays a wrapper around `NewPostCard`
+- it does not own publish logic
+- its draft is preserved when the dialog closes on the same page because the dialog stays mounted
+- changing pages remounts the dialog composer, so that draft does not follow you across routes
 - accessibility behavior comes from the shared dialog primitive rather than custom modal markup
 
 ### `PostDialog.tsx`

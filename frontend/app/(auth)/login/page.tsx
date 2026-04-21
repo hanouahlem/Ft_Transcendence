@@ -2,9 +2,14 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
-import { loginUser } from "@/lib/api";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import {
+	loginUser,
+	resendLoginTwoFactorCode,
+	verifyLoginTwoFactorCode,
+} from "@/lib/api";
 import LoginPaperCard from "@/components/auth/login/LoginPaperCard";
+import TwoFactorCodeDialog from "@/components/auth/shared/TwoFactorCodeDialog";
 import AuthPageShell from "@/components/auth/shared/AuthPageShell";
 import { archiveToaster } from "@/components/ui/toaster";
 import { useAuth } from "@/context/AuthContext";
@@ -25,6 +30,14 @@ export default function LoginPage() {
 	const [loading, setLoading] = useState(false);
 	const [identifierError, setIdentifierError] = useState("");
 	const [passwordError, setPasswordError] = useState("");
+	const [twoFactorDialogOpen, setTwoFactorDialogOpen] = useState(false);
+	const [twoFactorPendingToken, setTwoFactorPendingToken] = useState<string | null>(null);
+	const [twoFactorEmail, setTwoFactorEmail] = useState("");
+	const [twoFactorCodeSent, setTwoFactorCodeSent] = useState(false);
+	const [twoFactorAutoSendAttempted, setTwoFactorAutoSendAttempted] = useState(false);
+	const [twoFactorMessage, setTwoFactorMessage] = useState<string | null>(null);
+	const [twoFactorConfirming, setTwoFactorConfirming] = useState(false);
+	const [twoFactorSending, setTwoFactorSending] = useState(false);
 
 	useEffect(() => {
 		if (!isAuthLoading && isLoggedIn) {
@@ -44,15 +57,12 @@ export default function LoginPage() {
 		}
 	}, [searchParams]);
 
-	if (isAuthLoading || isLoggedIn) {
-		return null;
-	}
-
-	const dateLabel = new Date().toLocaleDateString(locale, {
-		month: "short",
-		day: "2-digit",
-		year: "numeric",
-	})
+	const dateLabel = new Date()
+		.toLocaleDateString("en-US", {
+			month: "short",
+			day: "2-digit",
+			year: "numeric",
+		})
 		.toUpperCase();
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -102,7 +112,17 @@ export default function LoginPage() {
 				return;
 			}
 
-			if (result.data.token) {
+			if ("twoFactorRequired" in result.data && result.data.twoFactorRequired) {
+				setTwoFactorPendingToken(result.data.pendingToken);
+				setTwoFactorEmail(result.data.email);
+				setTwoFactorCodeSent(false);
+				setTwoFactorAutoSendAttempted(false);
+				setTwoFactorMessage("Sending your 4-digit verification code...");
+				setTwoFactorDialogOpen(true);
+				return;
+			}
+
+			if ("token" in result.data && result.data.token) {
 				const loginSucceeded = await login(result.data.token);
 
 				if (!loginSucceeded) {
@@ -128,10 +148,142 @@ export default function LoginPage() {
 		}
 	};
 
+	const handleTwoFactorDialogOpenChange = (open: boolean) => {
+		setTwoFactorDialogOpen(open);
+
+		if (!open) {
+			setTwoFactorPendingToken(null);
+			setTwoFactorEmail("");
+			setTwoFactorCodeSent(false);
+			setTwoFactorAutoSendAttempted(false);
+			setTwoFactorMessage(null);
+		}
+	};
+
+	const handleConfirmTwoFactorLogin = async (code: string) => {
+		if (!twoFactorPendingToken) {
+			archiveToaster.error({
+				title: "Error",
+				description: "2FA session is missing. Please login again.",
+				duration: 6000,
+			});
+			setTwoFactorDialogOpen(false);
+			return;
+		}
+
+		if (!twoFactorCodeSent) {
+			archiveToaster.error({
+				title: "Error",
+				description: "Send a code first.",
+				duration: 4000,
+			});
+			return;
+		}
+
+		try {
+			setTwoFactorConfirming(true);
+
+			const result = await verifyLoginTwoFactorCode(twoFactorPendingToken, code);
+
+			if (!result.ok) {
+				throw new Error(result.message || "Unable to confirm 2FA code.");
+			}
+
+			const loginSucceeded = await login(result.data.token);
+
+			if (!loginSucceeded) {
+				throw new Error("Login failed while loading your account.");
+			}
+
+			setTwoFactorDialogOpen(false);
+			setTwoFactorPendingToken(null);
+			setTwoFactorEmail("");
+			setTwoFactorMessage(null);
+			router.push("/feed");
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to confirm 2FA code.";
+			setTwoFactorMessage(message);
+			archiveToaster.error({
+				title: "Error",
+				description: message,
+				duration: 6000,
+			});
+		} finally {
+			setTwoFactorConfirming(false);
+		}
+	};
+
+	const handleSendLoginTwoFactorCode = useCallback(async () => {
+		if (!twoFactorPendingToken) {
+			archiveToaster.error({
+				title: "Error",
+				description: "2FA session is missing. Please login again.",
+				duration: 6000,
+			});
+			setTwoFactorDialogOpen(false);
+			return;
+		}
+
+		try {
+			setTwoFactorSending(true);
+
+			const result = await resendLoginTwoFactorCode(twoFactorPendingToken);
+
+			if (!result.ok) {
+				throw new Error(result.message || "Unable to resend 2FA code.");
+			}
+
+			setTwoFactorCodeSent(true);
+			setTwoFactorEmail(result.data.email);
+			setTwoFactorMessage(result.data.message);
+			archiveToaster.success({
+				title: "Code sent",
+				description: result.data.message,
+				duration: 4500,
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to resend 2FA code.";
+			setTwoFactorMessage(message);
+			archiveToaster.error({
+				title: "Error",
+				description: message,
+				duration: 6000,
+			});
+		} finally {
+			setTwoFactorSending(false);
+		}
+	}, [twoFactorPendingToken]);
+
+	useEffect(() => {
+		if (
+			!twoFactorDialogOpen ||
+			twoFactorCodeSent ||
+			twoFactorSending ||
+			twoFactorAutoSendAttempted
+		) {
+			return;
+		}
+
+		setTwoFactorAutoSendAttempted(true);
+		void handleSendLoginTwoFactorCode();
+	}, [
+		handleSendLoginTwoFactorCode,
+		twoFactorAutoSendAttempted,
+		twoFactorCodeSent,
+		twoFactorDialogOpen,
+		twoFactorSending,
+	]);
+
+	if (isAuthLoading || isLoggedIn) {
+		return null;
+	}
+
 	return (
-		<AuthPageShell
-			panelAlign={isRtl ? "left" : "right"}
-			localeSwitcher={<LocaleSwitcher compact />}
+		<>
+			<AuthPageShell
+			panelAlign="right"
 			footer={
 				<p className="inline-block border border-label/20 bg-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-ink/65">
 					{t("auth.login.footerPrefix")}
@@ -164,6 +316,21 @@ export default function LoginPage() {
 				}}
 				onSubmit={handleSubmit}
 			/>
-		</AuthPageShell>
+			</AuthPageShell>
+
+			<TwoFactorCodeDialog
+				open={twoFactorDialogOpen}
+				onOpenChange={handleTwoFactorDialogOpenChange}
+				title="Two-Factor Login"
+				subtitle="Authentication Checkpoint / Step 2"
+				email={twoFactorEmail || "Unknown email"}
+				codeSent={twoFactorCodeSent}
+				confirming={twoFactorConfirming}
+				sending={twoFactorSending}
+				message={twoFactorMessage}
+				onConfirm={handleConfirmTwoFactorLogin}
+				onSendCode={handleSendLoginTwoFactorCode}
+			/>
+		</>
 	);
 }

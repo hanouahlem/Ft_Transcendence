@@ -136,6 +136,73 @@ Examples:
 - `getUser` uses `req.user.id`
 - friend and post logic use `req.user.id` for ownership or identity
 
+## 2FA Email Code Flow (4 Digits)
+
+This project now uses a 4-digit email code for:
+
+- enabling 2FA in settings
+- confirming login when `twoFactorEnabled` is active
+
+Main files:
+
+- `backend/src/controllers/twoFactorController.js`
+- `backend/src/controllers/userController.js`
+- `backend/src/services/twoFactorService.js`
+- `backend/src/routes/routes.js`
+
+### Setup Flow In Settings
+
+Protected routes (token required):
+
+- `POST /settings/auth/2fa/setup`
+- `POST /settings/auth/2fa/confirm`
+- `POST /settings/auth/2fa/disable`
+
+Real code path:
+
+- `setupCodeTwoFa` sends code by email
+- `checkTwoFaCode` validates a strict 4-digit code and enables `twoFactorEnabled`
+- `disableTwoFA` clears 2FA state
+
+Example validation from `twoFactorController.js`:
+
+```js
+const code = typeof req.body?.code === "string" ? req.body.code.trim() : "";
+
+if (!/^\d{4}$/.test(code)) {
+  return res.status(400).json({ message: "Code must contain exactly 4 digits" });
+}
+```
+
+### Login Flow With 2FA Enabled
+
+Public routes:
+
+- `POST /login`
+- `POST /login/2fa/verify`
+- `POST /login/2fa/resend`
+
+How it works:
+
+1. user submits login/password to `/login`
+2. if password is valid and `twoFactorEnabled === true`, backend returns `twoFactorRequired: true` + a short-lived `pendingToken`
+3. frontend opens the 2FA dialog and automatically sends the first code
+4. frontend calls `/login/2fa/resend` (used for first send and resend)
+5. frontend calls `/login/2fa/verify` with `pendingToken + code`
+6. backend returns the normal app JWT only after code verification
+
+Why this matters:
+
+- password + email code are both required before issuing the session token
+- 2FA verification stays server-side, not just a frontend check
+- resend is controlled by backend (`/login/2fa/resend`)
+
+Key terms evaluators may ask:
+
+- pending token: a short-lived JWT for a temporary login challenge, not a full session
+- step-up authentication: additional verification after password check
+- verification TTL: code expiration window (`10 minutes` in `twoFactorService.js`)
+
 ## Authorization Checks
 
 Authentication only tells you who the user is.
