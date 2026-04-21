@@ -2,6 +2,53 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { getEnv } from "../env.js";
 import prisma from "../prisma.js";
+import { issueTwoFactorCode } from "../services/twoFactorService.js";
+
+const APP_TOKEN_EXPIRATION = "3h";
+const PENDING_TWO_FACTOR_EXPIRATION = "10m";
+
+function signSessionToken(user) {
+  return jwt.sign(
+    { id: user.id, email: user.email },
+    getEnv("JWT_SECRET"),
+    { expiresIn: APP_TOKEN_EXPIRATION }
+  );
+}
+
+function signPendingTwoFactorToken(user) {
+  return jwt.sign(
+    { id: user.id, purpose: "login_2fa" },
+    getEnv("JWT_SECRET"),
+    { expiresIn: PENDING_TWO_FACTOR_EXPIRATION }
+  );
+}
+
+function normalizeTwoFactorCode(input) {
+  return typeof input === "string" ? input.trim() : "";
+}
+
+function verifyPendingTwoFactorToken(pendingToken) {
+  if (typeof pendingToken !== "string" || !pendingToken.trim()) {
+    return null;
+  }
+
+  try {
+    const payload = jwt.verify(pendingToken.trim(), getEnv("JWT_SECRET"));
+
+    if (
+      typeof payload !== "object" ||
+      payload === null ||
+      payload.purpose !== "login_2fa" ||
+      typeof payload.id !== "number"
+    ) {
+      return null;
+    }
+
+    return payload.id;
+  } catch (error) {
+    return null;
+  }
+}
 
 const currentUserSelect = {
   id: true,
@@ -15,6 +62,7 @@ const currentUserSelect = {
   location: true,
   website: true,
   createdAt: true,
+  twoFactorEnabled: true,
   password: true,
 };
 
@@ -203,23 +251,17 @@ export const loginUser = async (req, res) => {
         },
       });
     }
-  
+
     if (user.twoFactorEnabled) {
-      const code = crypto.randomInt(100000, 999999).toString();
-      const timeToExpireCode = new Date(Date.now() + 10 * 60 * 1000);
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { twoFactorcode: code, twoFactorExpires: timeToExpireCode },
+      return res.status(200).json({
+        message: "2FA required. Send a code to continue.",
+        twoFactorRequired: true,
+        pendingToken: signPendingTwoFactorToken(user),
+        email: user.email,
       });
-      await Emailconfirmation(user.email, code);
-      return res.status(200).json({ requiresTwoFactor: true, userId: user.id });
     }
-  
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      getEnv("JWT_SECRET"),
-      { expiresIn: "3h" }
-    );
+
+    const token = signSessionToken(user);
 
     return res.status(200).json({message: "Login successful",token,});
   }
@@ -227,6 +269,85 @@ export const loginUser = async (req, res) => {
   catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({message: "Server error during login."});
+  }
+};
+
+export const verifyLoginTwoFactor = async (req, res) => {
+  try {
+    const userId = verifyPendingTwoFactorToken(req.body?.pendingToken);
+    const code = normalizeTwoFactorCode(req.body?.code);
+
+    if (!userId) {
+      return res.status(401).json({ message: "Invalid or expired 2FA session." });
+    }
+
+    if (!/^\d{4}$/.test(code)) {
+      return res.status(400).json({ message: "Code must contain exactly 4 digits." });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.twoFactorEnabled) {
+      return res.status(401).json({ message: "Invalid 2FA challenge." });
+    }
+
+    if (!user.twoFactorcode || !user.twoFactorExpires) {
+      return res.status(400).json({ message: "No code sent." });
+    }
+
+    if (new Date() > user.twoFactorExpires) {
+      return res.status(400).json({ message: "Code expired." });
+    }
+
+    if (user.twoFactorcode !== code) {
+      return res.status(401).json({ message: "Invalid code." });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        twoFactorcode: null,
+        twoFactorExpires: null,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Login successful",
+      token: signSessionToken(user),
+    });
+  } catch (error) {
+    console.error("verifyLoginTwoFactor error:", error);
+    return res.status(500).json({ message: "Failed to verify 2FA code." });
+  }
+};
+
+export const resendLoginTwoFactor = async (req, res) => {
+  try {
+    const userId = verifyPendingTwoFactorToken(req.body?.pendingToken);
+
+    if (!userId) {
+      return res.status(401).json({ message: "Invalid or expired 2FA session." });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.twoFactorEnabled) {
+      return res.status(401).json({ message: "Invalid 2FA challenge." });
+    }
+
+    await issueTwoFactorCode(user);
+
+    return res.status(200).json({
+      message: "Code sent by email.",
+      email: user.email,
+    });
+  } catch (error) {
+    console.error("resendLoginTwoFactor error:", error);
+    return res.status(500).json({ message: "Failed to resend 2FA code." });
   }
 };
 
@@ -784,6 +905,8 @@ export default {
   registerUser,
   allUsers,
   loginUser,
+  verifyLoginTwoFactor,
+  resendLoginTwoFactor,
   getUser,
   getUserById,
   getUserPosts,

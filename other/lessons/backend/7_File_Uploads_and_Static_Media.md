@@ -1,10 +1,10 @@
 # 7. File Uploads and Static Media
 
-Goal: understand how image uploads are received, stored, served back by the backend, and seeded without committing image assets into git.
+Goal: understand how post attachments are received, stored, served back by the backend, and seeded without committing media assets into git.
 
 ## Big Picture
 
-This project allows post creation with an optional uploaded media file.
+This project allows post creation with one optional uploaded media file.
 
 That involves two separate things:
 
@@ -59,12 +59,17 @@ Example shape:
 The middleware checks:
 
 ```js
-file.mimetype.startsWith("image/")
+file.mimetype.startsWith("image/") || file.mimetype === "application/pdf"
 ```
 
-So only image uploads are accepted.
+So post uploads now accept:
 
-If the uploaded file is not an image:
+- images
+- PDF documents
+
+There is also a 10 MB size limit for post attachments.
+
+If the uploaded file is not an allowed type:
 
 - Multer rejects it with an error
 
@@ -110,6 +115,7 @@ That means files in the uploads folder can be served through URLs like:
 
 ```text
 /uploads/post-123.webp
+/uploads/post-123.pdf
 ```
 
 So uploaded media becomes accessible over normal HTTP.
@@ -164,7 +170,7 @@ What this means:
 - only a deterministic subset gets banner URLs
 - avatar and banner images are still remote URLs, not uploaded files
 
-Post images still go through the real upload pipeline.
+Post attachments still go through the real upload pipeline.
 
 Real code from `other/seed.sh`:
 
@@ -255,7 +261,7 @@ router.post(
 
 How the full flow works:
 
-1. frontend sends a local image file with `multipart/form-data`
+1. frontend sends one local image or PDF file with `multipart/form-data`
 2. Multer writes the file into `uploads/`
 3. backend returns the public file URL
 4. frontend saves that URL into `User.avatar` or `User.banner` through `PUT /users/:id`

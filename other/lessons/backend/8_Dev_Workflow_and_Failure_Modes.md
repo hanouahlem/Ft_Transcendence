@@ -163,6 +163,7 @@ The large social dataset is no longer embedded directly in the shell script.
 Current flow:
 
 - [`other/seed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/seed.sh) remains the older small scripted seed
+- its post generator now injects the current right-rail trend terms into only a deterministic subset of captions, so local demo content can surface those search themes without turning every post into keyword spam
 - [`other/superseed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/superseed.sh) is the thin launcher for the large deterministic dataset
 - [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/seed.mjs) loads curated JSON config from [`other/seed/config/roster.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/roster.json), [`other/seed/config/clusters.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/clusters.json), [`other/seed/config/themes.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/themes.json), [`other/seed/config/relationships.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/relationships.json), and [`other/seed/config/showcase-users.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/showcase-users.json)
 - the generator builds deterministic user budgets, friendship plans, post plans, likes, favorites, and comment plans from that small curated input

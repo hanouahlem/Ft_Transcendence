@@ -76,7 +76,7 @@ export function SettingsPasswordSection({
 
         <Button
           type="button"
-          variant="paper"
+          variant="bluesh"
           size="sm"
           className="rounded-none md:mb-0.5"
           onClick={onSubmit}
@@ -86,7 +86,7 @@ export function SettingsPasswordSection({
           {saving
             ? "Writing..."
             : hasPassword
-              ? "Change Password"
+              ? ""
               : "Set Password"}
         </Button>
       </div>

@@ -8,22 +8,24 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-ink bg-ink text-paper shadow-[2px_4px_0_#d32f2f] hover:bg-ink/90",
+          "border-ink bg-ink text-paper shadow-[2px_4px_0_#d32f2f] hover:translate-x-px hover:translate-y-[2px] hover:bg-ink/90 hover:shadow-[1px_2px_0_#d32f2f]",
         outline:
-          "border-label/25 bg-paper text-ink shadow-[2px_3px_0_rgba(26,26,26,0.14)] hover:bg-paper-muted",
+          "border-label/25 bg-paper text-ink shadow-[2px_3px_0_rgba(26,26,26,0.14)] hover:translate-x-px hover:translate-y-px hover:bg-paper-muted hover:shadow-[1px_2px_0_rgba(26,26,26,0.14)]",
         secondary:
           "border-black/10 bg-black/5 text-label hover:bg-black/10 hover:text-ink",
         destructive:
-          "border-ink bg-accent-red text-paper shadow-[2px_4px_0_#000] hover:bg-accent-red/80",
+          "border-ink bg-accent-red text-paper shadow-[2px_4px_0_#000] hover:translate-x-px hover:translate-y-[2px] hover:bg-accent-red/80 hover:shadow-[1px_2px_0_#000]",
         ghost:
           "border-transparent bg-transparent text-label hover:border-black/10 hover:bg-black/5 hover:text-ink",
         link: "border-transparent bg-transparent text-accent-red underline underline-offset-4 shadow-none hover:text-ink",
         accent:
-          "border-ink bg-ink text-paper shadow-[2px_4px_0_#d32f2f] hover:bg-ink/90",
+          "border-ink bg-ink text-paper shadow-[2px_4px_0_#d32f2f] hover:translate-x-px hover:translate-y-[2px] hover:bg-ink/90 hover:shadow-[1px_2px_0_#d32f2f]",
         bluesh:
-          "border-ink bg-accent-blue text-paper shadow-[2px_4px_0_#000] hover:bg-ink/90",
+          "border-ink bg-accent-blue text-paper shadow-[2px_4px_0_#000] hover:translate-x-px hover:translate-y-[2px] hover:bg-ink/90 hover:shadow-[1px_2px_0_#000]",
+        redsh:
+          "border-ink bg-accent-red text-paper shadow-[2px_4px_0_#000] hover:translate-x-px hover:translate-y-[2px] hover:bg-accent-red hover:shadow-[1px_2px_0_#000]",
         paper:
-          "border-label/25 bg-paper text-ink shadow-[2px_3px_0_rgba(26,26,26,0.14)] hover:bg-paper-muted",
+          "border-label/25 bg-paper text-ink shadow-[2px_3px_0_rgba(26,26,26,0.14)] hover:translate-x-px hover:translate-y-px hover:bg-paper-muted hover:shadow-[1px_2px_0_rgba(26,26,26,0.14)]",
         stamp:
           "border-accent-red bg-transparent text-accent-red hover:bg-accent-red hover:text-paper",
         subtle:
@@ -33,9 +35,9 @@ const buttonVariants = cva(
         black:
           "border-black/10 bg-ink text-paper hover:bg-black/70 hover:text-paper/90",
         ledger:
-          "border-ink bg-ink text-paper shadow-[4px_4px_0_#ff4a1c] hover:bg-accent-orange hover:text-paper hover:shadow-[4px_4px_0_#ff4a1c]",
+          "border-ink bg-ink text-paper shadow-[4px_4px_0_#ff4a1c] hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-accent-orange hover:text-paper hover:shadow-[2px_2px_0_#ff4a1c]",
         correspondence:
-          "border-label/30 bg-paper text-ink shadow-[3px_4px_0_#ff4a1c] hover:bg-paper-muted hover:shadow-[2px_3px_0_#ff4a1c]",
+          "border-label/30 bg-paper text-ink shadow-[3px_4px_0_#ff4a1c] hover:translate-x-px hover:translate-y-px hover:bg-paper-muted hover:shadow-[2px_3px_0_#ff4a1c]",
       },
       size: {
         xs: "min-h-8 px-2.5 py-1.5 text-[10px]",

@@ -1,8 +1,10 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { getEnv } from "./env.js";
+import { SOCKET_EVENTS } from "./socketEvents.js";
 
 let io = null;
+const userSocketCounts = new Map();
 
 export function getUserRoomName(userId) {
   return `user:${userId}`;
@@ -72,9 +74,35 @@ export function attachSocketServer(httpServer) {
     }
 
     socket.join(getUserRoomName(userId));
+
+    const currentCount = userSocketCounts.get(userId) ?? 0;
+    userSocketCounts.set(userId, currentCount + 1);
+    emitOnlineUsers();
+
+    socket.on("disconnect", () => {
+      const nextCount = (userSocketCounts.get(userId) ?? 1) - 1;
+
+      if (nextCount > 0) {
+        userSocketCounts.set(userId, nextCount);
+      } else {
+        userSocketCounts.delete(userId);
+      }
+
+      emitOnlineUsers();
+    });
   });
 
   return io;
+}
+
+function emitOnlineUsers() {
+  if (!io) {
+    return;
+  }
+
+  io.emit(SOCKET_EVENTS.ONLINE_USERS, {
+    onlineUserIds: [...userSocketCounts.keys()],
+  });
 }
 
 export function getSocketServer() {

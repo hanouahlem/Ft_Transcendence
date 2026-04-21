@@ -19,6 +19,7 @@ function formatMessageDate(value: string) {
 
 type ConversationThreadProps = {
   selectedConversation: ConversationItem | null;
+  onlineUserIds: Set<number>;
   messages: ConversationMessage[];
   currentUserId?: number;
   isLoadingMessages: boolean;
@@ -30,6 +31,7 @@ type ConversationThreadProps = {
 
 export function ConversationThread({
   selectedConversation,
+  onlineUserIds,
   messages,
   currentUserId,
   isLoadingMessages,
@@ -41,6 +43,8 @@ export function ConversationThread({
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const selectedConversationId = selectedConversation?.id ?? null;
   const selectedPeer = selectedConversation?.peer ?? null;
+  const selectedPeerIsOnline =
+    typeof selectedPeer?.id === "number" && selectedPeer.id > 0 && onlineUserIds.has(selectedPeer.id);
 
   useEffect(() => {
     if (!selectedConversationId) {
@@ -76,22 +80,41 @@ export function ConversationThread({
             ) : null}
             <div className="min-w-0">
               {selectedPeer ? (
-                <>
-                  <UserIdentityLink
-                    user={selectedPeer}
-                    className="block truncate text-3xl font-semibold text-ink"
+                <div className="inline-flex max-w-full items-center gap-3">
+                  <div className="min-w-0">
+                    <UserIdentityLink
+                      user={selectedPeer}
+                      className="block truncate text-3xl font-semibold text-ink"
+                    >
+                      {selectedPeer.displayName ||
+                        selectedPeer.username ||
+                        "Unknown user"}
+                    </UserIdentityLink>
+                    <UserIdentityLink
+                      user={selectedPeer}
+                      className="block truncate font-mono text-[10px] uppercase tracking-[0.18em] text-label"
+                    >
+                      @{selectedPeer.username || "unknown"}
+                    </UserIdentityLink>
+                  </div>
+                  <div
+                    className={cn(
+                      "shrink-0 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em]",
+                      selectedPeerIsOnline
+                        ? "border-emerald-600/45 bg-emerald-500/10 text-emerald-700"
+                        : "border-zinc-600/35 bg-zinc-500/10 text-zinc-700",
+                    )}
                   >
-                    {selectedPeer.displayName ||
-                      selectedPeer.username ||
-                      "Unknown user"}
-                  </UserIdentityLink>
-                  <UserIdentityLink
-                    user={selectedPeer}
-                    className="block truncate font-mono text-[10px] uppercase tracking-[0.18em] text-label"
-                  >
-                    @{selectedPeer.username || "unknown"}
-                  </UserIdentityLink>
-                </>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        selectedPeerIsOnline ? "bg-emerald-500" : "bg-zinc-500",
+                      )}
+                    />
+                    {selectedPeerIsOnline ? "Online" : "Offline"}
+                  </div>
+                </div>
               ) : null}
             </div>
           </>
