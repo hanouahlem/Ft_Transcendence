@@ -331,7 +331,10 @@ export default function SearchPage() {
 
   const resultCount =
     activeTab === "posts" ? filteredPosts.length : filteredUsers.length;
-  const resultLabel = activeTab === "posts" ? "post" : "user";
+  const resultLabel =
+    activeTab === "posts"
+      ? t("search.resultLabels.posts")
+      : t("search.resultLabels.users");
   const pageSize = activeTab === "posts" ? POSTS_PER_PAGE : USERS_PER_PAGE;
   const totalPages = Math.max(1, Math.ceil(resultCount / pageSize));
   const currentPage = Math.min(requestedPage, totalPages);

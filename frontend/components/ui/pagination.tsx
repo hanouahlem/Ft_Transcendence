@@ -13,6 +13,7 @@ import {
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const triggerClassName = cn(
   buttonVariants({ variant: "paper", size: "xs" }),
@@ -54,42 +55,50 @@ PaginationControls.displayName = "PaginationControls";
 const PaginationPrevTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof ArkPaginationPrevTrigger>
->(({ className, children, ...props }, ref) => (
-  <ArkPaginationPrevTrigger
-    ref={ref}
-    data-slot="pagination-prev-trigger"
-    className={cn(triggerClassName, className)}
-    {...props}
-  >
-    {children ?? (
-      <>
-        <ChevronLeft className="h-3.5 w-3.5" />
-        Prev
-      </>
-    )}
-  </ArkPaginationPrevTrigger>
-));
+>(({ className, children, ...props }, ref) => {
+  const { t } = useI18n();
+
+  return (
+    <ArkPaginationPrevTrigger
+      ref={ref}
+      data-slot="pagination-prev-trigger"
+      className={cn(triggerClassName, className)}
+      {...props}
+    >
+      {children ?? (
+        <>
+          <ChevronLeft className="h-3.5 w-3.5" />
+          {t("pagination.prev")}
+        </>
+      )}
+    </ArkPaginationPrevTrigger>
+  );
+});
 
 PaginationPrevTrigger.displayName = "PaginationPrevTrigger";
 
 const PaginationNextTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof ArkPaginationNextTrigger>
->(({ className, children, ...props }, ref) => (
-  <ArkPaginationNextTrigger
-    ref={ref}
-    data-slot="pagination-next-trigger"
-    className={cn(triggerClassName, className)}
-    {...props}
-  >
-    {children ?? (
-      <>
-        Next
-        <ChevronRight className="h-3.5 w-3.5" />
-      </>
-    )}
-  </ArkPaginationNextTrigger>
-));
+>(({ className, children, ...props }, ref) => {
+  const { t } = useI18n();
+
+  return (
+    <ArkPaginationNextTrigger
+      ref={ref}
+      data-slot="pagination-next-trigger"
+      className={cn(triggerClassName, className)}
+      {...props}
+    >
+      {children ?? (
+        <>
+          {t("pagination.next")}
+          <ChevronRight className="h-3.5 w-3.5" />
+        </>
+      )}
+    </ArkPaginationNextTrigger>
+  );
+});
 
 PaginationNextTrigger.displayName = "PaginationNextTrigger";
 
@@ -163,6 +172,8 @@ function PaginationSummary({
 }: React.ComponentProps<"p"> & {
   itemLabel?: string;
 }) {
+  const { t } = useI18n();
+
   return (
     <ArkPaginationContext>
       {(pagination) => {
@@ -177,8 +188,7 @@ function PaginationSummary({
               className,
             )}
           >
-            Showing {pagination.pageRange.start + 1}-{pagination.pageRange.end} of{" "}
-            {pagination.count} {itemLabel}
+            {t("pagination.showing")} {pagination.pageRange.start + 1}-{pagination.pageRange.end} {t("pagination.of")} {pagination.count} {itemLabel}
           </p>
         );
       }}
