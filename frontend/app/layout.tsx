@@ -1,9 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { cookies } from "next/headers";
 import { AuthProvider } from "@/context/AuthContext";
 import { AppToaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
+import { I18nProvider } from "@/i18n/I18nProvider";
+import { defaultLocale, getLocaleDirection, isLocale, localeCookieName } from "@/i18n/config";
 
 const displaySerif = localFont({
   src: [
@@ -61,18 +64,25 @@ export const metadata: Metadata = {
   description: "Frontend du projet ft_transcendence",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const cookieValue = cookieStore.get(localeCookieName)?.value;
+  const initialLocale = isLocale(cookieValue) ? cookieValue : defaultLocale;
+  const direction = getLocaleDirection(initialLocale);
+
   return (
-    <html lang="fr" className={cn(displaySerif.variable, monoFont.variable)}>
+    <html lang={initialLocale} dir={direction} className={cn(displaySerif.variable, monoFont.variable)}>
       <body className="min-h-screen bg-neutral-950 text-white">
-        <AuthProvider>
-          {children}
-          <AppToaster />
-        </AuthProvider>
+        <I18nProvider initialLocale={initialLocale}>
+          <AuthProvider>
+            {children}
+            <AppToaster />
+          </AuthProvider>
+        </I18nProvider>
       </body>
     </html>
   );

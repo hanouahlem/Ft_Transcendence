@@ -37,13 +37,15 @@ export function SettingsField({
             <PasswordInput.Input
               {...props}
               className={cn(
-                "archive-input h-9 w-full rounded-none border-0 border-b border-dashed border-label/80 bg-transparent px-0 py-1 pr-16 font-mono text-sm text-ink tracking-[0.1em] shadow-none placeholder:text-label/40 focus:border-accent-orange focus-visible:ring-0 disabled:opacity-55",
+                "archive-input h-9 w-full rounded-none border-0 border-b border-dashed border-label/80 bg-transparent px-0 py-1 font-mono text-sm text-ink tracking-[0.1em] shadow-none placeholder:text-label/40 focus:border-accent-orange focus-visible:ring-0 disabled:opacity-55",
                 inputClassName,
               )}
+              style={{ paddingInlineEnd: "4rem" }}
             />
             <PasswordInput.VisibilityTrigger
               type="button"
-              className="absolute right-0 top-1/2 -translate-y-1/2 text-accent-orange hover:text-ink"
+              className="absolute top-1/2 -translate-y-1/2 text-accent-orange hover:text-ink"
+              style={{ insetInlineEnd: 0 }}
             >
               <PasswordInput.Indicator
                 fallback={<HugeiconsIcon icon={ViewOffIcon} size={16} strokeWidth={1.9} />}

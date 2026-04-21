@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { NavButton } from "@/components/layout/NavButton";
 import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type SidebarProps = {
 	user: CurrentUser | null;
@@ -28,16 +30,6 @@ type SidebarProps = {
 	onCreatePost: () => void;
 	onLogout: () => void;
 };
-
-const NAV_ITEMS = [
-	{ href: "/feed", label: "Timeline", icon: Home08Icon },
-	{ href: "/search", label: "Search", icon: Search01Icon },
-	{ href: "/profile", label: "Profile", icon: UserCircleIcon },
-	{ href: "/notifications", label: "Notifications", icon: Notification01Icon },
-	{ href: "/friends", label: "Friends", icon: UserGroupIcon },
-	{ href: "/message", label: "Message", icon: Message01Icon },
-	{ href: "/settings", label: "Settings", icon: Settings02Icon },
-];
 
 export function Sidebar({
 	user,
@@ -48,14 +40,24 @@ export function Sidebar({
 }: SidebarProps) {
 	const pathname = usePathname();
 	const [expanded, setExpanded] = useState(false);
-	const userDisplayName = user?.displayName?.trim() || user?.username || "Field User";
-	const userHandle = user?.username || "observer";
+	const { t } = useI18n();
+	const userDisplayName = user?.displayName?.trim() || user?.username || t("sidebar.profileFallback");
+	const userHandle = user?.username || t("sidebar.profileHandleFallback");
+	const navItems = [
+		{ href: "/feed", label: t("nav.feed"), icon: Home08Icon },
+		{ href: "/search", label: t("nav.search"), icon: Search01Icon },
+		{ href: "/profile", label: t("nav.profile"), icon: UserCircleIcon },
+		{ href: "/notifications", label: t("nav.notifications"), icon: Notification01Icon },
+		{ href: "/friends", label: t("nav.friends"), icon: UserGroupIcon },
+		{ href: "/message", label: t("nav.message"), icon: Message01Icon },
+		{ href: "/settings", label: t("nav.settings"), icon: Settings02Icon },
+	];
 
 	return (
 		<aside
 			className="fixed inset-y-0 z-30 hidden flex-col overflow-hidden border-r border-black/10 bg-paper-muted px-3 py-8 lg:flex"
 			style={{
-				left: 0,
+				insetInlineStart: 0,
 				width: expanded ? "240px" : "76px",
 				transition: "width 0.2s ease-out",
 			}}
@@ -83,12 +85,12 @@ export function Sidebar({
 					className="whitespace-nowrap font-display text-[1.7rem] font-black tracking-[-0.05em] text-ink transition-opacity duration-150"
 					style={{ opacity: expanded ? 1 : 0 }}
 				>
-					Field Notes
+					{t("sidebar.fieldNotes")}
 				</span>
 			</Link>
 
 			<nav className="flex flex-1 flex-col justify-center gap-1">
-				{NAV_ITEMS.map((item) => (
+				{navItems.map((item) => (
 					<NavButton
 						key={item.href}
 						href={item.href}
@@ -119,18 +121,23 @@ export function Sidebar({
 				>
 					<HugeiconsIcon icon={QuillWrite02Icon} size={20} strokeWidth={1.9} />
 					<span
-						className="overflow-hidden whitespace-nowrap transition-all duration-150 ml-2 text-sm"
+						className="overflow-hidden whitespace-nowrap text-sm transition-all duration-150"
 						style={{
+							marginInlineStart: "0.5rem",
 							opacity: expanded ? 1 : 0,
 							maxWidth: expanded ? "200px" : "0px",
 						}}
 					>
-						New Post
+						{t("sidebar.newPost")}
 					</span>
 				</Button>
 			</nav>
 
 			<div className="mt-auto space-y-3">
+				<div className="flex justify-center">
+					<LocaleSwitcher compact />
+				</div>
+
 				<Link
 					href="/profile"
 					className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-black/5"
@@ -170,11 +177,12 @@ export function Sidebar({
 					<span
 						className="overflow-hidden whitespace-nowrap transition-all duration-150"
 						style={{
+							marginInlineStart: "0.5rem",
 							opacity: expanded ? 1 : 0,
 							maxWidth: expanded ? "200px" : "0px",
 						}}
 					>
-						Logout
+						{t("sidebar.logout")}
 					</span>
 				</Button>
 			</div>

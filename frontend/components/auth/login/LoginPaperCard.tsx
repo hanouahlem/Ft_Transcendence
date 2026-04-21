@@ -8,6 +8,7 @@ import AuthProvidersRow from "@/components/auth/shared/AuthProvidersRow";
 import WaxSeal from "@/components/decor/WaxSeal";
 import FieldInput from "@/components/ui/FieldInput";
 import StampButton from "@/components/ui/StampButton";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type LoginPaperCardProps = {
 	identifier: string;
@@ -36,15 +37,28 @@ export default function LoginPaperCard({
 	onPasswordChange,
 	onSubmit,
 }: LoginPaperCardProps) {
+	const { isRtl, t } = useI18n();
+	const cardClassName = isRtl
+		? "lg:absolute lg:inset-y-0 lg:right-12 lg:w-1/2 lg:rotate-2"
+		: "lg:absolute lg:inset-y-0 lg:left-12 lg:w-1/2 lg:-rotate-2";
+	const topTapeClassName = isRtl
+		? "-top-3 right-[24%] h-8 w-32 -rotate-3"
+		: "-top-3 left-[24%] h-8 w-32 -rotate-3";
+	const bottomTapeClassName = isRtl
+		? "-bottom-2 left-[24%] h-6 w-24 rotate-2"
+		: "-bottom-2 right-[24%] h-6 w-24 rotate-2";
+
 	return (
 		<AuthPaperCard
-			className="lg:absolute lg:inset-y-0 lg:left-12 lg:w-1/2 lg:-rotate-2"
+			className={cardClassName}
 			contentClassName="px-6 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-12"
+			topTapeClassName={topTapeClassName}
+			bottomTapeClassName={bottomTapeClassName}
 		>
 			<AuthCardHeader
-				eyebrow="Form 4A - Authorized Personnel"
-				title="Login Entry"
-				subtitle="Log_ID: Secure_Entry_V4"
+				eyebrow={t("auth.login.eyebrow")}
+				title={t("auth.login.title")}
+				subtitle={t("auth.login.subtitle")}
 				decoration={<WaxSeal />}
 			/>
 
@@ -56,8 +70,8 @@ export default function LoginPaperCard({
 			>
 				<FieldInput
 					type="email"
-					label="Username / Email"
-					placeholder="login@student.42.fr"
+					label={t("auth.login.usernameLabel")}
+					placeholder={t("auth.login.usernamePlaceholder")}
 					value={identifier}
 					onChange={onEmailChange}
 					required
@@ -66,7 +80,7 @@ export default function LoginPaperCard({
 
 				<FieldInput
 					type="password"
-					label="Password"
+					label={t("auth.login.passwordLabel")}
 					placeholder="••••••••"
 					value={password}
 					onChange={onPasswordChange}
@@ -78,7 +92,7 @@ export default function LoginPaperCard({
 								type="button"
 								className="bg-paper px-1 font-mono text-[11px] uppercase tracking-[0.12em] text-accent-red underline decoration-dotted underline-offset-4"
 							>
-								Forgot Password?
+								{t("auth.login.forgotPassword")}
 							</button>
 						) : undefined
 					}
@@ -87,28 +101,29 @@ export default function LoginPaperCard({
 				<div className="mt-auto pt-6">
 					<AuthFormMeta
 						dateLabel={dateLabel}
-						locationLabel="Encrypted_Port"
+						locationLabel={t("auth.login.dateLocation")}
 						action={
 							<StampButton
 								type="submit"
 								form="login-form"
 								disabled={loading}
 								textClassName="text-5xl"
-								className="absolute right-0 bottom-8 sm:right-2 lg:bottom-9"
+								className="absolute bottom-8 sm:bottom-9"
+								style={{ insetInlineEnd: isRtl ? undefined : "0rem", insetInlineStart: isRtl ? "0rem" : undefined }}
 							>
-								{loading ? "..." : "Login"}
+								{loading ? "..." : t("auth.login.submit")}
 							</StampButton>
 						}
 					/>
 
-					<AuthProvidersRow>
+					<AuthProvidersRow label={t("auth.login.providerLabel")}>
 						<OAuthProviderButton
-							label="Intra"
+							label={t("auth.login.providerTwo")}
 							icon={<FortyTwoIcon className="h-4 w-4" />}
 							href={fortyTwoHref}
 						/>
 						<OAuthProviderButton
-							label="GitHub"
+							label={t("auth.login.providerGithub")}
 							icon={<GithubIcon className="h-4 w-4" />}
 							href={githubHref}
 						/>

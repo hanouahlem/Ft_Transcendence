@@ -9,6 +9,7 @@ import { useArchiveToasts } from "@/hooks/useArchiveToasts";
 import { useAuth } from "@/context/AuthContext";
 import { useInboxUnread } from "@/context/InboxUnreadContext";
 import { useSocket } from "@/context/SocketContext";
+import { useI18n } from "@/i18n/I18nProvider";
 import {
   getNotifications,
   markNotificationAsRead,
@@ -34,6 +35,7 @@ const DEFAULT_FILTERS: NotificationFilterState = {
 
 export default function NotificationsPage() {
   const { token } = useAuth();
+  const { t } = useI18n();
   const { socket, isConnected } = useSocket();
   const { setUnreadNotificationsCount } = useInboxUnread();
   const { notifyError, notifySuccess } = useArchiveToasts();
@@ -60,7 +62,7 @@ export default function NotificationsPage() {
         const result = await getNotifications(token);
 
         if (!result.ok) {
-          throw new Error(result.message || "Unable to load notifications.");
+          throw new Error(result.message || t("notifications.errors.load"));
         }
 
         setNotifications(
@@ -70,7 +72,7 @@ export default function NotificationsPage() {
         const message =
           loadError instanceof Error
             ? loadError.message
-            : "Failed to load correspondence.";
+            : t("notifications.errors.loadFallback");
         setError(message);
 
         if (notifyOnError) {
@@ -80,7 +82,7 @@ export default function NotificationsPage() {
         setLoading(false);
       }
     },
-    [notifyError, token],
+    [notifyError, t, token],
   );
 
   useEffect(() => {
@@ -202,7 +204,7 @@ export default function NotificationsPage() {
 
       if (failure && !failure.ok) {
         throw new Error(
-          failure.message || "Unable to mark the notification as read.",
+          failure.message || t("notifications.errors.markOne"),
         );
       }
 
@@ -234,7 +236,7 @@ export default function NotificationsPage() {
       notifyError(
         markError instanceof Error
           ? markError.message
-          : "Failed to mark the notification as read.",
+          : t("notifications.errors.markOneFallback"),
       );
     }
   };
@@ -246,7 +248,7 @@ export default function NotificationsPage() {
       notifyError(
         markError instanceof Error
           ? markError.message
-          : "Failed to mark the notification as read.",
+          : t("notifications.errors.markOneFallback"),
       );
     }
   };
@@ -268,12 +270,12 @@ export default function NotificationsPage() {
       setMarkingAll(true);
       await handleMarkNotificationsAsRead(unreadIds);
 
-      notifySuccess("All visible unread records were marked as read.");
+      notifySuccess(t("notifications.toasts.markAllSuccess"));
     } catch (markAllError) {
       notifyError(
         markAllError instanceof Error
           ? markAllError.message
-          : "Failed to mark every notification as read.",
+          : t("notifications.errors.markAllFallback"),
       );
     } finally {
       setMarkingAll(false);
@@ -323,7 +325,7 @@ export default function NotificationsPage() {
           <header className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h1 className="mt-5 font-display text-4xl font-black uppercase tracking-[-0.05em] text-ink sm:text-5xl">
-                Notifications
+                {t("notifications.pageTitle")}
               </h1>
             </div>
           </header>
@@ -352,34 +354,40 @@ export default function NotificationsPage() {
           ) : notifications.length === 0 ? (
             <section className="border border-black/10 bg-paper px-6 py-8 shadow-[8px_12px_25px_rgba(26,26,26,0.12)]">
               <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                No correspondence has been filed yet.
+                {t("notifications.empty.noneTitle")}
               </p>
               <p className="mt-3 text-base italic leading-relaxed text-label">
-                New likes, comments, and follow activity will appear here once the
-                archive receives them.
+                {t("notifications.empty.noneDescription")}
               </p>
             </section>
           ) : visibleLedgerItems.length === 0 ? (
             <section className="border border-black/10 bg-paper px-6 py-8 shadow-[8px_12px_25px_rgba(26,26,26,0.12)]">
               <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-                No records match the active ledger filters.
+                {t("notifications.empty.filteredTitle")}
               </p>
               <p className="mt-3 text-base italic leading-relaxed text-label">
-                Adjust the search or re-enable one of the notification groups in the
-                right rail.
+                {t("notifications.empty.filteredDescription")}
               </p>
             </section>
           ) : (
             <>
               <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                {/*
+                  Translation note:
+                  this summary line switches key based on UI state,
+                  while counts are injected with params for each locale.
+                */}
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
                   {hasFiltersApplied
-                    ? `${visibleLedgerItems.length} filtered records`
-                    : `${unreadCount} unread / ${notifications.length} total`}
+                    ? t("notifications.summary.filtered", { count: visibleLedgerItems.length })
+                    : t("notifications.summary.default", {
+                      unread: unreadCount,
+                      total: notifications.length,
+                    })}
                 </p>
                 {hasFiltersApplied ? (
                   <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-accent-blue">
-                    Search and filter are applied locally
+                    {t("notifications.summary.localFilter")}
                   </p>
                 ) : null}
               </div>
@@ -407,7 +415,7 @@ export default function NotificationsPage() {
           )}
 
           <div className="mt-12 border-t border-dashed border-label pt-8 text-center font-mono text-sm text-label">
-            --- NO MORE CORRESPONDENCE ---
+            {t("notifications.noMore")}
           </div>
         </section>
 

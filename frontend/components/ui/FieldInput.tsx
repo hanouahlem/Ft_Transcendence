@@ -44,7 +44,7 @@ export default function FieldInput({
   const inputId = id ?? generatedId;
   const invalid = Boolean(errorText);
   const topRight = invalid ? (
-    <Field.ErrorText className="bg-paper px-1 text-right font-mono text-[10px] uppercase tracking-[0.12em] text-accent-red">
+    <Field.ErrorText className="bg-paper px-1 text-end font-mono text-[10px] uppercase tracking-[0.12em] text-accent-red">
       {errorText}
     </Field.ErrorText>
   ) : (
@@ -62,7 +62,7 @@ export default function FieldInput({
         errorText: `${inputId}-error`,
       }}
     >
-      <div className="absolute -top-3 left-1 right-1 z-10 flex items-center justify-between">
+      <div className="absolute -top-3 z-10 flex items-center justify-between" style={{ insetInlineStart: "0.25rem", insetInlineEnd: "0.25rem" }}>
         <Field.Label
           className={cn(
             "bg-paper px-1 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors",
@@ -86,7 +86,7 @@ export default function FieldInput({
             : focused
               ? "border-accent-red/50"
               : "border-label/30",
-          )}
+        )}
       >
         {type === "password" ? (
           <PasswordInput.Root>
@@ -100,15 +100,17 @@ export default function FieldInput({
                 required={required}
                 {...inputProps}
                 className={cn(
-                  "archive-input w-full border-0 border-b-2 border-dotted border-label bg-transparent px-1 pt-3 pb-1 pr-18 font-mono text-lg text-ink tracking-[0.1em] transition-colors placeholder:text-label/40 focus:border-accent-red focus:bg-accent-red/[0.02]",
+                  "archive-input w-full border-0 border-b-2 border-dotted border-label bg-transparent px-1 pt-3 pb-1 font-mono text-lg text-ink tracking-[0.1em] transition-colors placeholder:text-label/40 focus:border-accent-red focus:bg-accent-red/[0.02]",
                   invalid &&
-                    "border-accent-red placeholder:text-accent-red/45 focus:border-accent-red focus:bg-accent-red/[0.02]",
+                  "border-accent-red placeholder:text-accent-red/45 focus:border-accent-red focus:bg-accent-red/[0.02]",
                   inputClassName,
                 )}
+                style={{ paddingInlineEnd: "4.5rem" }}
               />
               <PasswordInput.VisibilityTrigger
                 type="button"
-                className="absolute right-0 top-1/2 -translate-y-1/2 bg-paper px-1 text-accent-red hover:text-ink"
+                className="absolute top-1/2 -translate-y-1/2 bg-paper px-1 text-accent-red hover:text-ink"
+                style={{ insetInlineEnd: 0 }}
               >
                 <PasswordInput.Indicator
                   fallback={<HugeiconsIcon icon={ViewOffIcon} size={16} strokeWidth={1.9} />}
@@ -130,7 +132,7 @@ export default function FieldInput({
             className={cn(
               "archive-input w-full border-0 border-b-2 border-dotted border-label bg-transparent px-1 pt-3 pb-1 font-mono text-lg text-ink transition-colors placeholder:text-label/40 focus:border-accent-red focus:bg-accent-red/[0.02]",
               invalid &&
-                "border-accent-red placeholder:text-accent-red/45 focus:border-accent-red focus:bg-accent-red/[0.02]",
+              "border-accent-red placeholder:text-accent-red/45 focus:border-accent-red focus:bg-accent-red/[0.02]",
               inputClassName,
             )}
           />

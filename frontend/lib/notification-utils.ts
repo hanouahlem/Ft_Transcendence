@@ -17,6 +17,11 @@ type NotificationCopy = {
   inlineQuote?: boolean;
 };
 
+type NotificationTranslate = (
+  key: string,
+  params?: Record<string, string | number>,
+) => string;
+
 export type SingleNotificationLedgerItem = {
   kind: "single";
   id: string;
@@ -53,33 +58,37 @@ function truncateNotificationPost(content?: string | null, maxLength = 56) {
   return `${normalized.slice(0, maxLength).trimEnd()}...`;
 }
 
-export function formatNotificationTime(dateString: string) {
+export function formatNotificationTime(dateString: string, locale = "en") {
   const date = new Date(dateString);
 
   if (Number.isNaN(date.getTime())) {
-    return "Unknown";
+    return "";
   }
 
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  const diffInSeconds = Math.floor((date.getTime() - Date.now()) / 1000);
+  const absDiff = Math.abs(diffInSeconds);
+  const relativeFormatter = new Intl.RelativeTimeFormat(locale, {
+    numeric: "auto",
+    style: "short",
+  });
 
-  if (diffInSeconds < 60) {
-    return "Just now";
+  if (absDiff < 60) {
+    return relativeFormatter.format(Math.round(diffInSeconds), "second");
   }
 
-  if (diffInSeconds < 3600) {
-    return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (absDiff < 3600) {
+    return relativeFormatter.format(Math.round(diffInSeconds / 60), "minute");
   }
 
-  if (diffInSeconds < 86400) {
-    return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (absDiff < 86400) {
+    return relativeFormatter.format(Math.round(diffInSeconds / 3600), "hour");
   }
 
-  if (diffInSeconds < 172800) {
-    return "Yesterday";
+  if (absDiff < 172800) {
+    return relativeFormatter.format(Math.round(diffInSeconds / 86400), "day");
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
   }).format(date);
@@ -129,66 +138,85 @@ export function getNotificationHref(notification: NotificationItem) {
 
 export function getNotificationCopy(
   notification: NotificationItem,
+  t?: NotificationTranslate,
 ): NotificationCopy {
   switch (notification.type) {
     case "FOLLOW":
       return {
-        eyebrow: "Friend Request",
-        body: "Sent you a friend request.",
-        helper: "This notice opens their public profile record.",
-        actionLabel: "Visit profile",
+        eyebrow: t ? t("notifications.copy.follow.eyebrow") : "Friend Request",
+        body: t ? t("notifications.copy.follow.body") : "Sent you a friend request.",
+        helper: t
+          ? t("notifications.copy.follow.helper")
+          : "This notice opens their public profile record.",
+        actionLabel: t ? t("notifications.copy.follow.actionLabel") : "Visit profile",
       };
     case "FOLLOW_ACCEPT":
       return {
-        eyebrow: "Accepted request",
-        body: "Accepted your friend request.",
-        helper: "This notice opens the newly connected profile.",
-        actionLabel: "Open profile",
+        eyebrow: t ? t("notifications.copy.followAccept.eyebrow") : "Accepted request",
+        body: t ? t("notifications.copy.followAccept.body") : "Accepted your friend request.",
+        helper: t
+          ? t("notifications.copy.followAccept.helper")
+          : "This notice opens the newly connected profile.",
+        actionLabel: t ? t("notifications.copy.followAccept.actionLabel") : "Open profile",
       };
     case "UNFOLLOW":
       return {
-        eyebrow: "Field distance",
-        body: "Removed you from their friends list.",
-        helper: "You can still review their profile record if needed.",
-        actionLabel: "Review profile",
+        eyebrow: t ? t("notifications.copy.unfollow.eyebrow") : "Field distance",
+        body: t ? t("notifications.copy.unfollow.body") : "Removed you from their friends list.",
+        helper: t
+          ? t("notifications.copy.unfollow.helper")
+          : "You can still review their profile record if needed.",
+        actionLabel: t ? t("notifications.copy.unfollow.actionLabel") : "Review profile",
       };
     case "LIKE":
       return {
-        eyebrow: "Like",
-        body: "Liked your post:",
-        helper: "This notice links directly to the referenced post dialog.",
-        actionLabel: "Open entry",
+        eyebrow: t ? t("notifications.copy.like.eyebrow") : "Like",
+        body: t ? t("notifications.copy.like.body") : "Liked your post:",
+        helper: t
+          ? t("notifications.copy.like.helper")
+          : "This notice links directly to the referenced post dialog.",
+        actionLabel: t ? t("notifications.copy.like.actionLabel") : "Open entry",
         quote: truncateNotificationPost(notification.post?.content),
         inlineQuote: true,
       };
     case "COMMENT":
       return {
-        eyebrow: "Comment",
-        body: "Commented on your post.",
-        helper: "Open the linked record to inspect the conversation.",
-        actionLabel: "Open comment thread",
+        eyebrow: t ? t("notifications.copy.comment.eyebrow") : "Comment",
+        body: t ? t("notifications.copy.comment.body") : "Commented on your post.",
+        helper: t
+          ? t("notifications.copy.comment.helper")
+          : "Open the linked record to inspect the conversation.",
+        actionLabel: t ? t("notifications.copy.comment.actionLabel") : "Open comment thread",
       };
     case "MENTION":
       return {
-        eyebrow: "Ink mention",
-        body: "Mentioned you in a post.",
-        helper: "This notice links to the referenced post on their profile.",
-        actionLabel: "Open mention",
+        eyebrow: t ? t("notifications.copy.mention.eyebrow") : "Ink mention",
+        body: t ? t("notifications.copy.mention.body") : "Mentioned you in a post.",
+        helper: t
+          ? t("notifications.copy.mention.helper")
+          : "This notice links to the referenced post on their profile.",
+        actionLabel: t ? t("notifications.copy.mention.actionLabel") : "Open mention",
         quote: truncateNotificationPost(notification.post?.content),
       };
     case "MESSAGE":
       return {
-        eyebrow: "Message",
-        body: "Sent you a message.",
-        helper: "Direct messaging is not wired here yet, so this opens the sender profile.",
-        actionLabel: "Open sender profile",
+        eyebrow: t ? t("notifications.copy.message.eyebrow") : "Message",
+        body: t ? t("notifications.copy.message.body") : "Sent you a message.",
+        helper: t
+          ? t("notifications.copy.message.helper")
+          : "Direct messaging is not wired here yet, so this opens the sender profile.",
+        actionLabel: t ? t("notifications.copy.message.actionLabel") : "Open sender profile",
       };
     default:
       return {
-        eyebrow: "Archive update",
-        body: "triggered a notification event in your record.",
-        helper: "Open the related profile to inspect the activity.",
-        actionLabel: "Open record",
+        eyebrow: t ? t("notifications.copy.default.eyebrow") : "Archive update",
+        body: t
+          ? t("notifications.copy.default.body")
+          : "triggered a notification event in your record.",
+        helper: t
+          ? t("notifications.copy.default.helper")
+          : "Open the related profile to inspect the activity.",
+        actionLabel: t ? t("notifications.copy.default.actionLabel") : "Open record",
       };
   }
 }
@@ -236,52 +264,54 @@ export function buildNotificationLedgerItems(
 
   const emittedLikeGroups = new Set<number>();
 
-  return notifications.flatMap((notification) => {
-    if (notification.type !== "LIKE" || notification.postId === null) {
+  return notifications.flatMap<NotificationLedgerItem>(
+    (notification): NotificationLedgerItem[] => {
+      if (notification.type !== "LIKE" || notification.postId === null) {
+        return [
+          {
+            kind: "single" as const,
+            id: `notification-${notification.id}`,
+            notification,
+          },
+        ];
+      }
+
+      const groupedNotifications =
+        likeNotificationsByPostId.get(notification.postId) ?? [];
+
+      if (groupedNotifications.length <= 3) {
+        return [
+          {
+            kind: "single" as const,
+            id: `notification-${notification.id}`,
+            notification,
+          },
+        ];
+      }
+
+      if (emittedLikeGroups.has(notification.postId)) {
+        return [];
+      }
+
+      emittedLikeGroups.add(notification.postId);
+
       return [
         {
-          kind: "single" as const,
-          id: `notification-${notification.id}`,
-          notification,
+          kind: "like-group" as const,
+          id: `like-group-${notification.postId}`,
+          notifications: groupedNotifications,
+          latestNotification: groupedNotifications[0],
+          actors: getUniqueActors(groupedNotifications),
+          likeCount: groupedNotifications.length,
+          unread: groupedNotifications.some(
+            (groupedNotification) => !groupedNotification.read,
+          ),
+          createdAt: groupedNotifications[0].createdAt,
+          postId: notification.postId,
         },
       ];
-    }
-
-    const groupedNotifications =
-      likeNotificationsByPostId.get(notification.postId) ?? [];
-
-    if (groupedNotifications.length <= 3) {
-      return [
-        {
-          kind: "single" as const,
-          id: `notification-${notification.id}`,
-          notification,
-        },
-      ];
-    }
-
-    if (emittedLikeGroups.has(notification.postId)) {
-      return [];
-    }
-
-    emittedLikeGroups.add(notification.postId);
-
-    return [
-      {
-        kind: "like-group" as const,
-        id: `like-group-${notification.postId}`,
-        notifications: groupedNotifications,
-        latestNotification: groupedNotifications[0],
-        actors: getUniqueActors(groupedNotifications),
-        likeCount: groupedNotifications.length,
-        unread: groupedNotifications.some(
-          (groupedNotification) => !groupedNotification.read,
-        ),
-        createdAt: groupedNotifications[0].createdAt,
-        postId: notification.postId,
-      },
-    ];
-  });
+    },
+  );
 }
 
 export function matchesNotificationLedgerFilters(

@@ -8,14 +8,7 @@ import { SocialComposer } from "@/components/ui/SocialComposer";
 import { UserIdentityLink } from "@/components/users/UserIdentityLink";
 import { cn } from "@/lib/utils";
 import type { ConversationItem, ConversationMessage } from "@/lib/api";
-
-function formatMessageDate(value: string) {
-  const date = new Date(value);
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
+import { useI18n } from "@/i18n/I18nProvider";
 
 type ConversationThreadProps = {
   selectedConversation: ConversationItem | null;
@@ -41,6 +34,7 @@ export function ConversationThread({
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const selectedConversationId = selectedConversation?.id ?? null;
   const selectedPeer = selectedConversation?.peer ?? null;
+  const { locale, t } = useI18n();
 
   useEffect(() => {
     if (!selectedConversationId) {
@@ -101,7 +95,7 @@ export function ConversationThread({
               <MessageCircle className="h-5 w-5 text-label" />
             </div>
             <p className="font-serif text-sm text-label">
-              Select a conversation or start one from the user list.
+              {t("conversation.selectPrompt")}
             </p>
           </>
         )}
@@ -112,15 +106,15 @@ export function ConversationThread({
         <div className="relative z-10 h-full space-y-3 overflow-auto p-4">
           {!selectedConversation ? (
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-label">
-              No conversation selected.
+              {t("conversation.noSelected")}
             </p>
           ) : isLoadingMessages ? (
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-label">
-              Loading messages...
+              {t("conversation.loadingMessages")}
             </p>
           ) : messages.length < 1 ? (
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-label">
-              No messages yet. Send the first one.
+              {t("conversation.noMessages")}
             </p>
           ) : (
             messages.map((message) => {
@@ -142,11 +136,11 @@ export function ConversationThread({
                     <p className="whitespace-pre-wrap font-serif text-md">{message.content}</p>
                     <p
                       className={cn(
-                        "mt-1 text-right font-mono text-[10px] uppercase tracking-[0.16em]",
+                        "mt-1 text-end font-mono text-[10px] uppercase tracking-[0.16em]",
                         isMine ? "text-paper/70" : "text-label",
                       )}
                     >
-                      {formatMessageDate(message.createdAt)}
+                      {new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(new Date(message.createdAt))}
                     </p>
                   </div>
                 </div>
@@ -164,10 +158,10 @@ export function ConversationThread({
           onChange={onDraftChange}
           onSubmit={onSend}
           placeholder={
-            selectedConversation ? "Write your correspondence..." : "Select a conversation first..."
+            selectedConversation ? t("conversation.writePrompt") : t("conversation.selectFirst")
           }
-          label="Write a direct message"
-          submitLabel={isSending ? "Sending message" : "Send message"}
+          label={t("conversation.composeLabel")}
+          submitLabel={isSending ? t("conversation.sending") : t("conversation.send")}
           rows={1}
           maxLength={1000}
           keepFocusOnSubmit

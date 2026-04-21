@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { NatureCanvas } from "@/components/layout/NatureCanvas";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 
 type BannerUploaderProps = {
@@ -43,6 +44,7 @@ export function BannerUploader({
   onSelect,
   onClear,
 }: BannerUploaderProps) {
+   const { t } = useI18n();
   const fileUpload = useFileUpload({
     maxFiles: 1,
     accept: ["image/*"],
@@ -62,7 +64,7 @@ export function BannerUploader({
   return (
     <FileUpload.RootProvider value={fileUpload}>
       <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-        06. Archive Banner
+        {t("settingsPage.fields.bannerLabel")}
       </span>
 
       <FileUpload.Dropzone
@@ -96,7 +98,7 @@ export function BannerUploader({
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-transparent px-6 text-center font-mono text-xs uppercase tracking-[0.14em] text-label/65">
-              Initialize banner sketch or upload a new archive plate
+              {t("settingsPage.fields.bannerPlaceholder")}
             </div>
           )}
 
@@ -141,7 +143,7 @@ export function BannerUploader({
           <div className="h-4 w-4 opacity-60">
             <ArchiveStar />
           </div>
-          Decorative archive header
+          {t("settingsPage.fields.bannerPlaceholder")}
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import type { KeyboardEvent } from "react";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
+import { useI18n } from "@/i18n/I18nProvider";
 import type { LikeNotificationGroupLedgerItem } from "@/lib/notification-utils";
 import { cn } from "@/lib/utils";
 import { formatNotificationTime } from "@/lib/notification-utils";
@@ -20,7 +21,7 @@ function truncateLikePreview(content?: string | null, maxLength = 60) {
   const normalized = content?.trim().replace(/\s+/g, " ") || "";
 
   if (!normalized) {
-    return "your archive entry";
+    return "";
   }
 
   if (normalized.length <= maxLength) {
@@ -36,15 +37,18 @@ export function LikeNotificationGroupCard({
   onMarkAsRead,
 }: LikeNotificationGroupCardProps) {
   const router = useRouter();
+  const { locale, t } = useI18n();
   const rotation = ROTATIONS[index % ROTATIONS.length];
   const primaryActor = group.actors[0];
   const primaryName =
-    primaryActor?.displayName?.trim() || primaryActor?.username || "Someone";
+    primaryActor?.displayName?.trim() || primaryActor?.username || t("notifications.someone");
   const otherCount = Math.max(0, group.likeCount - 1);
   const unreadIds = group.notifications
     .filter((notification) => !notification.read)
     .map((notification) => notification.id);
-  const postPreview = truncateLikePreview(group.latestNotification.post?.content);
+  const postPreview =
+    truncateLikePreview(group.latestNotification.post?.content) ||
+    t("notifications.likeGroup.fallbackPost");
 
   const handleOpenGroup = () => {
     if (unreadIds.length > 0) {
@@ -68,7 +72,7 @@ export function LikeNotificationGroupCard({
       onClick={handleOpenGroup}
       onKeyDown={handleKeyDown}
       className={cn(
-        "group relative cursor-pointer border-2 border-label/30 px-6 py-7 text-left shadow-[8px_12px_25px_rgba(26,26,26,0.15)] transition-transform duration-200 hover:-translate-y-1",
+        "group relative cursor-pointer border-2 border-label/30 px-6 py-7 text-start shadow-[8px_12px_25px_rgba(26,26,26,0.15)] transition-transform duration-200 hover:-translate-y-1",
         group.unread ? "bg-paper" : "bg-paper-muted",
         rotation,
       )}
@@ -113,13 +117,13 @@ export function LikeNotificationGroupCard({
                   {otherCount > 0 ? (
                     <>
                       {" "}
-                      and <span className="font-black text-ink">{otherCount} others</span>
+                      {t("notifications.likeGroup.andOthers", { count: otherCount })}
                     </>
                   ) : null}{" "}
-                  liked your post.
+                  {t("notifications.likeGroup.likedYourPost")}
                 </p>
                 <span className="shrink-0 bg-stage px-2.5 py-1 font-mono text-[10px] text-label">
-                  {formatNotificationTime(group.createdAt)}
+                  {formatNotificationTime(group.createdAt, locale)}
                 </span>
               </div>
 

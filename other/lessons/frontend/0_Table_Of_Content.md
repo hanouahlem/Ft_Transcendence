@@ -140,6 +140,20 @@ Study file:
 
 - `lessons/frontend/9_Dev_Workflow_and_Failure_Modes.md`
 
+## 10. Internationalization and RTL
+
+Goal: understand how language switching and full LTR/RTL mirroring are implemented in this repo.
+
+- i18n provider and translation dictionary structure
+- locale persistence (cookie + localStorage)
+- how `lang` and `dir` are applied globally
+- where logical CSS properties are used for RTL mirroring
+- what was translated first (auth, sidebar, right rail, messaging)
+
+Study file:
+
+- `lessons/frontend/10_Internationalization_and_RTL.md`
+
 ## Recommended Walkthrough Order
 
 1. Frontend Runtime Architecture
@@ -151,6 +165,7 @@ Study file:
 7. Feature Pages and Current Wiring Status
 8. Reusable UI Components and Styling System
 9. Frontend Dev Workflow and Failure Modes
+10. Internationalization and RTL
 
 ## Notes
 

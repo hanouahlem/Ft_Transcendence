@@ -1,5 +1,8 @@
+"use client";
+
 import MonoText from "@/components/typography/MonoText";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const PANEL_MAIN_TONES = {
   olive: {
@@ -29,6 +32,7 @@ export default function AuthGreenPanel({
   mainTone = "olive",
   accentTone = "accent-red",
 }: AuthGreenPanelProps) {
+  const { t } = useI18n();
   const isRightAligned = align === "right";
   const mainToneClasses = PANEL_MAIN_TONES[mainTone];
   const accentToneClasses = PANEL_ACCENT_TONES[accentTone];
@@ -94,17 +98,17 @@ export default function AuthGreenPanel({
           </div>
 
           <h1 className="font-display text-8xl font-black uppercase leading-[0.85] tracking-[-0.05em] text-paper mix-blend-overlay">
-            Field
+            {t("auth.panel.title1")}
             <br />
-            Notes
+            {t("auth.panel.title2")}
           </h1>
 
           <div className={cn("mt-8 space-y-2", isRightAligned && "text-right")}>
             <MonoText className="block text-xs text-paper/75">
-              Official Repository
+              {t("auth.panel.repository")}
             </MonoText>
             <MonoText className="block text-xs text-paper/75">
-              Est. 1892
+              {t("auth.panel.established")}
             </MonoText>
           </div>
         </div>
@@ -119,8 +123,7 @@ export default function AuthGreenPanel({
           )}
         >
           <MonoText className="block text-[10px] leading-5 tracking-[0.16em] text-paper/55">
-            Property of the global observation network. Unauthorized access is
-            strictly recorded. Ensure all entries are permanently affixed.
+            {t("auth.panel.warning")}
           </MonoText>
         </div>
       </div>
