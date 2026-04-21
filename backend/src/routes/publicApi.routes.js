@@ -33,7 +33,5 @@ router.delete("/posts/:id", deletePost);
  *       200:
  *         description: Success
 */
-router.get("/posts", getPosts);
-
 
 export default router;

@@ -5,8 +5,9 @@ import { validateEnv } from "./env.js";
 import route from "./routes/routes.js";
 import { apiKeyMiddleware } from "./middleware/apiKey.js";
 import publicRoutes from "./routes/publicApi.routes.js";
+import { swaggerUi, swaggerSpec } from "./swagger.js";
 
-const app = express(); // ✅ toujours en premier
+const app = express();
 
 try {
   validateEnv();
