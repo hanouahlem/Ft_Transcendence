@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-export default function GitHubHandoffPage() {
+function GitHubHandoffPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isLoggedIn, isAuthLoading } = useAuth();
@@ -85,5 +85,13 @@ export default function GitHubHandoffPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function GitHubHandoffPage() {
+  return (
+    <Suspense fallback={null}>
+      <GitHubHandoffPageContent />
+    </Suspense>
   );
 }

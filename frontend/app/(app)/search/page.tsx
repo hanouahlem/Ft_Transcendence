@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { PostCard } from "@/components/posts/PostCard";
@@ -71,7 +71,7 @@ function buildSearchHref(query: string, tab: SearchTab, page = 1) {
   return serialized ? `/search?${serialized}` : "/search";
 }
 
-export default function SearchPage() {
+function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, token } = useAuth();
@@ -657,5 +657,13 @@ export default function SearchPage() {
         onAddComment={handleAddComment}
       />
     </>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={null}>
+      <SearchPageContent />
+    </Suspense>
   );
 }

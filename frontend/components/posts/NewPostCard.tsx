@@ -2,7 +2,7 @@
 
 import { Progress } from "@ark-ui/react/progress";
 import { FileUpload, useFileUpload } from "@ark-ui/react/file-upload";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Cancel01Icon,
   ImageAdd02Icon,
@@ -65,6 +65,21 @@ export function NewPostCard({
 
   const selectedFile = fileUpload.acceptedFiles[0] ?? null;
   const isPdf = selectedFile?.type === "application/pdf";
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedFile || isPdf) {
+      setImagePreviewUrl(null);
+      return;
+    }
+
+    const nextPreviewUrl = URL.createObjectURL(selectedFile);
+    setImagePreviewUrl(nextPreviewUrl);
+
+    return () => {
+      URL.revokeObjectURL(nextPreviewUrl);
+    };
+  }, [isPdf, selectedFile]);
 
   const previewLabel = (() => {
     if (!selectedFile) {
@@ -151,12 +166,14 @@ export function NewPostCard({
                       </div>
                     ) : null}
 
-                    <FileUpload.ItemPreview type="image/*">
-                      <FileUpload.ItemPreviewImage
+                    {!isPdf && imagePreviewUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imagePreviewUrl}
                         alt="Selected upload preview"
                         className="archive-photo max-h-30 w-full border border-label/20 object-cover"
                       />
-                    </FileUpload.ItemPreview>
+                    ) : null}
 
                     <FileUpload.ItemPreview type="application/pdf">
                       <div className="flex min-h-[100px] flex-col justify-between border border-label/20 bg-paper-muted px-4 py-4">

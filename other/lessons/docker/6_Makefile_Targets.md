@@ -4,18 +4,31 @@
 
 The Makefile is the shortcut layer for the Docker workflow. It keeps the common commands short and avoids repeating long `docker compose` commands.
 
-Current definitions come from [`Makefile`](/Users/curtis/Desktop/DEV/last_jeune/Makefile).
+Current definitions come from [`Makefile`](/Users/curtis/Desktop/DEV/main_transcendance/Makefile).
 
-## Why `make up` no longer rebuilds
+## Why `make up` now targets evaluation
 
 `make up` now runs:
 
 ```makefile
 up:
-	$(COMPOSE) up
+	$(EVAL_COMPOSE) up --build
 ```
 
-This starts the existing images and containers without forcing a rebuild every time. That matches the current dev setup better because:
+This now starts the evaluation stack by default because the project needs a single-command containerized deployment for peer evaluation.
+
+The hot-reload dev flow moved to `make dev-up`, which still uses the normal `docker-compose.yml`.
+
+## Why `make dev-up` matches the old workflow
+
+`make dev-up` runs:
+
+```makefile
+dev-up:
+	$(DEV_COMPOSE) up
+```
+
+That keeps the previous behavior:
 
 - source code is bind-mounted into the containers
 - hot reload already picks up most code edits
@@ -24,25 +37,37 @@ This starts the existing images and containers without forcing a rebuild every t
 ## When to use each target
 
 `make up`
-: start the stack fast, without rebuilding images
+: build and start the evaluation stack from `docker-compose.eval.yml`
 
 `make up-build`
-: start the stack and force a rebuild first
+: explicit rebuild for the evaluation stack
 
 `make restart`
-: stop the stack and start it again without rebuilding
+: restart the evaluation stack
 
 `make build`
-: build the images, but do not start containers
+: build the evaluation images without starting containers
 
 `make rebuild`
-: build the images and then start the stack
+: rebuild the evaluation images and start the evaluation stack
+
+`make dev`
+: shortcut for `make dev-up`
+
+`make dev-up`
+: start the bind-mounted development stack
+
+`make dev-up-build`
+: rebuild and start the development stack
+
+`make dev-down`
+: stop the development containers
 
 `make down`
-: stop and remove containers and the default network
+: stop and remove the evaluation containers without deleting named volumes
 
 `make clean`
-: remove containers, network, and volumes managed by Compose
+: remove the evaluation containers, network, and named volumes
 
 `make fclean`
 : do `clean` and also prune Docker system data
@@ -60,18 +85,21 @@ This starts the existing images and containers without forcing a rebuild every t
 
 The important distinction is:
 
-- `docker compose up` uses existing images if they are already available
-- `docker compose up --build` rebuilds images before starting
-- bind mounts handle live source changes, so rebuilding is not required for ordinary edits
-- `make db-clean` runs `npx prisma migrate reset --force` inside the running `backend` container, so the database is reset in place while containers keep running
-- `make fclean` runs `find backend/uploads -mindepth 1 -delete`, which clears every uploaded media file while preserving the `backend/uploads` directory expected by Multer
+- `make up` now uses `docker compose -f docker-compose.eval.yml up --build`, so the default demo path is the immutable evaluation stack
+- `make down` intentionally does **not** pass `-v`, because the evaluation stack is supposed to keep `postgres_data` and `uploads_data` across restarts
+- `make dev-up` still uses `docker compose up`, so the bind-mounted hot-reload workflow stays available for daily development
+- `make dev-fclean` runs `find backend/uploads -mindepth 1 -delete`, which clears every uploaded media file while preserving the `backend/uploads` directory expected by Multer
+- `make db-clean` runs `npx prisma migrate reset --force` inside the running development `backend` container, so the development database is reset in place while containers keep running
 - `make seed` first runs `make db-clean`, then runs the older `bash other/seed.sh` host script
 - `make superseed` first runs `make db-clean`, then runs `bash other/superseed.sh` on the host
-- [`other/superseed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/superseed.sh) only resolves the repo root, reads `SEED_SCRIPT_KEY`, and launches [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/seed.mjs)
-- [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/seed.mjs) loads curated config from [`other/seed/config/roster.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/roster.json) and the other files in [`other/seed/config/`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config), builds a deterministic plan, then talks to the backend over `http://localhost:3001`
+- [`other/superseed.sh`](/Users/curtis/Desktop/DEV/main_transcendance/other/superseed.sh) only resolves the repo root, reads `SEED_SCRIPT_KEY`, and launches [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/main_transcendance/other/seed/seed.mjs)
+- [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/main_transcendance/other/seed/seed.mjs) loads curated config from [`other/seed/config/roster.json`](/Users/curtis/Desktop/DEV/main_transcendance/other/seed/config/roster.json) and the other files in [`other/seed/config/`](/Users/curtis/Desktop/DEV/main_transcendance/other/seed/config), builds a deterministic plan, then talks to the backend over `http://localhost:3001`
 - because the host only needs Node's built-in runtime and `fetch`, the seed still works without host-side Prisma dependencies
 
-That means the default path should be `make up`, while `make up-build` and `make rebuild` stay available for dependency or Dockerfile changes.
+That means:
+
+- `make up` is the evaluation path
+- `make dev` or `make dev-up` is the daily development path
 
 ## Why `db-clean` keeps containers alive
 
@@ -79,7 +107,7 @@ The target is:
 
 ```makefile
 db-clean:
-	$(COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate reset --force'
+	$(DEV_COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate reset --force'
 ```
 
 What it does:
@@ -87,7 +115,7 @@ What it does:
 - `docker compose exec backend`: run the command inside the existing backend container
 - `DB_URL`: points Prisma at the Docker Postgres service host `postgres`
 - `prisma migrate reset --force`: drop the current schema, recreate it, and apply every migration again
-- because it uses `exec`, the `backend` container must already be running, which matches the normal `make up` workflow
+- because it uses `exec`, the development `backend` container must already be running, which matches the normal `make dev-up` workflow
 
 Why that matters:
 

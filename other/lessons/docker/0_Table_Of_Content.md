@@ -9,6 +9,7 @@ Quick study checklist:
 - [ ] I understand the backend startup command and why each step matters
 - [ ] I know why `DATABASE_URL` differs between host and container
 - [ ] I can use the Makefile targets for common dev tasks
+- [ ] I can explain why the repo has a separate eval stack with nginx + HTTPS
 - [ ] I know which section I still need to review in depth
 
 ## 1. Volumes
@@ -88,18 +89,38 @@ Study file:
 
 Goal: know the shortcuts and how they work under the hood.
 
-- `make up` / `make down` / `make restart`: lifecycle
-- `make up-build` / `make rebuild`: explicit rebuild workflows
+- `make up` / `make down` / `make restart`: evaluation lifecycle
+- `make dev-up` / `make dev-down` / `make dev-restart`: development lifecycle
+- `make up-build` / `make rebuild`: explicit evaluation rebuild workflows
 - `make clean` / `make fclean` / `make re`: cleanup and rebuild
 - `make db-clean`: reset the PostgreSQL schema without removing containers
 - `make prisma-migrate`: runs `prisma migrate dev` inside Docker with correct `DATABASE_URL`
 - `make prisma-studio`: runs Prisma Studio on port 5555 with `--browser none`
 - `DB_URL` Makefile variable: overrides `DATABASE_URL` with `postgres` hostname
+- `make dev`: shortcut for `make dev-up`
 - `make frontend` / `make backend`: run services locally without Docker
 
 Study file:
 
 - `lessons/docker/6_Makefile_Targets.md`
+
+## 7. Evaluation Stack, HTTPS, and OAuth Routing
+
+Goal: understand the production-like stack used for peer evaluation.
+
+- why `docker-compose.eval.yml` exists next to `docker-compose.yml`
+- immutable backend/frontend images in eval
+- backend entrypoint: `prisma migrate deploy` then `node src/server.js`
+- nginx TLS termination on `443`
+- why frontend uses `https://localhost/api` in eval
+- why OAuth callbacks and handoff routes are split between backend and frontend
+- why secure OAuth state cookies are enabled under HTTPS
+- why Express trusts proxy headers in this flow
+- why uploads move to a named Docker volume in eval
+
+Study file:
+
+- `lessons/docker/7_Eval_Stack_HTTPS_And_OAuth_Routing.md`
 
 ## Recommended Walkthrough Order
 

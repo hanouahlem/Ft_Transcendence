@@ -223,6 +223,7 @@ export function buildNotificationLedgerItems(
   notifications: NotificationItem[],
 ): NotificationLedgerItem[] {
   const likeNotificationsByPostId = new Map<number, NotificationItem[]>();
+  const ledgerItems: NotificationLedgerItem[] = [];
 
   for (const notification of notifications) {
     if (notification.type !== "LIKE" || notification.postId === null) {
@@ -236,52 +237,50 @@ export function buildNotificationLedgerItems(
 
   const emittedLikeGroups = new Set<number>();
 
-  return notifications.flatMap((notification) => {
+  for (const notification of notifications) {
     if (notification.type !== "LIKE" || notification.postId === null) {
-      return [
-        {
-          kind: "single" as const,
-          id: `notification-${notification.id}`,
-          notification,
-        },
-      ];
+      ledgerItems.push({
+        kind: "single",
+        id: `notification-${notification.id}`,
+        notification,
+      });
+      continue;
     }
 
     const groupedNotifications =
       likeNotificationsByPostId.get(notification.postId) ?? [];
 
     if (groupedNotifications.length <= 3) {
-      return [
-        {
-          kind: "single" as const,
-          id: `notification-${notification.id}`,
-          notification,
-        },
-      ];
+      ledgerItems.push({
+        kind: "single",
+        id: `notification-${notification.id}`,
+        notification,
+      });
+      continue;
     }
 
     if (emittedLikeGroups.has(notification.postId)) {
-      return [];
+      continue;
     }
 
     emittedLikeGroups.add(notification.postId);
 
-    return [
-      {
-        kind: "like-group" as const,
-        id: `like-group-${notification.postId}`,
-        notifications: groupedNotifications,
-        latestNotification: groupedNotifications[0],
-        actors: getUniqueActors(groupedNotifications),
-        likeCount: groupedNotifications.length,
-        unread: groupedNotifications.some(
-          (groupedNotification) => !groupedNotification.read,
-        ),
-        createdAt: groupedNotifications[0].createdAt,
-        postId: notification.postId,
-      },
-    ];
-  });
+    ledgerItems.push({
+      kind: "like-group",
+      id: `like-group-${notification.postId}`,
+      notifications: groupedNotifications,
+      latestNotification: groupedNotifications[0],
+      actors: getUniqueActors(groupedNotifications),
+      likeCount: groupedNotifications.length,
+      unread: groupedNotifications.some(
+        (groupedNotification) => !groupedNotification.read,
+      ),
+      createdAt: groupedNotifications[0].createdAt,
+      postId: notification.postId,
+    });
+  }
+
+  return ledgerItems;
 }
 
 export function matchesNotificationLedgerFilters(

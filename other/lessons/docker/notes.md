@@ -146,7 +146,7 @@ Why this matters:
 So the safe pattern is:
 
 - use the devcontainer for editors, shells, Git, and AI CLIs
-- use `make up` from inside the devcontainer to launch the normal host-backed Compose stack
+- use `make dev-up` from inside the devcontainer to launch the normal host-backed Compose stack
 - open the frontend at `http://localhost:3000`
 - open Prisma Studio at `http://localhost:5555`
 

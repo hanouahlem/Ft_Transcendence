@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-export default function FortyTwoHandoffPage() {
+function FortyTwoHandoffPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isLoggedIn, isAuthLoading } = useAuth();
@@ -85,5 +85,13 @@ export default function FortyTwoHandoffPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function FortyTwoHandoffPage() {
+  return (
+    <Suspense fallback={null}>
+      <FortyTwoHandoffPageContent />
+    </Suspense>
   );
 }

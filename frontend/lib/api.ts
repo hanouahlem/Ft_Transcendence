@@ -240,19 +240,39 @@ function withAuthHeaders(token?: string | null, headers?: HeadersInit) {
 }
 
 async function handleResponse<T>(response: Response): Promise<ApiResult<T>> {
-  const data = await response.json();
+  const contentType = response.headers.get("content-type") || "";
+  let data: unknown = null;
+
+  if (contentType.includes("application/json")) {
+    data = await response.json().catch(() => null);
+  } else {
+    const text = await response.text().catch(() => "");
+    data = text ? { message: text } : null;
+  }
+
+  const message =
+    typeof data === "object" && data !== null && "message" in data
+      ? String(data.message)
+      : response.ok
+        ? "Request succeeded"
+        : response.status === 413
+          ? "Files must be 10 MB or smaller."
+          : "Request failed";
 
   if (!response.ok) {
     return {
       ok: false,
-      message: data.message || "Request failed",
-      fieldErrors: data.fieldErrors,
+      message,
+      fieldErrors:
+        typeof data === "object" && data !== null && "fieldErrors" in data
+          ? (data.fieldErrors as Partial<Record<string, string>> | undefined)
+          : undefined,
     };
   }
 
   return {
     ok: true,
-    data,
+    data: data as T,
   };
 }
 
