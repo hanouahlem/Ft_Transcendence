@@ -23,7 +23,7 @@ export default function LoginPage() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { login, isLoggedIn, isAuthLoading } = useAuth();
-	const { isRtl, t, locale } = useI18n();
+	const { t, locale } = useI18n();
 
 	const [identifier, setIdentifier] = useState("");
 	const [password, setPassword] = useState("");
@@ -58,7 +58,7 @@ export default function LoginPage() {
 	}, [searchParams]);
 
 	const dateLabel = new Date()
-		.toLocaleDateString("en-US", {
+		.toLocaleDateString(locale, {
 			month: "short",
 			day: "2-digit",
 			year: "numeric",
@@ -283,6 +283,7 @@ export default function LoginPage() {
 	return (
 		<>
 			<AuthPageShell
+			localeSwitcher={<LocaleSwitcher />}
 			panelAlign="right"
 			footer={
 				<p className="inline-block border border-label/20 bg-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-ink/65">
