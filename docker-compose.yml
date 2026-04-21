@@ -18,6 +18,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: dev
     restart: always
     working_dir: /app
     env_file:
@@ -51,6 +52,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: dev
     restart: always
     working_dir: /app
     ports:
@@ -64,6 +66,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    command: npm run dev
 
 volumes:
   postgres_data:
