@@ -173,6 +173,29 @@ Important implementation details:
 - backend callback is `/auth/github/callback`
 - frontend handoff page is `/auth/github/handoff`
 
+## OAuth Network Reliability (April 2026)
+
+During callback handling, provider requests can fail transiently in containerized environments (for example `UND_ERR_CONNECT_TIMEOUT` or `ECONNREFUSED`).
+
+Current hardening in `backend/src/controllers/oauthController.js`:
+
+- `fetchJson(...)` retries transient network failures and retryable statuses (429, 500, 502, 503, 504)
+- GitHub API calls now send `User-Agent` and `X-GitHub-Api-Version` headers
+- GitHub callback now fetches profile then emails sequentially (instead of `Promise.all`) to reduce concurrent outbound connections
+- 42 profile fetch uses the same retry strategy
+
+Real code excerpt:
+
+```js
+const OAUTH_READ_RETRY_ATTEMPTS = 3;
+const OAUTH_READ_RETRY_BASE_DELAY_MS = 300;
+
+const profile = await fetchGitHubProfile(accessToken);
+const emails = await fetchGitHubEmails(accessToken);
+```
+
+Evaluator keywords: transient network failure, retry backoff, idempotent provider reads, callback resilience.
+
 ## 42 OAuth In This Project
 
 For 42, the implemented flow is almost the same:

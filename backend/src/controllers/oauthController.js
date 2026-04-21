@@ -14,6 +14,20 @@ const FORTYTWO_ME_URL = "https://api.intra.42.fr/v2/me";
 const FORTYTWO_SCOPES = ["public"];
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+const OAUTH_READ_RETRY_ATTEMPTS = 3;
+const OAUTH_READ_RETRY_BASE_DELAY_MS = 300;
+const RETRYABLE_FETCH_ERROR_CODES = new Set([
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "EAI_AGAIN",
+  "ENOTFOUND",
+  "ENETUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+  "UND_ERR_HEADERS_TIMEOUT",
+  "UND_ERR_SOCKET",
+]);
+const RETRYABLE_HTTP_STATUSES = new Set([429, 500, 502, 503, 504]);
 
 const PROVIDERS = {
   github: {
@@ -81,20 +95,103 @@ function readCookie(req, name) {
   return null;
 }
 
-async function fetchJson(url, options, errorContext) {
-  const response = await fetch(url, options);
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const message =
-      data?.error_description ||
-      data?.error ||
-      data?.message ||
-      errorContext;
-    throw new Error(message);
+function sleep(ms) {
+  if (ms <= 0) {
+    return Promise.resolve();
   }
 
-  return data;
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function getFetchErrorCode(error) {
+  if (error && typeof error === "object") {
+    return (
+      error.code ||
+      error.cause?.code ||
+      error.cause?.cause?.code ||
+      ""
+    );
+  }
+
+  return "";
+}
+
+function isRetryableFetchError(error) {
+  const code = getFetchErrorCode(error);
+  return RETRYABLE_FETCH_ERROR_CODES.has(code);
+}
+
+function buildFetchErrorMessage(errorContext, error) {
+  const code = getFetchErrorCode(error);
+  const detail =
+    error?.cause?.message ||
+    error?.message ||
+    "";
+
+  if (code && detail) {
+    return `${errorContext} (${code}: ${detail})`;
+  }
+
+  if (code) {
+    return `${errorContext} (${code})`;
+  }
+
+  if (detail) {
+    return `${errorContext} (${detail})`;
+  }
+
+  return errorContext;
+}
+
+async function fetchJson(url, options, errorContext, retryOptions = {}) {
+  const attempts = Number.isInteger(retryOptions.attempts)
+    ? Math.max(1, retryOptions.attempts)
+    : 1;
+  const baseDelayMs =
+    typeof retryOptions.baseDelayMs === "number"
+      ? Math.max(0, retryOptions.baseDelayMs)
+      : 0;
+  const shouldRetryHttpStatus =
+    typeof retryOptions.shouldRetryHttpStatus === "function"
+      ? retryOptions.shouldRetryHttpStatus
+      : (status) => RETRYABLE_HTTP_STATUSES.has(status);
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    let response;
+
+    try {
+      response = await fetch(url, options);
+    } catch (error) {
+      if (attempt < attempts && isRetryableFetchError(error)) {
+        await sleep(baseDelayMs * attempt);
+        continue;
+      }
+
+      throw new Error(buildFetchErrorMessage(errorContext, error), { cause: error });
+    }
+
+    const data = await response.json().catch(() => null);
+
+    if (response.ok === false) {
+      if (attempt < attempts && shouldRetryHttpStatus(response.status)) {
+        await sleep(baseDelayMs * attempt);
+        continue;
+      }
+
+      const message =
+        data?.error_description ||
+        data?.error ||
+        data?.message ||
+        errorContext;
+      throw new Error(message);
+    }
+
+    return data;
+  }
+
+  throw new Error(errorContext);
 }
 
 async function buildUniqueUsername(candidate) {
@@ -180,9 +277,15 @@ async function fetchGitHubProfile(accessToken) {
       headers: {
         Accept: "application/vnd.github+json",
         Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "ft-transcendence-oauth",
+        "X-GitHub-Api-Version": "2022-11-28",
       },
     },
     "Failed to fetch GitHub profile.",
+    {
+      attempts: OAUTH_READ_RETRY_ATTEMPTS,
+      baseDelayMs: OAUTH_READ_RETRY_BASE_DELAY_MS,
+    },
   );
 }
 
@@ -193,9 +296,15 @@ async function fetchGitHubEmails(accessToken) {
       headers: {
         Accept: "application/vnd.github+json",
         Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "ft-transcendence-oauth",
+        "X-GitHub-Api-Version": "2022-11-28",
       },
     },
     "Failed to fetch GitHub emails.",
+    {
+      attempts: OAUTH_READ_RETRY_ATTEMPTS,
+      baseDelayMs: OAUTH_READ_RETRY_BASE_DELAY_MS,
+    },
   );
 }
 
@@ -285,6 +394,10 @@ async function fetchFortyTwoProfile(accessToken) {
       },
     },
     "Failed to fetch 42 profile.",
+    {
+      attempts: OAUTH_READ_RETRY_ATTEMPTS,
+      baseDelayMs: OAUTH_READ_RETRY_BASE_DELAY_MS,
+    },
   );
 }
 
@@ -451,10 +564,8 @@ export async function handleGitHubCallback(req, res) {
       code: code.trim(),
       state: state.trim(),
     });
-    const [profile, emails] = await Promise.all([
-      fetchGitHubProfile(accessToken),
-      fetchGitHubEmails(accessToken),
-    ]);
+    const profile = await fetchGitHubProfile(accessToken);
+    const emails = await fetchGitHubEmails(accessToken);
     const verifiedEmail = selectVerifiedEmail(emails);
 
     if (!verifiedEmail) {
