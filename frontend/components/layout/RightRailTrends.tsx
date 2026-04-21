@@ -6,11 +6,19 @@ import { useI18n } from "@/i18n/I18nProvider";
 
 const SEARCH_ROUTE = "/search";
 
-const TRENDS = [
-  { rank: "01", title: "42", meta: "School / Subject" },
-  { rank: "02", title: "Tailwind CSS", meta: "Frontend / Styling" },
-  { rank: "03", title: "Development", meta: "Build / Workflow" },
-];
+type RightRailTrendsProps = {
+  title: string;
+  searchLabel: (title: string) => string;
+};
+
+export function RightRailTrends({ title, searchLabel }: RightRailTrendsProps) {
+  const { t } = useI18n();
+
+  const trends = [
+    { rank: "01", title: t("rightRail.trends.drop.title"), meta: t("rightRail.trends.drop.meta") },
+    { rank: "02", title: t("rightRail.trends.guild.title"), meta: t("rightRail.trends.guild.meta") },
+    { rank: "03", title: t("rightRail.trends.retro.title"), meta: t("rightRail.trends.retro.meta") },
+  ];
 
   return (
     <section className="relative">
@@ -21,7 +29,7 @@ const TRENDS = [
       </div>
 
       <div className="flex flex-col">
-        {TRENDS.map((trend, index) => (
+        {trends.map((trend, index) => (
           <Link
             key={trend.rank}
             href={`${SEARCH_ROUTE}?q=${encodeURIComponent(trend.title)}`}

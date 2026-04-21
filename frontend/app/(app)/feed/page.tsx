@@ -30,6 +30,7 @@ type FeedScope = "all" | "friends";
 
 export default function FeedPage() {
   const { user, token } = useAuth();
+  const { t } = useI18n();
   const { notifyError } = useArchiveToasts();
 
   const [loading, setLoading] = useState(true);

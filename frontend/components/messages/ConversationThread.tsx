@@ -33,6 +33,7 @@ export function ConversationThread({
   onSend,
   isSending,
 }: ConversationThreadProps) {
+  const { locale, t } = useI18n();
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const selectedConversationId = selectedConversation?.id ?? null;
   const selectedPeer = selectedConversation?.peer ?? null;
