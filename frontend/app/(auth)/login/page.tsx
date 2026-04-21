@@ -23,7 +23,7 @@ export default function LoginPage() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { login, isLoggedIn, isAuthLoading } = useAuth();
-	const { t, locale } = useI18n();
+	const { isRtl, t, locale } = useI18n();
 
 	const [identifier, setIdentifier] = useState("");
 	const [password, setPassword] = useState("");
@@ -284,7 +284,7 @@ export default function LoginPage() {
 		<>
 			<AuthPageShell
 			localeSwitcher={<LocaleSwitcher />}
-			panelAlign="right"
+			panelAlign={isRtl ? "left" : "right"}
 			footer={
 				<p className="inline-block border border-label/20 bg-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-ink/65">
 					{t("auth.login.footerPrefix")}
