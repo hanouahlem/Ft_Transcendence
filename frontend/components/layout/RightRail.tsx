@@ -66,6 +66,9 @@ export function RightRail({
 						addingLabel={t("common.adding")}
 						acceptingLabel={t("common.accepting")}
 						sentLabel={t("common.sent")}
+						friendLabel={t("friends.friend")}
+						removeLabel={t("friends.delete")}
+						removingLabel={t("friends.loading")}
 						suggestions={suggestions}
 						sentRequests={sentRequests}
 						incomingRequestIdsBySender={incomingRequestIdsBySender}

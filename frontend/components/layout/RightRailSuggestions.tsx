@@ -13,6 +13,9 @@ type RightRailSuggestionsProps = {
 	addingLabel: string;
 	acceptingLabel: string;
 	sentLabel: string;
+	friendLabel?: string;
+	removeLabel?: string;
+	removingLabel?: string;
 	suggestions: RightRailSuggestion[];
 	sentRequests: number[];
 	incomingRequestIdsBySender: Record<number, number>;
@@ -33,6 +36,9 @@ export function RightRailSuggestions({
 	addingLabel,
 	acceptingLabel,
 	sentLabel,
+	friendLabel = "Friend",
+	removeLabel = "Remove",
+	removingLabel = "Removing",
 	suggestions,
 	sentRequests,
 	incomingRequestIdsBySender,
@@ -76,17 +82,17 @@ export function RightRailSuggestions({
 							author.displayName?.trim() || author.username;
 						const actionLabel = isSubmitting
 							? isConnected
-								? "Removing"
+								? removingLabel
 								: incomingRequestId
-									? "Accepting"
-									: "Adding"
+									? acceptingLabel
+									: addingLabel
 							: isConnected
-								? "Remove"
+								? removeLabel
 								: incomingRequestId
-									? "Accept"
+									? acceptLabel
 									: sent
-										? "Sent"
-										: "Add";
+										? sentLabel
+										: addLabel;
 						const actionVariant = isConnected
 							? "destructive"
 							: sent
@@ -150,7 +156,7 @@ export function RightRailSuggestions({
 								{allowFollow ? (
 									isConnected && !canRemoveFriend ? (
 										<span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-label">
-											Friend
+											{friendLabel}
 										</span>
 									) : (
 										<Button

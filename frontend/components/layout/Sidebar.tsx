@@ -33,15 +33,6 @@ type SidebarProps = {
 	onLogout: () => void;
 };
 
-const NAV_ITEMS = [
-	{ href: "/feed", label: "Timeline", icon: Home08Icon },
-	{ href: "/search", label: "Search", icon: Search01Icon },
-	{ href: "/profile", label: "Profile", icon: UserCircleIcon },
-	{ href: "/notifications", label: "Notifications", icon: Notification01Icon },
-	{ href: "/friends", label: "Friends", icon: UserGroupIcon },
-	{ href: "/message", label: "Message", icon: Message01Icon },
-];
-
 export function Sidebar({
 	user,
 	unreadNotificationsCount,
@@ -145,6 +136,10 @@ export function Sidebar({
 			</nav>
 
 			<div className="mt-auto space-y-3">
+				<div className="flex justify-center">
+					<LocaleSwitcher compact />
+				</div>
+
 				<Menu.Root
 					positioning={{
 						placement: "top",
@@ -195,7 +190,7 @@ export function Sidebar({
 										className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-muted"
 									>
 										<HugeiconsIcon icon={Settings02Icon} size={16} strokeWidth={1.7} />
-										Settings
+										{t("nav.settings")}
 									</Link>
 								</Menu.Item>
 
@@ -206,7 +201,7 @@ export function Sidebar({
 										onClick={onLogout}
 									>
 										<HugeiconsIcon icon={Logout02Icon} size={16} strokeWidth={1.7} />
-										Disconnect
+										{t("sidebar.logout")}
 									</button>
 								</Menu.Item>
 							</Menu.Content>
