@@ -135,6 +135,13 @@ Then the frontend turns that relative path into the correct full URL using its o
 
 That keeps the database independent from dev vs eval hostnames and protocols.
 
+Concrete frontend hook-up:
+
+- `frontend/lib/api.ts` exports `normalizeUploadedMediaPayload(...)`
+- API helper responses already pass through that normalizer automatically
+- raw client fetches that read JSON directly must also normalize `/uploads/...` fields before storing them in React state
+- for example, `frontend/app/(app)/feed/page.tsx` normalizes fetched posts so `/uploads/post-*.jpg` resolves against backend `NEXT_PUBLIC_API_URL` instead of the frontend origin
+
 ## Deleting Uploaded Files
 
 When a post is deleted, `postService.js` tries to:
