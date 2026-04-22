@@ -1,8 +1,9 @@
 DEV_COMPOSE = docker compose
 EVAL_COMPOSE = docker compose -f docker-compose.eval.yml
 DB_URL = DATABASE_URL=postgresql://$$POSTGRES_USER:$$POSTGRES_PASSWORD@postgres:5432/$$POSTGRES_DB
+export PATH := $(HOME)/.local/bin:$(PATH)
 
-up:
+up: init
 	$(EVAL_COMPOSE) up --build
 
 up-build:
@@ -123,4 +124,16 @@ dc-clean: dc-stop dc-rm dc-rmi
 	-docker volume rm transcendance-backend-node-modules transcendance-frontend-node-modules
 	docker builder prune -f
 
-.PHONY: up up-build down restart build rebuild logs ps clean fclean re dev dev-up dev-up-build dev-down dev-restart dev-build dev-rebuild dev-logs dev-ps dev-clean dev-fclean dev-re frontend backend db db-clean seed prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean
+init:
+	./other/nginx/generate-eval-cert.sh
+	mkdir -p $(HOME)/.local/bin
+	ln -snf /usr/bin/podman $(HOME)/.local/bin/docker
+	touch $(HOME)/.zshrc $(HOME)/.bashrc
+	grep -qxF 'export PATH="$$HOME/.local/bin:$$PATH"' $(HOME)/.zshrc || echo 'export PATH="$$HOME/.local/bin:$$PATH"' >> $(HOME)/.zshrc
+	grep -qxF 'export PATH="$$HOME/.local/bin:$$PATH"' $(HOME)/.bashrc || echo 'export PATH="$$HOME/.local/bin:$$PATH"' >> $(HOME)/.bashrc
+	mkdir -p $(HOME)/.config/fish
+	touch $(HOME)/.config/fish/config.fish
+	grep -qxF 'fish_add_path -m $$HOME/.local/bin' $(HOME)/.config/fish/config.fish || echo 'fish_add_path -m $$HOME/.local/bin' >> $(HOME)/.config/fish/config.fish
+	@echo "Init complete. PATH is active for this make invocation and persisted for zsh, bash, and fish."
+
+.PHONY: up up-build down restart build rebuild logs ps clean fclean re dev dev-up dev-up-build dev-down dev-restart dev-build dev-rebuild dev-logs dev-ps dev-clean dev-fclean dev-re frontend backend db db-clean seed prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean init

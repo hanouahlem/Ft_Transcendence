@@ -59,3 +59,28 @@ const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+let isShuttingDown = false;
+
+const shutdown = (signal) => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  console.log(`Received ${signal}. Shutting down gracefully...`);
+
+  httpServer.close((error) => {
+    if (error) {
+      console.error("Error during HTTP server shutdown:", error);
+      process.exit(1);
+    }
+    process.exit(0);
+  });
+
+  setTimeout(() => {
+    console.error("Graceful shutdown timed out. Forcing exit.");
+    process.exit(1);
+  }, 9000).unref();
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

@@ -18,6 +18,7 @@ services:
       dockerfile: Dockerfile
       target: runtime
     restart: always
+    init: true
     env_file:
       - ./backend/.env.eval
     environment:

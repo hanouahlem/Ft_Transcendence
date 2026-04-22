@@ -20,6 +20,7 @@ services:
       dockerfile: Dockerfile
       target: dev
     restart: always
+    init: true
     working_dir: /app
     env_file:
       - ./backend/.env
