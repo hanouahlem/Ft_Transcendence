@@ -13,6 +13,7 @@ Important traits:
 - backend runs `npm run dev`
 - frontend runs a dev server
 - Postgres data is persisted with a named Docker volume
+- uploaded media is persisted with the named Docker volume `uploads_data`
 
 So the stack is optimized for iteration, not for production-style immutability.
 
@@ -130,11 +131,11 @@ Cause:
 
 Symptoms:
 
-- post creation fails when file is not an image
+- post creation fails when file type is not allowed
 
 Cause:
 
-- Multer rejects non-image files
+- Multer rejects files that are neither images nor PDFs for post uploads
 
 ### Seeded comments bypass moderation
 
@@ -144,11 +145,11 @@ Symptoms:
 
 How it works:
 
-- backend reads optional `SEED_SCRIPT_KEY` through [`backend/src/env.js`](/Users/curtis/Desktop/DEV/last_jeune/backend/src/env.js)
-- the generator wrapper [`other/superseed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/superseed.sh) reads the same value from `backend/.env` and passes it to [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/seed.mjs)
+- backend reads optional `SEED_SCRIPT_KEY` through [`backend/src/env.js`](/Users/curtis/Desktop/DEV/main_transcendance/backend/src/env.js)
+- the seed scripts run inside the backend container, so they read the same `SEED_SCRIPT_KEY` directly from the container environment
 - seeded comment requests send `x-seed-script-key`
-- [`backend/src/controllers/postController.js`](/Users/curtis/Desktop/DEV/last_jeune/backend/src/controllers/postController.js) only sets `skipModeration` when the header matches the env value
-- [`backend/src/services/postService.js`](/Users/curtis/Desktop/DEV/last_jeune/backend/src/services/postService.js) skips `checkComment()` only for that local seed path
+- [`backend/src/controllers/postController.js`](/Users/curtis/Desktop/DEV/main_transcendance/backend/src/controllers/postController.js) only sets `skipModeration` when the header matches the env value
+- [`backend/src/services/postService.js`](/Users/curtis/Desktop/DEV/main_transcendance/backend/src/services/postService.js) skips `checkComment()` only for that local seed path
 
 Why this matters:
 
@@ -162,19 +163,20 @@ The large social dataset is no longer embedded directly in the shell script.
 
 Current flow:
 
-- [`other/seed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/seed.sh) remains the older small scripted seed
+- [`backend/scripts/seed/legacy-seed.mjs`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/legacy-seed.mjs) is the smaller hand-scripted seed
 - its post generator now injects the current right-rail trend terms into only a deterministic subset of captions, so local demo content can surface those search themes without turning every post into keyword spam
-- [`other/superseed.sh`](/Users/curtis/Desktop/DEV/last_jeune/other/superseed.sh) is the thin launcher for the large deterministic dataset
-- [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/seed.mjs) loads curated JSON config from [`other/seed/config/roster.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/roster.json), [`other/seed/config/clusters.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/clusters.json), [`other/seed/config/themes.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/themes.json), [`other/seed/config/relationships.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/relationships.json), and [`other/seed/config/showcase-users.json`](/Users/curtis/Desktop/DEV/last_jeune/other/seed/config/showcase-users.json)
+- [`backend/scripts/seed/superseed.mjs`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/superseed.mjs) is the larger deterministic generator seed
+- it loads curated JSON config from [`backend/scripts/seed/config/roster.json`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/config/roster.json), [`backend/scripts/seed/config/clusters.json`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/config/clusters.json), [`backend/scripts/seed/config/themes.json`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/config/themes.json), [`backend/scripts/seed/config/relationships.json`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/config/relationships.json), and [`backend/scripts/seed/config/showcase-users.json`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/config/showcase-users.json)
 - the generator builds deterministic user budgets, friendship plans, post plans, likes, favorites, and comment plans from that small curated input
 - all real data creation still happens through the existing HTTP routes: register, login, profile update, friends, posts, likes, favorites, comments
+- both seed scripts now run inside the backend container and talk to the backend over `http://backend:3001`
 
 Why this version is easier to explain in evaluation:
 
 - the larger seed keeps shell responsibilities small and obvious
 - the backend remains the source of truth because the seed still uses the public route layer
 - the dataset is scalable without pasting hundreds of hardcoded posts into Bash
-- `node other/seed/seed.mjs --plan-only` gives a non-mutating shape check before touching the database
+- `docker compose exec backend node scripts/seed/superseed.mjs --plan-only` gives a non-mutating shape check before touching the database
 
 ## What To Check First When Something Breaks
 

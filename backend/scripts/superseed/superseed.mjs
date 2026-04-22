@@ -5,11 +5,8 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT_DIR = process.env.ROOT_DIR
-  ? path.resolve(process.env.ROOT_DIR)
-  : path.resolve(__dirname, "../..");
-const CONFIG_DIR = path.join(ROOT_DIR, "other", "seed", "config");
-const API = process.env.API || "http://localhost:3001";
+const CONFIG_DIR = path.join(__dirname, "config");
+const API = process.env.API || "http://backend:3001";
 const PASS = process.env.PASS || "test1234";
 const SEED_SCRIPT_KEY = normalizeEnvValue(process.env.SEED_SCRIPT_KEY || "");
 const FIXED_SEED = "ft_transcendence-social-seed-generator-v2";
@@ -1559,6 +1556,22 @@ async function createRemoteImage(spec) {
   }
 }
 
+function extractRelativePostMediaPath(response, hasUpload) {
+  const mediaPath = response?.post?.media?.[0] ?? null;
+
+  if (!hasUpload) {
+    return mediaPath;
+  }
+
+  if (typeof mediaPath !== "string" || !mediaPath.startsWith("/uploads/")) {
+    throw new Error(
+      `POST /posts returned an unexpected media path: ${String(mediaPath)}`,
+    );
+  }
+
+  return mediaPath;
+}
+
 async function registerUsers(users) {
   console.log("=== Creating users and profiles ===");
 
@@ -1669,11 +1682,13 @@ async function createPosts(plans) {
       token: TOKENS.get(plan.author.username),
       formData,
     });
+    const mediaPath = extractRelativePostMediaPath(response, Boolean(upload));
 
     createdPosts.push({
       ...plan,
       id: response.post.id,
       hasImage: Boolean(upload),
+      mediaPath,
       likes: [],
       favorites: [],
       comments: [],
@@ -1994,7 +2009,7 @@ async function main() {
   console.log("  expecting a clean database; `make seed` now handles that via `db-clean`");
 
   if (!SEED_SCRIPT_KEY) {
-    console.log("  SEED_SCRIPT_KEY not found in backend/.env; seeded comments will use normal moderation");
+    console.log("  SEED_SCRIPT_KEY not found in backend container env; seeded comments will use normal moderation");
   }
 
   await registerUsers(state.users);

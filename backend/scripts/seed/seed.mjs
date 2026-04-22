@@ -1,41 +1,17 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-API="${API:-http://localhost:3001}"
-PASS="${SEED_PASSWORD:-test1234}"
-
-cd "$ROOT_DIR"
-
-API="$API" PASS="$PASS" ROOT_DIR="$ROOT_DIR" node --input-type=module <<'NODE'
 import { Blob } from "node:buffer";
-import { readFileSync } from "node:fs";
-import path from "node:path";
 
 const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-const API = process.env.API;
-const PASS = process.env.PASS;
-const ROOT_DIR = process.env.ROOT_DIR;
+const API = process.env.API || "http://backend:3001";
+const PASS = process.env.PASS || "test1234";
 
-function readSeedScriptKey() {
-  try {
-    const envFile = readFileSync(path.join(ROOT_DIR, "backend/.env"), "utf8");
-    const match = envFile.match(/^\s*SEED_SCRIPT_KEY\s*=\s*(.*)\s*$/m);
-
-    if (!match) {
-      return "";
-    }
-
-    return match[1].trim().replace(/^(["'])(.*)\1$/, "$2");
-  } catch {
-    return "";
-  }
+function normalizeEnvValue(value) {
+  return String(value).trim().replace(/^(["'])(.*)\1$/, "$2");
 }
 
-const SEED_SCRIPT_KEY = readSeedScriptKey();
+const SEED_SCRIPT_KEY = normalizeEnvValue(process.env.SEED_SCRIPT_KEY || "");
 
 function makeUser({
   username,
@@ -868,6 +844,22 @@ async function createRemoteImage(spec) {
   }
 }
 
+function extractRelativePostMediaPath(response, hasUpload) {
+  const mediaPath = response?.post?.media?.[0] ?? null;
+
+  if (!hasUpload) {
+    return mediaPath;
+  }
+
+  if (typeof mediaPath !== "string" || !mediaPath.startsWith("/uploads/")) {
+    throw new Error(
+      `POST /posts returned an unexpected media path: ${String(mediaPath)}`,
+    );
+  }
+
+  return mediaPath;
+}
+
 const TOKENS = new Map();
 const USER_IDS = new Map();
 
@@ -985,12 +977,14 @@ async function createPosts() {
       token: TOKENS.get(entry.user.username),
       formData,
     });
+    const mediaPath = extractRelativePostMediaPath(response, hasImage);
 
     createdPosts.push({
       ...entry,
       id: response.post.id,
       content,
       hasImage,
+      mediaPath,
       likes: [],
       favorites: [],
       comments: [],
@@ -1183,7 +1177,7 @@ async function main() {
   console.log("  expecting a clean database; `make seed` now handles that via `db-clean`");
 
   if (!SEED_SCRIPT_KEY) {
-    console.log("  SEED_SCRIPT_KEY not found in backend/.env; seeded comments will use normal moderation");
+    console.log("  SEED_SCRIPT_KEY not found in backend container env; seeded comments will use normal moderation");
   }
 
   await registerUsers();
@@ -1224,83 +1218,3 @@ try {
   console.error(`Seed failed: ${error.message}`);
   process.exitCode = 1;
 }
-NODE
-
-echo "=== Adding direct dev notifications for mention/message preview ==="
-docker compose exec -T backend sh -lc 'export DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB && node --input-type=module' <<'NODE'
-import prisma from "/app/src/prisma.js";
-
-const mentionPlans = [
-  { recipient: "alice", actor: "hugo", postOwner: "hugo", type: "MENTION" },
-  { recipient: "bob", actor: "iris", postOwner: "iris", type: "MENTION" },
-];
-
-const messagePlans = [
-  { recipient: "alice", actor: "diana", type: "MESSAGE" },
-  { recipient: "bob", actor: "charlie", type: "MESSAGE" },
-];
-
-async function resolveUserId(username) {
-  const user = await prisma.user.findUnique({
-    where: { username },
-    select: { id: true },
-  });
-
-  return user?.id ?? null;
-}
-
-async function resolveLatestPostId(username) {
-  const post = await prisma.post.findFirst({
-    where: { author: { username } },
-    orderBy: { createdAt: "desc" },
-    select: { id: true },
-  });
-
-  return post?.id ?? null;
-}
-
-try {
-  for (const plan of mentionPlans) {
-    const userId = await resolveUserId(plan.recipient);
-    const actorId = await resolveUserId(plan.actor);
-    const postId = await resolveLatestPostId(plan.postOwner);
-
-    if (!userId || !actorId || !postId) {
-      console.log(`  ${plan.type.padEnd(11)}: ${plan.actor} -> ${plan.recipient} skipped (missing seed data)`);
-      continue;
-    }
-
-    await prisma.notification.deleteMany({
-      where: { userId, actorId, type: plan.type, postId },
-    });
-
-    await prisma.notification.create({
-      data: { userId, actorId, type: plan.type, postId },
-    });
-
-    console.log(`  ${plan.type.padEnd(11)}: ${plan.actor} mentioned ${plan.recipient} on post ${postId}`);
-  }
-
-  for (const plan of messagePlans) {
-    const userId = await resolveUserId(plan.recipient);
-    const actorId = await resolveUserId(plan.actor);
-
-    if (!userId || !actorId) {
-      console.log(`  ${plan.type.padEnd(11)}: ${plan.actor} -> ${plan.recipient} skipped (missing seed data)`);
-      continue;
-    }
-
-    await prisma.notification.deleteMany({
-      where: { userId, actorId, type: plan.type, postId: null },
-    });
-
-    await prisma.notification.create({
-      data: { userId, actorId, type: plan.type },
-    });
-
-    console.log(`  ${plan.type.padEnd(11)}: ${plan.actor} messaged ${plan.recipient}`);
-  }
-} finally {
-  await prisma.$disconnect();
-}
-NODE

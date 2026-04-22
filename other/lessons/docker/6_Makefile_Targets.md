@@ -76,10 +76,10 @@ That keeps the previous behavior:
 : wipe the PostgreSQL schema through Prisma migrations, then re-apply all migrations without stopping containers
 
 `make seed`
-: run `make db-clean` first, then execute the legacy `other/seed.sh` host script
+: run `make db-clean` first, then execute the small backend-side seed script inside the running `backend` container
 
 `make superseed`
-: run `make db-clean` first, then execute `other/superseed.sh` from the host to recreate the deterministic generator-backed social dataset: users, profiles, friendship graph, posts, likes, favorites, comments, avatars, and seeded post images
+: run `make db-clean` first, then execute the larger generator-backed seed inside the running `backend` container to recreate the deterministic social dataset: users, profiles, friendship graph, posts, likes, favorites, comments, avatars, and seeded post images
 
 ## How this works
 
@@ -88,13 +88,12 @@ The important distinction is:
 - `make up` now uses `docker compose -f docker-compose.eval.yml up --build`, so the default demo path is the immutable evaluation stack
 - `make down` intentionally does **not** pass `-v`, because the evaluation stack is supposed to keep `postgres_data` and `uploads_data` across restarts
 - `make dev-up` still uses `docker compose up`, so the bind-mounted hot-reload workflow stays available for daily development
-- `make dev-fclean` runs `find backend/uploads -mindepth 1 -delete`, which clears every uploaded media file while preserving the `backend/uploads` directory expected by Multer
+- `make dev-fclean` removes the dev stack with `-v`, so both `postgres_data` and `uploads_data` are cleared together
 - `make db-clean` runs `npx prisma migrate reset --force` inside the running development `backend` container, so the development database is reset in place while containers keep running
-- `make seed` first runs `make db-clean`, then runs the older `bash other/seed.sh` host script
-- `make superseed` first runs `make db-clean`, then runs `bash other/superseed.sh` on the host
-- [`other/superseed.sh`](/Users/curtis/Desktop/DEV/main_transcendance/other/superseed.sh) only resolves the repo root, reads `SEED_SCRIPT_KEY`, and launches [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/main_transcendance/other/seed/seed.mjs)
-- [`other/seed/seed.mjs`](/Users/curtis/Desktop/DEV/main_transcendance/other/seed/seed.mjs) loads curated config from [`other/seed/config/roster.json`](/Users/curtis/Desktop/DEV/main_transcendance/other/seed/config/roster.json) and the other files in [`other/seed/config/`](/Users/curtis/Desktop/DEV/main_transcendance/other/seed/config), builds a deterministic plan, then talks to the backend over `http://localhost:3001`
-- because the host only needs Node's built-in runtime and `fetch`, the seed still works without host-side Prisma dependencies
+- `make seed` first runs `make db-clean`, then runs `node scripts/seed/legacy-seed.mjs` inside the development `backend` container
+- `make superseed` first runs `make db-clean`, then runs `node scripts/seed/superseed.mjs` inside the development `backend` container
+- [`backend/scripts/seed/superseed.mjs`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/superseed.mjs) loads curated config from [`backend/scripts/seed/config/roster.json`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/config/roster.json) and the other files in [`backend/scripts/seed/config/`](/Users/curtis/Desktop/DEV/main_transcendance/backend/scripts/seed/config), builds a deterministic plan, then talks to the backend over `http://backend:3001`
+- because the scripts run inside the container, they use the same backend network and environment as the app itself
 
 That means:
 

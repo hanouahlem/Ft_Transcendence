@@ -70,7 +70,6 @@ dev-clean:
 
 dev-fclean:
 	$(DEV_COMPOSE) down -v --remove-orphans
-	@if [ -d backend/uploads ]; then find backend/uploads -mindepth 1 -delete; fi
 	docker system prune -af
 
 dev-re: dev-fclean dev-up
@@ -88,10 +87,10 @@ db-clean:
 	$(DEV_COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate reset --force'
 
 seed: db-clean
-	bash other/seed.sh
+	$(DEV_COMPOSE) exec backend node scripts/seed/seed.mjs
 
 superseed: db-clean
-	bash other/superseed.sh
+	$(DEV_COMPOSE) exec backend node scripts/superseed/superseed.mjs
 
 prisma-generate:
 	$(DEV_COMPOSE) exec backend npx prisma generate
