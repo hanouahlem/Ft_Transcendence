@@ -7,6 +7,7 @@ import {
   getConversations,
   getUsers,
   markConversationAsRead,
+  normalizeUploadedMediaPayload,
   sendConversationMessage,
   type ConversationItem,
   type ConversationMessage,
@@ -258,10 +259,13 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
   }, [conversations, setUnreadMessagesCount]);
 
   const handleMessageCreatedEvent = useEffectEvent((payload: MessageCreatedEvent) => {
-    upsertConversation(payload.conversation);
-    const nextMessages = appendMessageToCache(payload.conversation.id, payload.message);
+    const conversation = normalizeUploadedMediaPayload(payload.conversation);
+    const message = normalizeUploadedMediaPayload(payload.message);
 
-    if (selectedConversationIdRef.current === payload.conversation.id) {
+    upsertConversation(conversation);
+    const nextMessages = appendMessageToCache(conversation.id, message);
+
+    if (selectedConversationIdRef.current === conversation.id) {
       setMessages(nextMessages);
       setIsLoadingMessages(false);
     }
@@ -412,12 +416,14 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
       return;
     }
 
-    void loadConversations().then(() => {
-      const activeConversationId = selectedConversationIdRef.current;
+    queueMicrotask(() => {
+      void loadConversations().then(() => {
+        const activeConversationId = selectedConversationIdRef.current;
 
-      if (activeConversationId) {
-        void loadMessages(activeConversationId, { showLoading: false });
-      }
+        if (activeConversationId) {
+          void loadMessages(activeConversationId, { showLoading: false });
+        }
+      });
     });
   }, [isConnected, loadConversations, loadMessages, token]);
 

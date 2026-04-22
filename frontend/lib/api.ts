@@ -272,8 +272,48 @@ async function handleResponse<T>(response: Response): Promise<ApiResult<T>> {
 
   return {
     ok: true,
-    data: data as T,
+    data: normalizeUploadedMedia(data) as T,
   };
+}
+
+function resolveUploadUrl(path: string) {
+  if (!path.startsWith("/uploads/")) {
+    return path;
+  }
+
+  return new URL(path, API_URL).toString();
+}
+
+export function normalizeUploadedMediaPayload<T>(value: T): T {
+  return normalizeUploadedMedia(value) as T;
+}
+
+function normalizeUploadedMedia(value: unknown, parentKey?: string): unknown {
+  if (typeof value === "string") {
+    const shouldResolve =
+      parentKey === "url" ||
+      parentKey === "avatar" ||
+      parentKey === "banner" ||
+      parentKey === "image" ||
+      parentKey === "media";
+
+    return shouldResolve ? resolveUploadUrl(value) : value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeUploadedMedia(item, parentKey));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entryValue]) => [
+        key,
+        normalizeUploadedMedia(entryValue, key),
+      ]),
+    );
+  }
+
+  return value;
 }
 
 async function requestJson<T>(

@@ -77,25 +77,21 @@ Using:
 
 creates a separate Docker-managed area for dependencies, so the container keeps its own `node_modules`.
 
-## Why Uploads Currently End Up In The Repo
+## Upload Storage In This Project
 
 The backend writes uploads to `uploads/`, which resolves to `/app/uploads` in the container.
 
-Because `/app` is bind-mounted to `./backend`, those files appear in:
+Both compose files mount that path as a named volume:
 
-- `backend/uploads`
+- `uploads_data:/app/uploads`
 
-So uploaded files are currently written into the repo working tree.
+So:
 
-## Docker Volume For Uploads
+- the app still saves files to the same in-container path
+- uploaded files live in Docker-managed persistent storage
+- runtime media stays out of the repo working tree
 
-If uploads were moved to a dedicated Docker volume:
-
-- the app would still save files to a path like `/app/uploads`
-- but the files would live in Docker-managed persistent storage
-- they would no longer pollute the repo tree
-
-This would keep runtime data separate from source code.
+This keeps runtime data separate from source code while preserving the bind-mounted dev workflow for the actual application files.
 
 ## Current Project vs Inception Volume Philosophy
 

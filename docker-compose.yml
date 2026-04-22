@@ -45,6 +45,7 @@ services:
       start_period: 15s
     volumes:
       - ./backend:/app
+      - uploads_data:/app/uploads
       - /app/node_modules
     command: sh -c "export DATABASE_URL=postgresql://$$POSTGRES_USER:$$POSTGRES_PASSWORD@postgres:5432/$$POSTGRES_DB && npx prisma generate && npx prisma migrate deploy && npm run dev"
 
@@ -70,3 +71,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:

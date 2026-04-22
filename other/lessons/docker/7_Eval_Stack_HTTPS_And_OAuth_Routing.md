@@ -143,9 +143,9 @@ Why:
 
 - nginx sends `X-Forwarded-Proto: https`
 - Express must trust that header to treat the original browser request as HTTPS
-- uploaded media URLs are built from `req.protocol` and `req.get("host")`
+- secure-cookie and proxy-aware request handling still need the original HTTPS context
 
-Without `trust proxy`, uploaded media could be returned as `http://localhost/uploads/...`, which would break inside an HTTPS page.
+Uploaded media paths are now stored in the database as relative `/uploads/...` paths, so they no longer depend on `req.protocol` or `req.get("host")`.
 
 ## Upload persistence in eval
 

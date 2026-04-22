@@ -582,7 +582,7 @@ export async function uploadUserMedia(req, res) {
     return res.status(400).json({ message: "Image file is required." });
   }
 
-  const mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  const mediaUrl = `/uploads/${req.file.filename}`;
 
   return res.status(201).json({ url: mediaUrl });
 }
