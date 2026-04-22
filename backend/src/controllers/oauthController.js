@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.js";
-import { assertEnv, getEnv, getOptionalEnv } from "../env.js";
+import { assertEnv, getEnv } from "../env.js";
 
 const GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
 const GITHUB_ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token";
@@ -114,17 +114,7 @@ function sleep(ms) {
 }
 
 function shouldUseSecureOAuthCookie(provider) {
-  const explicitValue = getOptionalEnv("OAUTH_COOKIE_SECURE").toLowerCase();
-
-  if (explicitValue === "true") {
-    return true;
-  }
-
-  if (explicitValue === "false") {
-    return false;
-  }
-
-  const callbackUrl = getOptionalEnv(provider.callbackEnvKey);
+  const callbackUrl = getEnv(provider.callbackEnvKey);
   return callbackUrl.startsWith("https://");
 }
 

@@ -119,7 +119,7 @@ This matches the current backend routes in [`backend/src/routes/routes.js`](/Use
 
 OAuth state cookies are set in [`backend/src/controllers/oauthController.js`](/Users/curtis/Desktop/DEV/main_transcendance/backend/src/controllers/oauthController.js).
 
-The important change is that the cookie now becomes `secure: true` when the callback URL is HTTPS, or when `OAUTH_COOKIE_SECURE=true` is set explicitly.
+The important change is that the cookie now becomes `secure: true` automatically when the callback URL is HTTPS.
 
 Why:
 
