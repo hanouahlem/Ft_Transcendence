@@ -12,6 +12,7 @@ const REQUIRED_ENV_KEYS = [
   "FORTYTWO_CALLBACK_URL",
   "MAIL_USER",
   "MAIL_PASS",
+  "API_KEY_PUBLIC",
 ];
 
 export function assertEnv(keys) {
