@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
@@ -9,7 +9,7 @@ import { NewConversationDialog } from "@/components/messages/NewConversationDial
 import { ConversationThread } from "@/components/messages/ConversationThread";
 import { ConversationRail } from "@/components/messages/ConversationRail";
 
-export default function MessagePage() {
+function MessagePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, user } = useAuth();
@@ -110,5 +110,13 @@ export default function MessagePage() {
         />
       </div>
     </>
+  );
+}
+
+export default function MessagePage() {
+  return (
+    <Suspense fallback={null}>
+      <MessagePageContent />
+    </Suspense>
   );
 }

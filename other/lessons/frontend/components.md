@@ -528,8 +528,10 @@ Explain during evaluation:
 - the sidebar owns navigation configuration in `NAV_ITEMS`
 - `NavButton` is the row renderer
 - `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” (new post)
-- the bottom profile preview is an Ark UI menu trigger (`@ark-ui/react/menu`), not a direct route link
-- that menu now centralizes account quick actions
+- the bottom profile preview anchors an Ark UI menu (`@ark-ui/react/menu`) and also routes to `/profile` on click
+- hovering the profile preview opens that account menu
+- clicking the profile preview itself routes to `/profile`
+- that menu now centralizes account quick actions and the locale switcher
 - `Settings` in the menu navigates to `/settings`
 - `Disconnect` in the menu calls the existing `onLogout` flow from `AppSidebarShell`
 - the search page is a first-class route in the main sidebar, not only a control inside the right rail

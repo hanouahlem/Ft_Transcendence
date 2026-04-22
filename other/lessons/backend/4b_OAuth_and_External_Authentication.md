@@ -244,6 +244,47 @@ For 42:
 - `FORTYTWO_CLIENT_SECRET`
 - `FORTYTWO_CALLBACK_URL`
 
+For the HTTPS evaluation stack:
+
+- `FRONTEND_URL=https://localhost`
+- `GITHUB_CALLBACK_URL=https://localhost/auth/github/callback`
+- `FORTYTWO_CALLBACK_URL=https://localhost/auth/42/callback`
+
+Those callback URLs must exactly match the provider configuration.
+
+Recommended repo setup:
+
+- `backend/.env` = dev OAuth clients
+- `backend/.env.eval` = eval OAuth clients
+
+That avoids constantly editing one provider app between:
+
+- `http://localhost:3001/auth/github/callback`
+- `https://localhost/auth/github/callback`
+
+## HTTPS Eval Hardening
+
+In the evaluation stack, OAuth requests pass through nginx on `https://localhost`.
+
+Important backend hardening in `backend/src/controllers/oauthController.js`:
+
+- state cookies are set with `httpOnly: true`
+- `sameSite: "lax"` still allows the top-level provider redirect back into our callback route
+- `secure: true` is enabled automatically when the callback URL uses HTTPS
+- `clearCookie(...)` uses the same options so the browser actually removes the state cookie
+
+Why this matters:
+
+- the OAuth state cookie is our CSRF check between the start route and the callback route
+- in eval, that cookie should only travel over HTTPS
+- if `secure` or `path` do not match when clearing the cookie, stale state can remain in the browser
+
+Related runtime detail:
+
+- `backend/src/server.js` now sets `app.set("trust proxy", 1)`
+- nginx forwards `X-Forwarded-Proto: https`
+- that lets Express generate correct `https://...` URLs for uploaded media during the proxied eval flow
+
 ## Important Distinction To Remember
 
 Do not confuse:

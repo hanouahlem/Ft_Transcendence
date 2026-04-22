@@ -125,6 +125,11 @@ Representative files:
 - `frontend/components/layout/RightRail.tsx`
 - `frontend/components/messages/ConversationThread.tsx`
 
+Important UI placement:
+
+- auth screens expose the locale switcher directly in the page shell
+- protected app screens expose locale selection inside the sidebar account menu (`frontend/components/layout/Sidebar.tsx`)
+
 ## Date/Number Locale Alignment
 
 We also updated date/number formatting to use active locale:

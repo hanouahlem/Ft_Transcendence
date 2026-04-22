@@ -30,6 +30,26 @@ Why it matters:
 - `NEXT_PUBLIC_...` makes the value available in browser-side code
 - local development still works without setting the env because it falls back to `http://localhost:3001`
 
+The same base URL is also used to resolve uploaded media paths returned by the backend.
+
+Real code:
+
+```ts
+function resolveUploadUrl(path: string) {
+  if (!path.startsWith("/uploads/")) {
+    return path;
+  }
+
+  return new URL(path, API_URL).toString();
+}
+```
+
+Why this matters:
+
+- the backend now stores uploaded media as relative `/uploads/...` paths
+- dev and eval can point to different public origins without changing database values
+- components can keep using ready-to-render `src` values instead of rebuilding URLs themselves
+
 ## Shared Result Shape
 
 The API helpers return a discriminated result instead of throwing for normal backend rejections.

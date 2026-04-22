@@ -83,10 +83,11 @@ make frontend    # install deps + run Next.js dev server
 make backend     # install deps + run Express dev server
 ```
 
-Seed the database (requires backend running on localhost:3001):
+Seed the database (requires the dev Docker backend container running):
 
 ```bash
-sh other/seed.sh
+make seed
+make superseed
 ```
 
 Docker behavior:
@@ -143,18 +144,20 @@ Protected routes use `Authorization: Bearer <token>`.
 ## Uploads and Persistence
 
 - uploads are handled by Multer in `backend/src/middleware/upload.js`
-- only image files are accepted
-- uploaded files are stored in `backend/uploads/`
+- post uploads accept images and PDFs, while settings media accepts images only
+- uploaded files are written to `uploads/` inside the backend container
+- both Docker compose flows mount that path as the named volume `uploads_data`
 - Express serves them from `/uploads`
 
 Docker persistence:
 
 - Postgres data lives in the `postgres_data` volume
+- uploaded media lives in the `uploads_data` volume
 - `make down` keeps database data
-- `make clean` removes the Docker database volume
-- `make clean` does not remove files from `backend/uploads/`
+- `make clean` removes both Docker volumes
+- `make clean` removes Docker-managed uploaded media together with the database volume
 
 Local persistence:
 
 - local Postgres persistence depends on your local setup
-- uploaded files still live in `backend/uploads/`
+- outside Docker, uploaded files still live in the backend `uploads/` folder

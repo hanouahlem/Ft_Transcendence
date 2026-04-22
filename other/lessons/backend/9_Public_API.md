@@ -17,7 +17,7 @@ Every request to `/api/public/*` must include:
 x-api-key: <value of API_KEY_PUBLIC env var>
 ```
 
-The middleware in [backend/src/middleware/apiKey.js](../../../backend/src/middleware/apiKey.js) validates this header and returns `401` if it's missing or wrong.
+The middleware in [backend/src/middleware/apiKey.js](../../../backend/src/middleware/apiKey.js) validates this header and returns `401` if it's missing or wrong. The same env var is also part of backend startup validation, so the server fails fast if the public API key is missing.
 
 ### Rate Limiting
 
@@ -39,11 +39,13 @@ All at `/api/public/posts`:
 | PUT | `/api/public/posts/:id` | Update a post's content |
 | DELETE | `/api/public/posts/:id` | Delete a post |
 
-The controller [backend/src/controllers/publicApiController.js](../../../backend/src/controllers/publicApiController.js) queries Prisma directly and returns a simplified response (no `likedByCurrentUser` or `favoritedByCurrentUser` since there is no authenticated user context).
+The controller [backend/src/controllers/publicApiController.js](../../../backend/src/controllers/publicApiController.js) returns a simplified response (no `likedByCurrentUser` or `favoritedByCurrentUser` since there is no authenticated user context). For deletion, it reuses the shared post-service cleanup so likes, favorites, comments, reposts, and uploaded media are removed consistently with the private API.
 
 ### Documentation (Swagger UI)
 
-Available at: `http://localhost:3001/api-docs`
+Available at:
+- dev: `http://localhost:3001/api-docs`
+- eval: `https://localhost/api-docs`
 
 The spec is generated from JSDoc comments in the routes file using `swagger-jsdoc`. The config lives in [backend/src/swagger.js](../../../backend/src/swagger.js).
 
@@ -83,4 +85,11 @@ curl -X POST http://localhost:3001/api/public/posts \
   -H "x-api-key: your_key_here" \
   -H "Content-Type: application/json" \
   -d '{"content": "Hello from the public API", "authorId": 1}'
+```
+
+In eval mode, use the HTTPS proxy URL instead:
+
+```bash
+curl -k https://localhost/api/public/posts \
+  -H "x-api-key: your_key_here"
 ```

@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent } from "react";
 import { usePathname } from "next/navigation";
 import { archiveToaster } from "@/components/ui/toaster";
+import { normalizeUploadedMediaPayload } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import {
@@ -30,27 +31,30 @@ export function LiveInboxToasts() {
 
   const handleMessageCreatedEvent = useEffectEvent(
     ({ conversation, message }: MessageCreatedEvent) => {
+      const normalizedConversation = normalizeUploadedMediaPayload(conversation);
+      const normalizedMessage = normalizeUploadedMediaPayload(message);
+
       if (isMessagePage) {
         return;
       }
 
-      if (message.senderId === user?.id) {
+      if (normalizedMessage.senderId === user?.id) {
         return;
       }
 
       const peerName = getDisplayName(
-        conversation.peer?.displayName,
-        conversation.peer?.username,
+        normalizedConversation.peer?.displayName,
+        normalizedConversation.peer?.username,
       );
 
       archiveToaster.info({
         title: peerName,
-        description: message.content,
+        description: normalizedMessage.content,
         duration: Infinity,
         meta: {
           kind: "message",
-          conversation,
-          message,
+          conversation: normalizedConversation,
+          message: normalizedMessage,
         },
       });
     },
@@ -58,11 +62,13 @@ export function LiveInboxToasts() {
 
   const handleNotificationCreatedEvent = useEffectEvent(
     ({ notification }: NotificationCreatedEvent) => {
+      const normalizedNotification = normalizeUploadedMediaPayload(notification);
+
       if (isNotificationsPage) {
         return;
       }
 
-      if (notification.type === "MESSAGE") {
+      if (normalizedNotification.type === "MESSAGE") {
         return;
       }
 
@@ -72,7 +78,7 @@ export function LiveInboxToasts() {
         closable: false,
         meta: {
           kind: "notification",
-          notification,
+          notification: normalizedNotification,
         },
       });
     },

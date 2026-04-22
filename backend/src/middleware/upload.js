@@ -58,6 +58,9 @@ function createPostUpload(prefix = "post") {
 
   return multer({
     storage,
+    limits: {
+      fileSize: POST_UPLOAD_MAX_FILE_SIZE,
+    },
     fileFilter,
   });
 }

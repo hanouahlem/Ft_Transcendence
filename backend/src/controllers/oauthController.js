@@ -31,12 +31,14 @@ const RETRYABLE_HTTP_STATUSES = new Set([429, 500, 502, 503, 504]);
 
 const PROVIDERS = {
   github: {
+    callbackEnvKey: "GITHUB_CALLBACK_URL",
     handoffPath: "/auth/github/handoff",
     startPath: "/auth/github",
     stateCookie: "github_oauth_state",
     displayName: "GitHub",
   },
   fortyTwo: {
+    callbackEnvKey: "FORTYTWO_CALLBACK_URL",
     handoffPath: "/auth/42/handoff",
     startPath: "/auth/42",
     stateCookie: "fortytwo_oauth_state",
@@ -59,18 +61,24 @@ function redirectToFrontendHandoff(res, provider, payload) {
 }
 
 function setOAuthStateCookie(res, provider, state) {
+  const secure = shouldUseSecureOAuthCookie(provider);
+
   res.cookie(provider.stateCookie, state, {
     httpOnly: true,
     sameSite: "lax",
+    secure,
     maxAge: OAUTH_STATE_TTL_MS,
     path: provider.startPath,
   });
 }
 
 function clearOAuthStateCookie(res, provider) {
+  const secure = shouldUseSecureOAuthCookie(provider);
+
   res.clearCookie(provider.stateCookie, {
     httpOnly: true,
     sameSite: "lax",
+    secure,
     path: provider.startPath,
   });
 }
@@ -103,6 +111,11 @@ function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+function shouldUseSecureOAuthCookie(provider) {
+  const callbackUrl = getEnv(provider.callbackEnvKey);
+  return callbackUrl.startsWith("https://");
 }
 
 function getFetchErrorCode(error) {

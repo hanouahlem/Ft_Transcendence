@@ -1,4 +1,5 @@
 import prisma from "../prisma.js";
+import { deletePostById } from "../services/postService.js";
 
 // Minimal public representation — no user-specific fields (likedBy, favoritedBy)
 function formatPost(post) {
@@ -127,16 +128,16 @@ export const deletePost = async (req, res) => {
       return res.status(400).json({ message: "Invalid post id." });
     }
 
-    const existing = await prisma.post.findUnique({ where: { id: postId } });
-    if (!existing) {
-      return res.status(404).json({ message: "Post not found." });
-    }
-
-    await prisma.post.delete({ where: { id: postId } });
+    await deletePostById(postId);
 
     res.status(200).json({ message: "Post deleted successfully." });
   } catch (error) {
     console.error("Public API deletePost:", error);
+
+    if (error instanceof Error && error.message === "Post not found") {
+      return res.status(404).json({ message: error.message });
+    }
+
     res.status(500).json({ message: "Unable to delete post." });
   }
 };

@@ -256,10 +256,14 @@ For a 42 group project, separate eval Dockerfiles may actually be easier for the
 
 Recommended eval commands:
 
-- `make eval-up`
-- `make eval-down`
-- `make eval-logs`
-- `make eval-re`
+- `make up`
+- `make down`
+- `make logs`
+- `make re`
+- `make dev-up`
+- `make dev-down`
+- `make dev-logs`
+- `make dev-re`
 
 This helps maintain the “single command” story for evaluation.
 

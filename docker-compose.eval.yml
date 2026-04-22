@@ -3,9 +3,7 @@ services:
     image: postgres:15
     restart: always
     env_file:
-      - ./backend/.env
-    ports:
-      - "5432:5432"
+      - ./backend/.env.eval
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,16 +16,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      target: dev
+      target: runtime
     restart: always
-    working_dir: /app
     env_file:
-      - ./backend/.env
-    ports:
-      - "3001:3001"
-      - "5555:5555"
+      - ./backend/.env.eval
     environment:
       PORT: 3001
+      NODE_ENV: production
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,30 +39,36 @@ services:
       retries: 10
       start_period: 15s
     volumes:
-      - ./backend:/app
       - uploads_data:/app/uploads
-      - /app/node_modules
-    command: sh -c "export DATABASE_URL=postgresql://$$POSTGRES_USER:$$POSTGRES_PASSWORD@postgres:5432/$$POSTGRES_DB && npx prisma generate && npx prisma migrate deploy && npm run dev"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: dev
+      target: runtime
+      args:
+        NEXT_PUBLIC_API_URL: https://localhost/api
     restart: always
-    working_dir: /app
-    ports:
-      - "3000:3000"
     environment:
-      CHOKIDAR_USEPOLLING: "true"
-      NEXT_TELEMETRY_DISABLED: "1" 
+      NEXT_PUBLIC_API_URL: https://localhost/api
+      NEXT_TELEMETRY_DISABLED: "1"
     depends_on:
       backend:
         condition: service_healthy
+
+  proxy:
+    image: nginx:1.27-alpine
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    ports:
+      - "443:443"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: npm run dev
+      - ./other/nginx/eval.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./other/nginx/certs:/etc/nginx/certs:ro
 
 volumes:
   postgres_data:

@@ -19,7 +19,7 @@ Last updated: 2026-04-16
 - [ ] Phase 3: Uploads named volume in eval (`uploads_data:/app/uploads`)
 - [ ] Phase 4: HTTPS reverse proxy (`nginx`) + OAuth route split
 - [ ] Phase 5: OAuth state cookie hardening for HTTPS (`Secure: true`)
-- [ ] Phase 6: Makefile eval commands (`eval-up`, `eval-down`, `eval-logs`, `eval-re`)
+- [ ] Phase 6: Makefile eval commands (`up`, `down`, `logs`, `re`) and dev aliases (`dev-up`, `dev-down`, `dev-logs`, `dev-re`)
 - [ ] Phase 7: README + env examples documentation for evaluator flow
 
 ## Phase 1 — Runtime Docker Setup
@@ -82,10 +82,14 @@ Done when:
 ## Phase 6 — Makefile Eval Targets
 
 - [ ] Add:
-  - `make eval-up`
-  - `make eval-down`
-  - `make eval-logs`
-  - `make eval-re`
+  - `make up`
+  - `make down`
+  - `make logs`
+  - `make re`
+  - `make dev-up`
+  - `make dev-down`
+  - `make dev-logs`
+  - `make dev-re`
 
 Done when:
 - team can demo eval stack lifecycle with short, predictable commands.
@@ -113,4 +117,3 @@ Done when:
 - [ ] Prisma migrations applied on startup.
 - [ ] OAuth callback + handoff paths verified.
 - [ ] Upload persistence verified.
-

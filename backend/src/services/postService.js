@@ -171,30 +171,18 @@ export const createPost = async (input) => {
   return formatPost(post, input.authorId);
 };
 
-export const deletePost = async (postId, userId) => {
-  const post = await prisma.post.findUnique({
+const getPostForDeletion = async (postId) =>
+  prisma.post.findUnique({
     where: { id: Number(postId) },
     include: {
       comments: true,
     },
   });
 
-  if (!post) throw new Error("Post not found");
-  if (post.authorId !== Number(userId)) throw new Error("You are not allowed to delete this post");
+const deletePostWithRelations = async (post) => {
+  deleteUploadedFile(post.image);
 
-  if (post.image) {
-    try {
-      const filename = post.image.split("/uploads/")[1];
-      if (filename) {
-        const filePath = path.resolve("uploads", filename);
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      }
-    } catch (error) {
-      console.error("Erreur suppression image :", error);
-    }
-  }
-
-  const commentIds = post.comments.map((c) => c.id);
+  const commentIds = post.comments.map((comment) => comment.id);
 
   if (commentIds.length > 0) {
     await prisma.commentLike.deleteMany({
@@ -205,11 +193,30 @@ export const deletePost = async (postId, userId) => {
     });
   }
 
-  await prisma.favorite.deleteMany({ where: { postId: Number(postId) } });
-  await prisma.like.deleteMany({ where: { postId: Number(postId) } });
-  await prisma.comment.deleteMany({ where: { postId: Number(postId) } });
-  await prisma.repost.deleteMany({ where: { postId: Number(postId) } });
-  await prisma.post.delete({ where: { id: Number(postId) } });
+  await prisma.favorite.deleteMany({ where: { postId: post.id } });
+  await prisma.like.deleteMany({ where: { postId: post.id } });
+  await prisma.comment.deleteMany({ where: { postId: post.id } });
+  await prisma.repost.deleteMany({ where: { postId: post.id } });
+  await prisma.post.delete({ where: { id: post.id } });
+};
+
+export const deletePostById = async (postId) => {
+  const post = await getPostForDeletion(postId);
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  await deletePostWithRelations(post);
+  return true;
+};
+
+export const deletePost = async (postId, userId) => {
+  const post = await getPostForDeletion(postId);
+
+  if (!post) throw new Error("Post not found");
+  if (post.authorId !== Number(userId)) throw new Error("You are not allowed to delete this post");
+  await deletePostWithRelations(post);
 
   return true;
 };

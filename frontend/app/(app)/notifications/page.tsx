@@ -13,6 +13,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import {
   getNotifications,
   markNotificationAsRead,
+  normalizeUploadedMediaPayload,
   type NotificationItem,
 } from "@/lib/api";
 import {
@@ -108,12 +109,14 @@ export default function NotificationsPage() {
 
   const handleNotificationCreatedEvent = useEffectEvent(
     ({ notification }: NotificationCreatedEvent) => {
+      const normalizedNotification = normalizeUploadedMediaPayload(notification);
+
       setNotifications((current) => {
-        if (current.some((entry) => entry.id === notification.id)) {
+        if (current.some((entry) => entry.id === normalizedNotification.id)) {
           return current;
         }
 
-        return [notification, ...current];
+        return [normalizedNotification, ...current];
       });
     },
   );

@@ -11,8 +11,18 @@ import { useAuth } from "@/context/AuthContext";
 import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
 import { useI18n } from "@/i18n/I18nProvider";
 
-const GITHUB_OAUTH_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/github`;
-const FORTYTWO_OAUTH_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/42`;
+const OAUTH_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+function buildOAuthUrl(path: string) {
+	try {
+		return new URL(path, OAUTH_BASE_URL).toString();
+	} catch {
+		return `${OAUTH_BASE_URL}${path}`;
+	}
+}
+
+const GITHUB_OAUTH_URL = buildOAuthUrl("/auth/github");
+const FORTYTWO_OAUTH_URL = buildOAuthUrl("/auth/42");
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegisterPage() {

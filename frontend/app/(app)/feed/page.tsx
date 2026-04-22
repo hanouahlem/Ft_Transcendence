@@ -22,6 +22,7 @@ import { useCreatePost } from "@/hooks/useCreatePost";
 import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { usePostInteractions } from "@/hooks/usePostInteractions";
 import { useI18n } from "@/i18n/I18nProvider";
+import { normalizeUploadedMediaPayload } from "@/lib/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const POSTS_PER_PAGE = 50;
@@ -170,7 +171,11 @@ export default function FeedPage() {
         throw new Error(data.message || "Unable to fetch posts.");
       }
 
-      setPosts(Array.isArray(data) ? data : []);
+      const normalizedPosts = normalizeUploadedMediaPayload(
+        Array.isArray(data) ? data : [],
+      );
+
+      setPosts(normalizedPosts);
     } catch (err) {
       console.error("Erreur fetchPosts :", err);
       notifyError(
@@ -200,7 +205,7 @@ export default function FeedPage() {
       }
 
       const normalizedSuggestions = Array.isArray(data?.suggestions)
-        ? data.suggestions
+        ? normalizeUploadedMediaPayload(data.suggestions)
           .filter(
             (item: unknown): item is RightRailSuggestion =>
               typeof item === "object" &&

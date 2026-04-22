@@ -240,20 +240,80 @@ function withAuthHeaders(token?: string | null, headers?: HeadersInit) {
 }
 
 async function handleResponse<T>(response: Response): Promise<ApiResult<T>> {
-  const data = await response.json();
+  const contentType = response.headers.get("content-type") || "";
+  let data: unknown = null;
+
+  if (contentType.includes("application/json")) {
+    data = await response.json().catch(() => null);
+  } else {
+    const text = await response.text().catch(() => "");
+    data = text ? { message: text } : null;
+  }
+
+  const message =
+    typeof data === "object" && data !== null && "message" in data
+      ? String(data.message)
+      : response.ok
+        ? "Request succeeded"
+        : response.status === 413
+          ? "Files must be 10 MB or smaller."
+          : "Request failed";
 
   if (!response.ok) {
     return {
       ok: false,
-      message: data.message || "Request failed",
-      fieldErrors: data.fieldErrors,
+      message,
+      fieldErrors:
+        typeof data === "object" && data !== null && "fieldErrors" in data
+          ? (data.fieldErrors as Partial<Record<string, string>> | undefined)
+          : undefined,
     };
   }
 
   return {
     ok: true,
-    data,
+    data: normalizeUploadedMedia(data) as T,
   };
+}
+
+function resolveUploadUrl(path: string) {
+  if (!path.startsWith("/uploads/")) {
+    return path;
+  }
+
+  return new URL(path, API_URL).toString();
+}
+
+export function normalizeUploadedMediaPayload<T>(value: T): T {
+  return normalizeUploadedMedia(value) as T;
+}
+
+function normalizeUploadedMedia(value: unknown, parentKey?: string): unknown {
+  if (typeof value === "string") {
+    const shouldResolve =
+      parentKey === "url" ||
+      parentKey === "avatar" ||
+      parentKey === "banner" ||
+      parentKey === "image" ||
+      parentKey === "media";
+
+    return shouldResolve ? resolveUploadUrl(value) : value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeUploadedMedia(item, parentKey));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entryValue]) => [
+        key,
+        normalizeUploadedMedia(entryValue, key),
+      ]),
+    );
+  }
+
+  return value;
 }
 
 async function requestJson<T>(

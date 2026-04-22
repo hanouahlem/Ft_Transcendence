@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FeedComment, FeedPost } from "@/lib/feed-types";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
+import { normalizeUploadedMediaPayload } from "@/lib/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -191,9 +192,11 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
       setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
       if (data.comment) {
+        const normalizedComment = normalizeUploadedMediaPayload(data.comment);
+
         updatePostInState(postId, (post) => ({
           ...post,
-          comments: [...post.comments, data.comment],
+          comments: [...post.comments, normalizedComment],
           commentsCount: post.commentsCount + 1,
         }));
       }

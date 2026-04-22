@@ -63,7 +63,7 @@ export const createPostHandler = async (req, res) => {
     let mediaUrl = null;
 
     if (req.file) {
-      mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      mediaUrl = `/uploads/${req.file.filename}`;
     }
 
     const newPost = await createPost({

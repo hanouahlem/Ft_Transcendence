@@ -13,6 +13,13 @@ import { useAuth } from "@/context/AuthContext";
 import { SOCKET_EVENTS, type OnlineUsersEvent } from "@/lib/socket-events";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const SOCKET_URL = (() => {
+  try {
+    return new URL(API_URL).origin;
+  } catch {
+    return API_URL;
+  }
+})();
 
 type SocketContextValue = {
   socket: Socket | null;
@@ -33,7 +40,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const nextSocket = io(API_URL, {
+    const nextSocket = io(SOCKET_URL, {
       auth: {
         token,
       },

@@ -251,6 +251,7 @@ export function buildNotificationLedgerItems(
   notifications: NotificationItem[],
 ): NotificationLedgerItem[] {
   const likeNotificationsByPostId = new Map<number, NotificationItem[]>();
+  const ledgerItems: NotificationLedgerItem[] = [];
 
   for (const notification of notifications) {
     if (notification.type !== "LIKE" || notification.postId === null) {

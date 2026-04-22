@@ -92,12 +92,12 @@ Meaning:
 
 In `createPostHandler`:
 
-- if `req.file` exists, backend builds a public media URL
-- that URL is stored in the post’s `image` field through the service
+- if `req.file` exists, backend builds the relative path `/uploads/<filename>`
+- that relative path is stored in the post’s `image` field through the service
 
 So the database stores:
 
-- the file URL/path
+- the file path, not an environment-specific full URL
 
 The filesystem stores:
 
@@ -120,6 +120,28 @@ That means files in the uploads folder can be served through URLs like:
 
 So uploaded media becomes accessible over normal HTTP.
 
+## Why Relative Paths Are Better Here
+
+This project has two public entry points:
+
+- dev uses `http://localhost:3001`
+- eval uses `https://localhost` through nginx
+
+If the backend stored absolute URLs, the database would contain different values depending on which stack created the upload.
+
+Storing only `/uploads/<filename>` avoids that coupling.
+
+Then the frontend turns that relative path into the correct full URL using its own `NEXT_PUBLIC_API_URL`.
+
+That keeps the database independent from dev vs eval hostnames and protocols.
+
+Concrete frontend hook-up:
+
+- `frontend/lib/api.ts` exports `normalizeUploadedMediaPayload(...)`
+- API helper responses already pass through that normalizer automatically
+- raw client fetches that read JSON directly must also normalize `/uploads/...` fields before storing them in React state
+- for example, `frontend/app/(app)/feed/page.tsx` normalizes fetched posts so `/uploads/post-*.jpg` resolves against backend `NEXT_PUBLIC_API_URL` instead of the frontend origin
+
 ## Deleting Uploaded Files
 
 When a post is deleted, `postService.js` tries to:
@@ -136,7 +158,7 @@ The new seed flow uses two different media strategies on purpose.
 
 Profile media and identity fields are stored through `PUT /users/:id`.
 
-Real code from `other/seed.sh`:
+Real code from `backend/scripts/seed/legacy-seed.mjs`:
 
 ```js
 user.displayName = titleCaseUsername(user.username);
@@ -172,7 +194,7 @@ What this means:
 
 Post attachments still go through the real upload pipeline.
 
-Real code from `other/seed.sh`:
+Real code from `backend/scripts/seed/legacy-seed.mjs`:
 
 ```js
 const response = await fetch(spec.url);
@@ -193,6 +215,7 @@ Why this split is useful:
 - posts still exercise the real Multer upload path
 - the seed can use deterministic remote providers like `pravatar` and `picsum`
 - seeded post media still ends up in backend `/uploads`, exactly like a normal user upload
+- the seed scripts now also verify that uploaded post responses come back as relative `/uploads/...` paths, which protects the new dev/eval-agnostic media model
 
 ## Deterministic Seed Media
 
@@ -210,17 +233,23 @@ Important details:
 - width and height vary so the feed gets landscape, portrait, and square-ish posts
 - only some posts receive media, which makes the feed look more believable than “image on every post”
 
-## Current Project Tradeoff
+## Docker Persistence Choice
 
-Because the backend source is bind-mounted in Docker, uploads currently land in:
+In Docker, the backend still writes to:
 
-- `backend/uploads`
+- `uploads/`
 
-So runtime-generated files are currently written into the repo working tree.
+But both compose files now mount that path as:
 
-That is convenient for dev, but not the cleanest long-term storage strategy.
+- `uploads_data:/app/uploads`
 
-The seed script now avoids checking source images into git, but uploaded post media still lands in that runtime folder because that is how the current backend is designed.
+So:
+
+- the app code keeps the same simple relative path
+- uploaded media survives container restarts
+- runtime-generated files do not clutter the repo working tree
+
+This keeps development and evaluation behavior aligned while still letting the dev stack bind-mount source code for hot reload.
 
 ## Self-Check Questions
 

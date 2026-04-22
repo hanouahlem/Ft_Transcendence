@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import {
+	Suspense,
+	useCallback,
+	useEffect,
+	useState,
+	type FormEvent,
+} from "react";
 import {
 	loginUser,
 	resendLoginTwoFactorCode,
@@ -16,10 +22,20 @@ import { useAuth } from "@/context/AuthContext";
 import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
 import { useI18n } from "@/i18n/I18nProvider";
 
-const GITHUB_OAUTH_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/github`;
-const FORTYTWO_OAUTH_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/42`;
+const OAUTH_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-export default function LoginPage() {
+function buildOAuthUrl(path: string) {
+	try {
+		return new URL(path, OAUTH_BASE_URL).toString();
+	} catch {
+		return `${OAUTH_BASE_URL}${path}`;
+	}
+}
+
+const GITHUB_OAUTH_URL = buildOAuthUrl("/auth/github");
+const FORTYTWO_OAUTH_URL = buildOAuthUrl("/auth/42");
+
+function LoginPageContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { login, isLoggedIn, isAuthLoading } = useAuth();
@@ -333,5 +349,13 @@ export default function LoginPage() {
 				onSendCode={handleSendLoginTwoFactorCode}
 			/>
 		</>
+	);
+}
+
+export default function LoginPage() {
+	return (
+		<Suspense fallback={null}>
+			<LoginPageContent />
+		</Suspense>
 	);
 }
