@@ -74,7 +74,7 @@ Study file:
 
 Goal: understand what happens when the backend container starts.
 
-- the full command: `export DATABASE_URL=... && prisma generate && prisma migrate deploy && npm run dev`
+- the full command: `prisma generate && prisma migrate deploy && npm run dev`
 - why `DATABASE_URL` is built at runtime with `$$` escaping
 - `prisma generate`: syncs Prisma client with schema (no DB change)
 - `prisma migrate deploy`: applies pending migrations (changes DB)
@@ -96,7 +96,6 @@ Goal: know the shortcuts and how they work under the hood.
 - `make db-clean`: reset the PostgreSQL schema without removing containers
 - `make prisma-migrate`: runs `prisma migrate dev` inside Docker with correct `DATABASE_URL`
 - `make prisma-studio`: runs Prisma Studio on port 5555 with `--browser none`
-- `DB_URL` Makefile variable: overrides `DATABASE_URL` with `postgres` hostname
 - `make dev`: shortcut for `make dev-up`
 - `make frontend` / `make backend`: run services locally without Docker
 

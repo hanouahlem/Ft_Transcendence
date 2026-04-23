@@ -2,7 +2,6 @@ DOCKER ?= docker
 # (faire DOCKER=podman make)
 DEV_COMPOSE = $(DOCKER) compose
 EVAL_COMPOSE = $(DOCKER) compose -f docker-compose.eval.yml
-DB_URL = DATABASE_URL=postgresql://$$POSTGRES_USER:$$POSTGRES_PASSWORD@postgres:5432/$$POSTGRES_DB
 
 
 # Eval Setup Commands
@@ -59,7 +58,7 @@ dev-re: dev-clean dev-up
 # Database Commands
 
 db-clean:
-	$(DEV_COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate reset --force'
+	$(DEV_COMPOSE) exec backend npx prisma migrate reset --force
 
 seed: db-clean
 	$(DEV_COMPOSE) exec backend node scripts/seed/seed.mjs
@@ -68,7 +67,7 @@ superseed: db-clean
 	$(DEV_COMPOSE) exec backend node scripts/superseed/superseed.mjs
 
 studio:
-	$(DEV_COMPOSE) exec backend sh -c '$(DB_URL) npx prisma studio --browser none --port 5555'
+	$(DEV_COMPOSE) exec backend npx prisma studio --browser none --port 5555
 	
 	
 # Devcontainer Commands

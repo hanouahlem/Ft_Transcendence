@@ -113,13 +113,12 @@ The target is:
 
 ```makefile
 db-clean:
-	$(DEV_COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate reset --force'
+	$(DEV_COMPOSE) exec backend npx prisma migrate reset --force
 ```
 
 What it does:
 
 - `docker compose exec backend`: run the command inside the existing backend container
-- `DB_URL`: points Prisma at the Docker Postgres service host `postgres`
 - `prisma migrate reset --force`: drop the current schema, recreate it, and apply every migration again
 - because it uses `exec`, the development `backend` container must already be running, which matches the normal `make dev-up` workflow
 
