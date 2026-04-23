@@ -129,6 +129,40 @@ Why that matters:
 - it avoids deleting Compose-managed containers or networks
 - it restores the schema from the tracked migration history, so the database returns to a known state
 
+## Devcontainer lifecycle targets
+
+What this does:
+
+- `make dc-build` builds the devcontainer image used by editor tooling and CLI workflows
+- `make dc-clean` removes the devcontainer container/image, deletes its dedicated `node_modules` volumes, and prunes builder cache
+
+Why it is needed:
+
+- teammates can reset a broken devcontainer state in one command
+- dedicated volumes (`ft_devcontainer_backend_modules`, `ft_devcontainer_frontend_modules`) keep dependency storage separate from app runtime volumes
+- cleanup stays explicit and project-focused, which is easier to explain during evaluation
+
+How it works in this codebase:
+
+```makefile
+dc-build:
+	$(DOCKER) build -f .devcontainer/Dockerfile -t ft_devcontainer .
+
+dc-clean:
+	-$(DOCKER) rm -f ft_devcontainer
+	-$(DOCKER) rmi ft_devcontainer
+	-$(DOCKER) volume rm ft_devcontainer_backend_modules ft_devcontainer_frontend_modules
+	$(DOCKER) builder prune -f
+```
+
+Key evaluator terms:
+
+- `docker build`: creates an image from a Dockerfile
+- `docker rm -f`: force removes a container (stops it first if needed)
+- `docker rmi`: removes an image
+- `docker volume rm`: removes named Docker volumes
+- `docker builder prune`: removes build cache layers
+
 ## Terms to know
 
 - `bind mount`: a host folder mounted into the container

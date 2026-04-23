@@ -13,17 +13,8 @@ up:
 init:
 	./other/nginx/generate-eval-cert.sh
 
-up-no-build:
-	$(EVAL_COMPOSE) up
-
 down:
 	$(EVAL_COMPOSE) down
-
-build:
-	$(EVAL_COMPOSE) build
-
-logs:
-	$(EVAL_COMPOSE) logs -f
 
 ps:
 	$(EVAL_COMPOSE) ps
@@ -44,20 +35,11 @@ re: clean up
 
 dev: dev-up
 
-dev-up-no-build:
-	$(DEV_COMPOSE) up
-
 dev-up:
 	$(DEV_COMPOSE) up --build
 
 dev-down:
 	$(DEV_COMPOSE) down
-
-dev-build:
-	$(DEV_COMPOSE) build
-
-dev-logs:
-	$(DEV_COMPOSE) logs -f
 
 dev-ps:
 	$(DEV_COMPOSE) ps
@@ -94,23 +76,11 @@ studio:
 dc-build:
 	$(DOCKER) build -f .devcontainer/Dockerfile -t ft_devcontainer .
 
-dc-stop:
-	-$(DOCKER) stop ft_devcontainer
-
-dc-rm:
-	-$(DOCKER) rm ft_devcontainer
-
-dc-rmi:
+dc-clean:
+	-$(DOCKER) rm -f ft_devcontainer
 	-$(DOCKER) rmi ft_devcontainer
-
-dc-clean: dc-stop dc-rm dc-rmi
-	-$(DOCKER) volume rm transcendance-backend-node-modules transcendance-frontend-node-modules
+	-$(DOCKER) volume rm ft_devcontainer_backend_modules ft_devcontainer_frontend_modules
 	$(DOCKER) builder prune -f
 
-	
 
-nuke:
-	$(DOCKER) system prune -af --volumes
-
-
-.PHONY: up up-build down restart build rebuild logs ps clean fclean re dev dev-up dev-up-build dev-down dev-restart dev-build dev-rebuild dev-logs dev-ps dev-clean dev-fclean dev-re nuke frontend backend db db-clean seed prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean init
+.PHONY: up init down ps volume clean fclean re dev dev-up dev-down dev-ps dev-volume dev-clean dev-fclean dev-re db-clean seed superseed studio dc-build dc-clean
