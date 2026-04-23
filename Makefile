@@ -1,7 +1,7 @@
 DOCKER ?= docker
 # (faire DOCKER=podman make)
-DEV_COMPOSE = $(DOCKER) compose
-EVAL_COMPOSE = $(DOCKER) compose -f docker-compose.eval.yml
+DEV_COMPOSE = $(DOCKER) compose -f docker-compose.dev.yml
+EVAL_COMPOSE = $(DOCKER) compose
 
 
 # Eval Setup Commands

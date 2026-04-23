@@ -7,6 +7,10 @@ if [ ! -f backend/.env ] && [ -f backend/.env.example ]; then
   cp backend/.env.example backend/.env
 fi
 
+if [ ! -f backend/.env.dev ] && [ -f backend/.env.dev.example ]; then
+  cp backend/.env.dev.example backend/.env.dev
+fi
+
 if [ ! -f frontend/.env.local ] && [ -f frontend/.env.local.example ]; then
   cp frontend/.env.local.example frontend/.env.local
 fi

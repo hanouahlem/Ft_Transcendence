@@ -15,7 +15,7 @@ node_modules/
 
 .next/
 backend/.env
-backend/.env.eval
+backend/.env.dev
 dist/
 build/
 

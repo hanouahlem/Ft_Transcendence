@@ -16,11 +16,11 @@ This should be an evaluation-ready setup, not a full production platform.
 
 Keep:
 
-- `docker-compose.yml` as the development setup
+- `docker-compose.dev.yml` as the development setup
 
 Add:
 
-- `docker-compose.eval.yml`
+- `docker-compose.yml` for evaluation
 
 This gives the project two clear flows:
 
@@ -287,7 +287,7 @@ It should be obvious to an evaluator which command launches the evaluation-ready
 
 ## Suggested Implementation Order
 
-1. Add `docker-compose.eval.yml`
+1. Add `docker-compose.yml`
 2. Remove bind mounts and dev commands in eval mode
 3. Make frontend image work with `next build` and `next start`
 4. Make backend use a stable runtime command

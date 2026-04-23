@@ -7,15 +7,15 @@ Last updated: 2026-04-16
 
 ## Scope Guard
 
-- Keep `docker-compose.yml` as dev flow.
-- Build eval flow separately in `docker-compose.eval.yml`.
+- Keep `docker-compose.dev.yml` as dev flow.
+- Build eval flow in `docker-compose.yml`.
 - Prioritize subject compliance and explainability over production hardening.
 - Do not add advanced secrets orchestration yet.
 
 ## Current Status
 
 - [ ] Phase 1: Runtime Docker setup (frontend + backend) for eval
-- [ ] Phase 2: `docker-compose.eval.yml` base stack (postgres/backend/frontend)
+- [ ] Phase 2: `docker-compose.yml` base stack (postgres/backend/frontend)
 - [ ] Phase 3: Uploads named volume in eval (`uploads_data:/app/uploads`)
 - [ ] Phase 4: HTTPS reverse proxy (`nginx`) + OAuth route split
 - [ ] Phase 5: OAuth state cookie hardening for HTTPS (`Secure: true`)
@@ -37,7 +37,7 @@ Done when:
 
 ## Phase 2 — Eval Compose Base
 
-- [ ] Create `docker-compose.eval.yml` with:
+- [ ] Create `docker-compose.yml` with:
   - `postgres`
   - `backend`
   - `frontend`
@@ -45,7 +45,7 @@ Done when:
 - [ ] Keep DB healthcheck + backend dependency + backend healthcheck.
 
 Done when:
-- `docker compose -f docker-compose.eval.yml up --build` starts app stack in internal HTTP mode.
+- `docker compose up --build` starts app stack in internal HTTP mode.
 
 ## Phase 3 — Upload Persistence
 

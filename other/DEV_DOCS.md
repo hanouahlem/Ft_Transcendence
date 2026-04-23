@@ -2,8 +2,10 @@
 
 ## Env Files
 
-- `backend/.env`: real local backend env file
-- `backend/.env.example`: backend env template
+- `backend/.env`: eval backend env file
+- `backend/.env.example`: eval backend env template
+- `backend/.env.dev`: dev backend env file
+- `backend/.env.dev.example`: dev backend env template
 - `frontend/.env.local`: optional local frontend env file
 - `frontend/.env.local.example`: frontend env template
 
@@ -13,7 +15,7 @@ Backend env:
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=transcendence
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/transcendence
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/transcendence
 JWT_SECRET=dev-secret-change-me
 ```
 
@@ -27,8 +29,8 @@ Notes:
 
 - the backend defaults to port `3001`
 - Docker Compose sets `PORT=3001` for the backend container
-- Docker builds the backend container `DATABASE_URL` from `POSTGRES_*` and uses host `postgres` instead of `localhost`
-- `POSTGRES_*` is shared by the `postgres` and `backend` services through `backend/.env`
+- in Docker stacks, `DATABASE_URL` uses service host `postgres` (not `localhost`)
+- `POSTGRES_*` is shared by the `postgres` and `backend` services through the selected env file (`backend/.env` for eval, `backend/.env.dev` for dev)
 
 ## Run Commands
 
@@ -58,7 +60,7 @@ Devcontainer notes:
 
 - the repo includes `.devcontainer/` for editor tooling and AI CLIs
 - the container mounts the repo at the exact same absolute path as the host path
-- this is required because `docker compose` talks to the host Docker socket, and the bind mounts in `docker-compose.yml` must resolve to real host paths
+- this is required because `docker compose` talks to the host Docker socket, and the bind mounts in `docker-compose.dev.yml` must resolve to real host paths
 - the app still runs through the normal Docker stack, not inside the devcontainer itself
 - browser access stays on `http://localhost:3000`
 - API access stays on `http://localhost:3001`

@@ -45,7 +45,7 @@ The controller [backend/src/controllers/publicApiController.js](../../../backend
 
 Available at:
 - dev: `http://localhost:3001/api-docs`
-- eval: `https://localhost/api-docs`
+- eval: `https://localhost:4433/api-docs`
 
 The spec is generated from JSDoc comments in the routes file using `swagger-jsdoc`. The config lives in [backend/src/swagger.js](../../../backend/src/swagger.js).
 
@@ -90,6 +90,6 @@ curl -X POST http://localhost:3001/api/public/posts \
 In eval mode, use the HTTPS proxy URL instead:
 
 ```bash
-curl -k https://localhost/api/public/posts \
+curl -k https://localhost:4433/api/public/posts \
   -H "x-api-key: your_key_here"
 ```

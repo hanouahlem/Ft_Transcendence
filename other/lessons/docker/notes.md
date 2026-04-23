@@ -2,11 +2,11 @@
 
 ## Current Project Volume Setup
 
-In the current `docker-compose.yml`:
+In the current `docker-compose.dev.yml`:
 
 - `./backend:/app` is a bind mount
 - `./frontend:/app` is a bind mount
-- `/app/node_modules` is an anonymous Docker volume
+- `dev_backend_node_modules:/app/node_modules` and `dev_frontend_node_modules:/app/node_modules` are named Docker volumes
 - `postgres_data:/var/lib/postgresql/data` is a named Docker volume
 
 What that means:
@@ -32,17 +32,17 @@ Meaning:
 
 So the container uses the host files directly.
 
-### Anonymous volume
+### Named node_modules volume
 
 Example:
 
 ```yml
-- /app/node_modules
+- dev_backend_node_modules:/app/node_modules
 ```
 
 Meaning:
 
-- Docker creates managed storage for that container path
+- Docker creates managed storage for that container path with a stable volume name
 - it is not mapped to a repo folder on the host
 
 ### Named volume
@@ -72,7 +72,7 @@ If nothing else is done, `/app/node_modules` would also come from the host side.
 Using:
 
 ```yml
-- /app/node_modules
+- dev_backend_node_modules:/app/node_modules
 ```
 
 creates a separate Docker-managed area for dependencies, so the container keeps its own `node_modules`.
@@ -122,7 +122,7 @@ Why:
 - dev wants bind mounts, hot reload, debug-friendly behavior
 - prod wants immutable images, no live source mounts, tighter secrets and cleaner startup
 
-Our current `docker-compose.yml` is clearly a dev setup.
+Our current `docker-compose.dev.yml` is clearly a dev setup.
 
 ## Devcontainer With Host Docker Socket
 
@@ -136,7 +136,7 @@ Important detail:
 Why this matters:
 
 - `docker compose` runs against the host Docker daemon
-- the bind mounts in `docker-compose.yml` use host paths like `./backend` and `./frontend`
+- the bind mounts in `docker-compose.dev.yml` use host paths like `./backend` and `./frontend`
 - if the repo were mounted inside the devcontainer at a different path, Docker would try to resolve a container-only path that does not exist on the host
 
 So the safe pattern is:

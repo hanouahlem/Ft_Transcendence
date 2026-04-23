@@ -2,7 +2,7 @@
 
 Quick study checklist:
 
-- [ ] I can explain what each service in `docker-compose.yml` does
+- [ ] I can explain what each service in `docker-compose.dev.yml` does
 - [ ] I understand bind mounts vs Docker volumes vs anonymous volumes
 - [ ] I know how services talk to each other (networking, hostnames)
 - [ ] I can explain the difference between `env_file` and `environment` in Compose
@@ -17,10 +17,10 @@ Quick study checklist:
 Goal: understand how data flows between the host and containers.
 
 - bind mounts: `./backend:/app`, `./frontend:/app`
-- anonymous volumes: `/app/node_modules`
+- named node_modules volumes: `dev_backend_node_modules`, `dev_frontend_node_modules`
 - named volumes: `postgres_data`
 - why `node_modules` needs its own volume
-- why uploads end up in the repo
+- why uploads are stored in named Docker volumes
 - dev-oriented vs infra-oriented volume strategy
 
 Study file:
@@ -29,7 +29,7 @@ Study file:
 
 ## 2. Compose Structure and Service Roles
 
-Goal: understand what `docker-compose.yml` defines and how services relate.
+Goal: understand what `docker-compose.dev.yml` defines and how services relate.
 
 - three services: `postgres`, `backend`, `frontend`
 - `build` vs `image` (backend/frontend build from Dockerfile, postgres uses an image)
@@ -107,11 +107,11 @@ Study file:
 
 Goal: understand the production-like stack used for peer evaluation.
 
-- why `docker-compose.eval.yml` exists next to `docker-compose.yml`
+- why `docker-compose.yml` (eval) exists next to `docker-compose.dev.yml` (dev)
 - immutable backend/frontend images in eval
 - backend entrypoint: `prisma migrate deploy` then `node src/server.js`
 - nginx TLS termination on `443`
-- why frontend uses `https://localhost/api` in eval
+- why frontend uses `https://localhost:4433/api` in eval
 - why OAuth callbacks and handoff routes are split between backend and frontend
 - why secure OAuth state cookies are enabled under HTTPS
 - why Express trusts proxy headers in this flow

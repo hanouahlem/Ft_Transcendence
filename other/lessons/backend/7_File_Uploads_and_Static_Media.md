@@ -125,7 +125,7 @@ So uploaded media becomes accessible over normal HTTP.
 This project has two public entry points:
 
 - dev uses `http://localhost:3001`
-- eval uses `https://localhost` through nginx
+- eval uses `https://localhost:4433` through nginx
 
 If the backend stored absolute URLs, the database would contain different values depending on which stack created the upload.
 

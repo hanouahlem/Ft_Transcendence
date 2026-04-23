@@ -4,22 +4,22 @@
 
 This lesson explains the evaluation-only stack added beside the dev stack:
 
-- [`docker-compose.eval.yml`](/Users/curtis/Desktop/DEV/main_transcendance/docker-compose.eval.yml)
+- [`docker-compose.yml`](/Users/curtis/Desktop/DEV/main_transcendance/docker-compose.yml)
 - [`backend/entrypoint.sh`](/Users/curtis/Desktop/DEV/main_transcendance/backend/entrypoint.sh)
 - [`other/nginx/eval.conf`](/Users/curtis/Desktop/DEV/main_transcendance/other/nginx/eval.conf)
-- `backend/.env.eval` (local ignored file copied from `backend/.env.eval.example`)
+- `backend/.env` (local ignored file copied from `backend/.env.example`)
 
 The goal is to satisfy the subject rule in [`other/transcendance.md`](/Users/curtis/Desktop/DEV/main_transcendance/other/transcendance.md) that deployment must use containerization and run with a single command, while keeping the existing bind-mounted dev workflow unchanged.
 
 ## Why we split dev and eval
 
-`docker-compose.yml` is a development stack:
+`docker-compose.dev.yml` is a development stack:
 
 - source code is bind-mounted
 - backend runs `npm run dev`
 - frontend runs `next dev`
 
-`docker-compose.eval.yml` is an evaluation stack:
+`docker-compose.yml` is an evaluation stack:
 
 - no source bind mounts
 - backend uses a built runtime image
@@ -74,23 +74,23 @@ In eval we build it with:
 
 ```yml
 args:
-  NEXT_PUBLIC_API_URL: https://localhost/api
+  NEXT_PUBLIC_API_URL: https://localhost:4433/api
 ```
 
 That means browser requests go through nginx over HTTPS instead of trying to call `http://localhost:3001`, which Chrome would block as mixed content.
 
 The eval compose file also injects backend HTTPS values:
 
-Those values now live in `backend/.env.eval`, not in the dev `backend/.env` file:
+Those values now live in `backend/.env`, not in the dev `backend/.env.dev` file:
 
-- `FRONTEND_URL=https://localhost`
-- `GITHUB_CALLBACK_URL=https://localhost/auth/github/callback`
-- `FORTYTWO_CALLBACK_URL=https://localhost/auth/42/callback`
+- `FRONTEND_URL=https://localhost:4433`
+- `GITHUB_CALLBACK_URL=https://localhost:4433/auth/github/callback`
+- `FORTYTWO_CALLBACK_URL=https://localhost:4433/auth/42/callback`
 
 So the project now uses two backend env files:
 
-- `backend/.env` for dev OAuth clients and `http://localhost:3000/3001`
-- `backend/.env.eval` for eval OAuth clients and `https://localhost`
+- `backend/.env` for eval OAuth clients and `https://localhost:4433`
+- `backend/.env.dev` for dev OAuth clients and `http://localhost:3000/3001`
 
 ## Nginx route split
 
@@ -123,7 +123,7 @@ The important change is that the cookie now becomes `secure: true` automatically
 
 Why:
 
-- in eval, the browser reaches the backend callback through `https://localhost/...`
+- in eval, the browser reaches the backend callback through `https://localhost:4433/...`
 - state cookies should only travel on HTTPS in that flow
 - `clearCookie` must use the same `secure`, `sameSite`, and `path` options or the browser may keep the cookie
 
@@ -149,7 +149,7 @@ Uploaded media paths are now stored in the database as relative `/uploads/...` p
 
 ## Upload persistence in eval
 
-In [`docker-compose.eval.yml`](/Users/curtis/Desktop/DEV/main_transcendance/docker-compose.eval.yml) the backend mounts:
+In [`docker-compose.yml`](/Users/curtis/Desktop/DEV/main_transcendance/docker-compose.yml) the backend mounts:
 
 ```yml
 volumes:
@@ -172,7 +172,7 @@ That means:
 
 ## Check questions
 
-- Why do we keep `docker-compose.yml` and `docker-compose.eval.yml` separate?
+- Why do we keep `docker-compose.yml` and `docker-compose.dev.yml` separate?
 - Why must OAuth callback routes go to the backend but handoff routes go to the frontend?
 - Why would `http://localhost:3001` be wrong for the frontend API in HTTPS eval mode?
 - Why do we need both secure cookies and `trust proxy` in the eval flow?

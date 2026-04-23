@@ -246,25 +246,25 @@ For 42:
 
 For the HTTPS evaluation stack:
 
-- `FRONTEND_URL=https://localhost`
-- `GITHUB_CALLBACK_URL=https://localhost/auth/github/callback`
-- `FORTYTWO_CALLBACK_URL=https://localhost/auth/42/callback`
+- `FRONTEND_URL=https://localhost:4433`
+- `GITHUB_CALLBACK_URL=https://localhost:4433/auth/github/callback`
+- `FORTYTWO_CALLBACK_URL=https://localhost:4433/auth/42/callback`
 
 Those callback URLs must exactly match the provider configuration.
 
 Recommended repo setup:
 
-- `backend/.env` = dev OAuth clients
-- `backend/.env.eval` = eval OAuth clients
+- `backend/.env.dev` = dev OAuth clients
+- `backend/.env` = eval OAuth clients
 
 That avoids constantly editing one provider app between:
 
 - `http://localhost:3001/auth/github/callback`
-- `https://localhost/auth/github/callback`
+- `https://localhost:4433/auth/github/callback`
 
 ## HTTPS Eval Hardening
 
-In the evaluation stack, OAuth requests pass through nginx on `https://localhost`.
+In the evaluation stack, OAuth requests pass through nginx on `https://localhost:4433`.
 
 Important backend hardening in `backend/src/controllers/oauthController.js`:
 

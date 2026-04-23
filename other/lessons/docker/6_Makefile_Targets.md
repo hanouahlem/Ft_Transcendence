@@ -17,7 +17,7 @@ up:
 
 This now starts the evaluation stack by default because the project needs a single-command containerized deployment for peer evaluation.
 
-The hot-reload dev flow moved to `make dev-up`, which still uses the normal `docker-compose.yml`.
+The hot-reload dev flow moved to `make dev-up`, which uses `docker-compose.dev.yml`.
 
 ## Why `make dev-up` matches the old workflow
 
@@ -37,7 +37,7 @@ That keeps the previous behavior:
 ## When to use each target
 
 `make up`
-: build and start the evaluation stack from `docker-compose.eval.yml`
+: build and start the evaluation stack from `docker-compose.yml`
 
 `make up-build`
 : explicit rebuild for the evaluation stack
@@ -88,11 +88,11 @@ That keeps the previous behavior:
 
 The important distinction is:
 
-- `make up` now uses `docker compose -f docker-compose.eval.yml up --build`, so the default demo path is the immutable evaluation stack
+- `make up` now uses `docker compose up --build`, so the default demo path is the immutable evaluation stack
 - `make down` intentionally does **not** pass `-v`, because the evaluation stack is supposed to keep `postgres_data` and `uploads_data` across restarts
 - `make clean` runs `down --remove-orphans --rmi local`, so it removes stale containers and project images but keeps named volumes
 - `make fclean` runs `down -v --remove-orphans --rmi local`, so it does the same cleanup plus volume removal
-- `make dev-up` still uses `docker compose up`, so the bind-mounted hot-reload workflow stays available for daily development
+- `make dev-up` uses `docker compose -f docker-compose.dev.yml up --build`, so the bind-mounted hot-reload workflow stays available for daily development
 - `make dev-clean` mirrors `clean` for the dev stack (`--remove-orphans --rmi local`)
 - `make dev-fclean` mirrors `fclean` for the dev stack (`-v --remove-orphans --rmi local`)
 - `make nuke` is intentionally separate because `docker system prune -af --volumes` is global, not project-scoped
