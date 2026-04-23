@@ -40,8 +40,9 @@ make down        # stop services (keeps data)
 make restart     # down + up
 make logs        # follow all service logs
 make ps          # show running containers
-make clean       # stop and remove volumes (deletes DB data)
-make fclean      # clean + prune all Docker images
+make clean       # down + remove compose images (keeps volumes)
+make fclean      # clean + remove volumes (deletes DB/uploads data)
+make nuke        # global docker prune + unused volumes (all projects)
 make re          # fclean + up
 make db          # start only postgres in background
 ```
@@ -154,8 +155,8 @@ Docker persistence:
 - Postgres data lives in the `postgres_data` volume
 - uploaded media lives in the `uploads_data` volume
 - `make down` keeps database data
-- `make clean` removes both Docker volumes
-- `make clean` removes Docker-managed uploaded media together with the database volume
+- `make clean` keeps both Docker volumes but removes local compose images
+- `make fclean` removes both Docker volumes and local compose images
 
 Local persistence:
 

@@ -3,88 +3,78 @@ DOCKER ?= docker
 DEV_COMPOSE = $(DOCKER) compose
 EVAL_COMPOSE = $(DOCKER) compose -f docker-compose.eval.yml
 DB_URL = DATABASE_URL=postgresql://$$POSTGRES_USER:$$POSTGRES_PASSWORD@postgres:5432/$$POSTGRES_DB
-export PATH := $(HOME)/.local/bin:$(PATH)
+
+
+# Eval Setup Commands
 
 up: 
 	$(EVAL_COMPOSE) up --build
+	
+init:
+	./other/nginx/generate-eval-cert.sh
 
-up-build:
-	$(EVAL_COMPOSE) up --build
+up-no-build:
+	$(EVAL_COMPOSE) up
 
 down:
-	$(EVAL_COMPOSE) down --remove-orphans
-
-restart:
-	$(EVAL_COMPOSE) down --remove-orphans
-	$(EVAL_COMPOSE) up --build
+	$(EVAL_COMPOSE) down
 
 build:
 	$(EVAL_COMPOSE) build
-
-rebuild:
-	$(EVAL_COMPOSE) build
-	$(EVAL_COMPOSE) up --build
 
 logs:
 	$(EVAL_COMPOSE) logs -f
 
 ps:
 	$(EVAL_COMPOSE) ps
+	
+volume:
+	$(EVAL_COMPOSE) volumes
 
 clean:
-	$(EVAL_COMPOSE) down -v --remove-orphans
+	$(EVAL_COMPOSE) down --remove-orphans --rmi local
 
 fclean:
-	$(EVAL_COMPOSE) down -v --remove-orphans
-	$(DOCKER) system prune -af
+	$(EVAL_COMPOSE) down -v --remove-orphans --rmi local
 
-re: fclean up
+re: clean up
+
+
+# Dev Setup Commands	
 
 dev: dev-up
 
-dev-up:
+dev-up-no-build:
 	$(DEV_COMPOSE) up
 
-dev-up-build:
+dev-up:
 	$(DEV_COMPOSE) up --build
 
 dev-down:
 	$(DEV_COMPOSE) down
 
-dev-restart:
-	$(DEV_COMPOSE) down
-	$(DEV_COMPOSE) up
-
 dev-build:
 	$(DEV_COMPOSE) build
-
-dev-rebuild:
-	$(DEV_COMPOSE) build
-	$(DEV_COMPOSE) up
 
 dev-logs:
 	$(DEV_COMPOSE) logs -f
 
 dev-ps:
 	$(DEV_COMPOSE) ps
+	
+dev-volume:
+	$(DEV_COMPOSE) volumes
 
 dev-clean:
-	$(DEV_COMPOSE) down -v --remove-orphans
+	$(DEV_COMPOSE) down --remove-orphans --rmi local
 
 dev-fclean:
-	$(DEV_COMPOSE) down -v --remove-orphans
-	$(DOCKER) system prune -af
+	$(DEV_COMPOSE) down -v --remove-orphans --rmi local
 
-dev-re: dev-fclean dev-up
+dev-re: dev-clean dev-up
 
-frontend:
-	cd frontend && npm install && npm run dev
 
-backend:
-	cd backend && npm install && npm run dev
-
-db:
-	$(DEV_COMPOSE) up -d postgres
+# Database Commands
 
 db-clean:
 	$(DEV_COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate reset --force'
@@ -95,20 +85,11 @@ seed: db-clean
 superseed: db-clean
 	$(DEV_COMPOSE) exec backend node scripts/superseed/superseed.mjs
 
-prisma-generate:
-	$(DEV_COMPOSE) exec backend npx prisma generate
-
-prisma-migrate:
-	$(DEV_COMPOSE) exec backend sh -c '$(DB_URL) npx prisma migrate dev'
-
-prisma-studio:
+studio:
 	$(DEV_COMPOSE) exec backend sh -c '$(DB_URL) npx prisma studio --browser none --port 5555'
-
-studio: prisma-studio
-
-migrate: prisma-migrate
-
-ms: migrate studio
+	
+	
+# Devcontainer Commands
 
 dc-build:
 	$(DOCKER) build -f .devcontainer/Dockerfile -t ft_devcontainer .
@@ -126,4 +107,10 @@ dc-clean: dc-stop dc-rm dc-rmi
 	-$(DOCKER) volume rm transcendance-backend-node-modules transcendance-frontend-node-modules
 	$(DOCKER) builder prune -f
 
-.PHONY: up up-build down restart build rebuild logs ps clean fclean re dev dev-up dev-up-build dev-down dev-restart dev-build dev-rebuild dev-logs dev-ps dev-clean dev-fclean dev-re frontend backend db db-clean seed prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean init
+	
+
+nuke:
+	$(DOCKER) system prune -af --volumes
+
+
+.PHONY: up up-build down restart build rebuild logs ps clean fclean re dev dev-up dev-up-build dev-down dev-restart dev-build dev-rebuild dev-logs dev-ps dev-clean dev-fclean dev-re nuke frontend backend db db-clean seed prisma-generate prisma-migrate prisma-studio studio migrate dc-build dc-stop dc-rm dc-rmi dc-clean init

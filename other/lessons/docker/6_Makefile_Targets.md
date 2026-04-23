@@ -67,10 +67,13 @@ That keeps the previous behavior:
 : stop and remove the evaluation containers without deleting named volumes
 
 `make clean`
-: remove the evaluation containers, network, and named volumes
+: remove evaluation containers/orphans and local compose images while keeping named volumes
 
 `make fclean`
-: do `clean` and also prune Docker system data
+: remove evaluation containers/orphans, local compose images, and named volumes
+
+`make nuke`
+: run `docker system prune -af --volumes` as an explicit global cleanup command
 
 `make db-clean`
 : wipe the PostgreSQL schema through Prisma migrations, then re-apply all migrations without stopping containers
@@ -87,8 +90,12 @@ The important distinction is:
 
 - `make up` now uses `docker compose -f docker-compose.eval.yml up --build`, so the default demo path is the immutable evaluation stack
 - `make down` intentionally does **not** pass `-v`, because the evaluation stack is supposed to keep `postgres_data` and `uploads_data` across restarts
+- `make clean` runs `down --remove-orphans --rmi local`, so it removes stale containers and project images but keeps named volumes
+- `make fclean` runs `down -v --remove-orphans --rmi local`, so it does the same cleanup plus volume removal
 - `make dev-up` still uses `docker compose up`, so the bind-mounted hot-reload workflow stays available for daily development
-- `make dev-fclean` removes the dev stack with `-v`, so both `postgres_data` and `uploads_data` are cleared together
+- `make dev-clean` mirrors `clean` for the dev stack (`--remove-orphans --rmi local`)
+- `make dev-fclean` mirrors `fclean` for the dev stack (`-v --remove-orphans --rmi local`)
+- `make nuke` is intentionally separate because `docker system prune -af --volumes` is global, not project-scoped
 - `make db-clean` runs `npx prisma migrate reset --force` inside the running development `backend` container, so the development database is reset in place while containers keep running
 - `make seed` first runs `make db-clean`, then runs `node scripts/seed/legacy-seed.mjs` inside the development `backend` container
 - `make superseed` first runs `make db-clean`, then runs `node scripts/seed/superseed.mjs` inside the development `backend` container
