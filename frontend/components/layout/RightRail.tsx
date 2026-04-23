@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { RightRailSuggestion } from "@/lib/right-rail";
 import { RightRailSearch } from "@/components/layout/RightRailSearch";
 import { RightRailSuggestions } from "@/components/layout/RightRailSuggestions";
@@ -42,6 +43,10 @@ export function RightRail({
 	rightAnchorBase = 604,
 }: RightRailProps) {
 	const { t } = useI18n();
+	const footerLinks = {
+		terms: t("rightRail.footerLinks.terms"),
+		privacy: t("rightRail.footerLinks.privacy"),
+	};
 	const sectionTitleLabel = sectionTitle || t("rightRail.youMightKnow");
 	const searchLabel = (title: string) => `${t("rightRail.searchButtonLabel")} ${title}`;
 	const emptySuggestionsTitle = t("rightRail.emptySuggestions");
@@ -81,7 +86,15 @@ export function RightRail({
 					/>
 
 					<footer className="mt-auto pb-2 font-mono text-[10px] leading-relaxed text-label">
-						<p>{t("rightRail.footerTerms")}</p>
+						<p className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
+							<Link className="transition-colors hover:text-ink hover:underline" href="/terms">
+								{footerLinks.terms}
+							</Link>
+							<span aria-hidden="true">·</span>
+							<Link className="transition-colors hover:text-ink hover:underline" href="/privacy">
+								{footerLinks.privacy}
+							</Link>
+						</p>
 						<p>{t("rightRail.stats", { posts: totalPosts, likes: totalLikes, comments: totalComments })}</p>
 					</footer>
 				</div>
