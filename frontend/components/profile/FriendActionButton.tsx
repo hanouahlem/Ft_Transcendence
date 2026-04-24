@@ -9,6 +9,7 @@ type FriendActionButtonProps = {
   incomingRequestId?: number;
   isPending: boolean;
   sendingFriendId: number | null;
+  size?: "xs" | "sm" | "default" | "md" | "lg";
   onAddFriend: (userId: number) => void;
   onAcceptFriend: (userId: number) => void;
   onRemoveFriend: (userId: number) => void;
@@ -84,6 +85,7 @@ export function FriendActionButton({
   incomingRequestId,
   isPending,
   sendingFriendId,
+  size = "lg",
   onAddFriend,
   onAcceptFriend,
   onRemoveFriend,
@@ -120,7 +122,7 @@ export function FriendActionButton({
         incomingRequestId,
         isPending,
       })}
-      size="lg"
+      size={size}
       disabled={isPending || isSubmitting}
       onClick={handleClick}
     >

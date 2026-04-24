@@ -100,7 +100,7 @@ Study file:
 Goal: understand what each major frontend page currently does and how complete it is.
 
 - feed page: posts, likes, comments, uploads
-- friends page: user list, search, current integration gaps
+- friends page: accepted friends list, incoming requests, query-driven search
 - notifications page: real structured notification ledger and deep-link behavior
 - profile and settings pages: how the real routed pages map to backend data and mutations
 - how to identify frontend drift from backend capabilities

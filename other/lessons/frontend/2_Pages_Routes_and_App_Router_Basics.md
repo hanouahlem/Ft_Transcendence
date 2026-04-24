@@ -213,7 +213,11 @@ Examples:
   - `GET /user` for the authenticated user route or `GET /users/by-username/:username` for a public profile
   - `GET /users/:id/posts`
   - `GET /users/:id/friends`
-- `/friends` has real backend wiring for requests, acceptance, and removal through friendship ids
+- `/friends` has real backend wiring for requests, acceptance, removal, and observer lookup through friendship ids and username search
+- `/friends` now defaults its center column to outgoing pending requests plus accepted friends instead of rendering every user record when the search box is empty
+- `/friends` only queries the user-search endpoint when the user actually types a search string
+- `/friends` reuses the shared `FriendActionButton` states so add, accept, pending, and remove match the profile/search surfaces
+- `/friends` keeps the right rail on discovery mode by loading `/friends/suggestions` instead of mirroring the accepted friends list there
 - `/message` is wired to the direct-message backend and split into small parts:
   - route entry: `frontend/app/(app)/message/page.tsx`
   - state/actions hook: `frontend/hooks/useMessages.ts`
