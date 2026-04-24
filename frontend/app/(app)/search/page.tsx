@@ -42,8 +42,6 @@ const USERS_PER_PAGE = 6;
 
 type PostFilters = {
   author: string;
-  dateFrom: string;
-  dateTo: string;
   mediaType: MediaTypeFilter;
   favoritesOnly: boolean;
   sort: PostSortOption;
@@ -57,8 +55,6 @@ type UserFilters = {
 
 const DEFAULT_POST_FILTERS: PostFilters = {
   author: "",
-  dateFrom: "",
-  dateTo: "",
   mediaType: "all",
   favoritesOnly: false,
   sort: "recent",
@@ -244,8 +240,6 @@ function SearchPageContent() {
           {
             q: currentQuery,
             author: postFilters.author,
-            dateFrom: postFilters.dateFrom,
-            dateTo: postFilters.dateTo,
             mediaType: postFilters.mediaType,
             favoritesOnly: postFilters.favoritesOnly,
             sort: postFilters.sort,
@@ -598,36 +592,6 @@ function SearchPageContent() {
                               <option value="pdf">PDF only</option>
                               <option value="none">No attachment</option>
                             </select>
-                          </label>
-
-                          <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                            Date from
-                            <input
-                              type="date"
-                              value={postFilters.dateFrom}
-                              onChange={(event) =>
-                                setPostFilters((prev) => ({
-                                  ...prev,
-                                  dateFrom: event.target.value,
-                                }))
-                              }
-                              className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
-                            />
-                          </label>
-
-                          <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                            Date to
-                            <input
-                              type="date"
-                              value={postFilters.dateTo}
-                              onChange={(event) =>
-                                setPostFilters((prev) => ({
-                                  ...prev,
-                                  dateTo: event.target.value,
-                                }))
-                              }
-                              className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
-                            />
                           </label>
 
                           <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">

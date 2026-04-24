@@ -39,8 +39,6 @@ export const searchPostsHandler = async (req, res) => {
     const result = await searchPosts(currentUserId, {
       q: req.query.q,
       authorUsername: req.query.author,
-      dateFrom: req.query.dateFrom,
-      dateTo: req.query.dateTo,
       mediaType: req.query.mediaType,
       favoritesOnly: req.query.favoritesOnly === "true",
       sort: req.query.sort,
