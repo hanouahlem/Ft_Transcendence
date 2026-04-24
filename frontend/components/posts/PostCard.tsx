@@ -301,12 +301,12 @@ export function PostCard({
 						{post.media.length > 0 ? (
 							<div className={variant.imageFrame || ""}>
 								{attachmentUrl && isPdfAttachment(attachmentUrl) ? (
-									<div className="flex min-h-[180px] flex-col justify-between border border-label/20 bg-paper-muted px-5 py-5">
-										<div className="flex items-start gap-4">
+									<div className="flex flex-col border border-label/20 bg-paper-muted">
+										<div className="flex items-start gap-4 border-b border-dashed border-label/25 px-5 py-4">
 											<div className="flex h-12 w-12 shrink-0 items-center justify-center border border-label/25 bg-paper">
 												<HugeiconsIcon icon={Pdf01Icon} size={24} strokeWidth={1.8} />
 											</div>
-											<div className="min-w-0">
+											<div className="min-w-0 flex-1">
 												<p className="truncate font-display text-lg text-ink">
 													{attachmentFileName}
 												</p>
@@ -314,11 +314,18 @@ export function PostCard({
 													PDF Attachment
 												</p>
 											</div>
+											<p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+												Tap to view
+											</p>
 										</div>
 
-										<p className="mt-5 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-											Document preview not embedded
-										</p>
+										<iframe
+											src={`${attachmentUrl}#view=FitH&toolbar=0&navpanes=0`}
+											title={attachmentFileName ?? "PDF preview"}
+											aria-hidden="true"
+											tabIndex={-1}
+											className="pointer-events-none h-[360px] w-full bg-paper"
+										/>
 									</div>
 								) : (
 									/* eslint-disable-next-line @next/next/no-img-element */
