@@ -512,8 +512,6 @@ export type MediaTypeFilter = "all" | "image" | "pdf" | "none";
 export type SearchPostsParams = {
   q?: string;
   author?: string;
-  dateFrom?: string;
-  dateTo?: string;
   mediaType?: MediaTypeFilter;
   favoritesOnly?: boolean;
   sort?: PostSortOption;
@@ -537,8 +535,6 @@ export async function searchPostsAdvanced(
 
   if (params.q) query.set("q", params.q);
   if (params.author) query.set("author", params.author);
-  if (params.dateFrom) query.set("dateFrom", params.dateFrom);
-  if (params.dateTo) query.set("dateTo", params.dateTo);
   if (params.mediaType && params.mediaType !== "all") query.set("mediaType", params.mediaType);
   if (params.favoritesOnly) query.set("favoritesOnly", "true");
   if (params.sort) query.set("sort", params.sort);

@@ -106,8 +106,6 @@ export const searchPosts = async (currentUserId, options = {}) => {
   const {
     q = "",
     authorUsername = "",
-    dateFrom = null,
-    dateTo = null,
     mediaType = "all",
     favoritesOnly = false,
     sort = "recent",
@@ -140,21 +138,6 @@ export const searchPosts = async (currentUserId, options = {}) => {
     filters.push({
       author: { username: { contains: trimmedAuthor, mode: "insensitive" } },
     });
-  }
-
-  if (dateFrom) {
-    const parsed = new Date(dateFrom);
-    if (!Number.isNaN(parsed.getTime())) {
-      filters.push({ createdAt: { gte: parsed } });
-    }
-  }
-
-  if (dateTo) {
-    const parsed = new Date(dateTo);
-    if (!Number.isNaN(parsed.getTime())) {
-      parsed.setHours(23, 59, 59, 999);
-      filters.push({ createdAt: { lte: parsed } });
-    }
   }
 
   if (mediaType === "image") {
