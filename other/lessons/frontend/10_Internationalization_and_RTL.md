@@ -115,7 +115,7 @@ The initial rollout translates high-visibility and high-frequency UI first:
 - right rail blocks
 - messaging rail/thread/dialog
 - password settings labels
-- landing page headline and key cards
+- landing page editorial hero, project brief, stack strip, team roster cards, and primary CTAs
 
 Representative files:
 

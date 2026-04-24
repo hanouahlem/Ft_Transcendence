@@ -78,6 +78,11 @@ So `/` behaves like:
 - landing page for logged-out users
 - redirect page for already logged-in users
 
+The logged-out landing page now uses the archive/editorial presentation from
+`frontend/app/page.tsx`: a top nav, project hero, brief card, stack marquee, and
+team roster cards. The copy describes this app's real social surfaces, stack,
+and contributors instead of placeholder project text.
+
 ## Auth Routes
 
 These files:

@@ -206,9 +206,29 @@
     box-shadow: inset 0 -2px 0 rgba(211, 47, 47, 0.4);
   }
 
+  .landing-marquee-track {
+    animation: landing-marquee 30s linear infinite;
+  }
+
   /* .archive-photo {
     filter: grayscale(100%) contrast(1.18) sepia(0.22);
   } */
+}
+
+@keyframes landing-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-marquee-track {
+    animation: none;
+  }
 }
 
 @layer utilities {
