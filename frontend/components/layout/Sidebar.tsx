@@ -166,11 +166,13 @@ export function Sidebar({
 	const pathname = usePathname();
 	const router = useRouter();
 	const [expanded, setExpanded] = useState(false);
+	const [canExpand, setCanExpand] = useState(false);
 	const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 	const closeMenuTimeoutRef = useRef<number | null>(null);
 	const { t } = useI18n();
 	const userDisplayName = user?.displayName?.trim() || user?.username || t("sidebar.profileFallback");
 	const userHandle = user?.username || t("sidebar.profileHandleFallback");
+	const isExpanded = canExpand && expanded;
 	const navItems = [
 		{ href: "/feed", label: t("nav.feed"), icon: Home08Icon },
 		{ href: "/search", label: t("nav.search"), icon: Search01Icon },
@@ -226,16 +228,38 @@ export function Sidebar({
 		};
 	}, []);
 
+	useEffect(() => {
+		const expandMedia = window.matchMedia("(min-width: 1280px) and (hover: hover) and (pointer: fine)");
+
+		const syncCanExpand = () => {
+			setCanExpand(expandMedia.matches);
+			if (!expandMedia.matches) {
+				setExpanded(false);
+			}
+		};
+
+		syncCanExpand();
+		expandMedia.addEventListener("change", syncCanExpand);
+
+		return () => {
+			expandMedia.removeEventListener("change", syncCanExpand);
+		};
+	}, []);
+
 	return (
 		<>
 			<aside
 				className="fixed inset-y-0 z-20 hidden flex-col overflow-hidden border-r border-black/10 bg-paper-muted px-3 py-8 lg:flex"
 				style={{
 					insetInlineStart: 0,
-					width: expanded ? "240px" : "76px",
+					width: isExpanded ? "240px" : "76px",
 					transition: "width 0.2s ease-out",
 				}}
-				onMouseEnter={() => setExpanded(true)}
+				onMouseEnter={() => {
+					if (canExpand) {
+						setExpanded(true);
+					}
+				}}
 				onMouseLeave={() => setExpanded(false)}
 			>
 				<Link href="/feed" className="mb-10 flex items-center gap-4 px-2">
@@ -257,7 +281,7 @@ export function Sidebar({
 
 					<span
 						className="whitespace-nowrap font-display text-[1.7rem] font-black tracking-[-0.05em] text-ink transition-opacity duration-150"
-						style={{ opacity: expanded ? 1 : 0 }}
+						style={{ opacity: isExpanded ? 1 : 0 }}
 					>
 						{t("sidebar.fieldNotes")}
 					</span>
@@ -271,7 +295,7 @@ export function Sidebar({
 							label={item.label}
 							icon={item.icon}
 							active={pathname === item.href}
-							expanded={expanded}
+							expanded={isExpanded}
 							badge={getNavBadge(item.href)}
 						/>
 					))}
@@ -281,7 +305,7 @@ export function Sidebar({
 						variant="black"
 						className={cn(
 							"mt-4 w-full font-sans font-semibold",
-							expanded
+							isExpanded
 								? "justify-start gap-3 px-4"
 								: "justify-start px-4",
 						)}
@@ -292,8 +316,8 @@ export function Sidebar({
 							className="overflow-hidden whitespace-nowrap text-sm transition-all duration-150"
 							style={{
 								marginInlineStart: "0.5rem",
-								opacity: expanded ? 1 : 0,
-								maxWidth: expanded ? "200px" : "0px",
+								opacity: isExpanded ? 1 : 0,
+								maxWidth: isExpanded ? "200px" : "0px",
 							}}
 						>
 							{t("sidebar.newPost")}
@@ -334,7 +358,7 @@ export function Sidebar({
 
 								<div
 									className="min-w-0 whitespace-nowrap transition-opacity duration-150"
-									style={{ opacity: expanded ? 1 : 0 }}
+									style={{ opacity: isExpanded ? 1 : 0 }}
 								>
 									<p className="truncate text-sm font-semibold text-ink">
 										{userDisplayName}

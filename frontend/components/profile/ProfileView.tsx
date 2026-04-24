@@ -381,10 +381,10 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                   <div className="w-full flex-1 pb-1">
                     <div className="space-y-4">
                       <div>
-                        <h1 className="font-display text-4xl font-black uppercase leading-none tracking-[-0.05em] text-paper md:text-5xl">
+                        <h1 className="font-display text-4xl font-black uppercase leading-none tracking-[-0.05em] text-ink md:text-5xl md:text-paper">
                           {profileDisplayName}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-3 font-mono text-s uppercase tracking-[0.18em] text-paper/80">
+                        <div className="flex flex-wrap items-center gap-3 font-mono text-s uppercase tracking-[0.18em] text-ink/80 md:text-paper/80">
                           <span>@{profile.username.toLowerCase()}</span>
                         </div>
                       </div>

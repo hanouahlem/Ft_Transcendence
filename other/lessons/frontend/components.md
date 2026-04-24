@@ -461,6 +461,8 @@ Explain it during evaluation like this:
 Real hero-layout detail from `frontend/components/profile/ProfileView.tsx`:
 
 - the hero now prefers `displayName` for the large title while keeping `@username` as the stable handle
+- the large profile title switches from `text-ink` on mobile to `md:text-paper` once the desktop layout places it back over the darker banner area
+- the `@username` line follows the same breakpoint rule so mobile keeps readable dark text and desktop keeps the lighter banner-overlay treatment
 - the banner component receives `src={profile.banner}` so saved banner URLs render directly in the hero
 - the red archive star used around the profile picture now lives in `frontend/components/decor/ArchiveStar.tsx` instead of being declared inline in the page component
 - the location chip and the profile action buttons are rendered inside one shared flex row with `justify-between`
@@ -509,6 +511,8 @@ Local state:
 
 ```tsx
 const [expanded, setExpanded] = useState(false);
+const [canExpand, setCanExpand] = useState(false);
+const isExpanded = canExpand && expanded;
 ```
 
 Why local state here is fine:
@@ -516,8 +520,31 @@ Why local state here is fine:
 - expanding/collapsing the sidebar is purely presentational
 - no other component needs to know it
 - the mobile bottom bar does not use this hover state because it is always compact
+- tablet-sized desktop layout keeps the sidebar compact; hover expansion is only enabled on `xl` fine-pointer screens
 
 Important detail:
+
+```tsx
+useEffect(() => {
+  const expandMedia = window.matchMedia("(min-width: 1280px) and (hover: hover) and (pointer: fine)");
+
+  const syncCanExpand = () => {
+    setCanExpand(expandMedia.matches);
+    if (!expandMedia.matches) {
+      setExpanded(false);
+    }
+  };
+
+  syncCanExpand();
+  expandMedia.addEventListener("change", syncCanExpand);
+
+  return () => {
+    expandMedia.removeEventListener("change", syncCanExpand);
+  };
+}, []);
+```
+
+This keeps the `lg` sidebar visible on tablet widths, but prevents it from growing to `240px` unless the screen is at least `1280px` wide and the device has a real hover-capable fine pointer.
 
 ```tsx
 const navItems = [
