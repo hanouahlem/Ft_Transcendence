@@ -26,6 +26,7 @@ type ConversationRailProps = {
   isLoadingConversations: boolean;
   onSelectConversation: (conversationId: number) => void;
   onOpenNewConversation: () => void;
+  className?: string;
 };
 
 export function ConversationRail({
@@ -35,12 +36,13 @@ export function ConversationRail({
   isLoadingConversations,
   onSelectConversation,
   onOpenNewConversation,
+  className,
 }: ConversationRailProps) {
   const { locale, t } = useI18n();
 
   return (
-    <aside className="relative z-10 flex min-h-screen w-full flex-col border border-black/10 bg-paper xl:w-[360px]">
-      <div className="flex-1 space-y-3 overflow-auto p-4">
+    <aside className={cn("relative z-10 flex h-full min-h-0 w-full flex-col border border-black/10 bg-paper xl:w-[360px] xl:shrink-0", className)}>
+      <div className="min-h-0 flex-1 space-y-3 overflow-auto p-3 sm:p-4">
         {isLoadingConversations ? (
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-label">
             {t("conversation.loadingConversations")}
@@ -64,7 +66,7 @@ export function ConversationRail({
                 type="button"
                 onClick={() => onSelectConversation(conversation.id)}
                 className={cn(
-                  "relative w-full border p-4 text-start transition",
+                  "relative w-full border p-3 text-start transition sm:p-4",
                   rotationClass,
                   isActive
                     ? "border-ink border-2 bg-paper shadow-[4px_6px_0_rgba(26,26,26,0.12)]"
@@ -76,7 +78,7 @@ export function ConversationRail({
                     {conversation.unreadCount}
                   </div>
                 ) : null}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
                   <ProfilePicture
                     name={conversation.peer?.displayName || conversation.peer?.username || t("conversation.userFallback")}
                     src={conversation.peer?.avatar}
@@ -87,7 +89,7 @@ export function ConversationRail({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex min-w-0 items-center gap-2">
-                        <p className="truncate text-lg font-bold text-ink">
+                        <p className="truncate text-base font-bold text-ink sm:text-lg">
                           {conversation.peer?.displayName || conversation.peer?.username || "Unknown user"}
                         </p>
                         <span
@@ -106,7 +108,7 @@ export function ConversationRail({
                       </div>
                     </div>
                     {/* Translation note: we keep a localized fallback for empty previews so list rows stay stable even without lastMessage */}
-                    <p className="mt-1 truncate font-serif text-md leading-5 text-ink/75">
+                    <p className="mt-1 truncate font-serif text-sm leading-5 text-ink/75 sm:text-md">
                       {conversation.lastMessage?.content || t("conversation.noMessageYet")}
                     </p>
                   </div>
@@ -117,7 +119,7 @@ export function ConversationRail({
         )}
       </div>
 
-      <div className="border-t border-black/10 bg-paper p-5">
+      <div className="shrink-0 border-t border-black/10 bg-paper p-4 sm:p-5">
         <Button
           type="button"
           variant="black"

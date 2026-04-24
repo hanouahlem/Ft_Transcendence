@@ -371,6 +371,8 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
         setIsNewConversationOpen(false);
         setUserSearch("");
       }
+
+      return opened;
     },
     [handleOpenConversation],
   );
@@ -409,7 +411,7 @@ export function useMessages({ token, currentUserId }: UseMessagesOptions) {
       socket.off(SOCKET_EVENTS.MESSAGE_CREATED, handleMessageCreated);
       socket.off(SOCKET_EVENTS.CONVERSATION_READ, handleConversationRead);
     };
-  }, [handleConversationReadEvent, handleMessageCreatedEvent, socket]);
+  }, [socket]);
 
   useEffect(() => {
     if (!token || !isConnected) {

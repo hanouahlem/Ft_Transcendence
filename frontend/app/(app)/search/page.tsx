@@ -493,9 +493,9 @@ function SearchPageContent() {
                   <h1 className="mt-4 font-display text-4xl font-black uppercase tracking-[-0.05em] text-ink sm:text-5xl">
                     {t("search.title")}
                   </h1>
-                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-label">
+                  {/*<p className="mt-2 max-w-2xl text-sm leading-relaxed text-label">
                     {t("search.description")}
-                  </p>
+                  </p>*/}
                 </div>
 
                 <form className="relative" onSubmit={handleSearchSubmit}>

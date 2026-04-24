@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
@@ -14,6 +14,7 @@ function MessagePageContent() {
   const searchParams = useSearchParams();
   const { token, user } = useAuth();
   const { onlineUserIds } = useSocket();
+  const [compactPane, setCompactPane] = useState<"rail" | "thread">("thread");
   const {
     conversations,
     messages,
@@ -67,9 +68,12 @@ function MessagePageContent() {
         return;
       }
 
+      setCompactPane("thread");
       router.replace("/message", { scroll: false });
     });
   }, [handleStartConversationFromRoute, routeTargetUserId, router, token]);
+
+  const isCompactThreadVisible = compactPane === "thread" && Boolean(selectedConversation);
 
   return (
     <>
@@ -81,18 +85,26 @@ function MessagePageContent() {
         filteredUsers={filteredUsers}
         isCreatingConversation={isCreatingConversation}
         onStartConversation={(targetUserId) => {
-          void handleStartConversationFromDialog(targetUserId);
+          void handleStartConversationFromDialog(targetUserId).then((opened) => {
+            if (opened) {
+              setCompactPane("thread");
+            }
+          });
         }}
       />
 
-      <div className="flex w-full min-h-screen flex-col gap-0 xl:flex-row">
+      <div className="flex h-[calc(100dvh_-_var(--mobile-bottom-nav-height))] min-h-0 w-full overflow-hidden lg:h-screen lg:min-h-screen xl:flex-row">
         <ConversationRail
           conversations={conversations}
           selectedConversationId={selectedConversationId}
           onlineUserIds={onlineUserIds}
           isLoadingConversations={isLoadingConversations}
-          onSelectConversation={setSelectedConversationId}
+          onSelectConversation={(conversationId) => {
+            setSelectedConversationId(conversationId);
+            setCompactPane("thread");
+          }}
           onOpenNewConversation={() => setIsNewConversationOpen(true)}
+          className={isCompactThreadVisible ? "hidden xl:flex" : "flex xl:flex"}
         />
 
         <ConversationThread
@@ -107,6 +119,9 @@ function MessagePageContent() {
             void handleSendMessage();
           }}
           isSending={isSending}
+          onBackToConversations={() => setCompactPane("rail")}
+          showBackButton={Boolean(selectedConversation)}
+          className={isCompactThreadVisible ? "flex xl:flex" : "hidden xl:flex"}
         />
       </div>
     </>

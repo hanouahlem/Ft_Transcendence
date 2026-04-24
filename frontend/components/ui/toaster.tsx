@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Toast, Toaster, createToaster } from "@ark-ui/react/toast";
 import type { ConversationItem, ConversationMessage, NotificationItem } from "@/lib/api";
 import ArchiveStar from "@/components/decor/ArchiveStar";
-import ArchiveTape from "@/components/decor/ArchiveTape";
 import {
   getNotificationTone,
   NotificationGlyph,
@@ -84,7 +83,6 @@ function NotificationToastContent({
 
   return (
     <div className="archive-live-toast archive-live-toast-notification">
-      <ArchiveTape tone={tone.tapeTone} className={cn("archive-live-toast-tape", tone.tapeClass)} />
       {notification.type === "MENTION" ? (
         <div className="archive-live-toast-star">
           <ArchiveStar />

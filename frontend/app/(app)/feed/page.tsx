@@ -348,7 +348,7 @@ export default function FeedPage() {
       <button
         type="button"
         onClick={() => window.dispatchEvent(new Event("archive:create-post"))}
-        className="fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-ink bg-ink text-paper shadow-[3px_6px_0_#d32f2f] transition hover:scale-105 lg:hidden"
+        className="fixed bottom-24 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border border-ink bg-ink text-paper shadow-[3px_6px_0_#d32f2f] transition hover:scale-105 lg:hidden"
         aria-label={t("feed.newPostAria")}
       >
         <Plus className="h-6 w-6" />

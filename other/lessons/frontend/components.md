@@ -48,6 +48,8 @@ The important rule is:
 
 - `page.tsx` owns page-specific fetching and composition
 - `useArchiveToasts()` owns the archive success/error toast pattern
+- `frontend/app/globals.css` owns shared toast sizing, including the mobile right offset that keeps toasts from filling the viewport edge-to-edge
+- live notification toasts keep the archive paper/card style but no longer render `ArchiveTape`
 - `useFriendRequests()` owns the shared friend-request action state and pending-request hydration
 - `usePostInteractions()` owns shared post/comment interaction state and mutations
 - components receive props and render UI
@@ -494,7 +496,7 @@ Important behavior:
 
 Purpose:
 
-- render the left archive navigation shell
+- render the desktop archive sidebar and the mobile bottom navigation bar
 
 Data it uses:
 
@@ -513,24 +515,37 @@ Why local state here is fine:
 
 - expanding/collapsing the sidebar is purely presentational
 - no other component needs to know it
+- the mobile bottom bar does not use this hover state because it is always compact
 
 Important detail:
 
 ```tsx
-const NAV_ITEMS = [
-  { href: "/feed", label: "Timeline", icon: Home },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/notifications", label: "Notifications", icon: Bell },
+const navItems = [
+  { href: "/feed", label: t("nav.feed"), icon: Home08Icon },
+  { href: "/search", label: t("nav.search"), icon: Search01Icon },
+  { href: "/notifications", label: t("nav.notifications"), icon: Notification01Icon },
+  { href: "/friends", label: t("nav.friends"), icon: UserGroupIcon },
+  { href: "/message", label: t("nav.message"), icon: Message01Icon },
+];
+
+const mobileNavItems = navItems.filter((item) =>
+  item.href === "/feed" ||
+  item.href === "/search" ||
+  item.href === "/notifications" ||
+  item.href === "/message"
+);
 ```
 
 Explain during evaluation:
 
-- the sidebar owns navigation configuration in `NAV_ITEMS`
+- the sidebar owns navigation configuration in `navItems`
 - `NavButton` is the row renderer
 - `Button` from `frontend/components/ui/button.tsx` is used for “Log Entry” (new post)
-- the bottom profile preview anchors an Ark UI menu (`@ark-ui/react/menu`) and also routes to `/profile` on click
+- the desktop bottom profile preview anchors an Ark UI menu (`@ark-ui/react/menu`) and also routes to `/profile` on click
 - hovering the profile preview opens that account menu
 - clicking the profile preview itself routes to `/profile`
+- below the `lg` breakpoint, the desktop sidebar disappears and `Sidebar.tsx` renders a fixed bottom bar instead
+- that bottom bar intentionally keeps only `/feed`, `/search`, `/notifications`, `/message`, and a menu trigger
 - that menu now centralizes account quick actions and the locale switcher
 - `Settings` in the menu navigates to `/settings`
 - `Disconnect` in the menu calls the existing `onLogout` flow from `AppSidebarShell`
@@ -593,7 +608,7 @@ What this does:
 Real code:
 
 ```tsx
-<div className="flex items-center gap-4">
+<div className="flex items-center gap-3 sm:gap-4">
   <ProfilePicture
     name={conversation.peer?.displayName || conversation.peer?.username || "User"}
     src={conversation.peer?.avatar}
@@ -602,10 +617,10 @@ Real code:
     className="shrink-0 self-center"
   />
   <div className="min-w-0 flex-1">
-    <p className="truncate text-sm font-bold text-ink">
+    <p className="truncate text-base font-bold text-ink sm:text-lg">
       {conversation.peer?.displayName || conversation.peer?.username || "Unknown user"}
     </p>
-    <p className="mt-1 truncate font-serif text-sm italic leading-5 text-ink/75">
+    <p className="mt-1 truncate font-serif text-sm leading-5 text-ink/75 sm:text-md">
       {conversation.lastMessage?.content || "No message yet."}
     </p>
   </div>
@@ -617,6 +632,50 @@ Why this matters:
 - the backend still sends both `displayName` and `username`, but this rail treats `displayName` as the primary reading label
 - removing the extra handle line reduces vertical clutter in a dense inbox list
 - the row remains purely presentational: conversation selection still comes from the parent message page and `useMessages`
+
+### Responsive Message Layout
+
+Files:
+
+- `frontend/app/(app)/message/page.tsx`
+- `frontend/components/messages/ConversationRail.tsx`
+- `frontend/components/messages/ConversationThread.tsx`
+
+What this does:
+
+- keeps the full rail + thread split on `xl` screens and larger
+- collapses below `xl` into one visible panel instead of stacking two full-height panels
+- moves to the thread when a conversation is selected
+- shows a small back-arrow button in the thread header so mobile and tablet users can return to the rail
+
+Real code:
+
+```tsx
+const [compactPane, setCompactPane] = useState<"rail" | "thread">("thread");
+const isCompactThreadVisible = compactPane === "thread" && Boolean(selectedConversation);
+
+<ConversationRail
+  onSelectConversation={(conversationId) => {
+    setSelectedConversationId(conversationId);
+    setCompactPane("thread");
+  }}
+  className={isCompactThreadVisible ? "hidden xl:flex" : "flex xl:flex"}
+/>
+
+<ConversationThread
+  onBackToConversations={() => setCompactPane("rail")}
+  showBackButton={Boolean(selectedConversation)}
+  className={isCompactThreadVisible ? "flex xl:flex" : "hidden xl:flex"}
+/>
+```
+
+Why this matters:
+
+- the 42 subject expects the frontend to stay clear, responsive, and accessible across devices
+- the page owns only presentation state (`compactPane`), while `useMessages` still owns conversations, selected IDs, messages, drafts, sending, and loading state
+- using `h-[calc(100dvh_-_var(--mobile-bottom-nav-height))]` below `lg` makes the message panel stop exactly above the mobile bottom navigation
+- `--mobile-bottom-nav-height` is defined in `frontend/app/globals.css` and matches `Sidebar.tsx` safe-area padding
+- `ConversationThread` keeps an accessible `aria-label` on the icon-only back button through `t("conversation.backToConversations")`
 
 ### `frontend/components/layout/RightRailSuggestions.tsx`
 

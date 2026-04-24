@@ -39,7 +39,7 @@ function AppSidebarShellContent({
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { unreadMessagesCount, unreadNotificationsCount } = useInboxUnread();
-  const { isRtl, t } = useI18n();
+  const { isRtl } = useI18n();
   const isMessagePage = pathname === "/message";
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -102,8 +102,8 @@ function AppSidebarShellContent({
             className={cn(
               "w-full",
               isMessagePage
-                ? "min-h-screen max-w-none px-0 py-0"
-                : "mx-auto max-w-[1132px] px-4 py-10 sm:px-6 lg:px-10 lg:py-12",
+                ? "min-h-screen max-w-none px-0 pb-[var(--mobile-bottom-nav-height)] lg:pb-0"
+                : "mx-auto max-w-[1132px] px-4 pb-28 pt-10 sm:px-6 lg:px-10 lg:py-12",
             )}
           >
             {children}
