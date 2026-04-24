@@ -8,7 +8,10 @@ export const NOTIFICATION_TYPES = Object.freeze({
   UNFOLLOW: "UNFOLLOW",
   FOLLOW_ACCEPT: "FOLLOW_ACCEPT",
   LIKE: "LIKE",
+  FAVORITE: "FAVORITE",
   COMMENT: "COMMENT",
+  COMMENT_LIKE: "COMMENT_LIKE",
+  COMMENT_FAVORITE: "COMMENT_FAVORITE",
   MENTION: "MENTION",
   MESSAGE: "MESSAGE",
 });
@@ -91,6 +94,49 @@ export function emitNotificationRead({ userId, notificationId }) {
   } catch (error) {
     console.error("emitNotificationRead error:", error);
   }
+}
+
+export async function deleteNotificationIfExists({ userId, actorId, type, postId = null }) {
+  const recipientId = Number(userId);
+  const resolvedActorId = Number(actorId);
+  const resolvedPostId = postId == null ? null : Number(postId);
+
+  if (
+    !Number.isInteger(recipientId) ||
+    !Number.isInteger(resolvedActorId) ||
+    recipientId < 1 ||
+    resolvedActorId < 1
+  ) {
+    return null;
+  }
+
+  const match = await prisma.notification.findFirst({
+    where: {
+      userId: recipientId,
+      actorId: resolvedActorId,
+      type,
+      postId: resolvedPostId,
+    },
+    select: { id: true },
+  });
+
+  if (!match) {
+    return null;
+  }
+
+  await prisma.notification.delete({ where: { id: match.id } });
+
+  try {
+    getSocketServer()
+      .to(getUserRoomName(recipientId))
+      .emit(SOCKET_EVENTS.NOTIFICATION_DELETED, { notificationId: match.id });
+
+    await emitInboxUnreadCounts(recipientId);
+  } catch (error) {
+    console.error("deleteNotificationIfExists socket emit error:", error);
+  }
+
+  return match.id;
 }
 
 export async function createNotificationIfRelevant({

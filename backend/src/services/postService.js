@@ -102,6 +102,109 @@ export const getAllPosts = async (currentUserId) => {
   return posts.map((post) => formatPost(post, currentUserId));
 };
 
+export const searchPosts = async (currentUserId, options = {}) => {
+  const {
+    q = "",
+    authorUsername = "",
+    dateFrom = null,
+    dateTo = null,
+    mediaType = "all",
+    favoritesOnly = false,
+    sort = "recent",
+    page = 1,
+    limit = 10,
+  } = options;
+
+  const resolvedUserId = Number(currentUserId);
+  const filters = [];
+
+  const trimmedQuery = typeof q === "string" ? q.trim() : "";
+  if (trimmedQuery) {
+    filters.push({
+      OR: [
+        { content: { contains: trimmedQuery, mode: "insensitive" } },
+        {
+          author: {
+            OR: [
+              { username: { contains: trimmedQuery, mode: "insensitive" } },
+              { displayName: { contains: trimmedQuery, mode: "insensitive" } },
+            ],
+          },
+        },
+      ],
+    });
+  }
+
+  const trimmedAuthor = typeof authorUsername === "string" ? authorUsername.trim().replace(/^@/, "") : "";
+  if (trimmedAuthor) {
+    filters.push({
+      author: { username: { contains: trimmedAuthor, mode: "insensitive" } },
+    });
+  }
+
+  if (dateFrom) {
+    const parsed = new Date(dateFrom);
+    if (!Number.isNaN(parsed.getTime())) {
+      filters.push({ createdAt: { gte: parsed } });
+    }
+  }
+
+  if (dateTo) {
+    const parsed = new Date(dateTo);
+    if (!Number.isNaN(parsed.getTime())) {
+      parsed.setHours(23, 59, 59, 999);
+      filters.push({ createdAt: { lte: parsed } });
+    }
+  }
+
+  if (mediaType === "image") {
+    filters.push({ image: { not: null } });
+    filters.push({ NOT: { image: { endsWith: ".pdf", mode: "insensitive" } } });
+  } else if (mediaType === "pdf") {
+    filters.push({ image: { endsWith: ".pdf", mode: "insensitive" } });
+  } else if (mediaType === "none") {
+    filters.push({ image: null });
+  }
+
+  if (favoritesOnly && resolvedUserId) {
+    filters.push({ favorites: { some: { userId: resolvedUserId } } });
+  }
+
+  const where = filters.length ? { AND: filters } : {};
+
+  let orderBy;
+  if (sort === "oldest") {
+    orderBy = { createdAt: "asc" };
+  } else if (sort === "likes") {
+    orderBy = [{ likes: { _count: "desc" } }, { createdAt: "desc" }];
+  } else {
+    orderBy = { createdAt: "desc" };
+  }
+
+  const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
+  const take = Math.max(1, Math.min(50, Number.parseInt(limit, 10) || 10));
+  const skip = (pageNum - 1) * take;
+
+  const [total, posts] = await Promise.all([
+    prisma.post.count({ where }),
+    prisma.post.findMany({
+      where,
+      orderBy,
+      skip,
+      take,
+      include: feedPostInclude,
+    }),
+  ]);
+
+  return {
+    items: posts.map((post) => formatPost(post, currentUserId)),
+    total,
+    page: pageNum,
+    limit: take,
+    totalPages: Math.max(1, Math.ceil(total / take)),
+  };
+};
+
 export const getFriendsPosts = async (currentUserId) => {
   const resolvedUserId = Number(currentUserId);
   const acceptedFriends = await prisma.friends.findMany({
@@ -278,7 +381,7 @@ export const unlikePost = async (postId, userId) => {
   });
 
   if (!existingLike) {
-    return true;
+    return { removed: false, postAuthorId: post.authorId };
   }
 
   await prisma.like.delete({
@@ -287,7 +390,7 @@ export const unlikePost = async (postId, userId) => {
     },
   });
 
-  return true;
+  return { removed: true, postAuthorId: post.authorId };
 };
 
 export const createComment = async (input) => {
@@ -357,7 +460,7 @@ export const favoritePost = async (postId, userId) => {
   });
 
   if (existingFavorite) {
-    return true;
+    return { created: false, postAuthorId: post.authorId };
   }
 
   await prisma.favorite.create({
@@ -367,7 +470,7 @@ export const favoritePost = async (postId, userId) => {
     },
   });
 
-  return true;
+  return { created: true, postAuthorId: post.authorId };
 };
 
 export const unfavoritePost = async (postId, userId) => {
@@ -389,7 +492,7 @@ export const unfavoritePost = async (postId, userId) => {
   });
 
   if (!existingFavorite) {
-    return true;
+    return { removed: false, postAuthorId: post.authorId };
   }
 
   await prisma.favorite.delete({
@@ -398,7 +501,7 @@ export const unfavoritePost = async (postId, userId) => {
     },
   });
 
-  return true;
+  return { removed: true, postAuthorId: post.authorId };
 };
 
 export const repostPost = async (postId, userId) => {
@@ -469,6 +572,9 @@ export const deleteComment = async (commentId, userId) => {
     where: {
       id: Number(commentId),
     },
+    include: {
+      post: { select: { authorId: true } },
+    },
   });
 
   if (!comment) {
@@ -499,7 +605,10 @@ export const deleteComment = async (commentId, userId) => {
     },
   });
 
-  return true;
+  return {
+    postId: comment.postId,
+    postAuthorId: comment.post?.authorId ?? null,
+  };
 };
 
 export const likeComment = async (commentId, userId) => {
@@ -519,7 +628,11 @@ export const likeComment = async (commentId, userId) => {
   });
 
   if (existingLike) {
-    return true;
+    return {
+      created: false,
+      commentAuthorId: comment.userId,
+      postId: comment.postId,
+    };
   }
 
   await prisma.commentLike.create({
@@ -529,10 +642,22 @@ export const likeComment = async (commentId, userId) => {
     },
   });
 
-  return true;
+  return {
+    created: true,
+    commentAuthorId: comment.userId,
+    postId: comment.postId,
+  };
 };
 
 export const unlikeComment = async (commentId, userId) => {
+  const comment = await prisma.comment.findUnique({
+    where: { id: Number(commentId) },
+  });
+
+  if (!comment) {
+    throw new Error("Comment not found");
+  }
+
   const existingLike = await prisma.commentLike.findFirst({
     where: {
       commentId: Number(commentId),
@@ -541,7 +666,11 @@ export const unlikeComment = async (commentId, userId) => {
   });
 
   if (!existingLike) {
-    return true;
+    return {
+      removed: false,
+      commentAuthorId: comment.userId,
+      postId: comment.postId,
+    };
   }
 
   await prisma.commentLike.delete({
@@ -550,7 +679,11 @@ export const unlikeComment = async (commentId, userId) => {
     },
   });
 
-  return true;
+  return {
+    removed: true,
+    commentAuthorId: comment.userId,
+    postId: comment.postId,
+  };
 };
 
 export const favoriteComment = async (commentId, userId) => {
@@ -570,7 +703,11 @@ export const favoriteComment = async (commentId, userId) => {
   });
 
   if (existingFavorite) {
-    return true;
+    return {
+      created: false,
+      commentAuthorId: comment.userId,
+      postId: comment.postId,
+    };
   }
 
   await prisma.commentFavorite.create({
@@ -580,10 +717,22 @@ export const favoriteComment = async (commentId, userId) => {
     },
   });
 
-  return true;
+  return {
+    created: true,
+    commentAuthorId: comment.userId,
+    postId: comment.postId,
+  };
 };
 
 export const unfavoriteComment = async (commentId, userId) => {
+  const comment = await prisma.comment.findUnique({
+    where: { id: Number(commentId) },
+  });
+
+  if (!comment) {
+    throw new Error("Comment not found");
+  }
+
   const existingFavorite = await prisma.commentFavorite.findFirst({
     where: {
       commentId: Number(commentId),
@@ -592,7 +741,11 @@ export const unfavoriteComment = async (commentId, userId) => {
   });
 
   if (!existingFavorite) {
-    return true;
+    return {
+      removed: false,
+      commentAuthorId: comment.userId,
+      postId: comment.postId,
+    };
   }
 
   await prisma.commentFavorite.delete({
@@ -601,5 +754,9 @@ export const unfavoriteComment = async (commentId, userId) => {
     },
   });
 
-  return true;
+  return {
+    removed: true,
+    commentAuthorId: comment.userId,
+    postId: comment.postId,
+  };
 };

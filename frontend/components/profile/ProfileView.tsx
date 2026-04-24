@@ -140,6 +140,10 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
     () => posts.reduce((sum, post) => sum + post.commentsCount, 0),
     [posts],
   );
+  const totalFavorites = useMemo(
+    () => posts.reduce((sum, post) => sum + post.favoritesCount, 0),
+    [posts],
+  );
   const deepLinkedPostId = useMemo(() => {
     const value = searchParams.get("post");
 
@@ -458,7 +462,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                   <div className="flex-grow border-t-2 border-ink/20" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
                   {[
                     {
                       label: t("profile.stats.posts"),
@@ -481,6 +485,12 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                       star: true,
                     },
                     {
+                      label: t("profile.stats.favorites"),
+                      value: formatCompactCount(totalFavorites, locale),
+                      tone: "text-accent-green text-6xl",
+                      rotate: "-rotate-1",
+                    },
+                    {
                       label: t("profile.stats.friends"),
                       value: formatCompactCount(friends.length, locale),
                       tone: "text-ink text-6xl",
@@ -493,13 +503,12 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                       tone: "text-ink text-4xl",
                       rotate: "rotate-1",
                     },
-                  ].map((item, index) => (
+                  ].map((item) => (
                     <article
                       key={item.label}
                       className={cn(
                         "relative border border-label/10 bg-paper p-4 text-center shadow-sm",
                         item.rotate,
-                        index === 4 ? "col-span-2 md:col-span-1" : "",
                       )}
                     >
                       {item.tape ? (

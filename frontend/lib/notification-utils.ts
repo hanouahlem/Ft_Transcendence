@@ -103,7 +103,10 @@ export function getNotificationCategory(
     case "UNFOLLOW":
       return "social";
     case "LIKE":
+    case "FAVORITE":
     case "COMMENT":
+    case "COMMENT_LIKE":
+    case "COMMENT_FAVORITE":
     case "MENTION":
       return "post";
     default:
@@ -125,7 +128,10 @@ export function getNotificationHref(notification: NotificationItem) {
 
   switch (notification.type) {
     case "LIKE":
+    case "FAVORITE":
     case "COMMENT":
+    case "COMMENT_LIKE":
+    case "COMMENT_FAVORITE":
       return notification.postId ? `/profile?post=${notification.postId}` : "/profile";
     case "MENTION":
       return notification.postId
@@ -178,6 +184,29 @@ export function getNotificationCopy(
         actionLabel: t ? t("notifications.copy.like.actionLabel") : "Open entry",
         quote: truncateNotificationPost(notification.post?.content),
         inlineQuote: true,
+      };
+    case "FAVORITE":
+      return {
+        eyebrow: "Favorite",
+        body: "Favorited your post:",
+        helper: "This notice links directly to the referenced post dialog.",
+        actionLabel: "Open entry",
+        quote: truncateNotificationPost(notification.post?.content),
+        inlineQuote: true,
+      };
+    case "COMMENT_LIKE":
+      return {
+        eyebrow: "Comment like",
+        body: "Liked your comment.",
+        helper: "Open the post to inspect the conversation.",
+        actionLabel: "Open comment thread",
+      };
+    case "COMMENT_FAVORITE":
+      return {
+        eyebrow: "Comment favorite",
+        body: "Favorited your comment.",
+        helper: "Open the post to inspect the conversation.",
+        actionLabel: "Open comment thread",
       };
     case "COMMENT":
       return {
