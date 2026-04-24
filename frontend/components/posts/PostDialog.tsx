@@ -211,12 +211,12 @@ export function PostDialog({
 								{post.media.length > 0 ? (
 									<div className="relative mt-6 w-full rotate-[-1deg] bg-white p-2 pb-8 shadow-lg">
 										{attachmentUrl && isPdfAttachment(attachmentUrl) ? (
-											<div className="flex min-h-[220px] flex-col justify-between border border-label/20 bg-paper-muted px-5 py-5">
-												<div className="flex items-start gap-4">
+											<div className="flex flex-col border border-label/20 bg-paper-muted">
+												<div className="flex items-start gap-4 border-b border-dashed border-label/25 px-5 py-4">
 													<div className="flex h-14 w-14 shrink-0 items-center justify-center border border-label/25 bg-paper">
 														<HugeiconsIcon icon={Pdf01Icon} size={28} strokeWidth={1.8} />
 													</div>
-													<div className="min-w-0">
+													<div className="min-w-0 flex-1">
 														<p className="truncate font-display text-xl text-ink">
 															{attachmentFileName}
 														</p>
@@ -224,11 +224,21 @@ export function PostDialog({
 															PDF Attachment
 														</p>
 													</div>
+													<a
+														href={attachmentUrl}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-label underline transition-colors hover:text-ink"
+													>
+														Open in new tab
+													</a>
 												</div>
 
-												<p className="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-													Document preview not embedded
-												</p>
+												<iframe
+													src={`${attachmentUrl}#view=FitH`}
+													title={attachmentFileName ?? "PDF viewer"}
+													className="h-[560px] w-full bg-paper"
+												/>
 											</div>
 										) : (
 											/* eslint-disable-next-line @next/next/no-img-element */
