@@ -24,10 +24,13 @@ import { usePostInteractions } from "@/hooks/usePostInteractions";
 import { useI18n } from "@/i18n/I18nProvider";
 import {
   getFriendSuggestions,
-  getPosts,
   getUserById,
   getUserFriends,
-  getUsers,
+  searchPostsAdvanced,
+  searchUsersAdvanced,
+  type MediaTypeFilter,
+  type PostSortOption,
+  type UserSortOption,
 } from "@/lib/api";
 import { getRightRailTitle, type RightRailSuggestion } from "@/lib/right-rail";
 
@@ -37,9 +40,35 @@ const DEFAULT_TAB: SearchTab = "posts";
 const POSTS_PER_PAGE = 5;
 const USERS_PER_PAGE = 6;
 
-function normalizeSearchValue(value: string | null | undefined) {
-  return value?.trim().toLowerCase() || "";
-}
+type PostFilters = {
+  author: string;
+  dateFrom: string;
+  dateTo: string;
+  mediaType: MediaTypeFilter;
+  favoritesOnly: boolean;
+  sort: PostSortOption;
+};
+
+type UserFilters = {
+  onlineOnly: boolean;
+  friendsOnly: boolean;
+  sort: UserSortOption;
+};
+
+const DEFAULT_POST_FILTERS: PostFilters = {
+  author: "",
+  dateFrom: "",
+  dateTo: "",
+  mediaType: "all",
+  favoritesOnly: false,
+  sort: "recent",
+};
+
+const DEFAULT_USER_FILTERS: UserFilters = {
+  onlineOnly: false,
+  friendsOnly: false,
+  sort: "alpha-asc",
+};
 
 function readSearchTab(value: string | null): SearchTab {
   return value === "users" ? "users" : DEFAULT_TAB;
@@ -88,6 +117,13 @@ function SearchPageContent() {
   const [pageError, setPageError] = useState<string | null>(null);
   const [users, setUsers] = useState<SearchUserRecord[]>([]);
   const [suggestions, setSuggestions] = useState<RightRailSuggestion[]>([]);
+  const [postFilters, setPostFilters] = useState<PostFilters>(DEFAULT_POST_FILTERS);
+  const [userFilters, setUserFilters] = useState<UserFilters>(DEFAULT_USER_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [postsTotal, setPostsTotal] = useState(0);
+  const [postsTotalPages, setPostsTotalPages] = useState(1);
+  const [usersTotal, setUsersTotal] = useState(0);
+  const [usersTotalPages, setUsersTotalPages] = useState(1);
   const enrichedUserIdsRef = useRef(new Set<number>());
   const enrichingUserIdsRef = useRef(new Set<number>());
 
@@ -150,11 +186,6 @@ function SearchPageContent() {
     [posts],
   );
 
-  const normalizedQuery = useMemo(
-    () => normalizeSearchValue(currentQuery),
-    [currentQuery],
-  );
-
   useEffect(() => {
     setDraftQuery(currentQuery);
   }, [currentQuery]);
@@ -166,79 +197,16 @@ function SearchPageContent() {
 
     let ignore = false;
 
-    const fetchSearchData = async () => {
-      try {
-        setLoading(true);
-        setPageError(null);
-        enrichedUserIdsRef.current.clear();
-        enrichingUserIdsRef.current.clear();
+    (async () => {
+      const suggestionsResult = await getFriendSuggestions(token);
 
-        const [postsResult, usersResult, suggestionsResult] = await Promise.all([
-          getPosts(token),
-          getUsers(token),
-          getFriendSuggestions(token),
-        ]);
+      if (ignore) return;
 
-        if (!postsResult.ok) {
-          throw new Error(postsResult.message || t("search.errors.loadPosts"));
-        }
-
-        if (!usersResult.ok) {
-          throw new Error(usersResult.message || t("search.errors.loadUsers"));
-        }
-
-        const resolvedPosts = Array.isArray(postsResult.data)
-          ? postsResult.data
-          : [];
-
-        const postStatsByUser = resolvedPosts.reduce<
-          Record<number, { postCount: number; totalLikes: number; totalComments: number }>
-        >((accumulator, post) => {
-          const nextStats = accumulator[post.author.id] || {
-            postCount: 0,
-            totalLikes: 0,
-            totalComments: 0,
-          };
-
-          nextStats.postCount += 1;
-          nextStats.totalLikes += post.likesCount;
-          nextStats.totalComments += post.commentsCount;
-          accumulator[post.author.id] = nextStats;
-
-          return accumulator;
-        }, {});
-
-        const baseUsers = Array.isArray(usersResult.data) ? usersResult.data : [];
-        const resolvedUsers = baseUsers.map((baseUser) => {
-          const stats = postStatsByUser[baseUser.id] || {
-            postCount: 0,
-            totalLikes: 0,
-            totalComments: 0,
-          };
-
-          return {
-            id: baseUser.id,
-            username: baseUser.username,
-            displayName: baseUser.displayName ?? null,
-            avatar: baseUser.avatar ?? null,
-            banner: null,
-            bio: null,
-            status: null,
-            location: null,
-            website: null,
-            createdAt: undefined,
-            friendCount: 0,
-            postCount: stats.postCount,
-            totalLikes: stats.totalLikes,
-            totalComments: stats.totalComments,
-          } satisfies SearchUserRecord;
-        });
-
-        const normalizedSuggestions =
-          suggestionsResult.ok &&
-            suggestionsResult.data &&
-            Array.isArray(suggestionsResult.data.suggestions)
-            ? suggestionsResult.data.suggestions
+      const normalizedSuggestions =
+        suggestionsResult.ok &&
+        suggestionsResult.data &&
+        Array.isArray(suggestionsResult.data.suggestions)
+          ? suggestionsResult.data.suggestions
               .filter(
                 (item): item is RightRailSuggestion =>
                   typeof item?.id === "number" &&
@@ -250,106 +218,158 @@ function SearchPageContent() {
                 displayName: item.displayName || null,
                 avatar: item.avatar || null,
               }))
-            : [];
+          : [];
 
-        if (ignore) {
-          return;
-        }
-
-        setPosts(resolvedPosts);
-        setUsers(
-          resolvedUsers.sort((left, right) =>
-            left.username.localeCompare(right.username),
-          ),
-        );
-        setSuggestions(normalizedSuggestions);
-      } catch (error) {
-        if (ignore) {
-          return;
-        }
-
-        const message =
-          error instanceof Error
-            ? error.message
-            : t("search.errors.loadFallback");
-
-        setPageError(message);
-        notifyError(message);
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void fetchSearchData();
+      setSuggestions(normalizedSuggestions);
+    })();
 
     return () => {
       ignore = true;
     };
-  }, [notifyError, setPosts, token]);
+  }, [token]);
 
-  const filteredPosts = useMemo(() => {
-    if (!normalizedQuery) {
-      return posts;
+  useEffect(() => {
+    if (!token || activeTab !== "posts") {
+      return;
     }
 
-    return posts.filter((post) => {
-      const haystack = [
-        post.content,
-        post.author.username,
-        post.author.displayName,
-        ...post.comments.map((comment) => comment.content),
-        ...post.comments.map((comment) => comment.author.username),
-        ...post.comments.map((comment) => comment.author.displayName),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+    let ignore = false;
 
-      return haystack.includes(normalizedQuery);
-    });
-  }, [normalizedQuery, posts]);
+    (async () => {
+      try {
+        setLoading(true);
+        setPageError(null);
 
-  const filteredUsers = useMemo(() => {
-    if (!normalizedQuery) {
-      return users;
+        const result = await searchPostsAdvanced(
+          {
+            q: currentQuery,
+            author: postFilters.author,
+            dateFrom: postFilters.dateFrom,
+            dateTo: postFilters.dateTo,
+            mediaType: postFilters.mediaType,
+            favoritesOnly: postFilters.favoritesOnly,
+            sort: postFilters.sort,
+            page: requestedPage,
+            limit: POSTS_PER_PAGE,
+          },
+          token,
+        );
+
+        if (ignore) return;
+
+        if (!result.ok) {
+          throw new Error(result.message || t("search.errors.loadPosts"));
+        }
+
+        setPosts(result.data.items);
+        setPostsTotal(result.data.total);
+        setPostsTotalPages(result.data.totalPages);
+      } catch (error) {
+        if (ignore) return;
+        const message =
+          error instanceof Error ? error.message : t("search.errors.loadFallback");
+        setPageError(message);
+        notifyError(message);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    })();
+
+    return () => {
+      ignore = true;
+    };
+  }, [
+    activeTab,
+    currentQuery,
+    notifyError,
+    postFilters,
+    requestedPage,
+    setPosts,
+    t,
+    token,
+  ]);
+
+  useEffect(() => {
+    if (!token || activeTab !== "users") {
+      return;
     }
 
-    return users.filter((candidate) => {
-      const haystack = [
-        candidate.username,
-        candidate.displayName,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+    let ignore = false;
 
-      return haystack.includes(normalizedQuery);
-    });
-  }, [normalizedQuery, users]);
+    (async () => {
+      try {
+        setLoading(true);
+        setPageError(null);
+        enrichedUserIdsRef.current.clear();
+        enrichingUserIdsRef.current.clear();
 
-  const resultCount =
-    activeTab === "posts" ? filteredPosts.length : filteredUsers.length;
+        const result = await searchUsersAdvanced(
+          {
+            q: currentQuery,
+            onlineOnly: userFilters.onlineOnly,
+            friendsOnly: userFilters.friendsOnly,
+            sort: userFilters.sort,
+            page: requestedPage,
+            limit: USERS_PER_PAGE,
+          },
+          token,
+        );
+
+        if (ignore) return;
+
+        if (!result.ok) {
+          throw new Error(result.message || t("search.errors.loadUsers"));
+        }
+
+        const baseUsers = result.data.items.map((baseUser) =>
+          ({
+            id: baseUser.id,
+            username: baseUser.username,
+            displayName: baseUser.displayName ?? null,
+            avatar: baseUser.avatar ?? null,
+            banner: null,
+            bio: null,
+            status: baseUser.status ?? null,
+            location: null,
+            website: null,
+            createdAt: baseUser.createdAt,
+            friendCount: 0,
+            postCount: 0,
+            totalLikes: 0,
+            totalComments: 0,
+          } satisfies SearchUserRecord),
+        );
+
+        setUsers(baseUsers);
+        setUsersTotal(result.data.total);
+        setUsersTotalPages(result.data.totalPages);
+      } catch (error) {
+        if (ignore) return;
+        const message =
+          error instanceof Error ? error.message : t("search.errors.loadFallback");
+        setPageError(message);
+        notifyError(message);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    })();
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeTab, currentQuery, notifyError, requestedPage, t, token, userFilters]);
+
+  const resultCount = activeTab === "posts" ? postsTotal : usersTotal;
   const resultLabel =
     activeTab === "posts"
       ? t("search.resultLabels.posts")
       : t("search.resultLabels.users");
   const pageSize = activeTab === "posts" ? POSTS_PER_PAGE : USERS_PER_PAGE;
-  const totalPages = Math.max(1, Math.ceil(resultCount / pageSize));
-  const currentPage = Math.min(requestedPage, totalPages);
+  const totalPages = activeTab === "posts" ? postsTotalPages : usersTotalPages;
+  const currentPage = Math.min(requestedPage, Math.max(1, totalPages));
 
-  const paginatedPosts = useMemo(() => {
-    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-
-    return filteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
-  }, [currentPage, filteredPosts]);
-
-  const paginatedUsers = useMemo(() => {
-    const startIndex = (currentPage - 1) * USERS_PER_PAGE;
-
-    return filteredUsers.slice(startIndex, startIndex + USERS_PER_PAGE);
-  }, [currentPage, filteredUsers]);
+  const paginatedPosts = posts;
+  const paginatedUsers = users;
 
   useEffect(() => {
     if (!token || loading || pageError || activeTab !== "users") {
@@ -461,6 +481,17 @@ function SearchPageContent() {
     router,
   ]);
 
+  const resetToFirstPage = () => {
+    if (requestedPage !== 1) {
+      router.replace(buildSearchHref(currentQuery, activeTab, 1));
+    }
+  };
+
+  useEffect(() => {
+    resetToFirstPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postFilters, userFilters, activeTab]);
+
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     router.push(buildSearchHref(draftQuery, activeTab));
@@ -519,6 +550,192 @@ function SearchPageContent() {
                   <TabsIndicator />
                 </TabsList>
 
+                <div className="border-t border-dashed border-label/30 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setFiltersOpen((prev) => !prev)}
+                    className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-label transition-colors hover:text-ink"
+                    aria-expanded={filtersOpen}
+                  >
+                    <span>{filtersOpen ? "[-]" : "[+]"}</span>
+                    <span>Advanced filters & sort</span>
+                  </button>
+
+                  {filtersOpen ? (
+                    <div className="mt-4 grid grid-cols-1 gap-4 border border-dashed border-label/25 bg-paper-muted/60 p-4 sm:grid-cols-2">
+                      {activeTab === "posts" ? (
+                        <>
+                          <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+                            Author (username)
+                            <input
+                              type="text"
+                              value={postFilters.author}
+                              onChange={(event) =>
+                                setPostFilters((prev) => ({
+                                  ...prev,
+                                  author: event.target.value,
+                                }))
+                              }
+                              placeholder="@username"
+                              className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
+                            />
+                          </label>
+
+                          <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+                            Media type
+                            <select
+                              value={postFilters.mediaType}
+                              onChange={(event) =>
+                                setPostFilters((prev) => ({
+                                  ...prev,
+                                  mediaType: event.target.value as MediaTypeFilter,
+                                }))
+                              }
+                              className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
+                            >
+                              <option value="all">All</option>
+                              <option value="image">Image only</option>
+                              <option value="pdf">PDF only</option>
+                              <option value="none">No attachment</option>
+                            </select>
+                          </label>
+
+                          <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+                            Date from
+                            <input
+                              type="date"
+                              value={postFilters.dateFrom}
+                              onChange={(event) =>
+                                setPostFilters((prev) => ({
+                                  ...prev,
+                                  dateFrom: event.target.value,
+                                }))
+                              }
+                              className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
+                            />
+                          </label>
+
+                          <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+                            Date to
+                            <input
+                              type="date"
+                              value={postFilters.dateTo}
+                              onChange={(event) =>
+                                setPostFilters((prev) => ({
+                                  ...prev,
+                                  dateTo: event.target.value,
+                                }))
+                              }
+                              className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
+                            />
+                          </label>
+
+                          <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+                            Sort by
+                            <select
+                              value={postFilters.sort}
+                              onChange={(event) =>
+                                setPostFilters((prev) => ({
+                                  ...prev,
+                                  sort: event.target.value as PostSortOption,
+                                }))
+                              }
+                              className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
+                            >
+                              <option value="recent">Most recent</option>
+                              <option value="oldest">Oldest</option>
+                              <option value="likes">Most liked</option>
+                            </select>
+                          </label>
+
+                          <label className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-label sm:mt-6">
+                            <input
+                              type="checkbox"
+                              checked={postFilters.favoritesOnly}
+                              onChange={(event) =>
+                                setPostFilters((prev) => ({
+                                  ...prev,
+                                  favoritesOnly: event.target.checked,
+                                }))
+                              }
+                              className="h-4 w-4 accent-accent-orange"
+                            />
+                            My favorites only
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => setPostFilters(DEFAULT_POST_FILTERS)}
+                            className="sm:col-span-2 mt-1 self-start font-mono text-[10px] uppercase tracking-[0.22em] text-label underline transition-colors hover:text-accent-red"
+                          >
+                            Reset filters
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
+                            Sort by
+                            <select
+                              value={userFilters.sort}
+                              onChange={(event) =>
+                                setUserFilters((prev) => ({
+                                  ...prev,
+                                  sort: event.target.value as UserSortOption,
+                                }))
+                              }
+                              className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
+                            >
+                              <option value="alpha-asc">Alphabetical (A-Z)</option>
+                              <option value="alpha-desc">Alphabetical (Z-A)</option>
+                              <option value="recent">Newest members</option>
+                              <option value="oldest">Oldest members</option>
+                            </select>
+                          </label>
+
+                          <div className="flex flex-col gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-label sm:mt-6">
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={userFilters.onlineOnly}
+                                onChange={(event) =>
+                                  setUserFilters((prev) => ({
+                                    ...prev,
+                                    onlineOnly: event.target.checked,
+                                  }))
+                                }
+                                className="h-4 w-4 accent-accent-orange"
+                              />
+                              Online only
+                            </label>
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={userFilters.friendsOnly}
+                                onChange={(event) =>
+                                  setUserFilters((prev) => ({
+                                    ...prev,
+                                    friendsOnly: event.target.checked,
+                                  }))
+                                }
+                                className="h-4 w-4 accent-accent-orange"
+                              />
+                              Friends only
+                            </label>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setUserFilters(DEFAULT_USER_FILTERS)}
+                            className="sm:col-span-2 mt-1 self-start font-mono text-[10px] uppercase tracking-[0.22em] text-label underline transition-colors hover:text-accent-red"
+                          >
+                            Reset filters
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+
                 <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-label">
                   <span>
                     {loading
@@ -526,7 +743,7 @@ function SearchPageContent() {
                       : t("search.resultsCount", { count: resultCount, label: resultLabel, s: resultCount === 1 ? "" : "s" })}
                   </span>
                   <span>
-                    {normalizedQuery
+                    {currentQuery
                       ? t("search.query", { query: currentQuery })
                       : t("search.showingLatest")}
                   </span>
@@ -551,7 +768,7 @@ function SearchPageContent() {
             ) : (
               <>
                 <TabsContent value="posts" className="space-y-10">
-                  {filteredPosts.length === 0 ? (
+                  {paginatedPosts.length === 0 ? (
                     <section className="border border-dashed border-label/30 bg-paper/70 px-5 py-10 text-center">
                       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-label">
                         {t("search.empty.posts")}
@@ -576,7 +793,7 @@ function SearchPageContent() {
                 </TabsContent>
 
                 <TabsContent value="users">
-                  {filteredUsers.length === 0 ? (
+                  {paginatedUsers.length === 0 ? (
                     <section className="border border-dashed border-label/30 bg-paper/70 px-5 py-10 text-center">
                       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-label">
                         {t("search.empty.users")}

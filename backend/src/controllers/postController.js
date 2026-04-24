@@ -2,6 +2,7 @@ import {
   createPost,
   getAllPosts,
   getFriendsPosts,
+  searchPosts,
   deletePost,
   likePost,
   unlikePost,
@@ -17,6 +18,7 @@ import {
 import { getOptionalEnv } from "../env.js";
 import {
   createNotificationIfRelevant,
+  deleteNotificationIfExists,
   NOTIFICATION_TYPES,
 } from "../services/notificationService.js";
 
@@ -28,6 +30,27 @@ export const getPostsHandler = async (req, res) => {
   } catch (error) {
     console.error("Erreur getPostsHandler :", error);
     res.status(500).json({ message: "Unable to fetch posts." });
+  }
+};
+
+export const searchPostsHandler = async (req, res) => {
+  try {
+    const currentUserId = req.user?.id ?? req.user?.userId;
+    const result = await searchPosts(currentUserId, {
+      q: req.query.q,
+      authorUsername: req.query.author,
+      dateFrom: req.query.dateFrom,
+      dateTo: req.query.dateTo,
+      mediaType: req.query.mediaType,
+      favoritesOnly: req.query.favoritesOnly === "true",
+      sort: req.query.sort,
+      page: req.query.page,
+      limit: req.query.limit,
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Erreur searchPostsHandler :", error);
+    res.status(500).json({ message: "Unable to search posts." });
   }
 };
 
@@ -101,7 +124,16 @@ export const deleteCommentHandler = async (req, res) => {
       });
     }
 
-    await deleteComment(commentId, userId);
+    const deleteResult = await deleteComment(commentId, userId);
+
+    if (deleteResult?.postAuthorId) {
+      await deleteNotificationIfExists({
+        userId: deleteResult.postAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.COMMENT,
+        postId: deleteResult.postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Comment deleted successfully.",
@@ -213,7 +245,16 @@ export const unlikePostHandler = async (req, res) => {
       });
     }
 
-    await unlikePost(postId, userId);
+    const result = await unlikePost(postId, userId);
+
+    if (result.removed) {
+      await deleteNotificationIfExists({
+        userId: result.postAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.LIKE,
+        postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Post unliked successfully.",
@@ -310,7 +351,16 @@ export const favoritePostHandler = async (req, res) => {
       });
     }
 
-    await favoritePost(postId, userId);
+    const favoriteResult = await favoritePost(postId, userId);
+
+    if (favoriteResult.created) {
+      await createNotificationIfRelevant({
+        userId: favoriteResult.postAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.FAVORITE,
+        postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Post favorited successfully.",
@@ -340,7 +390,16 @@ export const unfavoritePostHandler = async (req, res) => {
       });
     }
 
-    await unfavoritePost(postId, userId);
+    const unfavoriteResult = await unfavoritePost(postId, userId);
+
+    if (unfavoriteResult.removed) {
+      await deleteNotificationIfExists({
+        userId: unfavoriteResult.postAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.FAVORITE,
+        postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Post unfavorited successfully.",
@@ -369,7 +428,16 @@ export const likeCommentHandler = async (req, res) => {
       });
     }
 
-    await likeComment(commentId, userId);
+    const likeResult = await likeComment(commentId, userId);
+
+    if (likeResult.created) {
+      await createNotificationIfRelevant({
+        userId: likeResult.commentAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.COMMENT_LIKE,
+        postId: likeResult.postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Comment liked successfully.",
@@ -399,7 +467,16 @@ export const unlikeCommentHandler = async (req, res) => {
       });
     }
 
-    await unlikeComment(commentId, userId);
+    const unlikeResult = await unlikeComment(commentId, userId);
+
+    if (unlikeResult.removed) {
+      await deleteNotificationIfExists({
+        userId: unlikeResult.commentAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.COMMENT_LIKE,
+        postId: unlikeResult.postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Comment unliked successfully.",
@@ -429,7 +506,16 @@ export const favoriteCommentHandler = async (req, res) => {
       });
     }
 
-    await favoriteComment(commentId, userId);
+    const favResult = await favoriteComment(commentId, userId);
+
+    if (favResult.created) {
+      await createNotificationIfRelevant({
+        userId: favResult.commentAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.COMMENT_FAVORITE,
+        postId: favResult.postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Comment favorited successfully.",
@@ -459,7 +545,16 @@ export const unfavoriteCommentHandler = async (req, res) => {
       });
     }
 
-    await unfavoriteComment(commentId, userId);
+    const unfavResult = await unfavoriteComment(commentId, userId);
+
+    if (unfavResult.removed) {
+      await deleteNotificationIfExists({
+        userId: unfavResult.commentAuthorId,
+        actorId: userId,
+        type: NOTIFICATION_TYPES.COMMENT_FAVORITE,
+        postId: unfavResult.postId,
+      });
+    }
 
     return res.status(200).json({
       message: "Comment unfavorited successfully.",
@@ -477,6 +572,7 @@ export default {
   createPostHandler,
   getPostsHandler,
   getFriendsPostsHandler,
+  searchPostsHandler,
   deletePostHandler,
   likePostHandler,
   unlikePostHandler,

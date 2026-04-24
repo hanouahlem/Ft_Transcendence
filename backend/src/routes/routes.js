@@ -61,6 +61,10 @@ router.get("/conversations/:id/messages", authMiddleware, message.getConversatio
 router.post("/conversations/:id/messages", authMiddleware, message.sendMessage);
 router.post("/conversations/:id/read", authMiddleware, message.markConversationAsRead);
 
+// advanced search
+router.get("/search/posts", authMiddleware, post.searchPostsHandler);
+router.get("/search/users", authMiddleware, ctrl.searchUsersAdvanced);
+
 // post
 router.get("/posts", authMiddleware, post.getPostsHandler);
 router.get("/posts/friends", authMiddleware, post.getFriendsPostsHandler);

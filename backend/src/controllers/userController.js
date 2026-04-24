@@ -378,6 +378,108 @@ export async function searchUser(req, res){
     }
 }
 
+export async function searchUsersAdvanced(req, res) {
+  try {
+    const {
+      q = "",
+      onlineOnly,
+      friendsOnly,
+      sort = "alpha-asc",
+      page = "1",
+      limit = "12",
+    } = req.query;
+
+    const currentUserId = req.user?.id ?? req.user?.userId;
+    const resolvedUserId = Number(currentUserId);
+    const filters = [];
+
+    const trimmedQuery = typeof q === "string" ? q.trim() : "";
+    if (trimmedQuery) {
+      filters.push({
+        OR: [
+          { username: { contains: trimmedQuery, mode: "insensitive" } },
+          { displayName: { contains: trimmedQuery, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    if (onlineOnly === "true") {
+      filters.push({ status: "online" });
+    }
+
+    if (friendsOnly === "true" && resolvedUserId) {
+      const friendships = await prisma.friends.findMany({
+        where: {
+          status: "accepted",
+          OR: [{ senderId: resolvedUserId }, { receiverId: resolvedUserId }],
+        },
+        select: { senderId: true, receiverId: true },
+      });
+      const friendIds = friendships.map((relation) =>
+        relation.senderId === resolvedUserId ? relation.receiverId : relation.senderId,
+      );
+
+      if (friendIds.length === 0) {
+        return res.status(200).json({
+          items: [],
+          total: 0,
+          page: 1,
+          limit: 12,
+          totalPages: 1,
+        });
+      }
+
+      filters.push({ id: { in: friendIds } });
+    }
+
+    const where = filters.length ? { AND: filters } : {};
+
+    let orderBy;
+    if (sort === "alpha-desc") {
+      orderBy = { username: "desc" };
+    } else if (sort === "recent") {
+      orderBy = { createdAt: "desc" };
+    } else if (sort === "oldest") {
+      orderBy = { createdAt: "asc" };
+    } else {
+      orderBy = { username: "asc" };
+    }
+
+    const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
+    const take = Math.max(1, Math.min(50, Number.parseInt(limit, 10) || 12));
+    const skip = (pageNum - 1) * take;
+
+    const [total, users] = await Promise.all([
+      prisma.user.count({ where }),
+      prisma.user.findMany({
+        where,
+        orderBy,
+        skip,
+        take,
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          avatar: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+    ]);
+
+    return res.status(200).json({
+      items: users,
+      total,
+      page: pageNum,
+      limit: take,
+      totalPages: Math.max(1, Math.ceil(total / take)),
+    });
+  } catch (error) {
+    console.error("searchUsersAdvanced error:", error);
+    return res.status(500).json({ message: "Failed to search users" });
+  }
+}
+
 export async function getUserByUsername(req, res) {
   try {
     const username =
@@ -914,6 +1016,7 @@ export default {
   getUserLikes,
   getUserFavorites,
   searchUser,
+  searchUsersAdvanced,
   getUserByUsername,
   updateUser,
   updatePassword,

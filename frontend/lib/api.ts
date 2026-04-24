@@ -159,7 +159,10 @@ export const NOTIFICATION_TYPES = [
   "UNFOLLOW",
   "FOLLOW_ACCEPT",
   "LIKE",
+  "FAVORITE",
   "COMMENT",
+  "COMMENT_LIKE",
+  "COMMENT_FAVORITE",
   "MENTION",
   "MESSAGE",
 ] as const;
@@ -501,6 +504,96 @@ export async function getFriendsPosts(token?: string | null) {
 
 export async function getPosts(token?: string | null) {
   return getFeedPosts("all", token);
+}
+
+export type PostSortOption = "recent" | "oldest" | "likes";
+export type MediaTypeFilter = "all" | "image" | "pdf" | "none";
+
+export type SearchPostsParams = {
+  q?: string;
+  author?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  mediaType?: MediaTypeFilter;
+  favoritesOnly?: boolean;
+  sort?: PostSortOption;
+  page?: number;
+  limit?: number;
+};
+
+export type SearchPostsResponse = {
+  items: FeedPost[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export async function searchPostsAdvanced(
+  params: SearchPostsParams,
+  token?: string | null,
+) {
+  const query = new URLSearchParams();
+
+  if (params.q) query.set("q", params.q);
+  if (params.author) query.set("author", params.author);
+  if (params.dateFrom) query.set("dateFrom", params.dateFrom);
+  if (params.dateTo) query.set("dateTo", params.dateTo);
+  if (params.mediaType && params.mediaType !== "all") query.set("mediaType", params.mediaType);
+  if (params.favoritesOnly) query.set("favoritesOnly", "true");
+  if (params.sort) query.set("sort", params.sort);
+  if (params.page) query.set("page", String(params.page));
+  if (params.limit) query.set("limit", String(params.limit));
+
+  const suffix = query.toString();
+  const path = suffix ? `/search/posts?${suffix}` : "/search/posts";
+  return requestWithAuth<SearchPostsResponse>(path, { token });
+}
+
+export type UserSortOption = "alpha-asc" | "alpha-desc" | "recent" | "oldest";
+
+export type SearchUsersParams = {
+  q?: string;
+  onlineOnly?: boolean;
+  friendsOnly?: boolean;
+  sort?: UserSortOption;
+  page?: number;
+  limit?: number;
+};
+
+export type SearchUsersResultUser = {
+  id: number;
+  username: string;
+  displayName: string | null;
+  avatar: string | null;
+  status: string | null;
+  createdAt?: string;
+};
+
+export type SearchUsersResponse = {
+  items: SearchUsersResultUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export async function searchUsersAdvanced(
+  params: SearchUsersParams,
+  token?: string | null,
+) {
+  const query = new URLSearchParams();
+
+  if (params.q) query.set("q", params.q);
+  if (params.onlineOnly) query.set("onlineOnly", "true");
+  if (params.friendsOnly) query.set("friendsOnly", "true");
+  if (params.sort) query.set("sort", params.sort);
+  if (params.page) query.set("page", String(params.page));
+  if (params.limit) query.set("limit", String(params.limit));
+
+  const suffix = query.toString();
+  const path = suffix ? `/search/users?${suffix}` : "/search/users";
+  return requestWithAuth<SearchUsersResponse>(path, { token });
 }
 
 export async function createPostRequest(

@@ -25,6 +25,7 @@ import {
 import {
   SOCKET_EVENTS,
   type NotificationCreatedEvent,
+  type NotificationDeletedEvent,
   type NotificationReadEvent,
 } from "@/lib/socket-events";
 
@@ -129,6 +130,14 @@ export default function NotificationsPage() {
             ? { ...notification, read: true }
             : notification,
         ),
+      );
+    },
+  );
+
+  const handleNotificationDeletedEvent = useEffectEvent(
+    ({ notificationId }: NotificationDeletedEvent) => {
+      setNotifications((current) =>
+        current.filter((notification) => notification.id !== notificationId),
       );
     },
   );
@@ -302,14 +311,20 @@ export default function NotificationsPage() {
       handleNotificationReadEvent(payload);
     };
 
+    const handleDeleted = (payload: NotificationDeletedEvent) => {
+      handleNotificationDeletedEvent(payload);
+    };
+
     socket.on(SOCKET_EVENTS.NOTIFICATION_CREATED, handleCreated);
     socket.on(SOCKET_EVENTS.NOTIFICATION_READ, handleRead);
+    socket.on(SOCKET_EVENTS.NOTIFICATION_DELETED, handleDeleted);
 
     return () => {
       socket.off(SOCKET_EVENTS.NOTIFICATION_CREATED, handleCreated);
       socket.off(SOCKET_EVENTS.NOTIFICATION_READ, handleRead);
+      socket.off(SOCKET_EVENTS.NOTIFICATION_DELETED, handleDeleted);
     };
-  }, [handleNotificationCreatedEvent, handleNotificationReadEvent, socket]);
+  }, [handleNotificationCreatedEvent, handleNotificationDeletedEvent, handleNotificationReadEvent, socket]);
 
   useEffect(() => {
     if (!token || !isConnected) {
