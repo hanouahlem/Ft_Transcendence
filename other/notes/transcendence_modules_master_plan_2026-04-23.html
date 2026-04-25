@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Plan Modules ft_transcendence</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 1.2cm;
+    }
+
+    :root {
+      --ink: #1d1a16;
+      --muted: #5c5650;
+      --line: #d9d1c7;
+      --paper: #faf7f2;
+      --accent: #a43921;
+      --ok: #1f6b45;
+      --warn: #9a6700;
+      --todo: #8a1c1c;
+      --blocked: #5b4b8a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: white;
+      font-family: "Liberation Sans", Arial, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.35;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 0.3rem;
+      line-height: 1.15;
+    }
+
+    h1 {
+      font-size: 22pt;
+    }
+
+    h2 {
+      margin-top: 1.2rem;
+      font-size: 14pt;
+      color: var(--accent);
+    }
+
+    p {
+      margin: 0.35rem 0;
+    }
+
+    .hero {
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, #f6efe5 0%, #fcfaf7 100%);
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 9pt;
+    }
+
+    .callout {
+      margin-top: 0.8rem;
+      padding: 0.8rem 0.9rem;
+      border-left: 4px solid var(--accent);
+      background: var(--paper);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      margin-top: 0.8rem;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      padding: 0.7rem 0.8rem;
+      background: #fff;
+    }
+
+    .big {
+      font-size: 18pt;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    ul {
+      margin: 0.35rem 0 0 1rem;
+      padding: 0;
+    }
+
+    li {
+      margin: 0.2rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.6rem;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.38rem 0.42rem;
+      vertical-align: top;
+      text-align: left;
+      word-wrap: break-word;
+    }
+
+    th {
+      background: #f3ede4;
+      font-size: 9.5pt;
+    }
+
+    td {
+      font-size: 9.2pt;
+    }
+
+    .w-cat { width: 13%; }
+    .w-mod { width: 30%; }
+    .w-type { width: 9%; }
+    .w-pts { width: 6%; }
+    .w-status { width: 12%; }
+    .w-note { width: 30%; }
+
+    .status {
+      font-weight: 700;
+    }
+
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .todo { color: var(--todo); }
+    .blocked { color: var(--blocked); }
+
+    .small {
+      font-size: 8.6pt;
+      color: var(--muted);
+    }
+
+    .break-before {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <h1>ft_transcendence - Plan complet des modules</h1>
+    <p>Version de travail pour l'equipe, basee sur le sujet officiel <code>other/transcendance.md</code> (v20.0).</p>
+    <p class="meta">Mise a jour: 23 avril 2026</p>
+
+    <div class="callout">
+      <p><strong>Point cle du sujet:</strong> il faut <strong>14 points minimum</strong> pour valider le projet.</p>
+      <p><strong>Important:</strong> les modules incomplets ou non fonctionnels valent <strong>0 point</strong> pendant l'evaluation.</p>
+      <p><strong>Bonus:</strong> au-dela des 14 points, le sujet limite le bonus pris en compte a <strong>5 points maximum</strong>. Donc l'objectif reel comptabilisable pendant la review est <strong>19 points</strong>, pas 20/21.</p>
+      <p>Ce document liste quand meme <strong>tous les modules du sujet</strong>, meme ceux qui ne sont pas encore faits, pour servir de feuille de route et de support README/evaluation.</p>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h3>Estimation actuelle</h3>
+      <div class="big">17 pts forts</div>
+      <p>Modules avec des preuves claires dans le code actuel.</p>
+    </div>
+    <div class="card">
+      <h3>Potentiel proche</h3>
+      <div class="big">19 pts cibles</div>
+      <p>Atteignable si les modules partiels sont finis, documentes et bien demontres.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Lecture des statuts</h2>
+    <ul>
+      <li><strong class="status ok">Implemente</strong>: le repo contient deja des preuves serieuses pour soutenir ce module.</li>
+      <li><strong class="status warn">Partiel</strong>: il y a une base, mais il manque de la finition, de la doc, ou certains criteres du sujet.</li>
+      <li><strong class="status todo">A faire</strong>: pas encore implemente ou pas assez present pour etre revendique.</li>
+      <li><strong class="status blocked">Bloque / dependance</strong>: module impossible a revendiquer tant qu'un prerequis du sujet n'existe pas.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Modules avec forte base dans le code actuel</h2>
+    <ul>
+      <li>Framework frontend + backend: Next.js cote front, Express cote back.</li>
+      <li>Temps reel: Socket.io attache au serveur HTTP.</li>
+      <li>Interaction utilisateurs: profils, amis, messagerie directe.</li>
+      <li>API publique: cle API, rate limit, Swagger, endpoints CRUD sur les posts.</li>
+      <li>ORM: Prisma.</li>
+      <li>Notifications: endpoints et systeme de lecture/suppression.</li>
+      <li>Upload de fichiers: images pour posts et profils avec validations.</li>
+      <li>i18n + RTL: au moins 4 langues visibles dans le code, dont l'arabe.</li>
+      <li>User management standard: profil, avatar, edition, amis, page profil.</li>
+      <li>OAuth et 2FA: routes et logique dediees presentes.</li>
+    </ul>
+  </section>
+
+  <section class="break-before">
+    <h2>Catalogue complet des modules du sujet</h2>
+    <table>
+      <thead>
+        <tr>
+          <th class="w-cat">Categorie</th>
+          <th class="w-mod">Module</th>
+          <th class="w-type">Type</th>
+          <th class="w-pts">Pts</th>
+          <th class="w-status">Statut</th>
+          <th class="w-note">Notes / lecture projet</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Web</td><td>Framework frontend + backend</td><td>Major</td><td>2</td><td class="status ok">Implemente</td><td>Next.js pour le frontend et Express pour le backend.</td></tr>
+        <tr><td>Web</td><td>Framework frontend</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Deja couvert par le major precedent.</td></tr>
+        <tr><td>Web</td><td>Framework backend</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Deja couvert par le major precedent.</td></tr>
+        <tr><td>Web</td><td>Fonctionnalites temps reel</td><td>Major</td><td>2</td><td class="status ok">Implemente</td><td>Socket.io, presence en ligne, messages et synchro de lecture.</td></tr>
+        <tr><td>Web</td><td>Interaction entre utilisateurs</td><td>Major</td><td>2</td><td class="status ok">Implemente</td><td>Profils + systeme d'amis + messagerie directe.</td></tr>
+        <tr><td>Web</td><td>API publique securisee</td><td>Major</td><td>2</td><td class="status ok">Implemente</td><td>Cle API, rate limiting, Swagger, CRUD public sur les posts.</td></tr>
+        <tr><td>Web</td><td>ORM base de donnees</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Prisma present et utilise dans le backend.</td></tr>
+        <tr><td>Web</td><td>Systeme complet de notifications</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Creation automatique, lecture, suppression, affichage frontend.</td></tr>
+        <tr><td>Web</td><td>Fonctionnalites collaboratives temps reel</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Pas de workspace partage ou edition collaborative a ce stade.</td></tr>
+        <tr><td>Web</td><td>SSR</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Next.js le permet, mais le projet doit le documenter et le demonstrer clairement pour le revendiquer.</td></tr>
+        <tr><td>Web</td><td>PWA</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Pas d'installation offline/service worker visible.</td></tr>
+        <tr><td>Web</td><td>Design system custom</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Bonne base de composants reutilisables; a inventorier et justifier proprement pour l'eval.</td></tr>
+        <tr><td>Web</td><td>Recherche avancee</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Recherche et UI presentes, mais il faut verifier filtres, tri et pagination complete selon le sujet.</td></tr>
+        <tr><td>Web</td><td>Upload et gestion de fichiers</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Upload images pour posts/profil avec validations.</td></tr>
+
+        <tr><td>Accessibilite / i18n</td><td>Conformite accessibilite complete WCAG 2.1 AA</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Pas assez d'elements de preuve pour la revendiquer en l'etat.</td></tr>
+        <tr><td>Accessibilite / i18n</td><td>Support multi-langues</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Messages visibles en anglais, francais, espagnol et arabe.</td></tr>
+        <tr><td>Accessibilite / i18n</td><td>Support RTL</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Locale arabe et gestion explicite de la direction.</td></tr>
+        <tr><td>Accessibilite / i18n</td><td>Support navigateurs supplementaires</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Peut etre defendable si les tests Firefox/Edge/Safari sont documentes avec limites connues.</td></tr>
+
+        <tr><td>User Management</td><td>Gestion standard utilisateur + auth</td><td>Major</td><td>2</td><td class="status ok">Implemente</td><td>Edition profil, avatar, amis, page profil, auth JWT.</td></tr>
+        <tr><td>User Management</td><td>Statistiques de jeu et historique de match</td><td>Minor</td><td>1</td><td class="status blocked">Bloque / dependance</td><td>Impossible sans module de jeu fonctionnel.</td></tr>
+        <tr><td>User Management</td><td>OAuth 2.0</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Routes GitHub et 42 presentes.</td></tr>
+        <tr><td>User Management</td><td>Systeme avance de permissions</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Roles, vues et CRUD admin non visibles comme module complet.</td></tr>
+        <tr><td>User Management</td><td>Systeme d'organisations</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Pas de logique d'organisation actuellement.</td></tr>
+        <tr><td>User Management</td><td>2FA complete</td><td>Minor</td><td>1</td><td class="status ok">Implemente</td><td>Setup, confirmation, disable et verification login presents.</td></tr>
+        <tr><td>User Management</td><td>Dashboard analytics utilisateur</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Compteurs visibles sur le profil; a renforcer pour parler de vrai dashboard/insights.</td></tr>
+
+        <tr><td>IA</td><td>Adversaire IA pour un jeu</td><td>Major</td><td>2</td><td class="status blocked">Bloque / dependance</td><td>Necessite d'abord un jeu fonctionnel.</td></tr>
+        <tr><td>IA</td><td>RAG complet</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Absent du code actuel.</td></tr>
+        <tr><td>IA</td><td>Interface LLM complete</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Absent du produit actuel.</td></tr>
+        <tr><td>IA</td><td>Systeme de recommandation ML</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Absent du code actuel.</td></tr>
+        <tr><td>IA</td><td>Moderation de contenu par IA</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Service de moderation IA detecte cote backend; a valider sur le parcours complet et a documenter.</td></tr>
+        <tr><td>IA</td><td>Integration voix / speech</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Absent.</td></tr>
+        <tr><td>IA</td><td>Analyse de sentiment</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Ne pas confondre avec la moderation IA.</td></tr>
+        <tr><td>IA</td><td>Reconnaissance d'image et tagging</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Absent.</td></tr>
+
+        <tr><td>Cybersecurite</td><td>WAF/ModSecurity + Vault</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Non implemente dans la stack actuelle.</td></tr>
+
+        <tr><td>Gaming / UX</td><td>Jeu web complet</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Le projet actuel est oriente reseau social, pas jeu.</td></tr>
+        <tr><td>Gaming / UX</td><td>Joueurs distants en temps reel</td><td>Major</td><td>2</td><td class="status blocked">Bloque / dependance</td><td>Necessite d'abord un jeu fonctionnel.</td></tr>
+        <tr><td>Gaming / UX</td><td>Multijoueur 3+ joueurs</td><td>Major</td><td>2</td><td class="status blocked">Bloque / dependance</td><td>Necessite d'abord un jeu fonctionnel.</td></tr>
+        <tr><td>Gaming / UX</td><td>Ajouter un second jeu + matchmaking</td><td>Major</td><td>2</td><td class="status blocked">Bloque / dependance</td><td>Necessite un premier jeu fonctionnel.</td></tr>
+        <tr><td>Gaming / UX</td><td>Graphismes 3D avances</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Absent.</td></tr>
+        <tr><td>Gaming / UX</td><td>Chat avance</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Messagerie presente; restent a verifier blocage, invitations jeu, read receipts, historique complet.</td></tr>
+        <tr><td>Gaming / UX</td><td>Tournois</td><td>Minor</td><td>1</td><td class="status blocked">Bloque / dependance</td><td>Necessite un jeu.</td></tr>
+        <tr><td>Gaming / UX</td><td>Customisation de jeu</td><td>Minor</td><td>1</td><td class="status blocked">Bloque / dependance</td><td>Necessite un jeu.</td></tr>
+        <tr><td>Gaming / UX</td><td>Gamification</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Pas de systeme persistant de badges/xp/challenges visible.</td></tr>
+        <tr><td>Gaming / UX</td><td>Mode spectateur</td><td>Minor</td><td>1</td><td class="status blocked">Bloque / dependance</td><td>Necessite un jeu.</td></tr>
+
+        <tr><td>Devops</td><td>ELK log management</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Absent.</td></tr>
+        <tr><td>Devops</td><td>Prometheus + Grafana</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Absent.</td></tr>
+        <tr><td>Devops</td><td>Backend en microservices</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Architecture actuelle monolithique Express.</td></tr>
+        <tr><td>Devops</td><td>Health check + status page + backups/DR</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Route /health presente; il manque status page complete, backups et disaster recovery procedures.</td></tr>
+
+        <tr><td>Data / Analytics</td><td>Dashboard analytics avance</td><td>Major</td><td>2</td><td class="status todo">A faire</td><td>Les compteurs profil ne suffisent pas encore pour ce major.</td></tr>
+        <tr><td>Data / Analytics</td><td>Export / import de donnees</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Absent.</td></tr>
+        <tr><td>Data / Analytics</td><td>Fonctionnalites GDPR</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Absent ou non documente.</td></tr>
+
+        <tr><td>Blockchain</td><td>Scores de tournoi sur blockchain</td><td>Major</td><td>2</td><td class="status blocked">Bloque / dependance</td><td>Suppose deja un module de tournoi/jeu.</td></tr>
+        <tr><td>Blockchain</td><td>Backend ICP</td><td>Minor</td><td>1</td><td class="status todo">A faire</td><td>Absent.</td></tr>
+
+        <tr><td>Choix libre</td><td>Module custom majeur</td><td>Major</td><td>2</td><td class="status warn">Partiel</td><td>Possible seulement avec une justification forte dans le README. Ne pas revendiquer sans dossier solide.</td></tr>
+        <tr><td>Choix libre</td><td>Module custom mineur</td><td>Minor</td><td>1</td><td class="status warn">Partiel</td><td>Meme logique: valeur reelle + justification explicite obligatoire.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="break-before">
+    <h2>Strategie conseillee pour la soutenance</h2>
+    <p><strong>Objectif securise:</strong> annoncer d'abord les modules bien prouvables dans le code, puis ajouter un petit nombre de modules partiels seulement si vous avez le temps de les finir et de les documenter.</p>
+    <ul>
+      <li><strong>Socle deja defendable:</strong> 17 points environ.</li>
+      <li><strong>Modules a fiabiliser pour viser 19:</strong> navigateurs supplementaires, dashboard analytics utilisateur, moderation IA, design system ou recherche avancee.</li>
+      <li><strong>Ne pas promettre:</strong> modules de jeu, devops lourd, blockchain, accessibilite WCAG complete, PWA, organisations, permissions avancees, s'ils ne sont pas reellement demonstrables.</li>
+    </ul>
+
+    <h2>Points a ajouter ensuite dans le README</h2>
+    <ul>
+      <li>Liste finale des modules reellement revendiques.</li>
+      <li>Justification de chaque module choisi.</li>
+      <li>Preuve concrete d'implementation: routes, pages, composants, captures, scenarios de demo.</li>
+      <li>Qui a fait quoi dans l'equipe.</li>
+    </ul>
+
+    <p class="small">Document interne de cadrage. Source de verite: <code>other/transcendance.md</code>. Si un module n'est pas complet le jour J, il ne faut pas le revendiquer comme valide.</p>
+  </section>
+</body>
+</html>
