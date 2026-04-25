@@ -291,8 +291,11 @@ This will start:
 - Backend (Express API)
 - PostgreSQL database
 
-Useful Commands
 
+Open the evaluation stack at `https://localhost:4433/`.
+
+
+Useful Commands
 ```bash
 make init      # Generate SSL certificates (first run only)
 make down      # Stop containers
