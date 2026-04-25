@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type TwoFactorCodeDialogProps = {
   open: boolean;
@@ -39,6 +40,7 @@ export default function TwoFactorCodeDialog({
   onConfirm,
   onSendCode,
 }: TwoFactorCodeDialogProps) {
+  const { t } = useI18n();
   const [pinValue, setPinValue] = useState<string[]>(EMPTY_PIN);
   const code = useMemo(() => pinValue.join(""), [pinValue]);
   const canConfirm = codeSent && /^\d{4}$/.test(code) && !confirming;
@@ -89,16 +91,16 @@ export default function TwoFactorCodeDialog({
           <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.16em] text-label">
             {codeSent ? (
               <>
-                We sent a 4-digit code to <span className="text-ink">{email}</span>.
+                {t("twoFactorDialog.sentPrefix")} <span className="text-ink">{email}</span>.
               </>
             ) : sending ? (
               <>
-                Sending a 4-digit code to <span className="text-ink">{email}</span>...
+                {t("twoFactorDialog.sendingPrefix")} <span className="text-ink">{email}</span>...
               </>
             ) : (
               <>
-                Click <span className="text-ink">Send code</span> to receive a 4-digit code at{" "}
-                <span className="text-ink">{email}</span>.
+                {t("twoFactorDialog.readyPrefix")} <span className="text-ink">{t("twoFactorDialog.sendCode")}</span>{" "}
+                {t("twoFactorDialog.readySuffix")} <span className="text-ink">{email}</span>.
               </>
             )}
           </p>
@@ -150,14 +152,20 @@ export default function TwoFactorCodeDialog({
 
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-label">
-                {codeSent ? "Didn&apos;t receive it?" : "Ready to continue?"}{" "}
+                {codeSent ? t("twoFactorDialog.didNotReceive") : t("twoFactorDialog.readyQuestion")}{" "}
                 <button
                   type="button"
                   className="text-accent-red underline decoration-dotted underline-offset-4 disabled:opacity-60"
                   onClick={() => void onSendCode()}
                   disabled={sending}
                 >
-                  {sending ? (codeSent ? "Resending..." : "Sending...") : codeSent ? "Resend code" : "Send code"}
+                  {sending
+                    ? codeSent
+                      ? t("twoFactorDialog.resending")
+                      : t("twoFactorDialog.sending")
+                    : codeSent
+                      ? t("twoFactorDialog.resendCode")
+                      : t("twoFactorDialog.sendCode")}
                 </button>
               </p>
 
@@ -168,7 +176,7 @@ export default function TwoFactorCodeDialog({
                 className="rounded-none"
                 disabled={!canConfirm}
               >
-                {confirming ? "Confirming..." : "Confirm code"}
+                {confirming ? t("twoFactorDialog.confirming") : t("twoFactorDialog.confirmCode")}
               </Button>
             </div>
 

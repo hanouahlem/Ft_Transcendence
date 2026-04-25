@@ -133,7 +133,7 @@ function LoginPageContent() {
 				setTwoFactorEmail(result.data.email);
 				setTwoFactorCodeSent(false);
 				setTwoFactorAutoSendAttempted(false);
-				setTwoFactorMessage("Sending your 4-digit verification code...");
+				setTwoFactorMessage(t("auth.login.twoFactor.sendingMessage"));
 				setTwoFactorDialogOpen(true);
 				return;
 			}
@@ -179,8 +179,8 @@ function LoginPageContent() {
 	const handleConfirmTwoFactorLogin = async (code: string) => {
 		if (!twoFactorPendingToken) {
 			archiveToaster.error({
-				title: "Error",
-				description: "2FA session is missing. Please login again.",
+				title: t("common.error"),
+				description: t("auth.login.twoFactor.errors.sessionMissing"),
 				duration: 6000,
 			});
 			setTwoFactorDialogOpen(false);
@@ -189,8 +189,8 @@ function LoginPageContent() {
 
 		if (!twoFactorCodeSent) {
 			archiveToaster.error({
-				title: "Error",
-				description: "Send a code first.",
+				title: t("common.error"),
+				description: t("auth.login.twoFactor.errors.sendFirst"),
 				duration: 4000,
 			});
 			return;
@@ -202,13 +202,13 @@ function LoginPageContent() {
 			const result = await verifyLoginTwoFactorCode(twoFactorPendingToken, code);
 
 			if (!result.ok) {
-				throw new Error(result.message || "Unable to confirm 2FA code.");
+				throw new Error(result.message || t("auth.login.twoFactor.errors.confirm"));
 			}
 
 			const loginSucceeded = await login(result.data.token);
 
 			if (!loginSucceeded) {
-				throw new Error("Login failed while loading your account.");
+				throw new Error(t("auth.login.errors.failedLoading"));
 			}
 
 			setTwoFactorDialogOpen(false);
@@ -218,10 +218,10 @@ function LoginPageContent() {
 			router.push("/feed");
 		} catch (error) {
 			const message =
-				error instanceof Error ? error.message : "Failed to confirm 2FA code.";
+				error instanceof Error ? error.message : t("auth.login.twoFactor.errors.confirmFallback");
 			setTwoFactorMessage(message);
 			archiveToaster.error({
-				title: "Error",
+				title: t("common.error"),
 				description: message,
 				duration: 6000,
 			});
@@ -233,8 +233,8 @@ function LoginPageContent() {
 	const handleSendLoginTwoFactorCode = useCallback(async () => {
 		if (!twoFactorPendingToken) {
 			archiveToaster.error({
-				title: "Error",
-				description: "2FA session is missing. Please login again.",
+				title: t("common.error"),
+				description: t("auth.login.twoFactor.errors.sessionMissing"),
 				duration: 6000,
 			});
 			setTwoFactorDialogOpen(false);
@@ -247,30 +247,30 @@ function LoginPageContent() {
 			const result = await resendLoginTwoFactorCode(twoFactorPendingToken);
 
 			if (!result.ok) {
-				throw new Error(result.message || "Unable to resend 2FA code.");
+				throw new Error(result.message || t("auth.login.twoFactor.errors.resend"));
 			}
 
 			setTwoFactorCodeSent(true);
 			setTwoFactorEmail(result.data.email);
 			setTwoFactorMessage(result.data.message);
 			archiveToaster.success({
-				title: "Code sent",
+				title: t("auth.login.twoFactor.codeSent"),
 				description: result.data.message,
 				duration: 4500,
 			});
 		} catch (error) {
 			const message =
-				error instanceof Error ? error.message : "Failed to resend 2FA code.";
+				error instanceof Error ? error.message : t("auth.login.twoFactor.errors.resendFallback");
 			setTwoFactorMessage(message);
 			archiveToaster.error({
-				title: "Error",
+				title: t("common.error"),
 				description: message,
 				duration: 6000,
 			});
 		} finally {
 			setTwoFactorSending(false);
 		}
-	}, [twoFactorPendingToken]);
+	}, [t, twoFactorPendingToken]);
 
 	useEffect(() => {
 		if (
@@ -338,9 +338,9 @@ function LoginPageContent() {
 			<TwoFactorCodeDialog
 				open={twoFactorDialogOpen}
 				onOpenChange={handleTwoFactorDialogOpenChange}
-				title="Two-Factor Login"
-				subtitle="Authentication Checkpoint / Step 2"
-				email={twoFactorEmail || "Unknown email"}
+				title={t("auth.login.twoFactor.title")}
+				subtitle={t("auth.login.twoFactor.subtitle")}
+				email={twoFactorEmail || t("auth.login.twoFactor.unknownEmail")}
 				codeSent={twoFactorCodeSent}
 				confirming={twoFactorConfirming}
 				sending={twoFactorSending}

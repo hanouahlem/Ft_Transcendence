@@ -1,38 +1,52 @@
+"use client";
+
 import LegalPageLayout from "@/components/legal/LegalPageLayout";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function TermsPage() {
+  const { t } = useI18n();
+
   return (
     <LegalPageLayout
-      eyebrow="Public Archive Record"
-      title="Terms of Service"
-      summary="These terms define how this Field Notes instance can be used during the ft_transcendence project, including account behavior, published content, and platform access."
-      updatedAt="April 23, 2026"
-      alternateLink={{ href: "/privacy", label: "Privacy Policy" }}
+      eyebrow={t("legal.terms.eyebrow")}
+      title={t("legal.terms.title")}
+      summary={t("legal.terms.summary")}
+      updatedAt={t("legal.terms.updatedAt")}
+      alternateLink={{ href: "/privacy", label: t("legal.terms.alternateLink") }}
       notes={[
-        { label: "Applies To", value: "All registered users and visitors of this project instance." },
-        { label: "Context", value: "Educational deployment for a 42 school group project." },
-        { label: "Main Focus", value: "Acceptable use, account handling, and service limitations." },
+        {
+          label: t("legal.terms.notes.appliesToLabel"),
+          value: t("legal.terms.notes.appliesToValue"),
+        },
+        {
+          label: t("legal.terms.notes.contextLabel"),
+          value: t("legal.terms.notes.contextValue"),
+        },
+        {
+          label: t("legal.terms.notes.mainFocusLabel"),
+          value: t("legal.terms.notes.mainFocusValue"),
+        },
       ]}
       sections={[
         {
-          title: "Scope of the Service",
-          body: "Field Notes is a social web application where users create accounts, publish posts, react to content, and connect with other users. The platform exists for educational demonstration and project evaluation purposes.",
+          title: t("legal.terms.sections.scope.title"),
+          body: t("legal.terms.sections.scope.body"),
         },
         {
-          title: "User Responsibilities",
-          body: "Users remain responsible for the content they publish and the actions performed through their account. Content must not be unlawful, abusive, fraudulent, or intended to disrupt the service or misuse another user's data.",
+          title: t("legal.terms.sections.responsibilities.title"),
+          body: t("legal.terms.sections.responsibilities.body"),
         },
         {
-          title: "Accounts and Access",
-          body: "Accounts are personal and must not be shared. Users must protect their credentials and notify the team if unauthorized access is suspected. Access may be restricted if abusive or unsafe behavior is detected.",
+          title: t("legal.terms.sections.accounts.title"),
+          body: t("legal.terms.sections.accounts.body"),
         },
         {
-          title: "Service Availability",
-          body: "This project is provided as-is. Features, data, and uptime may change during development, debugging, demonstrations, or evaluation sessions. The team may suspend parts of the service temporarily when necessary.",
+          title: t("legal.terms.sections.availability.title"),
+          body: t("legal.terms.sections.availability.body"),
         },
         {
-          title: "Moderation and Contact",
-          body: "The project team may remove content or restrict access to preserve platform stability, safety, and compliance with the school project context. Questions about these terms can be addressed to the team maintaining the deployment.",
+          title: t("legal.terms.sections.moderation.title"),
+          body: t("legal.terms.sections.moderation.body"),
         },
       ]}
     />

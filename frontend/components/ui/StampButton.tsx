@@ -6,6 +6,7 @@ type StampButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 	textClassName?: string;
 	paddingClassName?: string;
 	borderClassName?: string;
+	rotationDeg?: number;
 	children: ReactNode;
 };
 
@@ -15,6 +16,7 @@ export default function StampButton({
 	textClassName,
 	paddingClassName,
 	borderClassName,
+	rotationDeg = -6,
 	children,
 	...props
 }: StampButtonProps) {
@@ -35,7 +37,7 @@ export default function StampButton({
 					textClassName,
 					stampClassName,
 				)}
-				style={{ transform: "rotate(-6deg)", filter: "url(#ink-texture)" }}
+				style={{ transform: `rotate(${rotationDeg}deg)`, filter: "url(#ink-texture)" }}
 			>
 				<span
 					aria-hidden="true"

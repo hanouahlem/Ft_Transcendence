@@ -102,14 +102,15 @@ export default function LoginPaperCard({
 					<AuthFormMeta
 						dateLabel={dateLabel}
 						locationLabel={t("auth.login.dateLocation")}
+						actionSide={isRtl ? "left" : "right"}
 						action={
 							<StampButton
 								type="submit"
 								form="login-form"
 								disabled={loading}
 								textClassName="text-5xl"
-								className="absolute bottom-8 sm:bottom-9"
-								style={{ insetInlineEnd: isRtl ? undefined : "0rem", insetInlineStart: isRtl ? "0rem" : undefined }}
+								rotationDeg={isRtl ? 6 : -6}
+								className={isRtl ? "absolute bottom-8 left-0 sm:bottom-9" : "absolute bottom-8 right-0 sm:bottom-9"}
 							>
 								{loading ? "..." : t("auth.login.submit")}
 							</StampButton>

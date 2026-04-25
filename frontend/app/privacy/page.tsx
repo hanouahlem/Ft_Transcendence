@@ -1,38 +1,52 @@
+"use client";
+
 import LegalPageLayout from "@/components/legal/LegalPageLayout";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function PrivacyPage() {
+  const { t } = useI18n();
+
   return (
     <LegalPageLayout
-      eyebrow="Public Archive Record"
-      title="Privacy Policy"
-      summary="This policy explains what data the project processes, why it is needed to run the application, and how the team handles account and activity information inside this deployment."
-      updatedAt="April 23, 2026"
-      alternateLink={{ href: "/terms", label: "Terms of Service" }}
+      eyebrow={t("legal.privacy.eyebrow")}
+      title={t("legal.privacy.title")}
+      summary={t("legal.privacy.summary")}
+      updatedAt={t("legal.privacy.updatedAt")}
+      alternateLink={{ href: "/terms", label: t("legal.privacy.alternateLink") }}
       notes={[
-        { label: "Applies To", value: "Account data, profile data, posts, comments, and friendship activity." },
-        { label: "Processed By", value: "The team operating this project instance and its backend services." },
-        { label: "Main Focus", value: "Data usage, retention, security, and user requests." },
+        {
+          label: t("legal.privacy.notes.appliesToLabel"),
+          value: t("legal.privacy.notes.appliesToValue"),
+        },
+        {
+          label: t("legal.privacy.notes.processedByLabel"),
+          value: t("legal.privacy.notes.processedByValue"),
+        },
+        {
+          label: t("legal.privacy.notes.mainFocusLabel"),
+          value: t("legal.privacy.notes.mainFocusValue"),
+        },
       ]}
       sections={[
         {
-          title: "What Data We Process",
-          body: "The application processes the data required to provide its features, including usernames, email addresses, authentication data, profile details, posts, comments, notifications, and friendship interactions.",
+          title: t("legal.privacy.sections.data.title"),
+          body: t("legal.privacy.sections.data.body"),
         },
         {
-          title: "Why We Process It",
-          body: "This data is used to authenticate users, display profiles and content, operate social features, maintain account relationships, and keep the application secure and functional during normal use.",
+          title: t("legal.privacy.sections.why.title"),
+          body: t("legal.privacy.sections.why.body"),
         },
         {
-          title: "Storage and Retention",
-          body: "Project data is stored in the database backing this deployment. It may remain available for the lifetime of the instance unless removed for moderation, debugging, maintenance, or explicit user requests handled by the team.",
+          title: t("legal.privacy.sections.storage.title"),
+          body: t("legal.privacy.sections.storage.body"),
         },
         {
-          title: "Security Measures",
-          body: "The project uses common safeguards such as authenticated API access and protected password storage. Even with these measures, no system can promise absolute security, and users should avoid sharing sensitive personal information.",
+          title: t("legal.privacy.sections.security.title"),
+          body: t("legal.privacy.sections.security.body"),
         },
         {
-          title: "Your Requests",
-          body: "Users may ask the team to correct or remove data associated with their account, within the limits of the educational and technical context of the project. Requests are handled by the team maintaining the running instance.",
+          title: t("legal.privacy.sections.requests.title"),
+          body: t("legal.privacy.sections.requests.body"),
         },
       ]}
     />

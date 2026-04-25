@@ -56,16 +56,25 @@ export default function AuthGreenPanel({
         <polygon points="25,2 31,18 48,25 31,32 25,48 19,32 2,25 19,18" />
       </svg>
 
-      <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/20 to-transparent" />
       <div
         className={cn(
-          "absolute inset-y-0 left-3 w-px",
+          "absolute inset-y-0 w-8",
+          isRightAligned
+            ? "right-0 bg-gradient-to-l from-black/20 to-transparent"
+            : "left-0 bg-gradient-to-r from-black/20 to-transparent",
+        )}
+      />
+      <div
+        className={cn(
+          "absolute inset-y-0 w-px",
+          isRightAligned ? "right-3" : "left-3",
           accentToneClasses.rail,
         )}
       />
       <div
         className={cn(
-          "absolute inset-y-0 left-[18px] w-px",
+          "absolute inset-y-0 w-px",
+          isRightAligned ? "right-[18px]" : "left-[18px]",
           accentToneClasses.rail,
         )}
       />

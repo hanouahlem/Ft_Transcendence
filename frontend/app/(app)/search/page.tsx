@@ -552,7 +552,7 @@ function SearchPageContent() {
                     aria-expanded={filtersOpen}
                   >
                     <span>{filtersOpen ? "[-]" : "[+]"}</span>
-                    <span>Advanced filters & sort</span>
+                    <span>{t("search.advancedToggle")}</span>
                   </button>
 
                   {filtersOpen ? (
@@ -560,7 +560,7 @@ function SearchPageContent() {
                       {activeTab === "posts" ? (
                         <>
                           <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                            Author (username)
+                            {t("search.postFilters.authorLabel")}
                             <input
                               type="text"
                               value={postFilters.author}
@@ -570,13 +570,13 @@ function SearchPageContent() {
                                   author: event.target.value,
                                 }))
                               }
-                              placeholder="@username"
+                              placeholder={t("search.postFilters.authorPlaceholder")}
                               className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
                             />
                           </label>
 
                           <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                            Media type
+                            {t("search.postFilters.mediaTypeLabel")}
                             <select
                               value={postFilters.mediaType}
                               onChange={(event) =>
@@ -587,15 +587,15 @@ function SearchPageContent() {
                               }
                               className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
                             >
-                              <option value="all">All</option>
-                              <option value="image">Image only</option>
-                              <option value="pdf">PDF only</option>
-                              <option value="none">No attachment</option>
+                              <option value="all">{t("search.postFilters.mediaTypeOptions.all")}</option>
+                              <option value="image">{t("search.postFilters.mediaTypeOptions.image")}</option>
+                              <option value="pdf">{t("search.postFilters.mediaTypeOptions.pdf")}</option>
+                              <option value="none">{t("search.postFilters.mediaTypeOptions.none")}</option>
                             </select>
                           </label>
 
                           <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                            Sort by
+                            {t("search.postFilters.sortLabel")}
                             <select
                               value={postFilters.sort}
                               onChange={(event) =>
@@ -606,9 +606,9 @@ function SearchPageContent() {
                               }
                               className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
                             >
-                              <option value="recent">Most recent</option>
-                              <option value="oldest">Oldest</option>
-                              <option value="likes">Most liked</option>
+                              <option value="recent">{t("search.postFilters.sortOptions.recent")}</option>
+                              <option value="oldest">{t("search.postFilters.sortOptions.oldest")}</option>
+                              <option value="likes">{t("search.postFilters.sortOptions.likes")}</option>
                             </select>
                           </label>
 
@@ -624,7 +624,7 @@ function SearchPageContent() {
                               }
                               className="h-4 w-4 accent-accent-orange"
                             />
-                            My favorites only
+                            {t("search.postFilters.favoritesOnly")}
                           </label>
 
                           <button
@@ -632,13 +632,13 @@ function SearchPageContent() {
                             onClick={() => setPostFilters(DEFAULT_POST_FILTERS)}
                             className="sm:col-span-2 mt-1 self-start font-mono text-[10px] uppercase tracking-[0.22em] text-label underline transition-colors hover:text-accent-red"
                           >
-                            Reset filters
+                            {t("search.resetFilters")}
                           </button>
                         </>
                       ) : (
                         <>
                           <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                            Sort by
+                            {t("search.userFilters.sortLabel")}
                             <select
                               value={userFilters.sort}
                               onChange={(event) =>
@@ -649,10 +649,10 @@ function SearchPageContent() {
                               }
                               className="archive-input mt-1 border border-label/20 bg-paper px-2 py-1.5 font-mono text-sm text-ink outline-none focus:border-accent-orange"
                             >
-                              <option value="alpha-asc">Alphabetical (A-Z)</option>
-                              <option value="alpha-desc">Alphabetical (Z-A)</option>
-                              <option value="recent">Newest members</option>
-                              <option value="oldest">Oldest members</option>
+                              <option value="alpha-asc">{t("search.userFilters.sortOptions.alphaAsc")}</option>
+                              <option value="alpha-desc">{t("search.userFilters.sortOptions.alphaDesc")}</option>
+                              <option value="recent">{t("search.userFilters.sortOptions.recent")}</option>
+                              <option value="oldest">{t("search.userFilters.sortOptions.oldest")}</option>
                             </select>
                           </label>
 
@@ -669,7 +669,7 @@ function SearchPageContent() {
                                 }
                                 className="h-4 w-4 accent-accent-orange"
                               />
-                              Online only
+                              {t("search.userFilters.onlineOnly")}
                             </label>
                             <label className="flex items-center gap-2">
                               <input
@@ -683,7 +683,7 @@ function SearchPageContent() {
                                 }
                                 className="h-4 w-4 accent-accent-orange"
                               />
-                              Friends only
+                              {t("search.userFilters.friendsOnly")}
                             </label>
                           </div>
 
@@ -692,7 +692,7 @@ function SearchPageContent() {
                             onClick={() => setUserFilters(DEFAULT_USER_FILTERS)}
                             className="sm:col-span-2 mt-1 self-start font-mono text-[10px] uppercase tracking-[0.22em] text-label underline transition-colors hover:text-accent-red"
                           >
-                            Reset filters
+                            {t("search.resetFilters")}
                           </button>
                         </>
                       )}

@@ -148,35 +148,39 @@ export default function SettingsPage() {
   const accountTags = useMemo(
     () => [
       {
-        label: settingsUser?.twoFactorEnabled ? "#2FAEnabled" : "#2FADisabled",
+        label: settingsUser?.twoFactorEnabled
+          ? t("settingsPage.tags.twoFactorEnabled")
+          : t("settingsPage.tags.twoFactorDisabled"),
         active: Boolean(settingsUser?.twoFactorEnabled),
         tone: settingsUser?.twoFactorEnabled
           ? "border-accent-green/30 text-accent-green"
           : "border-label/30 text-label",
       },
       {
-        label: settingsUser?.hasPassword ? "#LocalAuth" : "#OAuthOnly",
+        label: settingsUser?.hasPassword
+          ? t("settingsPage.tags.localAuth")
+          : t("settingsPage.tags.oauthOnly"),
         active: Boolean(settingsUser?.hasPassword),
         tone: settingsUser?.hasPassword
           ? "border-accent-green/30 text-accent-green"
           : "border-accent-blue/30 text-accent-blue",
       },
       {
-        label: form.avatar ? "#AvatarReady" : "#NoAvatar",
+        label: form.avatar ? t("settingsPage.tags.avatarReady") : t("settingsPage.tags.noAvatar"),
         active: Boolean(form.avatar),
         tone: form.avatar
           ? "border-accent-orange/30 text-accent-orange"
           : "border-label/30 text-label",
       },
       {
-        label: form.banner ? "#BannerReady" : "#NoBanner",
+        label: form.banner ? t("settingsPage.tags.bannerReady") : t("settingsPage.tags.noBanner"),
         active: Boolean(form.banner),
         tone: form.banner
           ? "border-accent-red/30 text-accent-red"
           : "border-label/30 text-label",
       },
     ],
-    [form.avatar, form.banner, settingsUser?.hasPassword, settingsUser?.twoFactorEnabled],
+    [form.avatar, form.banner, settingsUser?.hasPassword, settingsUser?.twoFactorEnabled, t],
   );
 
   const updateFormField = <K extends keyof ProfileFormState>(
@@ -491,7 +495,7 @@ export default function SettingsPage() {
 
   const handleSetupOrDisableTwoFactor = async () => {
     if (!token || !settingsUser) {
-      notifyError("You must be logged in to update 2FA settings.");
+      notifyError(t("settingsPage.twoFactor.errors.loginRequired"));
       return;
     }
 
@@ -503,7 +507,7 @@ export default function SettingsPage() {
         const result = await disableTwoFactor(token);
 
         if (!result.ok) {
-          throw new Error(result.message || "Unable to disable 2FA.");
+          throw new Error(result.message || t("settingsPage.twoFactor.errors.disable"));
         }
 
         setSettingsUser((previous) =>
@@ -514,8 +518,8 @@ export default function SettingsPage() {
               }
             : previous,
         );
-        setStampText("2FA DISABLED");
-        setStatusLine("Two-factor authentication has been disabled.");
+        setStampText(t("settingsPage.twoFactor.stampDisabled"));
+        setStatusLine(t("settingsPage.twoFactor.statusDisabled"));
         setLastSyncAt(Date.now());
         await refreshUser();
         notifySuccess(result.data.message);
@@ -525,10 +529,10 @@ export default function SettingsPage() {
       setTwoFactorDialogOpen(true);
       setTwoFactorCodeSent(false);
       setTwoFactorAutoSendAttempted(false);
-      setTwoFactorMessage("Sending your 4-digit verification code...");
+      setTwoFactorMessage(t("settingsPage.twoFactor.sendingMessage"));
     } catch (error) {
       notifyError(
-        error instanceof Error ? error.message : "Failed to update 2FA settings.",
+        error instanceof Error ? error.message : t("settingsPage.twoFactor.errors.updateFallback"),
       );
     } finally {
       setTwoFactorBusy(false);
@@ -537,12 +541,12 @@ export default function SettingsPage() {
 
   const handleConfirmTwoFactorSetup = async (code: string) => {
     if (!token) {
-      notifyError("You must be logged in to confirm 2FA.");
+      notifyError(t("settingsPage.twoFactor.errors.confirmLoginRequired"));
       return;
     }
 
     if (!twoFactorCodeSent) {
-      notifyError("Send a code first.");
+      notifyError(t("settingsPage.twoFactor.errors.sendFirst"));
       return;
     }
 
@@ -552,7 +556,7 @@ export default function SettingsPage() {
       const result = await confirmTwoFactorSetup(token, code);
 
       if (!result.ok) {
-        throw new Error(result.message || "Unable to confirm 2FA code.");
+        throw new Error(result.message || t("settingsPage.twoFactor.errors.confirm"));
       }
 
       setSettingsUser((previous) =>
@@ -565,14 +569,14 @@ export default function SettingsPage() {
       );
       setTwoFactorDialogOpen(false);
       setTwoFactorMessage(null);
-      setStampText("2FA ENABLED");
-      setStatusLine("Two-factor authentication enabled for login.");
+      setStampText(t("settingsPage.twoFactor.stampEnabled"));
+      setStatusLine(t("settingsPage.twoFactor.statusEnabled"));
       setLastSyncAt(Date.now());
       await refreshUser();
       notifySuccess(result.data.message);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to confirm 2FA code.";
+        error instanceof Error ? error.message : t("settingsPage.twoFactor.errors.confirmFallback");
       setTwoFactorMessage(message);
       notifyError(message);
     } finally {
@@ -582,7 +586,7 @@ export default function SettingsPage() {
 
   const handleSendTwoFactorSetupCode = useCallback(async () => {
     if (!token) {
-      notifyError("You must be logged in to send a 2FA code.");
+      notifyError(t("settingsPage.twoFactor.errors.sendLoginRequired"));
       return;
     }
 
@@ -592,7 +596,7 @@ export default function SettingsPage() {
       const result = await sendTwoFactorSetupCode(token);
 
       if (!result.ok) {
-        throw new Error(result.message || "Unable to send 2FA code.");
+        throw new Error(result.message || t("settingsPage.twoFactor.errors.send"));
       }
 
       setTwoFactorCodeSent(true);
@@ -600,13 +604,13 @@ export default function SettingsPage() {
       notifySuccess(result.data.message);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to send 2FA code.";
+        error instanceof Error ? error.message : t("settingsPage.twoFactor.errors.sendFallback");
       setTwoFactorMessage(message);
       notifyError(message);
     } finally {
       setTwoFactorSending(false);
     }
-  }, [notifyError, notifySuccess, token]);
+  }, [notifyError, notifySuccess, t, token]);
 
   useEffect(() => {
     if (
@@ -775,12 +779,12 @@ export default function SettingsPage() {
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-                        08. Two-factor authentication
+                        {t("settingsPage.twoFactor.label")}
                       </p>
                       <p className="mt-1 text-sm italic text-label">
                         {settingsUser.twoFactorEnabled
-                          ? "2FA is active. Login requires email code confirmation."
-                          : "Enable 2FA to require a 4-digit email code at login."}
+                          ? t("settingsPage.twoFactor.enabledDescription")
+                          : t("settingsPage.twoFactor.disabledDescription")}
                       </p>
                     </div>
 
@@ -798,10 +802,10 @@ export default function SettingsPage() {
                         <HugeiconsIcon icon={PhoneCheckIcon} size={16} strokeWidth={1.9} />
                       )}
                       {twoFactorBusy
-                        ? "Writing..."
+                        ? t("settings.password.saving")
                         : settingsUser.twoFactorEnabled
-                          ? "Disable 2FA"
-                          : "Setup 2FA"}
+                          ? t("settingsPage.twoFactor.disableCta")
+                          : t("settingsPage.twoFactor.setupCta")}
                     </Button>
                   </div>
                 </div>
@@ -873,9 +877,9 @@ export default function SettingsPage() {
       <TwoFactorCodeDialog
         open={twoFactorDialogOpen}
         onOpenChange={handleTwoFactorDialogOpenChange}
-        title="Two-Factor Setup"
-        subtitle="Security Confirmation / Step 2"
-        email={settingsUser?.email || "Unknown email"}
+        title={t("settingsPage.twoFactor.title")}
+        subtitle={t("settingsPage.twoFactor.subtitle")}
+        email={settingsUser?.email || t("settingsPage.unknown")}
         codeSent={twoFactorCodeSent}
         confirming={twoFactorConfirming}
         sending={twoFactorSending}

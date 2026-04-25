@@ -89,8 +89,8 @@ export function SettingsPasswordSection({
           {saving
             ? t("settings.password.saving")
             : hasPassword
-              ? ""
-              : "Set Password"}
+              ? t("common.changePassword")
+              : t("common.setPassword")}
         </Button>
       </div>
 

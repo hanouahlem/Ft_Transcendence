@@ -65,7 +65,7 @@ function LandingNav() {
 		<nav className="flex flex-wrap items-center justify-between gap-4 border-b border-dashed border-ink/10 py-6 lg:py-8">
 			<Link href="/" className="flex items-center gap-4 text-ink">
 				<LogoIcon />
-				<span className="font-display text-xl font-semibold">Field Notes</span>
+				<span className="font-display text-xl font-semibold">{t("app.name")}</span>
 			</Link>
 
 			<div className="flex items-center gap-3 sm:gap-5">

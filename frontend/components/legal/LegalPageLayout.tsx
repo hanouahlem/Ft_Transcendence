@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import ArchiveFilters from "@/components/decor/ArchiveFilters";
 import AccentBeads from "@/components/decor/AccentBeads";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type LegalSection = {
   title: string;
@@ -34,6 +37,8 @@ export default function LegalPageLayout({
   sections,
   alternateLink,
 }: LegalPageLayoutProps) {
+  const { t } = useI18n();
+
   return (
     <main className="archive-page relative min-h-screen overflow-hidden px-6 py-10 sm:px-8 lg:px-12">
       <ArchiveFilters />
@@ -47,14 +52,14 @@ export default function LegalPageLayout({
             className="inline-flex items-center gap-3 border border-black/10 bg-paper px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-label shadow-[3px_3px_0_rgba(0,0,0,0.08)] transition-transform hover:-translate-y-0.5 hover:text-ink"
           >
             <AccentBeads />
-            Archive Index
+            {t("legal.shared.archiveIndex")}
           </Link>
 
           <Link
             href={alternateLink.href}
             className="inline-flex items-center gap-2 border border-black/10 bg-paper-muted px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-label shadow-[3px_3px_0_rgba(0,0,0,0.08)] transition-transform hover:-translate-y-0.5 hover:text-ink"
           >
-            Related Document
+            {t("legal.shared.relatedDocument")}
             <span className="text-ink">{alternateLink.label}</span>
           </Link>
         </div>
@@ -78,7 +83,7 @@ export default function LegalPageLayout({
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="border border-black/10 bg-paper-muted/70 px-4 py-3 shadow-[3px_3px_0_rgba(0,0,0,0.05)] sm:col-span-2 xl:col-span-1">
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-label">
-                    Last Updated
+                    {t("legal.shared.lastUpdated")}
                   </p>
                   <p className="mt-1 text-sm font-semibold text-ink">{updatedAt}</p>
                 </div>
@@ -106,7 +111,9 @@ export default function LegalPageLayout({
                   ].join(" ")}
                 >
                   <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.24em] text-label">
-                    Section {String(index + 1).padStart(2, "0")}
+                    {t("legal.shared.section", {
+                      number: String(index + 1).padStart(2, "0"),
+                    })}
                   </p>
                   <h2 className="text-xl font-semibold text-ink">{section.title}</h2>
                   <p className="mt-3 text-[15px] leading-7 text-label">{section.body}</p>
