@@ -478,6 +478,7 @@ export const translations: Record<Locale, TranslationTree> = {
                 passwordUpdateFallback: "Échec de la mise à jour du mot de passe.",
             },
             toasts: { saved: "Réglages enregistrés." },
+            
         },
         toasts: { needContent: "Vous devez écrire quelque chose avant de publier.", needLogin: "Vous devez être connecté pour publier.", publishFailed: "Impossible de publier le post.", published: "Post publié avec succès." },
     },
