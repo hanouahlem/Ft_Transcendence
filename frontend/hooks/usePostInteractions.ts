@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FeedComment, FeedPost } from "@/lib/feed-types";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
 import { normalizeUploadedMediaPayload } from "@/lib/api";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -13,6 +14,7 @@ type UsePostInteractionsOptions = {
 
 export function usePostInteractions({ token }: UsePostInteractionsOptions) {
   const { notifyError, notifySuccess } = useArchiveToasts();
+  const { t } = useI18n();
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
   const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
@@ -113,7 +115,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
   const handleDeleteComment = async (commentId: number) => {
     if (!token) {
-      notifyError("You must be logged in to delete a comment.");
+      notifyError(t("postInteractions.errors.loginDeleteComment"));
       return;
     }
 
@@ -130,7 +132,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to delete the comment.");
+        throw new Error(data.message || t("postInteractions.errors.deleteCommentFallback"));
       }
 
       setPosts((prevPosts) =>
@@ -149,10 +151,10 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
         }),
       );
 
-      notifySuccess("Comment deleted successfully.");
+      notifySuccess(t("postInteractions.success.commentDeleted"));
     } catch (error) {
       console.error("handleDeleteComment error:", error);
-      notifyError(error instanceof Error ? error.message : "Unknown error.");
+      notifyError(error instanceof Error ? error.message : t("postInteractions.errors.unknown"));
     } finally {
       setDeletingCommentId(null);
     }
@@ -160,14 +162,14 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
   const handleAddComment = async (postId: number) => {
     if (!token) {
-      notifyError("You must be logged in to comment.");
+      notifyError(t("postInteractions.errors.loginComment"));
       return;
     }
 
     const content = commentInputs[postId]?.trim() || "";
 
     if (!content) {
-      notifyError("You need to write a comment.");
+      notifyError(t("postInteractions.errors.commentRequired"));
       return;
     }
 
@@ -186,7 +188,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        notifyError(data.message || "Unable to add the comment.");
+        notifyError(data.message || t("postInteractions.errors.addComment"));
         return;
       }
 
@@ -201,7 +203,9 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
         }));
       }
     } catch (error) {
-      notifyError(error instanceof Error ? error.message : "Failed to add the comment.");
+      notifyError(
+        error instanceof Error ? error.message : t("postInteractions.errors.addCommentFallback"),
+      );
     } finally {
       setCommentingPostId(null);
     }
@@ -209,7 +213,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
   const handleDelete = async (postId: number) => {
     if (!token) {
-      notifyError("You must be logged in to delete a post.");
+      notifyError(t("postInteractions.errors.loginDeletePost"));
       return;
     }
 
@@ -226,15 +230,17 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to delete the post.");
+        throw new Error(data.message || t("postInteractions.errors.deletePost"));
       }
 
-      notifySuccess("Post deleted successfully.");
+      notifySuccess(t("postInteractions.success.postDeleted"));
       setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
       setPostDialogOpen((prevOpen) => (prevOpen && dialogPostId === postId ? false : prevOpen));
     } catch (error) {
       console.error("handleDelete error:", error);
-      notifyError(error instanceof Error ? error.message : "Failed to delete the post.");
+      notifyError(
+        error instanceof Error ? error.message : t("postInteractions.errors.deletePostFallback"),
+      );
     } finally {
       setDeletingPostId(null);
     }
@@ -242,7 +248,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
   const handleToggleLike = async (post: FeedPost) => {
     if (!token) {
-      notifyError("You must be logged in to like a post.");
+      notifyError(t("postInteractions.errors.loginLikePost"));
       return;
     }
 
@@ -260,7 +266,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to update the like.");
+        throw new Error(data.message || t("postInteractions.errors.updateLike"));
       }
 
       updatePostInState(post.id, (currentPost) => ({
@@ -273,7 +279,9 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       }));
     } catch (error) {
       console.error("handleToggleLike error:", error);
-      notifyError(error instanceof Error ? error.message : "Failed to update the like.");
+      notifyError(
+        error instanceof Error ? error.message : t("postInteractions.errors.updateLikeFallback"),
+      );
     } finally {
       setLikingPostId(null);
     }
@@ -281,7 +289,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
   const handleToggleFavorite = async (post: FeedPost) => {
     if (!token) {
-      notifyError("You must be logged in to manage favorites.");
+      notifyError(t("postInteractions.errors.loginFavoritePost"));
       return;
     }
 
@@ -299,7 +307,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to update the favorite.");
+        throw new Error(data.message || t("postInteractions.errors.updateFavorite"));
       }
 
       updatePostInState(post.id, (currentPost) => ({
@@ -312,7 +320,11 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       }));
     } catch (error) {
       console.error("handleToggleFavorite error:", error);
-      notifyError(error instanceof Error ? error.message : "Failed to update the favorite.");
+      notifyError(
+        error instanceof Error
+          ? error.message
+          : t("postInteractions.errors.updateFavoriteFallback"),
+      );
     } finally {
       setFavoritingPostId(null);
     }
@@ -320,7 +332,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
   const handleToggleCommentLike = async (comment: FeedComment) => {
     if (!token) {
-      notifyError("You must be logged in to like a comment.");
+      notifyError(t("postInteractions.errors.loginLikeComment"));
       return;
     }
 
@@ -338,7 +350,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to update the comment like.");
+        throw new Error(data.message || t("postInteractions.errors.updateCommentLike"));
       }
 
       updateCommentInState(comment.id, (currentComment) => ({
@@ -352,7 +364,9 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
     } catch (error) {
       console.error("handleToggleCommentLike error:", error);
       notifyError(
-        error instanceof Error ? error.message : "Failed to update the comment like.",
+        error instanceof Error
+          ? error.message
+          : t("postInteractions.errors.updateCommentLikeFallback"),
       );
     } finally {
       setLikingCommentId(null);
@@ -361,7 +375,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
   const handleToggleCommentFavorite = async (comment: FeedComment) => {
     if (!token) {
-      notifyError("You must be logged in to manage comment favorites.");
+      notifyError(t("postInteractions.errors.loginFavoriteComment"));
       return;
     }
 
@@ -379,7 +393,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to update the comment favorite.");
+        throw new Error(data.message || t("postInteractions.errors.updateCommentFavorite"));
       }
 
       updateCommentInState(comment.id, (currentComment) => ({
@@ -393,7 +407,9 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
     } catch (error) {
       console.error("handleToggleCommentFavorite error:", error);
       notifyError(
-        error instanceof Error ? error.message : "Failed to update the comment favorite.",
+        error instanceof Error
+          ? error.message
+          : t("postInteractions.errors.updateCommentFavoriteFallback"),
       );
     } finally {
       setFavoritingCommentId(null);

@@ -168,7 +168,7 @@ export default function FeedPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to fetch posts.");
+        throw new Error(data.message || t("feed.errors.loadPosts"));
       }
 
       const normalizedPosts = normalizeUploadedMediaPayload(
@@ -179,7 +179,7 @@ export default function FeedPage() {
     } catch (err) {
       console.error("Erreur fetchPosts :", err);
       notifyError(
-        err instanceof Error ? err.message : "Failed to load the feed.",
+        err instanceof Error ? err.message : t("feed.errors.loadFallback"),
       );
     } finally {
       setLoading(false);
@@ -200,7 +200,7 @@ export default function FeedPage() {
 
       if (!res.ok) {
         throw new Error(
-          data.message || "Unable to fetch right-rail suggestions.",
+          data.message || t("feed.errors.loadSuggestions"),
         );
       }
 
