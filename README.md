@@ -13,9 +13,9 @@ This project is a full-stack web application developed as part of the 42 curricu
 | Login    | Role                 | Responsibilities                                |
 |----------|----------------------|-------------------------------------------------|
 | manbengh | PO, Developer        | Public API, notifications                       |
-| nabboud  | PO, Developer        | Upload images, dashboard, browser compatibility | 
+| nabboud  | PO, Developer        | Upload images, dashboard, posts                 | 
 | ahbey    | PM, Developer        | ORM (Prisma), 2FA, sentiment analysis           |
-| wlarbi-a | PM, Developer        | i18n, RTL,                                      |
+| wlarbi-a | PM, Developer        | i18n, RTL, browser compatibility                |
 | cumoncoq | Tech Lead, Developer | WebSockets, chat, OAuth, design system          |
 
 ---
@@ -181,7 +181,7 @@ The team worked collaboratively with regular meetings (2–3 times per week) to 
 - Dashboard analytics – nabboud
 - i18n – wlarbi-a
 - RTL – wlarbi-a
-- Multi-browser support – nabboud
+- Multi-browser support – wlarbi-a
 - Design system – cumoncoq
 - Sentiment analysis – ahbey
 - Search advance - nabboud, wlarbi-a
@@ -222,12 +222,12 @@ Total = 22 points (minimum required: 14)
 
 ### manbengh
 - Public API
-- Notifications
 - Friends system
 
 ### wlarbi-a
 - i18n
 - RTL support
+- Multi-browser
 
 ### cumoncoq
 - WebSockets
@@ -259,7 +259,7 @@ Total = 22 points (minimum required: 14)
 
 ## AI Usage
 
-AI was used to assist with documentation structure and feature organization. All generated content was reviewed and validated by the team.
+AI tools were used to assist with documentation writing and organizing project features. They were also used to clarify technical concepts and improve wording. All generated content was reviewed and validated by the team.
 
 ---
 
@@ -291,8 +291,14 @@ This will start:
 - Backend (Express API)
 - PostgreSQL database
 
-Useful Commands
 
+Open the evaluation stack at:
+
+- `https://localhost:4433/.`
+
+
+
+Useful Commands
 ```bash
 make init      # Generate SSL certificates (first run only)
 make down      # Stop containers
