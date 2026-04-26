@@ -51,6 +51,40 @@ During login:
 
 This is safer because the original password is not kept in the DB.
 
+## Minimum Password Length
+
+The 42 subject requires email/password authentication with proper security. In this codebase, password security has two backend checks:
+
+- passwords must contain between 8 and 20 characters
+- passwords are hashed with bcrypt before being stored
+
+The length rule lives in `backend/src/controllers/userController.js`:
+
+```js
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 20;
+
+function validatePasswordLength(password) {
+  return (
+    typeof password === "string" &&
+    password.length >= MIN_PASSWORD_LENGTH &&
+    password.length <= MAX_PASSWORD_LENGTH
+  );
+}
+```
+
+It is checked when a local password is created or changed:
+
+- `registerUser` for normal registration
+- `updatePassword` for changing an existing local password
+- `setPassword` for OAuth accounts that add a local password later
+
+Why it matters:
+
+- the backend is the security boundary, so a user cannot bypass the rule by editing frontend JavaScript
+- the same rule is reused in every password creation path
+- bcrypt still protects the stored value after the password passes validation
+
 ## JWT
 
 JWT stands for JSON Web Token.

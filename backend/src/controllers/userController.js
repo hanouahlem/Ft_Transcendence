@@ -6,6 +6,20 @@ import { issueTwoFactorCode } from "../services/twoFactorService.js";
 
 const APP_TOKEN_EXPIRATION = "3h";
 const PENDING_TWO_FACTOR_EXPIRATION = "10m";
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 20;
+
+function validatePasswordLength(password) {
+  return (
+    typeof password === "string" &&
+    password.length >= MIN_PASSWORD_LENGTH &&
+    password.length <= MAX_PASSWORD_LENGTH
+  );
+}
+
+function getPasswordLengthMessage() {
+  return `Password must contain between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters.`;
+}
 
 function signSessionToken(user) {
   return jwt.sign(
@@ -135,6 +149,9 @@ export async function registerUser(req, res) {
         if (!username) fieldErrors.username = "Required";
         if (!email) fieldErrors.email = "Required";
         if (!password) fieldErrors.password = "Required";
+        else if (!validatePasswordLength(password)) {
+            fieldErrors.password = getPasswordLengthMessage();
+        }
 
         if (Object.keys(fieldErrors).length > 0) {
             return res.status(400).json({
@@ -378,6 +395,7 @@ export async function searchUser(req, res){
     }
 }
 
+
 export async function searchUsersAdvanced(req, res) {
   try {
     const {
@@ -619,6 +637,10 @@ export async function updatePassword(req, res){
             return res.status(401).json({message: "Passwords do not match"});
         }
 
+        if (!validatePasswordLength(newPassword)) {
+            return res.status(400).json({ message: getPasswordLengthMessage() });
+        }
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         
         await prisma.user.update({
@@ -645,6 +667,10 @@ export async function setPassword(req, res) {
 
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    if (!validatePasswordLength(newPassword)) {
+      return res.status(400).json({ message: getPasswordLengthMessage() });
     }
 
     const user = await prisma.user.findUnique({
