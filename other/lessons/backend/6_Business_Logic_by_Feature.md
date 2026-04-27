@@ -286,8 +286,8 @@ These patterns matter because they make the API predictable.
 
 Concrete example:
 
-- `createCommentHandler` returns `200` with `{ blocked: true, message }` when moderation rejects a comment like "This comment contains inappropriate content."
-- that keeps moderation rejection as a handled business response (UI feedback without an HTTP error entry in browser console)
+- `createCommentHandler` returns `422` when moderation rejects a comment like "This comment contains inappropriate content."
+- the frontend handles that response with an in-app toast and does not log it with `console.error`
 
 ## Mental Model To Remember
 

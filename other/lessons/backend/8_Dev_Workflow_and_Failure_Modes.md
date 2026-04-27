@@ -127,6 +127,24 @@ Cause:
 - invalid IDs
 - invalid upload shape
 
+### Unexpected server error
+
+Symptoms:
+
+- `500` responses
+
+Cause:
+
+- database/runtime failure after request validation passed
+- unexpected exception in controller/service code
+
+Important evaluation rule:
+
+- expected client mistakes should map to `4xx`
+- `500` should be reserved for real backend failures
+
+For example, `backend/src/middleware/auth.js` validates the `Authorization: Bearer <token>` header before splitting it. Missing or malformed tokens return `401`, not `500`.
+
 ### Upload errors
 
 Symptoms:

@@ -263,7 +263,6 @@ export default function SettingsPage() {
         setPosts(Array.isArray(postsData) ? postsData : []);
         setStampText(t("settingsPage.stamp.pending"));
       } catch (error) {
-        console.error("settings fetch error:", error);
         notifyError(
           error instanceof Error ? error.message : t("settingsPage.errors.loadFallback"),
         );
@@ -401,7 +400,6 @@ export default function SettingsPage() {
       await refreshUser();
       notifySuccess(t("settingsPage.toasts.saved"));
     } catch (error) {
-      console.error("save settings error:", error);
       setStampText(t("settingsPage.stamp.commitFailed"));
       notifyError(
         error instanceof Error ? error.message : t("settingsPage.errors.saveFallback"),
@@ -473,7 +471,6 @@ export default function SettingsPage() {
       );
       notifySuccess(result.data.message);
     } catch (error) {
-      console.error("password update error:", error);
       setStampText(t("settingsPage.stamp.passwordFailed"));
       notifyError(
         error instanceof Error ? error.message : t("settingsPage.errors.passwordUpdateFallback"),

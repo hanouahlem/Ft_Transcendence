@@ -32,6 +32,7 @@ const displaySerif = localFont({
     },
   ],
   variable: "--font-display-source",
+  preload: false,
 });
 const monoFont = localFont({
   src: [
@@ -57,6 +58,7 @@ const monoFont = localFont({
     },
   ],
   variable: "--font-mono-source",
+  preload: false,
 });
 
 export const metadata: Metadata = {

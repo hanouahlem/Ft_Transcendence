@@ -95,8 +95,7 @@ export default function FriendsPage() {
 
 				const results = Array.isArray(result.data) ? result.data : [];
 				setSearchedUsers(results.filter((entry) => entry.id !== user?.id));
-			} catch (err) {
-				console.error("Failed to search users", err);
+			} catch {
 				if (searchRequestIdRef.current === requestId) {
 					setSearchedUsers([]);
 				}
@@ -123,8 +122,8 @@ export default function FriendsPage() {
 					)
 				);
 			}
-		} catch (err) {
-			console.error("Erreur fetch friends:", err);
+		} catch {
+			setFriends([]);
 		}
 	}, [token]);
 
@@ -143,8 +142,8 @@ export default function FriendsPage() {
 					)
 				);
 			}
-		} catch (err) {
-			console.error("Erreur fetch requests:", err);
+		} catch {
+			setRequests([]);
 		}
 	}, [token]);
 
@@ -163,8 +162,9 @@ export default function FriendsPage() {
 				setPendingRequests(nextPendingRequests);
 				setSentRequests(nextPendingRequests.map((request) => request.receiverId));
 			}
-		} catch (err) {
-			console.error("Erreur fetch sent requests:", err);
+		} catch {
+			setPendingRequests([]);
+			setSentRequests([]);
 		}
 	}, [token]);
 
@@ -179,8 +179,8 @@ export default function FriendsPage() {
 						: []
 				);
 			}
-		} catch (err) {
-			console.error("Erreur fetch suggestions:", err);
+		} catch {
+			setSuggestions([]);
 		}
 	}, [token]);
 
@@ -256,7 +256,10 @@ export default function FriendsPage() {
 				fetchFriends();
 			}
 		} catch (err) {
-			console.error("Accept error:", err);
+			archiveToaster.error({
+				title: t("friends.toasts.titles.error"),
+				description: err instanceof Error ? err.message : t("friends.toasts.sendError"),
+			});
 		} finally {
 			setProcessingUserId(null);
 		}
@@ -272,7 +275,10 @@ export default function FriendsPage() {
 				archiveToaster.success({ title: t("friends.toasts.titles.declined"), description: t("friends.toasts.declined") });
 			}
 		} catch (err) {
-			console.error("Decline error:", err);
+			archiveToaster.error({
+				title: t("friends.toasts.titles.error"),
+				description: err instanceof Error ? err.message : t("friends.toasts.removeUnable"),
+			});
 		} finally {
 			setProcessingRequestId(null);
 		}
@@ -297,8 +303,7 @@ export default function FriendsPage() {
 			} else {
 				throw new Error(result.message || t("friends.toasts.removeError"));
 			}
-		} catch (err) {
-			console.error("Remove friend error:", err);
+		} catch {
 			archiveToaster.error({ title: t("friends.toasts.titles.error"), description: t("friends.toasts.removeUnable") });
 		} finally {
 			setProcessingUserId(null);

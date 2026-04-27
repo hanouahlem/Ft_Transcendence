@@ -134,6 +134,8 @@ If verification fails:
 
 - request ends with `401`
 
+Missing or malformed auth headers also return `401`. The middleware checks the header before splitting it so a request without `Authorization` cannot accidentally throw and become a `500`.
+
 ## `Authorization: Bearer <token>`
 
 Protected requests must send a header like:
@@ -145,10 +147,20 @@ Authorization: Bearer eyJ...
 The `Bearer` part is just the standard scheme name.
 The actual JWT is the second part.
 
-That is why the middleware uses:
+That is why the middleware validates both parts:
 
 ```js
-req.headers.authorization?.split(" ")[1]
+const authorization = req.headers.authorization;
+
+if (!authorization || typeof authorization !== "string") {
+  return res.status(401).json({ message: "Token manquant" });
+}
+
+const [scheme, token] = authorization.split(" ");
+
+if (scheme !== "Bearer" || !token) {
+  return res.status(401).json({ message: "Token invalide" });
+}
 ```
 
 It splits:

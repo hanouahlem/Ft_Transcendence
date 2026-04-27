@@ -157,8 +157,10 @@ export function useFriendRequests({
         setIncomingRequestIdsBySender(nextIncomingRequests);
         setSentRequests(nextSentRequests);
         setConnectedFriendshipIdsByUser(nextConnectedFriendshipIds);
-      } catch (error) {
-        console.error("fetchPendingRequests error:", error);
+      } catch {
+        setSentRequests([]);
+        setIncomingRequestIdsBySender({});
+        setConnectedFriendshipIdsByUser({});
       }
     };
 
@@ -198,7 +200,6 @@ export function useFriendRequests({
       setSentRequests((prev) => (prev.includes(receiverId) ? prev : [...prev, receiverId]));
       notifySuccess(t("friendRequests.success.sent"));
     } catch (error) {
-      console.error("handleAddFriend error:", error);
       notifyError(
         error instanceof Error ? error.message : t("friendRequests.errors.sendFallback"),
       );
@@ -249,7 +250,6 @@ export function useFriendRequests({
       notifySuccess(t("friendRequests.success.accepted"));
       onFriendAccepted?.(senderId);
     } catch (error) {
-      console.error("handleAcceptFriend error:", error);
       notifyError(
         error instanceof Error ? error.message : t("friendRequests.errors.acceptFallback"),
       );
@@ -294,7 +294,6 @@ export function useFriendRequests({
       });
       notifySuccess(t("friendRequests.success.removed"));
     } catch (error) {
-      console.error("handleRemoveFriend error:", error);
       notifyError(
         error instanceof Error ? error.message : t("friendRequests.errors.removeFallback"),
       );

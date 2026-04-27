@@ -50,9 +50,9 @@ function buildMutualFriendSuggestions({ currentUserId, connectedUserIds, network
 export async function addFriend(req, res) {
     try {
         const senderId = req.user.id;
-        const { receiverId } = req.body;
+        const receiverId = Number(req.body?.receiverId);
 
-        if (!receiverId) {
+        if (Number.isNaN(receiverId) || receiverId < 1) {
             return res.status(400).json({ message: "receiverId is required" });
         }
 
@@ -157,6 +157,10 @@ export async function acceptFriend(req, res) {
 
         const requestId = parseInt(req.params.id);
 
+        if (Number.isNaN(requestId) || requestId < 1) {
+            return res.status(400).json({ message: "Invalid friend request id." });
+        }
+
         const friends = await prisma.friends.findUnique({
             where: { id: requestId }
         });
@@ -200,6 +204,10 @@ export async function deleteFriend(req, res) {
         }
 
         const friendId = parseInt(req.params.id);
+
+        if (Number.isNaN(friendId) || friendId < 1) {
+            return res.status(400).json({ message: "Invalid friend id." });
+        }
 
         const friend = await prisma.friends.findFirst({
             where: {

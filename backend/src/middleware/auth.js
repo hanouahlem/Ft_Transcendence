@@ -2,11 +2,18 @@ import jwt from 'jsonwebtoken';
 import { getEnv } from "../env.js";
 
 export function authMiddleware(req, res, next) {
+    const authorization = req.headers.authorization;
 
-    const token = req.headers.authorization.split(" ")[1];
-    if (!token) {
+    if (!authorization || typeof authorization !== "string") {
         return res.status(401).json({ message: "Token manquant" });
     }
+
+    const [scheme, token] = authorization.split(" ");
+
+    if (scheme !== "Bearer" || !token) {
+        return res.status(401).json({ message: "Token invalide" });
+    }
+
     try{
         const verifToken = jwt.verify (token, getEnv("JWT_SECRET"));
         req.user = verifToken;

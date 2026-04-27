@@ -154,7 +154,6 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
       notifySuccess(t("postInteractions.success.commentDeleted"));
     } catch (error) {
-      console.error("handleDeleteComment error:", error);
       notifyError(
         error instanceof Error ? translateApiMessage(error.message) : t("postInteractions.errors.unknown"),
       );
@@ -192,11 +191,6 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
 
       if (!res.ok) {
         notifyError(translateApiMessage(data.message) || t("postInteractions.errors.addComment"));
-        return;
-      }
-
-      if (data?.blocked) {
-        notifyError(data.message || t("postInteractions.errors.addComment"));
         return;
       }
 
@@ -245,7 +239,6 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
       setPostDialogOpen((prevOpen) => (prevOpen && dialogPostId === postId ? false : prevOpen));
     } catch (error) {
-      console.error("handleDelete error:", error);
       notifyError(
         error instanceof Error ? translateApiMessage(error.message) : t("postInteractions.errors.deletePostFallback"),
       );
@@ -286,7 +279,6 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
         ),
       }));
     } catch (error) {
-      console.error("handleToggleLike error:", error);
       notifyError(
         error instanceof Error ? translateApiMessage(error.message) : t("postInteractions.errors.updateLikeFallback"),
       );
@@ -327,7 +319,6 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
         ),
       }));
     } catch (error) {
-      console.error("handleToggleFavorite error:", error);
       notifyError(
         error instanceof Error
           ? translateApiMessage(error.message)
@@ -370,7 +361,6 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
         ),
       }));
     } catch (error) {
-      console.error("handleToggleCommentLike error:", error);
       notifyError(
         error instanceof Error
           ? translateApiMessage(error.message)
@@ -413,7 +403,6 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
         ),
       }));
     } catch (error) {
-      console.error("handleToggleCommentFavorite error:", error);
       notifyError(
         error instanceof Error
           ? translateApiMessage(error.message)

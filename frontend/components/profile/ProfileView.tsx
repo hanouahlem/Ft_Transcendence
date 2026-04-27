@@ -260,7 +260,6 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
         setPosts(Array.isArray(postsResult.data) ? postsResult.data : []);
         setFriends(Array.isArray(friendsResult.data) ? friendsResult.data : []);
       } catch (error) {
-        console.error("fetchProfile error:", error);
         setPageError(
           error instanceof Error
             ? error.message

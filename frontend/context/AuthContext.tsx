@@ -40,8 +40,7 @@ function getTokenExpiryTimestamp(token: string) {
     }
 
     return decodedPayload.exp * 1000;
-  } catch (error) {
-    console.error("Invalid JWT payload:", error);
+  } catch {
     return null;
   }
 }
@@ -75,8 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(result.data);
       return result.data;
-    } catch (error) {
-      console.error("Erreur chargement utilisateur :", error);
+    } catch {
       clearAuthState();
       return null;
     }
@@ -95,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const expiryTimestamp = getTokenExpiryTimestamp(storedToken);
 
-      if (expiryTimestamp !== null && expiryTimestamp <= Date.now()) {
+      if (expiryTimestamp === null || expiryTimestamp <= Date.now()) {
         clearAuthState();
         return;
       }
@@ -125,6 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const expiryTimestamp = getTokenExpiryTimestamp(token);
 
     if (expiryTimestamp === null) {
+      clearAuthState();
       return;
     }
 
@@ -150,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (newToken: string) => {
     const expiryTimestamp = getTokenExpiryTimestamp(newToken);
 
-    if (expiryTimestamp !== null && expiryTimestamp <= Date.now()) {
+    if (expiryTimestamp === null || expiryTimestamp <= Date.now()) {
       clearAuthState();
       return false;
     }

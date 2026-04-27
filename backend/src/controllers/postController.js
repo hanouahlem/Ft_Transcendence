@@ -23,6 +23,29 @@ import {
 } from "../services/notificationService.js";
 import { POST_MESSAGES } from "../constants/postMessages.js";
 
+const postErrorStatus = (error) => {
+  if (!(error instanceof Error)) {
+    return null;
+  }
+
+  if (
+    error.message === POST_MESSAGES.errors.postNotFound ||
+    error.message === POST_MESSAGES.errors.commentNotFound ||
+    error.message === POST_MESSAGES.errors.userNotFound
+  ) {
+    return 404;
+  }
+
+  if (
+    error.message === POST_MESSAGES.errors.notAllowedDeleteComment ||
+    error.message === "You are not allowed to delete this post"
+  ) {
+    return 403;
+  }
+
+  return null;
+};
+
 export const getPostsHandler = async (req, res) => {
   try {
     const currentUserId = req.user?.id ?? req.user?.userId;
@@ -100,6 +123,14 @@ export const createPostHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur createPostHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableCreatePost,
     });
@@ -182,6 +213,14 @@ export const deletePostHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur deletePostHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableDeletePost,
     });
@@ -221,6 +260,14 @@ export const likePostHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur likePostHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableLikePost,
     });
@@ -260,6 +307,14 @@ export const unlikePostHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur unlikePostHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableUnlikePost,
     });
@@ -315,8 +370,7 @@ export const createCommentHandler = async (req, res) => {
     });
   } catch (error) {
     if (error.message === POST_MESSAGES.errors.inappropriateComment) {
-      return res.status(200).json({
-        blocked: true,
+      return res.status(422).json({
         message: error.message,
       });
     }
@@ -367,6 +421,14 @@ export const favoritePostHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur favoritePostHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableFavoritePost,
     });
@@ -405,6 +467,14 @@ export const unfavoritePostHandler = async (req, res) => {
       message: POST_MESSAGES.success.postUnfavorited,
     });
   } catch (error) {
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableUnfavoritePost,
     });
@@ -444,6 +514,14 @@ export const likeCommentHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur likeCommentHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableLikeComment,
     });
@@ -483,6 +561,14 @@ export const unlikeCommentHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur unlikeCommentHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableUnlikeComment,
     });
@@ -522,6 +608,14 @@ export const favoriteCommentHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur favoriteCommentHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableFavoriteComment,
     });
@@ -561,6 +655,14 @@ export const unfavoriteCommentHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur unfavoriteCommentHandler :", error);
+    const status = postErrorStatus(error);
+
+    if (status) {
+      return res.status(status).json({
+        message: error.message,
+      });
+    }
+
     return res.status(500).json({
       message: error.message || POST_MESSAGES.errors.unableUnfavoriteComment,
     });

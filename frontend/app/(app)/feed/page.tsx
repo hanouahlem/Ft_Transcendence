@@ -177,7 +177,6 @@ export default function FeedPage() {
 
       setPosts(normalizedPosts);
     } catch (err) {
-      console.error("Erreur fetchPosts :", err);
       notifyError(
         err instanceof Error ? err.message : t("feed.errors.loadFallback"),
       );
@@ -224,8 +223,8 @@ export default function FeedPage() {
         : [];
 
       setSuggestions(normalizedSuggestions);
-    } catch (err) {
-      console.error("Erreur suggestions right rail :", err);
+    } catch {
+      setSuggestions([]);
     }
   };
 

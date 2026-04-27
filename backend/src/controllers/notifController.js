@@ -46,6 +46,10 @@ export async function markAsRead(req, res){
 
         const notifId = parseInt(req.params.id);
 
+        if (Number.isNaN(notifId) || notifId < 1) {
+            return res.status(400).json({ message: "Invalid notification id" });
+        }
+
         const notification = await prisma.notification.findFirst({
             where: { id: notifId , userId }
         });
@@ -86,6 +90,10 @@ export async function deleteNotif(req, res){
         }
 
         const notifId = parseInt(req.params.id);
+
+        if (Number.isNaN(notifId) || notifId < 1) {
+            return res.status(400).json({ message: "Invalid notification id" });
+        }
 
         const notification = await prisma.notification.findFirst({
             where: { id: notifId , userId }

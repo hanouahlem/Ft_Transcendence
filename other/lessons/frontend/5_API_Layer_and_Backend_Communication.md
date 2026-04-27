@@ -80,6 +80,35 @@ This is already used by auth/settings code such as:
 - `frontend/app/(auth)/login/page.tsx`
 - `frontend/app/(app)/settings/page.tsx`
 
+## Evaluation Console Hygiene
+
+Expected backend failures should be handled in UI state or toasts instead of being printed with `console.error`.
+
+Protected pages should:
+
+- skip API calls when there is no token
+- show an in-app error message or toast when a request fails
+- avoid logging expected `400`, `401`, `403`, or `404` responses to Chrome DevTools
+
+Real code uses guards like:
+
+```tsx
+if (!token) {
+  return;
+}
+```
+
+and then handles failed API results without console logging:
+
+```tsx
+if (!result.ok) {
+  notifyError(result.message);
+  return;
+}
+```
+
+This keeps the browser console clean during evaluation while still giving the user feedback. Server-side `console.error` can remain for unexpected backend failures because those logs are for Docker/server debugging, not Chrome DevTools.
+
 ## Auth Header Centralization
 
 During the refactor, the file was updated to centralize bearer-token handling.

@@ -30,11 +30,17 @@ contains archive-style utility classes such as:
 
 It also registers custom font families (for example the stamp font) so Tailwind utilities can use them from one place.
 
+The root layout loads the archive display and mono fonts in:
+
+- `frontend/app/layout.tsx`
+
+Those local fonts use `preload: false`. They are still available through the CSS variables, but Next.js does not add automatic `<link rel="preload">` tags for every weight/style variant on every route. This avoids browser console warnings like "preloaded but not used" when a route only uses some of the variants after hydration.
+
 The app-only sans font is loaded separately in:
 
 - `frontend/app/(app)/layout.tsx`
 
-and uses `preload: false` because the archive app shell does not need the browser to preload an italic Inter face on first paint. This avoids noisy preload warnings while keeping `font-sans` available for the few UI elements that still use it.
+and also uses `preload: false` because the archive app shell does not need the browser to preload the app sans face on first paint.
 
 Real code:
 
