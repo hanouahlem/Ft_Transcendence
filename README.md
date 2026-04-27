@@ -14,7 +14,7 @@ This project is a full-stack web application developed as part of the 42 curricu
 |----------|----------------------|-------------------------------------------------|
 | manbengh | PO, Developer        | Public API, notifications                       |
 | nabboud  | PO, Developer        | Upload images, dashboard, posts                 | 
-| ahbey    | PM, Developer        | ORM (Prisma), 2FA, sentiment analysis           |
+| ahbey    | PM, Developer        | ORM (Prisma), 2FA, Content moderation AI        |
 | wlarbi-a | PM, Developer        | i18n, RTL, browser compatibility                |
 | cumoncoq | Tech Lead, Developer | WebSockets, chat, OAuth, design system          |
 
@@ -53,6 +53,9 @@ The team worked collaboratively with regular meetings (2–3 times per week) to 
 ### Database
 - PostgreSQL
 
+### Reverse proxy
+- Nginx
+
 ### Justification
 
 - Next.js: modern full-stack framework
@@ -66,42 +69,76 @@ The team worked collaboratively with regular meetings (2–3 times per week) to 
 ## Database Schema
 
 ### Main tables
+## Database Schema
 
-- **User**
+### Main tables
+
+**User**
   - id
   - username
+  - displayName
   - email
   - password
+  - githubId
+  - fortyTwoId
   - avatar
+  - banner
   - bio
+  - status
+  - location
+  - website
+  - twoFactorEnabled
+  - twoFactorcode
+  - twoFactorExpires
   - createdAt
 
-- **Post**
+**Post**
   - id
   - content
   - image
   - authorId
   - createdAt
 
-- **Comment**
+**Comment**
   - id
   - content
+  - image
   - userId
   - postId
   - createdAt
 
-- **Like**
+**Like**
   - id
   - userId
   - postId
 
-- **Friends**
+**Repost**
+  - id
+  - userId
+  - postId
+
+**Favorite**
+  - id
+  - userId
+  - postId
+
+**CommentLike**
+  - id
+  - userId
+  - commentId
+
+**CommentFavorite**
+  - id
+  - userId
+  - commentId
+
+**Friends**
   - id
   - senderId
   - receiverId
   - status
 
-- **Notification**
+**Notification**
   - id
   - userId
   - actorId
@@ -110,53 +147,71 @@ The team worked collaboratively with regular meetings (2–3 times per week) to 
   - read
   - createdAt
 
-- **Conversation**
+**Conversation**
   - id
   - directKey
+  - lastMessageAt
   - createdAt
+  - updatedAt
 
-- **Message**
+**ConversationMember**
+  - id
+  - conversationId
+  - userId
+  - lastReadMessageId
+  - createdAt
+  - updatedAt
+  
+**Message**
   - id
   - conversationId
   - senderId
   - content
   - createdAt
 
-
-### Relationships:
+### Relationships
 
 - User → Post (1:N)
 - Post → Comment (1:N)
 - User → Comment (1:N)
 - User → Like (1:N)
 - Post → Like (1:N)
-- User → Friends (N:N)
-- User → Notification (1:N)
-- User → Message (1:N)
+- User → Repost (1:N)
+- Post → Repost (1:N)
+- User → Favorite (1:N)
+- Post → Favorite (1:N)
+- Comment → CommentLike (1:N)
+- Comment → CommentFavorite (1:N)
+- User → Friends (N:N via sender/receiver)
+- User → Notification (1:N via recipient + actor)
+- Post → Notification (1:N)
+- Conversation → ConversationMember (1:N)
+- User → ConversationMember (1:N)
 - Conversation → Message (1:N)
+- User → Message (1:N)
 
 ---
 
 ## Features List
 
-| Feature            | Description                           | Implemented by     |
-|--------------------|---------------------------------------|--------------------|
-| 2FA                | Two-factor authentication             | ahbey              |
-| OAuth              | Login, register with Intra and GitHub | cumoncoq           |
-| Profiles           | update profile, password, bio, usename| ahbey              |
-| Posts              | Create and delete posts               | nabboud            |
-| Likes&comments     | Social interactions                   | nabboud            |
-| Friends system     | Add, accept, and delete friends       | ahbey, manbengh    |
-| Real-time chat     | Real-time messaging using WebSockets  | cumoncoq           |
-| Notifications      | User alerts                           | manbengh, cumoncoq |
-| Image upload       | Media posts                           | nabboud            |
-| Search advance     | Users and posts                       | nabboud, wlarbi-a  |
-| Dashboard          | User analytics                        | nabboud            |
-| i18n               | Multi-language                        | wlarbi-a           |
-| RTL                | Right-to-left support                 | wlarbi-a           |
-| Browser support    | Multi-browser compatibility           | wlarbi-a           |
-| Public API         | External access                       | manbengh           |
-| Sentiment analysis | Comment moderation                    | ahbey              |
+| Feature               | Description                            | Implemented by      |
+|-----------------------|----------------------------------------|---------------------|
+| 2FA                   | Two-factor authentication              | ahbey               |
+| OAuth                 | Login, register with Intra and GitHub  | cumoncoq            |
+| Profiles              | update profile, password, bio, usename | ahbey               |
+| Posts                 | Create and delete posts                | nabboud             |
+| Likes&comments        | Social interactions                    | nabboud             |
+| Friends system        | Add, accept, and delete friends        | ahbey, manbengh     |
+| Real-time chat        | Real-time messaging using WebSockets   | cumoncoq            |
+| Notifications         | User alerts                            | manbengh, cumoncoq  |
+| Image upload          | Media posts                            | nabboud             |
+| Search advance        | Users and posts                        | nabboud, wlarbi-a   |
+| Dashboard             | User analytics                         | nabboud             |
+| i18n                  | Multi-language                         | wlarbi-a            |
+| RTL                   | Right-to-left support                  | wlarbi-a            |
+| Browser support       | Multi-browser compatibility            | wlarbi-a            |
+| Public API            | External access                        | manbengh            |
+| Content moderation AI | Comment moderation                     | ahbey               |
 
 ---
 
@@ -183,7 +238,7 @@ The team worked collaboratively with regular meetings (2–3 times per week) to 
 - RTL – wlarbi-a
 - Multi-browser support – wlarbi-a
 - Design system – cumoncoq
-- Sentiment analysis – ahbey
+- Content moderation AI ahbey
 - Search advance - nabboud, wlarbi-a
 
 ### Total Points
@@ -208,7 +263,7 @@ Total = 22 points (minimum required: 14)
 - **Multi-browser support**: ensures compatibility across different environments.
 - **User interaction**: core feature allowing communication between users.
 - **Design system**: ensures UI consistency and reusability.
-- **Sentiment analysis**: helps moderate comments and detect negative content.
+- **Content moderation AI**: helps moderate comments and detect negative content.
 - **Advanced search**: improves usability by allowing users to find content efficiently.
 
 ---
@@ -218,9 +273,10 @@ Total = 22 points (minimum required: 14)
 ### ahbey
 - Prisma ORM
 - 2FA
-- Sentiment analysis
+- Content moderation AI
 
 ### manbengh
+
 - Public API
 - Friends system
 
@@ -290,6 +346,7 @@ This will start:
 - Frontend (Next.js)
 - Backend (Express API)
 - PostgreSQL database
+- Nginx(reverse proxy)
 
 
 Open the evaluation stack at:

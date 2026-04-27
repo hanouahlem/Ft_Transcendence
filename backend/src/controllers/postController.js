@@ -315,7 +315,8 @@ export const createCommentHandler = async (req, res) => {
     });
   } catch (error) {
     if (error.message === POST_MESSAGES.errors.inappropriateComment) {
-      return res.status(422).json({
+      return res.status(200).json({
+        blocked: true,
         message: error.message,
       });
     }
