@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useEffectEvent } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
 import { usePathname } from "next/navigation";
 import { archiveToaster } from "@/components/ui/toaster";
 import { normalizeUploadedMediaPayload } from "@/lib/api";
@@ -12,20 +13,21 @@ import {
   type NotificationCreatedEvent,
 } from "@/lib/socket-events";
 
-function getDisplayName(value?: string | null, fallback?: string | null) {
+function getDisplayName(value?: string | null, fallback?: string | null, t?: any) {
   const normalizedValue = value?.trim();
 
   if (normalizedValue) {
     return normalizedValue;
   }
 
-  return fallback?.trim() || "Someone";
+  return fallback?.trim() || (t ? t("notifications.someone") : "Someone");
 }
 
 export function LiveInboxToasts() {
   const pathname = usePathname();
   const { user } = useAuth();
   const { socket } = useSocket();
+  const { t } = useI18n();
   const isMessagePage = pathname === "/message";
   const isNotificationsPage = pathname === "/notifications";
 
@@ -45,6 +47,7 @@ export function LiveInboxToasts() {
       const peerName = getDisplayName(
         normalizedConversation.peer?.displayName,
         normalizedConversation.peer?.username,
+        t,
       );
 
       archiveToaster.info({
@@ -73,7 +76,7 @@ export function LiveInboxToasts() {
       }
 
       archiveToaster.info({
-        title: "Notification",
+        title: t("notifications.pageTitle"),
         duration: 5000,
         closable: false,
         meta: {

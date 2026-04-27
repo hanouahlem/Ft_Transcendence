@@ -44,11 +44,15 @@ export type NotificationLedgerItem =
   | SingleNotificationLedgerItem
   | LikeNotificationGroupLedgerItem;
 
-function truncateNotificationPost(content?: string | null, maxLength = 56) {
+function truncateNotificationPost(
+  content?: string | null,
+  maxLength = 56,
+  t?: NotificationTranslate,
+) {
   const normalized = content?.trim().replace(/\s+/g, " ") || "";
 
   if (!normalized) {
-    return "Untitled archive entry";
+    return t ? t("notifications.copy.untitled") : "Untitled archive entry";
   }
 
   if (normalized.length <= maxLength) {
@@ -182,31 +186,37 @@ export function getNotificationCopy(
           ? t("notifications.copy.like.helper")
           : "This notice links directly to the referenced post dialog.",
         actionLabel: t ? t("notifications.copy.like.actionLabel") : "Open entry",
-        quote: truncateNotificationPost(notification.post?.content),
+        quote: truncateNotificationPost(notification.post?.content, 56, t),
         inlineQuote: true,
       };
     case "FAVORITE":
       return {
-        eyebrow: "Favorite",
-        body: "Favorited your post:",
-        helper: "This notice links directly to the referenced post dialog.",
-        actionLabel: "Open entry",
-        quote: truncateNotificationPost(notification.post?.content),
-        inlineQuote: true,
+            eyebrow: t ? t("notifications.copy.favorite.eyebrow") : "Favorite",
+            body: t ? t("notifications.copy.favorite.body") : "Favorited your post:",
+            helper: t
+              ? t("notifications.copy.favorite.helper")
+              : "This notice links directly to the referenced post dialog.",
+            actionLabel: t ? t("notifications.copy.favorite.actionLabel") : "Open entry",
+            quote: truncateNotificationPost(notification.post?.content, 56, t),
+            inlineQuote: true,
       };
     case "COMMENT_LIKE":
       return {
-        eyebrow: "Comment like",
-        body: "Liked your comment.",
-        helper: "Open the post to inspect the conversation.",
-        actionLabel: "Open comment thread",
+            eyebrow: t ? t("notifications.copy.commentLike.eyebrow") : "Comment like",
+            body: t ? t("notifications.copy.commentLike.body") : "Liked your comment.",
+            helper: t
+              ? t("notifications.copy.commentLike.helper")
+              : "Open the post to inspect the conversation.",
+            actionLabel: t ? t("notifications.copy.commentLike.actionLabel") : "Open comment thread",
       };
     case "COMMENT_FAVORITE":
       return {
-        eyebrow: "Comment favorite",
-        body: "Favorited your comment.",
-        helper: "Open the post to inspect the conversation.",
-        actionLabel: "Open comment thread",
+            eyebrow: t ? t("notifications.copy.commentFavorite.eyebrow") : "Comment favorite",
+            body: t ? t("notifications.copy.commentFavorite.body") : "Favorited your comment.",
+            helper: t
+              ? t("notifications.copy.commentFavorite.helper")
+              : "Open the post to inspect the conversation.",
+            actionLabel: t ? t("notifications.copy.commentFavorite.actionLabel") : "Open comment thread",
       };
     case "COMMENT":
       return {
@@ -355,24 +365,31 @@ export function matchesNotificationLedgerFilters(
   return matchesNotificationFilters(item.notification, filters);
 }
 
-export function getNotificationLedgerSearchText(item: NotificationLedgerItem) {
+export function getNotificationLedgerSearchText(
+  item: NotificationLedgerItem,
+  t?: NotificationTranslate,
+) {
   if (item.kind === "single") {
     return getNotificationSearchText(item.notification);
   }
 
   const primaryActor =
-    item.actors[0]?.displayName?.trim() || item.actors[0]?.username || "Someone";
+    item.actors[0]?.displayName?.trim() || item.actors[0]?.username || (t ? t("notifications.someone") : "Someone");
   const otherCount = Math.max(0, item.likeCount - 1);
   const postPreview = truncateNotificationPost(item.latestNotification.post?.content);
 
-  return [
+      return [
     primaryActor,
     ...item.actors.map((actor) => actor.displayName),
     ...item.actors.map((actor) => actor.username),
-    "recent activity",
-    "liked your post",
-    postPreview,
-    otherCount > 0 ? `${otherCount} others` : null,
+        t ? t("notifications.recentActivity") : "recent activity",
+        t ? t("notifications.likeGroup.likedYourPost") : "liked your post",
+        postPreview,
+        otherCount > 0
+          ? t
+            ? t("notifications.likeGroup.andOthers", { count: otherCount })
+            : `${otherCount} others`
+          : null,
   ]
     .filter(Boolean)
     .join(" ")

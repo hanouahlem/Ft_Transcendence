@@ -21,6 +21,7 @@ import {
   deleteNotificationIfExists,
   NOTIFICATION_TYPES,
 } from "../services/notificationService.js";
+import { POST_MESSAGES } from "../constants/postMessages.js";
 
 export const getPostsHandler = async (req, res) => {
   try {
@@ -28,8 +29,8 @@ export const getPostsHandler = async (req, res) => {
     const posts = await getAllPosts(currentUserId);
     res.status(200).json(posts);
   } catch (error) {
-    // console.error("Erreur getPostsHandler :", error);
-    res.status(500).json({ message: "Unable to fetch posts." });
+    console.error("Erreur getPostsHandler :", error);
+    res.status(500).json({ message: POST_MESSAGES.errors.unableFetchPosts });
   }
 };
 
@@ -47,8 +48,8 @@ export const searchPostsHandler = async (req, res) => {
     });
     res.status(200).json(result);
   } catch (error) {
-    // console.error("Erreur searchPostsHandler :", error);
-    res.status(500).json({ message: "Unable to search posts." });
+    console.error("Erreur searchPostsHandler :", error);
+    res.status(500).json({ message: POST_MESSAGES.errors.unableSearchPosts });
   }
 };
 
@@ -59,7 +60,7 @@ export const getFriendsPostsHandler = async (req, res) => {
     res.status(200).json(posts);
   } catch (error) {
     console.error("Erreur getFriendsPostsHandler :", error);
-    res.status(500).json({ message: "Unable to fetch friends posts." });
+    res.status(500).json({ message: POST_MESSAGES.errors.unableFetchFriendsPosts });
   }
 };
 
@@ -69,7 +70,7 @@ export const createPostHandler = async (req, res) => {
 
     if (!content || typeof content !== "string" || !content.trim()) {
       return res.status(400).json({
-        message: "Post content is required.",
+        message: POST_MESSAGES.errors.postContentRequired,
       });
     }
 
@@ -77,7 +78,7 @@ export const createPostHandler = async (req, res) => {
 
     if (!authorId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -94,13 +95,13 @@ export const createPostHandler = async (req, res) => {
     });
 
     return res.status(201).json({
-      message: "Post created successfully.",
+      message: POST_MESSAGES.success.postCreated,
       post: newPost,
     });
   } catch (error) {
     console.error("Erreur createPostHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to create post.",
+      message: error.message || POST_MESSAGES.errors.unableCreatePost,
     });
   }
 };
@@ -112,13 +113,13 @@ export const deleteCommentHandler = async (req, res) => {
 
     if (Number.isNaN(commentId) || commentId < 1) {
       return res.status(400).json({
-        message: "Invalid comment id.",
+        message: POST_MESSAGES.errors.invalidCommentId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -134,25 +135,25 @@ export const deleteCommentHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Comment deleted successfully.",
+      message: POST_MESSAGES.success.commentDeleted,
     });
   } catch (error) {
     console.error("Erreur deleteCommentHandler :", error);
 
-    if (error.message === "Comment not found") {
+    if (error.message === POST_MESSAGES.errors.commentNotFound) {
       return res.status(404).json({
         message: error.message,
       });
     }
 
-    if (error.message === "You are not allowed to delete this comment") {
+    if (error.message === POST_MESSAGES.errors.notAllowedDeleteComment) {
       return res.status(403).json({
         message: error.message,
       });
     }
 
     return res.status(500).json({
-      message: error.message || "Unable to delete comment.",
+      message: error.message || POST_MESSAGES.errors.unableDeleteComment,
     });
   }
 };
@@ -164,25 +165,25 @@ export const deletePostHandler = async (req, res) => {
 
     if (!postId || Number.isNaN(postId)) {
       return res.status(400).json({
-        message: "Invalid post id.",
+        message: POST_MESSAGES.errors.invalidPostId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
     await deletePost(postId, userId);
 
     return res.status(200).json({
-      message: "Post deleted successfully.",
+      message: POST_MESSAGES.success.postDeleted,
     });
   } catch (error) {
     console.error("Erreur deletePostHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to delete post.",
+      message: error.message || POST_MESSAGES.errors.unableDeletePost,
     });
   }
 };
@@ -194,13 +195,13 @@ export const likePostHandler = async (req, res) => {
 
     if (!postId || Number.isNaN(postId)) {
       return res.status(400).json({
-        message: "Invalid post id.",
+        message: POST_MESSAGES.errors.invalidPostId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -216,12 +217,12 @@ export const likePostHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Post liked successfully.",
+      message: POST_MESSAGES.success.postLiked,
     });
   } catch (error) {
     console.error("Erreur likePostHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to like post.",
+      message: error.message || POST_MESSAGES.errors.unableLikePost,
     });
   }
 };
@@ -233,13 +234,13 @@ export const unlikePostHandler = async (req, res) => {
 
     if (!postId || Number.isNaN(postId)) {
       return res.status(400).json({
-        message: "Invalid post id.",
+        message: POST_MESSAGES.errors.invalidPostId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -255,12 +256,12 @@ export const unlikePostHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Post unliked successfully.",
+      message: POST_MESSAGES.success.postUnliked,
     });
   } catch (error) {
     console.error("Erreur unlikePostHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to unlike post.",
+      message: error.message || POST_MESSAGES.errors.unableUnlikePost,
     });
   }
 };
@@ -273,19 +274,19 @@ export const createCommentHandler = async (req, res) => {
 
     if (Number.isNaN(postId) || postId < 1) {
       return res.status(400).json({
-        message: "Invalid post id.",
+        message: POST_MESSAGES.errors.invalidPostId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
     if (!content || !content.trim()) {
       return res.status(400).json({
-        message: "Comment content is required.",
+        message: POST_MESSAGES.errors.commentContentRequired,
       });
     }
 
@@ -309,18 +310,18 @@ export const createCommentHandler = async (req, res) => {
     });
 
     return res.status(201).json({
-      message: "Comment created successfully.",
+      message: POST_MESSAGES.success.commentCreated,
       comment,
     });
   } catch (error) {
-    if (error.message === "This comment contains inappropriate content.") {
+    if (error.message === POST_MESSAGES.errors.inappropriateComment) {
       return res.status(200).json({
         blocked: true,
         message: error.message,
       });
     }
 
-    if (error.message === "Post not found" || error.message === "User not found") {
+    if (error.message === POST_MESSAGES.errors.postNotFound || error.message === POST_MESSAGES.errors.userNotFound) {
       return res.status(404).json({
         message: error.message,
       });
@@ -328,7 +329,7 @@ export const createCommentHandler = async (req, res) => {
 
     console.error("Erreur createCommentHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to create comment.",
+      message: error.message || POST_MESSAGES.errors.unableCreateComment,
     });
   }
 };
@@ -340,13 +341,13 @@ export const favoritePostHandler = async (req, res) => {
 
     if (!postId || Number.isNaN(postId)) {
       return res.status(400).json({
-        message: "Invalid post id.",
+        message: POST_MESSAGES.errors.invalidPostId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -362,12 +363,12 @@ export const favoritePostHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Post favorited successfully.",
+      message: POST_MESSAGES.success.postFavorited,
     });
   } catch (error) {
     console.error("Erreur favoritePostHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to favorite post.",
+      message: error.message || POST_MESSAGES.errors.unableFavoritePost,
     });
   }
 };
@@ -379,13 +380,13 @@ export const unfavoritePostHandler = async (req, res) => {
 
     if (!postId || Number.isNaN(postId)) {
       return res.status(400).json({
-        message: "Invalid post id.",
+        message: POST_MESSAGES.errors.invalidPostId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -401,11 +402,11 @@ export const unfavoritePostHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Post unfavorited successfully.",
+      message: POST_MESSAGES.success.postUnfavorited,
     });
   } catch (error) {
     return res.status(500).json({
-      message: error.message || "Unable to unfavorite post.",
+      message: error.message || POST_MESSAGES.errors.unableUnfavoritePost,
     });
   }
 };
@@ -417,13 +418,13 @@ export const likeCommentHandler = async (req, res) => {
 
     if (Number.isNaN(commentId) || commentId < 1) {
       return res.status(400).json({
-        message: "Invalid comment id.",
+        message: POST_MESSAGES.errors.invalidCommentId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -439,12 +440,12 @@ export const likeCommentHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Comment liked successfully.",
+      message: POST_MESSAGES.success.commentLiked,
     });
   } catch (error) {
     console.error("Erreur likeCommentHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to like comment.",
+      message: error.message || POST_MESSAGES.errors.unableLikeComment,
     });
   }
 };
@@ -456,13 +457,13 @@ export const unlikeCommentHandler = async (req, res) => {
 
     if (Number.isNaN(commentId) || commentId < 1) {
       return res.status(400).json({
-        message: "Invalid comment id.",
+        message: POST_MESSAGES.errors.invalidCommentId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -478,12 +479,12 @@ export const unlikeCommentHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Comment unliked successfully.",
+      message: POST_MESSAGES.success.commentUnliked,
     });
   } catch (error) {
     console.error("Erreur unlikeCommentHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to unlike comment.",
+      message: error.message || POST_MESSAGES.errors.unableUnlikeComment,
     });
   }
 };
@@ -495,13 +496,13 @@ export const favoriteCommentHandler = async (req, res) => {
 
     if (Number.isNaN(commentId) || commentId < 1) {
       return res.status(400).json({
-        message: "Invalid comment id.",
+        message: POST_MESSAGES.errors.invalidCommentId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -517,12 +518,12 @@ export const favoriteCommentHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Comment favorited successfully.",
+      message: POST_MESSAGES.success.commentFavorited,
     });
   } catch (error) {
     console.error("Erreur favoriteCommentHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to favorite comment.",
+      message: error.message || POST_MESSAGES.errors.unableFavoriteComment,
     });
   }
 };
@@ -534,13 +535,13 @@ export const unfavoriteCommentHandler = async (req, res) => {
 
     if (Number.isNaN(commentId) || commentId < 1) {
       return res.status(400).json({
-        message: "Invalid comment id.",
+        message: POST_MESSAGES.errors.invalidCommentId,
       });
     }
 
     if (!userId) {
       return res.status(401).json({
-        message: "User not found in token.",
+        message: POST_MESSAGES.errors.userNotFoundInToken,
       });
     }
 
@@ -556,12 +557,12 @@ export const unfavoriteCommentHandler = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Comment unfavorited successfully.",
+      message: POST_MESSAGES.success.commentUnfavorited,
     });
   } catch (error) {
     console.error("Erreur unfavoriteCommentHandler :", error);
     return res.status(500).json({
-      message: error.message || "Unable to unfavorite comment.",
+      message: error.message || POST_MESSAGES.errors.unableUnfavoriteComment,
     });
   }
 };

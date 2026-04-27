@@ -12,6 +12,7 @@ export function useCreatePost() {
   const { notifyError, notifySuccess } = useArchiveToasts();
   const { t } = useI18n();
   const [publishing, setPublishing] = useState(false);
+  const translateApiMessage = (message?: string | null) => (message ? t(message) : "");
 
   const createPost = useCallback(
     async (content: string, file: File | null): Promise<FeedPost> => {
@@ -35,14 +36,14 @@ export function useCreatePost() {
         const result = await createPostRequest(trimmedContent, file, token);
 
         if (!result.ok) {
-          throw new Error(result.message || t("toasts.publishFailed"));
+          throw new Error(result.message || "api.posts.errors.unableCreatePost");
         }
 
         notifySuccess(t("toasts.published"));
         return result.data.post;
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : t("toasts.publishFailed");
+          error instanceof Error ? translateApiMessage(error.message) : t("toasts.publishFailed");
         notifyError(message);
         throw error;
       } finally {

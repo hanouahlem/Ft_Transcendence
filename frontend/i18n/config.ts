@@ -1,25 +1,51 @@
-// [Cree pour ce projet] Locales supportees dans l'application.
-// `as const` permet a TypeScript de generer une union stricte a partir de la liste.
+/**
+ * CONFIGURATION i18n - Les locales supportées et leurs métadonnées
+ * ================================================================
+ * Ce fichier définit les paramètres de base du système de traduction.
+ */
+
+// Liste de toutes les langues/locales supportées dans l'application.
+// - "en" = Anglais
+// - "fr" = Français
+// - "es" = Espagnol
+// - "ar" = Arabe (droite à gauche)
+// Le `as const` dit à TypeScript d'être strict : seules ces 4 valeurs sont acceptées.
 export const locales = ["en", "fr", "es", "ar"] as const;
 
+// Type TypeScript qui reprend automatiquement la liste des locales.
+// Si on modifie la liste, le type est mis à jour automatiquement.
 export type Locale = (typeof locales)[number];
 
-// [Cree pour ce projet] Locale par defaut si aucune preference n'est trouvee.
+// La langue par défaut si l'utilisateur n'a pas choisi de préférence.
+// Utilisé comme fallback quand une traduction manque dans la langue actuelle.
 export const defaultLocale: Locale = "en";
 
-// [Cree pour ce projet] Cles de persistance utilisees par le provider.
+// Clés pour persister le choix de langue de l'utilisateur :
+// - localStorage : stockage permanent côté client
+// - cookies : permet aussi au serveur de connaître la langue
 export const localeStorageKey = "ft_locale";
 export const localeCookieName = "ft_locale";
 
-// [Cree pour ce projet] Locales qui basculent toute l'UI en RTL.
+// Les locales qui écrivent de droite à gauche (RTL).
+// Pour l'arabe, l'UI bascule entièrement en RTL (direction, alignement, etc.)
 export const rtlLocales = new Set<Locale>(["ar"]);
 
-// [Cree pour ce projet] Garde de type runtime pour valider une locale dynamique.
+/**
+ * Valide qu'une valeur est bien une locale acceptée (TypeScript + runtime).
+ * Exemple : isLocale("fr") → true, isLocale("de") → false
+ * Utile après JSON.parse() ou localStorage.getItem() où on ne peut pas faire confiance au type.
+ */
 export function isLocale(value: string | null | undefined): value is Locale {
     return typeof value === "string" && (locales as readonly string[]).includes(value);
 }
 
-// [Cree pour ce projet] Source unique de verite pour la direction du texte.
+/**
+ * Retourne la direction du texte pour une locale donnée.
+ * - Arabe ("ar") → "rtl" (droite à gauche)
+ * - Autres langues ("en", "fr", "es") → "ltr" (gauche à droite)
+ * 
+ * Utilisé pour appliquer la classe CSS et l'attribut `dir=` sur le <html>.
+ */
 export function getLocaleDirection(locale: Locale) {
     return rtlLocales.has(locale) ? "rtl" : "ltr";
 }
