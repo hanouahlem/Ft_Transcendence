@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import prisma from "../prisma.js";
 import { checkComment } from './commentChecker.js';
+import { POST_MESSAGES } from "../constants/postMessages.js";
 
 const deleteUploadedFile = (mediaUrl) => {
   if (!mediaUrl) {
@@ -232,7 +233,7 @@ export const createPost = async (input) => {
   });
 
   if (!author) {
-    throw new Error("User not found");
+    throw new Error(POST_MESSAGES.errors.userNotFound);
   }
 
   const post = await prisma.post.create({
@@ -290,7 +291,7 @@ export const deletePostById = async (postId) => {
   const post = await getPostForDeletion(postId);
 
   if (!post) {
-    throw new Error("Post not found");
+    throw new Error(POST_MESSAGES.errors.postNotFound);
   }
 
   await deletePostWithRelations(post);
@@ -315,7 +316,7 @@ export const likePost = async (postId, userId) => {
   });
 
   if (!post) {
-    throw new Error("Post not found");
+    throw new Error(POST_MESSAGES.errors.postNotFound);
   }
 
   const existingLike = await prisma.like.findFirst({
@@ -391,7 +392,7 @@ export const createComment = async (input) => {
     const allowed = await checkComment(input.content);
 
     if (!allowed) {
-      throw new Error("This comment contains inappropriate content.");
+      throw new Error(POST_MESSAGES.errors.inappropriateComment);
     }
   }
   const user = await prisma.user.findUnique({
@@ -401,7 +402,7 @@ export const createComment = async (input) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error(POST_MESSAGES.errors.userNotFound);
   }
 
   const comment = await prisma.comment.create({
@@ -432,7 +433,7 @@ export const favoritePost = async (postId, userId) => {
   });
 
   if (!post) {
-    throw new Error("Post not found");
+    throw new Error(POST_MESSAGES.errors.postNotFound);
   }
 
   const existingFavorite = await prisma.favorite.findFirst({
@@ -464,7 +465,7 @@ export const unfavoritePost = async (postId, userId) => {
   });
 
   if (!post) {
-    throw new Error("Post not found");
+    throw new Error(POST_MESSAGES.errors.postNotFound);
   }
 
   const existingFavorite = await prisma.favorite.findFirst({
@@ -495,7 +496,7 @@ export const repostPost = async (postId, userId) => {
   });
 
   if (!post) {
-    throw new Error("Post not found");
+    throw new Error(POST_MESSAGES.errors.postNotFound);
   }
 
   const existingRepost = await prisma.repost.findFirst({
@@ -561,11 +562,11 @@ export const deleteComment = async (commentId, userId) => {
   });
 
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new Error(POST_MESSAGES.errors.commentNotFound);
   }
 
   if (comment.userId !== Number(userId)) {
-    throw new Error("You are not allowed to delete this comment");
+    throw new Error(POST_MESSAGES.errors.notAllowedDeleteComment);
   }
 
   deleteUploadedFile(comment.image);
@@ -600,7 +601,7 @@ export const likeComment = async (commentId, userId) => {
   });
 
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new Error(POST_MESSAGES.errors.commentNotFound);
   }
 
   const existingLike = await prisma.commentLike.findFirst({
@@ -638,7 +639,7 @@ export const unlikeComment = async (commentId, userId) => {
   });
 
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new Error(POST_MESSAGES.errors.commentNotFound);
   }
 
   const existingLike = await prisma.commentLike.findFirst({
@@ -675,7 +676,7 @@ export const favoriteComment = async (commentId, userId) => {
   });
 
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new Error(POST_MESSAGES.errors.commentNotFound);
   }
 
   const existingFavorite = await prisma.commentFavorite.findFirst({
@@ -713,7 +714,7 @@ export const unfavoriteComment = async (commentId, userId) => {
   });
 
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new Error(POST_MESSAGES.errors.commentNotFound);
   }
 
   const existingFavorite = await prisma.commentFavorite.findFirst({

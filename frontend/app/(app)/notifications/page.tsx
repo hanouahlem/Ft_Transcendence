@@ -150,7 +150,7 @@ export default function NotificationsPage() {
   const visibleLedgerItems = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
 
-    return ledgerItems.filter((item) => {
+      return ledgerItems.filter((item) => {
       if (!matchesNotificationLedgerFilters(item, filters)) {
         return false;
       }
@@ -159,7 +159,7 @@ export default function NotificationsPage() {
         return true;
       }
 
-      return getNotificationLedgerSearchText(item).includes(normalizedSearch);
+      return getNotificationLedgerSearchText(item, t).includes(normalizedSearch);
     });
   }, [filters, ledgerItems, searchValue]);
 

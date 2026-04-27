@@ -28,6 +28,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
   const [dialogPostSnapshot, setDialogPostSnapshot] = useState<FeedPost | null>(null);
   const [postDialogOpen, setPostDialogOpen] = useState(false);
   const [focusCommentInput, setFocusCommentInput] = useState(false);
+  const translateApiMessage = (message?: string | null) => (message ? t(message) : "");
 
   const activePost = useMemo(
     () => posts.find((post) => post.id === dialogPostId) ?? dialogPostSnapshot ?? null,
@@ -132,7 +133,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t("postInteractions.errors.deleteCommentFallback"));
+        throw new Error(data.message || "api.posts.errors.unableDeleteComment");
       }
 
       setPosts((prevPosts) =>
@@ -154,7 +155,9 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       notifySuccess(t("postInteractions.success.commentDeleted"));
     } catch (error) {
       console.error("handleDeleteComment error:", error);
-      notifyError(error instanceof Error ? error.message : t("postInteractions.errors.unknown"));
+      notifyError(
+        error instanceof Error ? translateApiMessage(error.message) : t("postInteractions.errors.unknown"),
+      );
     } finally {
       setDeletingCommentId(null);
     }
@@ -188,7 +191,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        notifyError(data.message || t("postInteractions.errors.addComment"));
+        notifyError(translateApiMessage(data.message) || t("postInteractions.errors.addComment"));
         return;
       }
 
@@ -204,7 +207,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       }
     } catch (error) {
       notifyError(
-        error instanceof Error ? error.message : t("postInteractions.errors.addCommentFallback"),
+        error instanceof Error ? translateApiMessage(error.message) : t("postInteractions.errors.addCommentFallback"),
       );
     } finally {
       setCommentingPostId(null);
@@ -230,7 +233,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || t("postInteractions.errors.deletePost"));
+        throw new Error(data.message || "api.posts.errors.unableDeletePost");
       }
 
       notifySuccess(t("postInteractions.success.postDeleted"));
@@ -239,7 +242,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
     } catch (error) {
       console.error("handleDelete error:", error);
       notifyError(
-        error instanceof Error ? error.message : t("postInteractions.errors.deletePostFallback"),
+        error instanceof Error ? translateApiMessage(error.message) : t("postInteractions.errors.deletePostFallback"),
       );
     } finally {
       setDeletingPostId(null);
@@ -266,7 +269,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || t("postInteractions.errors.updateLike"));
+        throw new Error(data.message || "api.posts.errors.unableLikePost");
       }
 
       updatePostInState(post.id, (currentPost) => ({
@@ -280,7 +283,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
     } catch (error) {
       console.error("handleToggleLike error:", error);
       notifyError(
-        error instanceof Error ? error.message : t("postInteractions.errors.updateLikeFallback"),
+        error instanceof Error ? translateApiMessage(error.message) : t("postInteractions.errors.updateLikeFallback"),
       );
     } finally {
       setLikingPostId(null);
@@ -307,7 +310,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || t("postInteractions.errors.updateFavorite"));
+        throw new Error(data.message || "api.posts.errors.unableFavoritePost");
       }
 
       updatePostInState(post.id, (currentPost) => ({
@@ -322,7 +325,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       console.error("handleToggleFavorite error:", error);
       notifyError(
         error instanceof Error
-          ? error.message
+          ? translateApiMessage(error.message)
           : t("postInteractions.errors.updateFavoriteFallback"),
       );
     } finally {
@@ -350,7 +353,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || t("postInteractions.errors.updateCommentLike"));
+        throw new Error(data.message || "api.posts.errors.unableLikeComment");
       }
 
       updateCommentInState(comment.id, (currentComment) => ({
@@ -365,7 +368,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       console.error("handleToggleCommentLike error:", error);
       notifyError(
         error instanceof Error
-          ? error.message
+          ? translateApiMessage(error.message)
           : t("postInteractions.errors.updateCommentLikeFallback"),
       );
     } finally {
@@ -393,7 +396,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || t("postInteractions.errors.updateCommentFavorite"));
+        throw new Error(data.message || "api.posts.errors.unableFavoriteComment");
       }
 
       updateCommentInState(comment.id, (currentComment) => ({
@@ -408,7 +411,7 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
       console.error("handleToggleCommentFavorite error:", error);
       notifyError(
         error instanceof Error
-          ? error.message
+          ? translateApiMessage(error.message)
           : t("postInteractions.errors.updateCommentFavoriteFallback"),
       );
     } finally {

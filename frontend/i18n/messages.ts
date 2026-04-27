@@ -1,15 +1,60 @@
 import type { Locale } from "./config";
 
+/*
+ * Ce fichier contient :
+ *   1. Le dictionnaire global de toutes les traductions (par locale et namespace)
+ *   2. Les utilitaires pour acceder aux traductions et remplacer les parametres
+ */
+
+// Paramètres qu'on peut passer a la fonction t() pour remplacer des placeholders.
+// Exemple : t("search.resultsCount", { count: 5, label: "posts" })
 export type TranslationParams = Record<string, string | number>;
 
-// [Cree pour ce projet] Arbre de traduction imbrique par namespaces.
-// Exemple de chemin: "auth.login.submit".
+/**
+ * Structure imbriquee pour l'arbre de traduction.
+ * Exemple :
+ *   {
+ *     "auth": {
+ *       "login": {
+ *         "submit": "Login"   // Feuille (string)
+ *       }
+ *     },
+ *     "common": {
+ *       "error": "Error"
+ *     }
+ *   }
+
+ */
 export interface TranslationTree {
     [key: string]: string | TranslationTree;
 }
 
-// [Cree pour ce projet] Dictionnaire global: locale -> namespaces fonctionnels.
-// Garder la meme structure de cles entre locales pour limiter le fallback.
+/**
+ * DICTIONNAIRE GLOBAL DE TRADUCTIONS
+ * ==================================
+ * 
+ * Structure : Record<Locale, TranslationTree>
+ *   - Chaque locale (en, fr, es, ar) a son propre arbre de traductions
+ *   - Les namespaces organisent les traductions par domaine fonctionnel
+ * 
+ * Namespaces utilises :
+ *   - "app" : infos generales (nom de l'app)
+ *   - "locale" : noms des langues et labels de langue
+ *   - "common" : traductions partagees (Login, Error, etc.)
+ *   - "landing" : page d'accueil
+ *   - "auth" : authentification (login, register, 2FA)
+ *   - "feed", "search", "profile", "friends" : pages de l'app
+ *   - etc.
+ * 
+ * IMPORTANT : Gardez la meme structure de cles entre toutes les locales.
+ * Si une traduction manque dans une langue → elle utilisera le fallback anglais.
+ * 
+ * Comment utiliser :
+ *   const { t } = useI18n();
+ *   t("auth.login.submit")      // Cherche translations[locale]["auth"]["login"]["submit"]
+ *   t("feed.posts")              // Cherche translations[locale]["feed"]["posts"]
+ *   t("search.resultsCount", { count: 5 })  // Remplace {count} par 5
+ */
 export const translations: Record<Locale, TranslationTree> = {
     en: {
         app: { name: "Field Notes" },
@@ -235,6 +280,7 @@ export const translations: Record<Locale, TranslationTree> = {
             marking: "Marking records",
             markAll: "Mark all as read",
             someone: "Someone",
+            recentActivity: "recent activity",
             noMore: "--- NO MORE CORRESPONDENCE ---",
             toastDismissAria: "Dismiss notification",
             toastDismiss: "Dismiss",
@@ -281,6 +327,10 @@ export const translations: Record<Locale, TranslationTree> = {
             },
             copy: {
                 follow: { eyebrow: "Friend Request", body: "Sent you a friend request.", helper: "This notice opens their public profile record.", actionLabel: "Visit profile" },
+                favorite: { eyebrow: "Favorite", body: "Favorited your post:", helper: "This notice links directly to the referenced post dialog.", actionLabel: "Open entry" },
+                commentLike: { eyebrow: "Comment like", body: "Liked your comment.", helper: "Open the post to inspect the conversation.", actionLabel: "Open comment thread" },
+                commentFavorite: { eyebrow: "Comment favorite", body: "Favorited your comment.", helper: "Open the post to inspect the conversation.", actionLabel: "Open comment thread" },
+                untitled: "Untitled archive entry",
                 followAccept: { eyebrow: "Accepted request", body: "Accepted your friend request.", helper: "This notice opens the newly connected profile.", actionLabel: "Open profile" },
                 unfollow: { eyebrow: "Field distance", body: "Removed you from their friends list.", helper: "You can still review their profile record if needed.", actionLabel: "Review profile" },
                 like: { eyebrow: "Like", body: "Liked your post:", helper: "This notice links directly to the referenced post dialog.", actionLabel: "Open entry" },
@@ -472,6 +522,56 @@ export const translations: Record<Locale, TranslationTree> = {
                 postDeleted: "Post deleted successfully.",
             },
         },
+        api: {
+            posts: {
+                errors: {
+                    unableFetchPosts: "Unable to fetch posts.",
+                    unableCreatePost: "Unable to create post.",
+                    unableDeleteComment: "Unable to delete comment.",
+                    unableDeletePost: "Unable to delete post.",
+                    unableLikePost: "Unable to like post.",
+                    unableUnlikePost: "Unable to unlike post.",
+                    unableCreateComment: "Unable to create comment.",
+                    unableFavoritePost: "Unable to favorite post.",
+                    unableUnfavoritePost: "Unable to unfavorite post.",
+                    unableLikeComment: "Unable to like comment.",
+                    unableUnlikeComment: "Unable to unlike comment.",
+                    unableFavoriteComment: "Unable to favorite comment.",
+                    unableUnfavoriteComment: "Unable to unfavorite comment.",
+                    unableSearchPosts: "Unable to search posts.",
+                    unableFetchFriendsPosts: "Unable to fetch friends posts.",
+                    unableFetchPost: "Unable to fetch post.",
+                    unableUpdatePost: "Unable to update post.",
+                    contentRequired: "content is required.",
+                    authorIdInvalid: "authorId must be a valid user id.",
+                    authorNotFound: "Author not found.",
+                    postContentRequired: "Post content is required.",
+                    commentContentRequired: "Comment content is required.",
+                    userNotFoundInToken: "User not found in token.",
+                    invalidCommentId: "Invalid comment id.",
+                    commentNotFound: "Comment not found",
+                    notAllowedDeleteComment: "You are not allowed to delete this comment",
+                    invalidPostId: "Invalid post id.",
+                    postNotFound: "Post not found",
+                    userNotFound: "User not found",
+                    inappropriateComment: "This comment contains inappropriate content.",
+                },
+                success: {
+                    postCreated: "Post created successfully.",
+                    commentDeleted: "Comment deleted successfully.",
+                    postDeleted: "Post deleted successfully.",
+                    postLiked: "Post liked successfully.",
+                    postUnliked: "Post unliked successfully.",
+                    commentCreated: "Comment created successfully.",
+                    postFavorited: "Post favorited successfully.",
+                    postUnfavorited: "Post unfavorited successfully.",
+                    commentLiked: "Comment liked successfully.",
+                    commentUnliked: "Comment unliked successfully.",
+                    commentFavorited: "Comment favorited successfully.",
+                    commentUnfavorited: "Comment unfavorited successfully.",
+                },
+            },
+        },
         toasts: { needContent: "You need to write something before publishing.", needLogin: "You must be logged in to publish.", publishFailed: "Unable to publish the post.", published: "Post published successfully." },
     },
     fr: {
@@ -520,11 +620,11 @@ export const translations: Record<Locale, TranslationTree> = {
             rosterTitle: "Equipe projet",
             rosterMeta: "Page 1 / Vol I",
             roster: {
-                curtis: { name: "Curtis Moncoq", role: "Integration full-stack", quote: "A relie le shell applicatif, les pages sociales, le flow Docker d'evaluation, le routage OAuth, les lessons et la finition production." },
-                ahlem: { name: "Ahlem Bey", role: "Services backend", quote: "A travaille sur les flux backend et la logique de service pour garder posts, utilisateurs et persistance faciles a expliquer." },
-                manar: { name: "Manar Bengharbi", role: "Base + backend", quote: "A contribue au cote Prisma/PostgreSQL, ou les comptes, posts, relations et donnees projet sont structures." },
-                nabil: { name: "Nabil Abboud", role: "API publique + securite", quote: "A aide a construire la couche API externe avec protection par cle API, rate limiting, documentation et wiring backend." },
-                walid: { name: "Walid", role: "Experience frontend", quote: "A contribue aux routes utilisateur et a l'interface archive, dont le feed, la recherche, le right rail, le login et la navigation." },
+                curtis: { name: "Curtis Moncoq", role: "Lead technique, Backend & Temps reel", quote: "A dirige l'architecture technique et implemente les fonctionnalites temps reel comme WebSockets et le chat, ainsi que l'integration OAuth et le design system." },
+                ahlem: { name: "Ahlem Bey", role: "Backend & Base de donnees", quote: "A travaille sur Prisma ORM, la structure de la base de donnees, les flux d'authentification incluant la 2FA, et l'analyse de sentiment pour la moderation des commentaires." },
+                manar: { name: "Manar Bengharbi", role: "Backend & API publique", quote: "A developpe l'API publique et le systeme de notifications, en gerant l'acces externe et la communication backend entre les services." },
+                nabil: { name: "Nabil Abboud", role: "Frontend & Fonctionnalites", quote: "A implemente les fonctionnalites utilisateur principales, dont les posts, l'upload d'images et le tableau de bord utilisateur, afin d'assurer une experience fluide." },
+                walid: { name: "Walid Larbi Aissa", role: "Frontend & Internationalisation", quote: "A travaille sur le support multilingue (i18n), l'interface RTL et la compatibilite navigateur pour ameliorer l'accessibilite pour tous les utilisateurs." },
             },
         },
         auth: {
@@ -601,6 +701,7 @@ export const translations: Record<Locale, TranslationTree> = {
             marking: "Marquage en cours",
             markAll: "Tout marquer comme lu",
             someone: "Quelqu’un",
+            recentActivity: "activité récente",
             noMore: "--- PLUS AUCUNE CORRESPONDANCE ---",
             toastDismissAria: "Fermer la notification",
             toastDismiss: "Fermer",
@@ -633,6 +734,10 @@ export const translations: Record<Locale, TranslationTree> = {
             likeGroup: { fallbackPost: "votre entrée d’archive", andOthers: "et {count} autres", likedYourPost: "ont aimé votre post." },
             copy: {
                 follow: { eyebrow: "Demande d’ami", body: "Vous a envoyé une demande d’ami.", helper: "Cette notice ouvre son profil public.", actionLabel: "Voir le profil" },
+                favorite: { eyebrow: "Favori", body: "A mis ce post en favori :", helper: "Cette notice ouvre directement le dialogue du post référencé.", actionLabel: "Ouvrir l’entrée" },
+                commentLike: { eyebrow: "Like de commentaire", body: "A aimé votre commentaire.", helper: "Ouvrez le post pour inspecter la conversation.", actionLabel: "Ouvrir le fil" },
+                commentFavorite: { eyebrow: "Favori de commentaire", body: "A mis votre commentaire en favori.", helper: "Ouvrez le post pour inspecter la conversation.", actionLabel: "Ouvrir le fil" },
+                untitled: "Entrée d’archive sans titre",
                 followAccept: { eyebrow: "Demande acceptée", body: "A accepté votre demande d’ami.", helper: "Cette notice ouvre le profil connecté.", actionLabel: "Ouvrir le profil" },
                 unfollow: { eyebrow: "Distance Field", body: "Vous a retiré de sa liste d’amis.", helper: "Vous pouvez encore consulter son profil.", actionLabel: "Consulter le profil" },
                 like: { eyebrow: "Like", body: "A aimé votre post :", helper: "Cette notice ouvre directement le post référencé.", actionLabel: "Ouvrir l’entrée" },
@@ -709,6 +814,7 @@ export const translations: Record<Locale, TranslationTree> = {
         friendRequests: {
             errors: {
                 loginSend: "Vous devez être connecté pour envoyer une demande d'ami.",
+                
                 missingReceiver: "Le destinataire est requis.",
                 cannotAddSelf: "Vous ne pouvez pas vous ajouter vous-même.",
                 userNotFound: "Utilisateur introuvable.",
@@ -764,13 +870,63 @@ export const translations: Record<Locale, TranslationTree> = {
                 postDeleted: "Post supprimé avec succès.",
             },
         },
+        api: {
+            posts: {
+                errors: {
+                    unableFetchPosts: "Impossible de récupérer les posts.",
+                    unableSearchPosts: "Impossible de rechercher les posts.",
+                    unableFetchFriendsPosts: "Impossible de récupérer les posts d'amis.",
+                    postContentRequired: "Le contenu du post est requis.",
+                    commentContentRequired: "Le contenu du commentaire est requis.",
+                    unableCreatePost: "Impossible de créer le post.",
+                    unableDeleteComment: "Impossible de supprimer le commentaire.",
+                    unableDeletePost: "Impossible de supprimer le post.",
+                    unableLikePost: "Impossible d'aimer le post.",
+                    unableUnlikePost: "Impossible de retirer le like du post.",
+                    unableCreateComment: "Impossible de créer le commentaire.",
+                    unableFavoritePost: "Impossible d'ajouter le post aux favoris.",
+                    unableUnfavoritePost: "Impossible de retirer le post des favoris.",
+                    unableLikeComment: "Impossible d'aimer le commentaire.",
+                    unableUnlikeComment: "Impossible de retirer le like du commentaire.",
+                    unableFavoriteComment: "Impossible d'ajouter le commentaire aux favoris.",
+                    unableUnfavoriteComment: "Impossible de retirer le commentaire des favoris.",
+                    unableFetchPost: "Impossible de récupérer le post.",
+                    unableUpdatePost: "Impossible de mettre à jour le post.",
+                    contentRequired: "Le contenu est requis.",
+                    authorIdInvalid: "authorId doit être un identifiant utilisateur valide.",
+                    authorNotFound: "Auteur introuvable.",
+                    userNotFoundInToken: "Utilisateur introuvable dans le token.",
+                    invalidCommentId: "Identifiant de commentaire invalide.",
+                    commentNotFound: "Commentaire introuvable",
+                    notAllowedDeleteComment: "Vous n'êtes pas autorisé à supprimer ce commentaire",
+                    invalidPostId: "Identifiant de post invalide.",
+                    postNotFound: "Post introuvable",
+                    userNotFound: "Utilisateur introuvable",
+                    inappropriateComment: "Ce commentaire contient du contenu inapproprié.",
+                },
+                success: {
+                    postCreated: "Post créé avec succès.",
+                    commentDeleted: "Commentaire supprimé avec succès.",
+                    postDeleted: "Post supprimé avec succès.",
+                    postLiked: "Post aimé avec succès.",
+                    postUnliked: "Like retiré du post avec succès.",
+                    commentCreated: "Commentaire créé avec succès.",
+                    postFavorited: "Post ajouté aux favoris.",
+                    postUnfavorited: "Post retiré des favoris.",
+                    commentLiked: "Commentaire aimé avec succès.",
+                    commentUnliked: "Like retiré du commentaire avec succès.",
+                    commentFavorited: "Commentaire ajouté aux favoris.",
+                    commentUnfavorited: "Commentaire retiré des favoris.",
+                },
+            },
+        },
         toasts: { needContent: "Vous devez écrire quelque chose avant de publier.", needLogin: "Vous devez être connecté pour publier.", publishFailed: "Impossible de publier le post.", published: "Post publié avec succès." },
     },
     es: {
         app: { name: "Field Notes" },
         locale: { label: "Idioma", en: "Inglés", fr: "Francés", es: "Español", ar: "Árabe" },
         common: { login: "Entrar", register: "Crear cuenta", logout: "Cerrar sesión", message: "Mensaje", newPost: "Nuevo post", error: "Error", fieldNotice: "Aviso", accept: "Aceptar", add: "Añadir", sent: "Enviado", pending: "Pendiente", adding: "Añadiendo", accepting: "Aceptando", remove: "Eliminar", removing: "Eliminando", changePassword: "Cambiar contraseña", setPassword: "Establecer contraseña" },
-        landing: { navSignIn: "Entrar", navRegister: "Crear cuenta", heroKickerPrimary: "Vol I / build en vivo", heroKickerSecondary: "Archivo social", heroTitle: "Project /", heroHighlight: "ft_transcendence", heroText: "Una app web 42 ft_transcendence donde los usuarios publican posts, personalizan perfiles, crean amistades, intercambian mensajes y siguen notificaciones en tiempo real dentro de un sistema full-stack documentado.", ctaStart: "Empezar", ctaLogin: "Entrar", ctaRoster: "Ver equipo", dispatchStamp: "Activo", dispatchEyebrow: "Resumen del proyecto", dispatchHandle: "@ft_transcendence", dispatchState: "En vivo", dispatchTitle: "Una plataforma social construida como un proyecto full-stack explicable.", dispatchBody: "Next.js renderiza la interfaz de archivo, Express expone la API REST, Prisma escribe en PostgreSQL, Socket.io transporta eventos en vivo y Docker Compose mantiene los servicios juntos.", dispatchPrimary: "[ Feed + perfiles ]", dispatchRealtime: "[ Mensajes + alertas ]", dispatchRepository: "[ API + base ]", dispatchReply: "[ Evaluacion 42 ]", rosterTitle: "Equipo del proyecto", rosterMeta: "Pagina 1 / Vol I", roster: { curtis: { name: "Curtis Moncoq", role: "Integracion full-stack", quote: "Conecto el shell de la app, paginas sociales, flujo Docker de evaluacion, OAuth, lessons y pulido de produccion en un proyecto explicable." }, ahlem: { name: "Ahlem Bey", role: "Servicios backend", quote: "Trabajo en flujos backend y logica de servicios para que posts, usuarios y persistencia sigan siendo faciles de explicar." }, manar: { name: "Manar Bengharbi", role: "Base + backend", quote: "Contribuyo al lado Prisma/PostgreSQL, donde cuentas, posts, relaciones y datos del proyecto estan estructurados." }, nabil: { name: "Nabil Abboud", role: "API publica + seguridad", quote: "Ayudo a construir la capa API externa con proteccion por API key, rate limiting, documentacion y conexion backend." }, walid: { name: "Walid", role: "Experiencia frontend", quote: "Contribuyo a rutas de usuario e interfaz de archivo, incluyendo feed, busqueda, right rail, login y navegacion." } } },
+        landing: { navSignIn: "Entrar", navRegister: "Crear cuenta", heroKickerPrimary: "Vol I / build en vivo", heroKickerSecondary: "Archivo social", heroTitle: "Project /", heroHighlight: "ft_transcendence", heroText: "Una app web 42 ft_transcendence donde los usuarios publican posts, personalizan perfiles, crean amistades, intercambian mensajes y siguen notificaciones en tiempo real dentro de un sistema full-stack documentado.", ctaStart: "Empezar", ctaLogin: "Entrar", ctaRoster: "Ver equipo", dispatchStamp: "Activo", dispatchEyebrow: "Resumen del proyecto", dispatchHandle: "@ft_transcendence", dispatchState: "En vivo", dispatchTitle: "Una plataforma social construida como un proyecto full-stack explicable.", dispatchBody: "Next.js renderiza la interfaz de archivo, Express expone la API REST, Prisma escribe en PostgreSQL, Socket.io transporta eventos en vivo y Docker Compose mantiene los servicios juntos.", dispatchPrimary: "[ Feed + perfiles ]", dispatchRealtime: "[ Mensajes + alertas ]", dispatchRepository: "[ API + base ]", dispatchReply: "[ Evaluacion 42 ]", rosterTitle: "Equipo del proyecto", rosterMeta: "Pagina 1 / Vol I", roster: { curtis: { name: "Curtis Moncoq", role: "Lider tecnico, Backend y tiempo real", quote: "Lidero la arquitectura tecnica e implemento funcionalidades en tiempo real como WebSockets y chat, junto con la integracion de OAuth y el sistema de diseno." }, ahlem: { name: "Ahlem Bey", role: "Backend y base de datos", quote: "Trabajo en Prisma ORM, la estructura de base de datos, los flujos de autenticacion incluyendo 2FA, y el analisis de sentimiento para moderar comentarios." }, manar: { name: "Manar Bengharbi", role: "Backend y API publica", quote: "Desarrollo la API publica y el sistema de notificaciones, gestionando el acceso externo y la comunicacion backend entre servicios." }, nabil: { name: "Nabil Abboud", role: "Frontend y funcionalidades", quote: "Implemento funcionalidades clave para usuarios, incluyendo publicaciones, subida de imagenes y panel de usuario, asegurando una experiencia fluida." }, walid: { name: "Walid Larbi Aissa", role: "Frontend e internacionalizacion", quote: "Trabajo en soporte multilenguaje (i18n), interfaz RTL y compatibilidad entre navegadores para mejorar la accesibilidad para todos los usuarios." } } },
         auth: { panel: { title1: "Notas", title2: "de Campo", repository: "Repositorio Oficial", established: "Fundado en 1892", warning: "Propiedad de la red de observación global. El acceso no autorizado queda estrictamente registrado. Asegúrese de que todas las entradas estén fijadas de forma permanente." }, login: { eyebrow: "Formulario 4A - Personal autorizado", title: "Entrada de acceso", subtitle: "Log_ID: Secure_Entry_V4", usernameLabel: "Usuario / Email", usernamePlaceholder: "login@student.42.fr", passwordLabel: "Contraseña", forgotPassword: "¿Olvidaste la contraseña?", submit: "Entrar", dateLocation: "Puerto_Encriptado", footerPrefix: "¿No eres miembro?", footerLink: "Registrarte", providerLabel: "Protocolos alternativos de acceso", providerTwo: "Intra", providerGithub: "GitHub", twoFactor: { title: "Inicio con doble factor", subtitle: "Punto de control de autenticación / Paso 2", codeSent: "Código enviado", codeSentByEmail: "Código enviado por correo", sendingMessage: "Enviando tu código de verificación de 4 dígitos...", unknownEmail: "Correo desconocido", errors: { sessionMissing: "Falta la sesión 2FA. Inicia sesión otra vez.", sendFirst: "Envía un código primero.", confirm: "No se pudo confirmar el código 2FA.", confirmFallback: "Error al confirmar el código 2FA.", resend: "No se pudo reenviar el código 2FA.", resendFallback: "Error al reenviar el código 2FA." } }, errors: { required: "Se requieren credenciales.", failedLoading: "Error al cargar tu cuenta.", invalidCredentials: "El usuario/email o la contraseña son incorrectos.", tokenMissing: "No se recibió el token." } }, register: { eyebrow: "Formulario 4B - Solicitud de credenciales", title: "Acceso", subtitle: "APP_ID: New_Access_V1", usernameLabel: "Nombre de usuario", usernamePlaceholder: "john_doe", emailLabel: "Email", emailPlaceholder: "login@student.42.fr", passwordLabel: "Contraseña", submit: "Registrar", dateLocation: "Puerto_Encriptado", footerPrefix: "¿Ya tienes una cuenta?", footerLink: "Entrar", providerLabel: "Protocolos alternativos de acceso", providerTwo: "Intra", providerGithub: "GitHub", errors: { required: "Requerido", invalidEmail: "Email inválido", created: "Cuenta creada con éxito." } } },
         nav: { feed: "Inicio", search: "Buscar", profile: "Perfil", notifications: "Notificaciones", friends: "Amigos", message: "Mensajes", settings: "Ajustes" },
         feed: { scopeAll: "Todas las publicaciones", scopeFriends: "Amigos", loadingFriends: "Cargando archivo de amigos...", loadingAll: "Cargando archivo del feed...", emptyFriends: "Aún no hay publicaciones de amigos aceptados.", emptyAll: "Aún no hay publicaciones registradas.", endOfLogs: "--- FIN DE LOS REGISTROS RECIENTES ---", newPostAria: "Crear una nueva publicación", posts: "publicaciones", errors: { loadPosts: "No se pudieron obtener las publicaciones.", loadFallback: "No se pudo cargar el feed.", loadSuggestions: "No se pudieron obtener las sugerencias del panel derecho." } },
@@ -779,7 +935,7 @@ export const translations: Record<Locale, TranslationTree> = {
         pagination: { prev: "Anterior", next: "Siguiente", showing: "Mostrando", of: "de" },
         profile: { errors: { resolveObserver: "No se pudo resolver el registro del observador.", fetchUser: "No se pudo obtener el usuario.", fetchPosts: "No se pudieron obtener las publicaciones.", fetchFriends: "No se pudieron obtener los amigos.", loadFallback: "Error al cargar el registro del observador." }, loading: "Cargando registro del observador...", notFound: "Registro del observador no encontrado.", fallbackName: "Observador", fallbackBio: "Observador de campo catalogando fragmentos, patrones y evidencia silenciosa del archivo.", editProfile: "Editar perfil", myFriends: "Mis amigos", message: "Mensaje", observerProfile: "Perfil del observador", stats: { posts: "Publicaciones", likes: "Likes recibidos", comments: "Comentarios", favorites: "Favoritos", friends: "Amigos", joined: "Unido" }, recentEntries: "Entradas recientes", emptyPosts: "Aún no se han registrado publicaciones para este observador.", endOfRecord: "--- FIN DEL REGISTRO ---" },
         friends: { title: "Directorio", subtitle: "Busca observadores y gestiona conexiones", searchPlaceholder: "Buscar observadores...", incomingRequests: "Solicitudes entrantes", wantsToConnect: "Quiere conectar", accept: "Aceptar", decline: "Rechazar", searchResults: "Resultados de búsqueda", allObservers: "Todos los observadores", loading: "Cargando...", noObservers: "No se encontraron observadores.", observerProfile: "Perfil de observador", friend: "Amigo", delete: "Eliminar", pending: "Pendiente", adding: "Añadiendo", add: "Añadir", toasts: { loginRequired: "Debes iniciar sesión para enviar una solicitud.", sendError: "No se pudo enviar la solicitud de amistad.", sent: "Solicitud de amistad enviada.", accepted: "Solicitud de amistad aceptada.", declined: "Solicitud de amistad rechazada.", notFound: "Amistad no encontrada.", removed: "Amigo eliminado.", removeError: "Error al eliminar al amigo.", removeUnable: "No se pudo eliminar al amigo.", titles: { error: "Error", sent: "Enviado", accepted: "Aceptado", declined: "Rechazado", removed: "Eliminado" } } },
-        sidebar: { fieldNotes: "Notas de campo", newPost: "Nuevo post", menu: "Menú", logout: "Salir", profileFallback: "Usuario de campo", profileHandleFallback: "observador" },
+        sidebar: { fieldNotes: "Field Notes", newPost: "Nuevo post", menu: "Menú", logout: "Salir", profileFallback: "Usuario de campo", profileHandleFallback: "observador" },
         rightRail: { searchPlaceholder: "Buscar en los archivos...", searchButtonLabel: "Buscar archivo", trendsTitle: "Tendencias actuales", token: "[+]", footerLinks: { terms: "Términos", privacy: "Privacidad" }, emptyFriends: "Todavía no tienes amigos.", emptySuggestions: "Estás por tu cuenta.", emptyOther: "No se encontraron amigos.", myFriends: "Mis amigos", youMightKnow: "Quizá conozcas", friendsSuffix: "Amigos", stats: "{posts} registros · {likes} likes · {comments} notas", trends: { drop: { title: "#NuevoArchivo", meta: "Nuevas entradas / Diario" }, guild: { title: "Notas de Gremio", meta: "Comunidad / 84 registros" }, retro: { title: "Diseños Retro", meta: "Diseño / 41 menciones" } } },
         conversation: { loadingConversations: "Cargando conversaciones...", noConversation: "Todavía no hay conversación.", newMessage: "Nuevo mensaje", selectPrompt: "Selecciona una conversación o inicia una desde la lista.", noSelected: "No hay conversación seleccionada.", loadingMessages: "Cargando mensajes...", noMessages: "Todavía no hay mensajes. Envía el primero.", writePrompt: "Escribe tu mensaje...", selectFirst: "Selecciona primero una conversación...", composeLabel: "Escribir un mensaje directo", send: "Enviar mensaje", sending: "Enviando mensaje", newConversationTitle: "Nueva conversación", newConversationDescription: "Busca usuarios y crea una conversación directa.", newConversationSubtitle: "Busca un usuario para empezar a chatear", newConversationPlaceholder: "Buscar un usuario...", noUsersFound: "No se encontraron usuarios.", userFallback: "Usuario", unknownUser: "Usuario desconocido", noMessageYet: "Todavía no hay mensajes.", backToConversations: "Volver a conversaciones" },
         settings: { password: { current: "Contraseña actual", new: "Nueva contraseña", confirm: "Confirmar contraseña", placeholder: "Introduce una contraseña local...", saving: "Escribiendo...", error: "Comprueba que las contraseñas coinciden." } },
@@ -840,6 +996,7 @@ export const translations: Record<Locale, TranslationTree> = {
             marking: "Marcando registros",
             markAll: "Marcar todo como leído",
             someone: "Alguien",
+            recentActivity: "actividad reciente",
             noMore: "--- NO HAY MÁS CORRESPONDENCIA ---",
             toastDismissAria: "Descartar notificación",
             toastDismiss: "Descartar",
@@ -868,6 +1025,10 @@ export const translations: Record<Locale, TranslationTree> = {
             likeGroup: { fallbackPost: "tu entrada de archivo", andOthers: "y {count} más", likedYourPost: "les gustó tu publicación." },
             copy: {
                 follow: { eyebrow: "Solicitud de amistad", body: "Te envió una solicitud de amistad.", helper: "Este aviso abre su perfil público.", actionLabel: "Ver perfil" },
+                favorite: { eyebrow: "Favorito", body: "Marcó tu publicación como favorita:", helper: "Este aviso enlaza directamente al diálogo de la publicación referenciada.", actionLabel: "Abrir entrada" },
+                commentLike: { eyebrow: "Like de comentario", body: "Le gustó tu comentario.", helper: "Abre la publicación para inspeccionar la conversación.", actionLabel: "Abrir hilo" },
+                commentFavorite: { eyebrow: "Favorito de comentario", body: "Marcó tu comentario como favorito.", helper: "Abre la publicación para inspeccionar la conversación.", actionLabel: "Abrir hilo" },
+                untitled: "Entrada de archivo sin título",
                 followAccept: { eyebrow: "Solicitud aceptada", body: "Aceptó tu solicitud de amistad.", helper: "Este aviso abre el nuevo perfil conectado.", actionLabel: "Abrir perfil" },
                 unfollow: { eyebrow: "Distancia de campo", body: "Te quitó de su lista de amigos.", helper: "Aún puedes revisar su perfil si lo necesitas.", actionLabel: "Revisar perfil" },
                 like: { eyebrow: "Like", body: "Le gustó tu publicación:", helper: "Este aviso enlaza directamente al diálogo de la publicación referenciada.", actionLabel: "Abrir entrada" },
@@ -998,13 +1159,63 @@ export const translations: Record<Locale, TranslationTree> = {
                 postDeleted: "Publicación eliminada con éxito.",
             },
         },
+        api: {
+            posts: {
+                errors: {
+                    unableFetchPosts: "No se pudieron obtener las publicaciones.",
+                    unableSearchPosts: "No se pudieron buscar las publicaciones.",
+                    unableFetchFriendsPosts: "No se pudieron obtener las publicaciones de amigos.",
+                    postContentRequired: "El contenido del post es obligatorio.",
+                    commentContentRequired: "El contenido del comentario es obligatorio.",
+                    unableCreatePost: "No se pudo crear la publicación.",
+                    unableDeleteComment: "No se pudo eliminar el comentario.",
+                    unableDeletePost: "No se pudo eliminar la publicación.",
+                    unableLikePost: "No se pudo dar me gusta a la publicación.",
+                    unableUnlikePost: "No se pudo quitar el me gusta de la publicación.",
+                    unableCreateComment: "No se pudo crear el comentario.",
+                    unableFavoritePost: "No se pudo añadir la publicación a favoritos.",
+                    unableUnfavoritePost: "No se pudo quitar la publicación de favoritos.",
+                    unableLikeComment: "No se pudo dar me gusta al comentario.",
+                    unableUnlikeComment: "No se pudo quitar el me gusta del comentario.",
+                    unableFavoriteComment: "No se pudo añadir el comentario a favoritos.",
+                    unableUnfavoriteComment: "No se pudo quitar el comentario de favoritos.",
+                    unableFetchPost: "No se pudo obtener la publicación.",
+                    unableUpdatePost: "No se pudo actualizar la publicación.",
+                    contentRequired: "Se requiere contenido.",
+                    authorIdInvalid: "authorId debe ser un id de usuario válido.",
+                    authorNotFound: "Autor no encontrado.",
+                    userNotFoundInToken: "Usuario no encontrado en el token.",
+                    invalidCommentId: "Id de comentario inválido.",
+                    commentNotFound: "Comentario no encontrado",
+                    notAllowedDeleteComment: "No tienes permiso para eliminar este comentario",
+                    invalidPostId: "Id de publicación inválido.",
+                    postNotFound: "Publicación no encontrada",
+                    userNotFound: "Usuario no encontrado",
+                    inappropriateComment: "Este comentario contiene contenido inapropiado.",
+                },
+                success: {
+                    postCreated: "Publicación creada con éxito.",
+                    commentDeleted: "Comentario eliminado con éxito.",
+                    postDeleted: "Publicación eliminada con éxito.",
+                    postLiked: "Publicación marcada con 'me gusta' con éxito.",
+                    postUnliked: "Se eliminó el 'me gusta' de la publicación con éxito.",
+                    commentCreated: "Comentario creado con éxito.",
+                    postFavorited: "Publicación añadida a favoritos.",
+                    postUnfavorited: "Publicación eliminada de favoritos.",
+                    commentLiked: "Comentario marcado con 'me gusta' con éxito.",
+                    commentUnliked: "Se eliminó el 'me gusta' del comentario con éxito.",
+                    commentFavorited: "Comentario añadido a favoritos.",
+                    commentUnfavorited: "Comentario eliminado de favoritos.",
+                },
+            },
+        },
         toasts: { needContent: "Debes escribir algo antes de publicar.", needLogin: "Debes iniciar sesión para publicar.", publishFailed: "No se pudo publicar el post.", published: "Post publicado con éxito." },
     },
     ar: {
         app: { name: "Field Notes" },
         locale: { label: "اللغة", en: "الإنجليزية", fr: "الفرنسية", es: "الإسبانية", ar: "العربية" },
         common: { login: "تسجيل الدخول", register: "إنشاء حساب", logout: "تسجيل الخروج", message: "رسالة", newPost: "منشور جديد", error: "خطأ", fieldNotice: "تنبيه", accept: "قبول", add: "إضافة", sent: "تم الإرسال", pending: "قيد الانتظار", adding: "جاري الإضافة", accepting: "جاري القبول", remove: "حذف", removing: "جارٍ الحذف", changePassword: "تغيير كلمة المرور", setPassword: "تعيين كلمة المرور" },
-        landing: { navSignIn: "تسجيل الدخول", navRegister: "إنشاء حساب", heroKickerPrimary: "المجلد I / بناء مباشر", heroKickerSecondary: "أرشيف اجتماعي", heroTitle: "Project /", heroHighlight: "ft_transcendence", heroText: "تطبيق ويب 42 ft_transcendence يتيح للمستخدمين نشر المنشورات، تخصيص الملفات، بناء الصداقات، تبادل الرسائل، ومتابعة الإشعارات الفورية داخل نظام كامل موثق.", ctaStart: "ابدأ رحلتك", ctaLogin: "دخول", ctaRoster: "عرض الفريق", dispatchStamp: "نشط", dispatchEyebrow: "ملخص المشروع", dispatchHandle: "@ft_transcendence", dispatchState: "مباشر", dispatchTitle: "منصة اجتماعية مبنية كمشروع full-stack قابل للشرح.", dispatchBody: "يعرض Next.js واجهة الأرشيف، وتوفر Express واجهة REST، ويكتب Prisma في PostgreSQL، وتنقل Socket.io الأحداث الفورية، ويشغل Docker Compose الخدمات معا.", dispatchPrimary: "[ الخلاصة + الملفات ]", dispatchRealtime: "[ الرسائل + التنبيهات ]", dispatchRepository: "[ API + قاعدة ]", dispatchReply: "[ تقييم 42 ]", rosterTitle: "فريق المشروع", rosterMeta: "صفحة 1 / المجلد I", roster: { curtis: { name: "Curtis Moncoq", role: "تكامل full-stack", quote: "ربط هيكل التطبيق والصفحات الاجتماعية وتدفق Docker للتقييم وOAuth والدروس ولمسات الإنتاج في مشروع قابل للشرح." }, ahlem: { name: "Ahlem Bey", role: "خدمات الخلفية", quote: "عملت على تدفقات الخلفية ومنطق الخدمات حتى تبقى المنشورات والمستخدمون والاستمرارية سهلة الشرح." }, manar: { name: "Manar Bengharbi", role: "قاعدة + خلفية", quote: "ساهمت في جانب Prisma/PostgreSQL حيث يتم تنظيم الحسابات والمنشورات والعلاقات وبيانات المشروع." }, nabil: { name: "Nabil Abboud", role: "API عامة + أمان", quote: "ساعد في بناء طبقة API الخارجية مع حماية API key وتحديد المعدل والتوثيق وربط الخلفية." }, walid: { name: "Walid", role: "تجربة الواجهة", quote: "ساهم في مسارات المستخدم وواجهة الأرشيف، بما في ذلك الخلاصة والبحث وright rail وتسجيل الدخول والتنقل." } } },
+        landing: { navSignIn: "تسجيل الدخول", navRegister: "إنشاء حساب", heroKickerPrimary: "المجلد I / بناء مباشر", heroKickerSecondary: "أرشيف اجتماعي", heroTitle: "Project /", heroHighlight: "ft_transcendence", heroText: "تطبيق ويب 42 ft_transcendence يتيح للمستخدمين نشر المنشورات، تخصيص الملفات، بناء الصداقات، تبادل الرسائل، ومتابعة الإشعارات الفورية داخل نظام كامل موثق.", ctaStart: "ابدأ رحلتك", ctaLogin: "دخول", ctaRoster: "عرض الفريق", dispatchStamp: "نشط", dispatchEyebrow: "ملخص المشروع", dispatchHandle: "@ft_transcendence", dispatchState: "مباشر", dispatchTitle: "منصة اجتماعية مبنية كمشروع full-stack قابل للشرح.", dispatchBody: "يعرض Next.js واجهة الأرشيف، وتوفر Express واجهة REST، ويكتب Prisma في PostgreSQL، وتنقل Socket.io الأحداث الفورية، ويشغل Docker Compose الخدمات معا.", dispatchPrimary: "[ الخلاصة + الملفات ]", dispatchRealtime: "[ الرسائل + التنبيهات ]", dispatchRepository: "[ API + قاعدة ]", dispatchReply: "[ تقييم 42 ]", rosterTitle: "فريق المشروع", rosterMeta: "صفحة 1 / المجلد I", roster: { curtis: { name: "Curtis Moncoq", role: "قائد تقني، الخلفية والوقت الفعلي", quote: "قاد البنية التقنية وطبّق ميزات الوقت الفعلي مثل WebSockets والدردشة، إلى جانب دمج OAuth ونظام التصميم." }, ahlem: { name: "Ahlem Bey", role: "الخلفية وقاعدة البيانات", quote: "عملت على Prisma ORM، وبنية قاعدة البيانات، وتدفقات المصادقة بما فيها 2FA، وتحليل المشاعر لاعتدال التعليقات." }, manar: { name: "Manar Bengharbi", role: "الخلفية وواجهة API العامة", quote: "طوّرت واجهة API العامة ونظام الإشعارات، مع إدارة الوصول الخارجي والتواصل الخلفي بين الخدمات." }, nabil: { name: "Nabil Abboud", role: "الواجهة والميزات", quote: "نفّذ الميزات الأساسية للمستخدمين، بما فيها المنشورات ورفع الصور ولوحة المستخدم، لضمان تجربة سلسة." }, walid: { name: "Walid Larbi Aissa", role: "الواجهة والتدويل", quote: "عمل على دعم تعدد اللغات (i18n)، وواجهة RTL، وتوافق المتصفحات لتحسين إمكانية الوصول لجميع المستخدمين." } } },
         feed: { scopeAll: "كل المنشورات", scopeFriends: "الأصدقاء", loadingFriends: "جارٍ تحميل أرشيف الأصدقاء...", loadingAll: "جارٍ تحميل أرشيف الموجز...", emptyFriends: "لم يتم تسجيل أي منشورات من الأصدقاء المقبولين بعد.", emptyAll: "لم يتم تسجيل أي منشورات بعد.", endOfLogs: "--- نهاية السجلات الأخيرة ---", newPostAria: "إنشاء منشور جديد", posts: "منشورات", errors: { loadPosts: "تعذر جلب المنشورات.", loadFallback: "فشل تحميل الخلاصة.", loadSuggestions: "تعذر جلب اقتراحات الشريط الجانبي الأيمن." } },
         auth: { meta: { date: "التاريخ:", location: "الموقع:" }, panel: { title1: "ملاحظات", title2: "ميدانية", repository: "المستودع الرسمي", established: "تأسس عام 1892", warning: "ملكية شبكة المراقبة العالمية. يُسجل الوصول غير المصرح به بصرامة. تأكد من تثبيت جميع الإدخالات بشكل دائم." }, login: { eyebrow: "النموذج 4A - موظفون معتمدون", title: "مدخل الدخول", subtitle: "معرف_الدخول: إدخال_آمن_V4", usernameLabel: "اسم المستخدم / البريد", usernamePlaceholder: "login@student.42.fr", passwordLabel: "كلمة المرور", forgotPassword: "هل نسيت كلمة المرور؟", submit: "دخول", dateLocation: "منفذ_مشفّر", footerPrefix: "لست عضوًا؟", footerLink: "سجّل", providerLabel: "بروتوكولات وصول بديلة", providerTwo: "Intra", providerGithub: "GitHub", twoFactor: { title: "تسجيل دخول بالمصادقة الثنائية", subtitle: "نقطة تحقق أمنية / الخطوة 2", codeSent: "تم إرسال الرمز", codeSentByEmail: "تم إرسال الرمز عبر البريد الإلكتروني", sendingMessage: "جارٍ إرسال رمز التحقق المكوّن من 4 أرقام.", unknownEmail: "بريد غير معروف", errors: { sessionMissing: "جلسة 2FA مفقودة. يرجى تسجيل الدخول من جديد.", sendFirst: "أرسل الرمز أولاً.", confirm: "تعذر تأكيد رمز 2FA.", confirmFallback: "فشل تأكيد رمز 2FA.", resend: "تعذر إعادة إرسال رمز 2FA.", resendFallback: "فشل إعادة إرسال رمز 2FA." } }, errors: { required: "بيانات الدخول مطلوبة.", failedLoading: "فشل الدخول أثناء تحميل حسابك.", invalidCredentials: "اسم المستخدم/البريد الإلكتروني أو كلمة المرور غير صحيحة.", tokenMissing: "لم يتم استلام الرمز." } }, register: { eyebrow: "النموذج 4B - طلب اعتماد", title: "الدخول إلى النظام", subtitle: "معرف_التطبيق: وصول_جديد_V1", usernameLabel: "اسم المستخدم", usernamePlaceholder: "john_doe", emailLabel: "البريد الإلكتروني", emailPlaceholder: "login@student.42.fr", passwordLabel: "كلمة المرور", submit: "تسجيل", dateLocation: "منفذ_مشفّر", footerPrefix: "هل لديك حساب؟", footerLink: "دخول", providerLabel: "بروتوكولات وصول بديلة", providerTwo: "Intra", providerGithub: "GitHub", errors: { required: "مطلوب", invalidEmail: "بريد إلكتروني غير صالح", created: "تم إنشاء الحساب بنجاح." } } },
         nav: { feed: "الخلاصة", search: "بحث", profile: "الملف الشخصي", notifications: "الإشعارات", friends: "الأصدقاء", message: "الرسائل", settings: "الإعدادات" },
@@ -1074,6 +1285,7 @@ export const translations: Record<Locale, TranslationTree> = {
             marking: "جارٍ تعليم السجلات",
             markAll: "تعليم الكل كمقروء",
             someone: "شخص ما",
+            recentActivity: "نشاط حديث",
             noMore: "--- لا توجد مراسلات إضافية ---",
             toastDismissAria: "إغلاق الإشعار",
             toastDismiss: "إغلاق",
@@ -1102,6 +1314,10 @@ export const translations: Record<Locale, TranslationTree> = {
             likeGroup: { fallbackPost: "إدخال الأرشيف الخاص بك", andOthers: "و {count} آخرين", likedYourPost: "أعجبوا بمنشورك." },
             copy: {
                 follow: { eyebrow: "طلب صداقة", body: "أرسل لك طلب صداقة.", helper: "يفتح هذا التنبيه ملفه العام.", actionLabel: "زيارة الملف" },
+                favorite: { eyebrow: "مفضل", body: "أضاف منشورك إلى المفضلة:", helper: "يربط هذا التنبيه مباشرة بحوار المنشور المشار إليه.", actionLabel: "فتح الإدخال" },
+                commentLike: { eyebrow: "إعجاب بالتعليق", body: "أعجب بتعليقك.", helper: "افتح المنشور لمراجعة المحادثة.", actionLabel: "فتح سلسلة التعليقات" },
+                commentFavorite: { eyebrow: "تعليق مفضل", body: "وضع تعليقك في المفضلة.", helper: "افتح المنشور لمراجعة المحادثة.", actionLabel: "فتح سلسلة التعليقات" },
+                untitled: "إدخال أرشيف بلا عنوان",
                 followAccept: { eyebrow: "تم قبول الطلب", body: "قبل طلب الصداقة الخاص بك.", helper: "يفتح هذا التنبيه الملف المرتبط حديثًا.", actionLabel: "فتح الملف" },
                 unfollow: { eyebrow: "تباعد ميداني", body: "أزالك من قائمة أصدقائه.", helper: "لا يزال بإمكانك مراجعة ملفه عند الحاجة.", actionLabel: "مراجعة الملف" },
                 like: { eyebrow: "إعجاب", body: "أعجب بمنشورك:", helper: "يربط هذا التنبيه مباشرة بحوار المنشور المشار إليه.", actionLabel: "فتح الإدخال" },
@@ -1230,31 +1446,96 @@ export const translations: Record<Locale, TranslationTree> = {
                 postDeleted: "تم حذف المنشور بنجاح.",
             },
         },
+        api: {
+            posts: {
+                errors: {
+                    unableFetchPosts: "تعذر جلب المنشورات.",
+                    unableSearchPosts: "تعذر البحث عن المنشورات.",
+                    unableFetchFriendsPosts: "تعذر جلب منشورات الأصدقاء.",
+                    postContentRequired: "محتوى المنشور مطلوب.",
+                    commentContentRequired: "محتوى التعليق مطلوب.",
+                    unableCreatePost: "تعذر إنشاء المنشور.",
+                    unableDeleteComment: "تعذر حذف التعليق.",
+                    unableDeletePost: "تعذر حذف المنشور.",
+                    unableLikePost: "تعذر الإعجاب بالمنشور.",
+                    unableUnlikePost: "تعذر إزالة الإعجاب عن المنشور.",
+                    unableCreateComment: "تعذر إنشاء التعليق.",
+                    unableFavoritePost: "تعذر إضافة المنشور إلى المفضلات.",
+                    unableUnfavoritePost: "تعذر إزالة المنشور من المفضلات.",
+                    unableLikeComment: "تعذر الإعجاب بالتعليق.",
+                    unableUnlikeComment: "تعذر إزالة الإعجاب عن التعليق.",
+                    unableFavoriteComment: "تعذر إضافة التعليق إلى المفضلات.",
+                    unableUnfavoriteComment: "تعذر إزالة التعليق من المفضلات.",
+                    unableFetchPost: "تعذر جلب المنشور.",
+                    unableUpdatePost: "تعذر تحديث المنشور.",
+                    contentRequired: "المحتوى مطلوب.",
+                    authorIdInvalid: "يجب أن يكون authorId معرّف مستخدم صالحًا.",
+                    authorNotFound: "المؤلف غير موجود.",
+                    userNotFoundInToken: "المستخدم غير موجود في الرموز.",
+                    invalidCommentId: "معرّف التعليق غير صالح.",
+                    commentNotFound: "التعليق غير موجود",
+                    notAllowedDeleteComment: "لست مخولاً بحذف هذا التعليق",
+                    invalidPostId: "معرّف المنشور غير صالح.",
+                    postNotFound: "المنشور غير موجود",
+                    userNotFound: "المستخدم غير موجود",
+                    inappropriateComment: "يحتوي هذا التعليق على محتوى غير لائق.",
+                },
+                success: {
+                    postCreated: "تم إنشاء المنشور بنجاح.",
+                    commentDeleted: "تم حذف التعليق بنجاح.",
+                    postDeleted: "تم حذف المنشور بنجاح.",
+                    postLiked: "تم الإعجاب بالمنشور بنجاح.",
+                    postUnliked: "تمت إزالة الإعجاب عن المنشور بنجاح.",
+                    commentCreated: "تم إنشاء التعليق بنجاح.",
+                    postFavorited: "تمت إضافة المنشور إلى المفضلات.",
+                    postUnfavorited: "تمت إزالة المنشور من المفضلات.",
+                    commentLiked: "تم الإعجاب بالتعليق بنجاح.",
+                    commentUnliked: "تمت إزالة الإعجاب عن التعليق بنجاح.",
+                    commentFavorited: "تمت إضافة التعليق إلى المفضلات.",
+                    commentUnfavorited: "تمت إزالة التعليق من المفضلات.",
+                },
+            },
+        },
         toasts: { needContent: "يجب أن تكتب شيئًا قبل النشر.", needLogin: "يجب تسجيل الدخول للنشر.", publishFailed: "تعذر نشر المنشور.", published: "تم نشر المنشور بنجاح." },
     },
 };
 
-// [Cree pour ce projet] Resout une cle "dot notation" dans un arbre de locale.
-// Retourne `undefined` si un segment est manquant.
+/*
+ * Navigue dans la structure imbriquee de traductions selon un chemin pointe.
+ * 
+ * Processus :
+ *   1. Divise le chemin par des points ("auth.login.submit" → ["auth", "login", "submit"])
+ *   2. Traverse l'arbre segment par segment
+ *   3. À chaque etape, verifie que l'objet existe et n'est pas undefined
+ *   4. Si un segment manque → retourne undefined (traduction manquante)
+ *   5. Retourne la valeur finale (ou undefined si pas trouvee)
+ */
 export function getTranslation(tree: TranslationTree, key: string): string | undefined {
+    // Utilise Array.reduce() pour parcourir chaque segment du chemin
     return key.split(".").reduce<unknown>((current, segment) => {
+        // Si current n'est pas un objet (null, undefined, string, etc.) → impossible de continuer
         if (!current || typeof current !== "object") {
             return undefined;
         }
-
         return (current as Record<string, unknown>)[segment];
-    }, tree) as string | undefined;
+    }, tree) as string | undefined;  // Commencer par l'arbre racine
 }
 
-// [Cree pour ce projet] Remplace les placeholders ({count}, {name}, etc.) a l'execution.
-// Les placeholders inconnus sont conserves volontairement pour signaler un param manquant.
+
 export function applyTranslationParams(value: string, params?: TranslationParams) {
+    // Si aucun parametre → pas de remplacement, retourne la chaine brute
     if (!params) {
         return value;
     }
 
+    // Expression reguliere : capture tous les {word} dans la chaine
+    // Exemple : "You have {count} {type}" → deux matches : "count" et "type"
     return value.replace(/\{(\w+)\}/g, (_, token: string) => {
+        // Cherche la valeur correspondante dans les parametres
         const replacement = params[token];
+        
+        // Si la valeur existe → la retourne convertie en string
+        // Sinon → retourne le placeholder original (indique un bug/parametre manquant)
         return replacement === undefined ? `{${token}}` : String(replacement);
     });
 }
