@@ -18,6 +18,7 @@ import { SocialToggle } from "@/components/posts/SocialToggle";
 import { Button } from "@/components/ui/button";
 import { ProfilePicture } from "@/components/ui/ProfilePicture";
 import { UserIdentityLink } from "@/components/users/UserIdentityLink";
+import { useI18n } from "@/i18n/I18nProvider";
 import {
 	ScrollArea,
 	ScrollAreaContent,
@@ -87,6 +88,7 @@ export function PostDialog({
 	favoritingCommentId,
 	commentingPostId,
 }: PostDialogProps) {
+	const { t } = useI18n();
 	const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
 
 	const focusReplyInput = () => {
@@ -123,7 +125,7 @@ export function PostDialog({
 	const isFavoriting = post ? favoritingPostId === post.id : false;
 	const isCommenting = post ? commentingPostId === post.id : false;
 	const authorDisplayName =
-		post?.author.displayName?.trim() || post?.author.username || "Observer";
+		post?.author.displayName?.trim() || post?.author.username || t("postDialog.fallbackObserver");
 	const attachmentUrl = post?.media[0] ?? null;
 	const attachmentFileName = attachmentUrl
 		? getAttachmentFileName(attachmentUrl)
@@ -196,7 +198,7 @@ export function PostDialog({
 												disabled={isDeleting}
 											>
 												<HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.9} />
-												{isDeleting ? "Deleting" : "Delete"}
+													{isDeleting ? t("postDialog.deleting") : t("postDialog.delete")}d
 											</Button>
 										) : null}
 									</div>
@@ -221,7 +223,7 @@ export function PostDialog({
 															{attachmentFileName}
 														</p>
 														<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-label">
-															PDF Attachment
+															{t("postDialog.pdfAttachment")}
 														</p>
 													</div>
 													<a
@@ -230,13 +232,13 @@ export function PostDialog({
 														rel="noopener noreferrer"
 														className="shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-label underline transition-colors hover:text-ink"
 													>
-														Open in new tab
+														{t("postDialog.openInNewTab")}
 													</a>
 												</div>
 
 												<iframe
 													src={`${attachmentUrl}#view=FitH`}
-													title={attachmentFileName ?? "PDF viewer"}
+													title={attachmentFileName ?? t("postDialog.pdfViewer")}
 													className="h-[560px] w-full bg-paper"
 												/>
 											</div>
@@ -244,14 +246,14 @@ export function PostDialog({
 											/* eslint-disable-next-line @next/next/no-img-element */
 											<img
 												src={attachmentUrl ?? undefined}
-												alt="Post media"
+												alt={t("postDialog.postMedia")}
 												className="archive-photo max-h-[420px] w-full border border-label/20 object-cover"
 											/>
 										)}
 										<div className="absolute bottom-2 right-3 font-mono text-[10px] text-label">
 											{attachmentUrl && isPdfAttachment(attachmentUrl)
-												? `FIELD DOSSIER - EXP ${post.id}`
-												: `FILM ROLL 42 - EXP ${post.id}`}
+												? t("postDialog.fieldDossierExp", { id: post.id })
+												: t("postDialog.filmRollExp", { id: post.id })}
 										</div>
 									</div>
 								) : null}
@@ -260,7 +262,7 @@ export function PostDialog({
 									<div className="flex flex-wrap items-center gap-2 sm:gap-4">
 										<SocialToggle
 											icon={Comment01Icon}
-											label="Comment count"
+											label={t("postDialog.commentCount")}
 											count={post.commentsCount}
 											accent="blue"
 											onMouseDown={(event) =>
@@ -270,7 +272,7 @@ export function PostDialog({
 										/>
 										<SocialToggle
 											icon={Bookmark02Icon}
-											label="Favorite post"
+											label={t("postDialog.favoritePost")}
 											count={post.favoritesCount}
 											accent="green"
 											pressed={post.favoritedByCurrentUser}
@@ -279,7 +281,7 @@ export function PostDialog({
 										/>
 										<SocialToggle
 											icon={FavouriteIcon}
-											label="Like post"
+											label={t("postDialog.likePost")}
 											count={post.likesCount}
 											accent="red"
 											pressed={post.likedByCurrentUser}
@@ -293,7 +295,7 @@ export function PostDialog({
 							<section className="rotate-1 max-h-[80vh] border border-black/10 bg-stage lg:flex lg:self-stretch lg:flex-col">
 								<div className="border-b border-dashed border-black/10 px-5 py-4 sm:px-6">
 									<p className="font-mono text-[11px] uppercase tracking-[0.18em] text-label">
-										Discussion
+										{t("postDialog.discussion")}
 									</p>
 								</div>
 

@@ -204,6 +204,8 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
           commentsCount: post.commentsCount + 1,
         }));
       }
+
+      notifySuccess(translateApiMessage(data.message) || t("postInteractions.success.commentCreated"));
     } catch (error) {
       notifyError(
         error instanceof Error ? translateApiMessage(error.message) : t("postInteractions.errors.addCommentFallback"),

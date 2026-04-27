@@ -493,6 +493,12 @@ export const translations: Record<Locale, TranslationTree> = {
             },
         },
         postInteractions: {
+            composer: {
+                placeholder: "Add a comment...",
+                label: "Add a comment to this post",
+                submit: "Submit comment",
+                sending: "Sending comment",
+            },
             errors: {
                 unknown: "Unknown error.",
                 loginDeleteComment: "You must be logged in to delete a comment.",
@@ -521,6 +527,21 @@ export const translations: Record<Locale, TranslationTree> = {
                 commentDeleted: "Comment deleted successfully.",
                 postDeleted: "Post deleted successfully.",
             },
+        },
+        postDialog: {
+            fallbackObserver: "Observer",
+            delete: "Delete",
+            deleting: "Deleting",
+            pdfAttachment: "PDF Attachment",
+            openInNewTab: "Open in new tab",
+            pdfViewer: "PDF viewer",
+            postMedia: "Post media",
+            fieldDossierExp: "FIELD DOSSIER - EXP {id}",
+            filmRollExp: "FILM ROLL 42 - EXP {id}",
+            commentCount: "Comment count",
+            favoritePost: "Favorite post",
+            likePost: "Like post",
+            discussion: "Discussion",
         },
         api: {
             posts: {
@@ -841,6 +862,12 @@ export const translations: Record<Locale, TranslationTree> = {
             },
         },
         postInteractions: {
+            composer: {
+                placeholder: "Ajouter un commentaire...",
+                label: "Ajouter un commentaire à ce post",
+                submit: "Publier le commentaire",
+                sending: "Envoi du commentaire",
+            },
             errors: {
                 unknown: "Erreur inconnue.",
                 loginDeleteComment: "Vous devez être connecté pour supprimer un commentaire.",
@@ -869,6 +896,21 @@ export const translations: Record<Locale, TranslationTree> = {
                 commentDeleted: "Commentaire supprimé avec succès.",
                 postDeleted: "Post supprimé avec succès.",
             },
+        },
+        postDialog: {
+            fallbackObserver: "Observateur",
+            delete: "Supprimer",
+            deleting: "Suppression...",
+            pdfAttachment: "Pièce jointe PDF",
+            openInNewTab: "Ouvrir dans un nouvel onglet",
+            pdfViewer: "Visionneuse PDF",
+            postMedia: "Média du post",
+            fieldDossierExp: "DOSSIER DE TERRAIN - EXP {id}",
+            filmRollExp: "ROULEAU 42 - EXP {id}",
+            commentCount: "Nombre de commentaires",
+            favoritePost: "Favori du post",
+            likePost: "Aimer le post",
+            discussion: "Discussion",
         },
         api: {
             posts: {
@@ -1130,6 +1172,12 @@ export const translations: Record<Locale, TranslationTree> = {
             },
         },
         postInteractions: {
+            composer: {
+                placeholder: "Añadir un comentario...",
+                label: "Añadir un comentario a esta publicación",
+                submit: "Enviar comentario",
+                sending: "Enviando comentario",
+            },
             errors: {
                 unknown: "Error desconocido.",
                 loginDeleteComment: "Debes iniciar sesión para eliminar un comentario.",
@@ -1158,6 +1206,21 @@ export const translations: Record<Locale, TranslationTree> = {
                 commentDeleted: "Comentario eliminado con éxito.",
                 postDeleted: "Publicación eliminada con éxito.",
             },
+        },
+        postDialog: {
+            fallbackObserver: "Observador",
+            delete: "Eliminar",
+            deleting: "Eliminando",
+            pdfAttachment: "Archivo PDF adjunto",
+            openInNewTab: "Abrir en una nueva pestaña",
+            pdfViewer: "Visor PDF",
+            postMedia: "Multimedia de la publicación",
+            fieldDossierExp: "DOSSIER DE CAMPO - EXP {id}",
+            filmRollExp: "ROLLO 42 - EXP {id}",
+            commentCount: "Cantidad de comentarios",
+            favoritePost: "Favorito de la publicación",
+            likePost: "Me gusta de la publicación",
+            discussion: "Discusión",
         },
         api: {
             posts: {
@@ -1417,6 +1480,12 @@ export const translations: Record<Locale, TranslationTree> = {
             },
         },
         postInteractions: {
+            composer: {
+                placeholder: "أضف تعليقًا...",
+                label: "أضف تعليقًا على هذا المنشور",
+                submit: "إرسال التعليق",
+                sending: "جارٍ إرسال التعليق",
+            },
             errors: {
                 unknown: "خطأ غير معروف.",
                 loginDeleteComment: "يجب تسجيل الدخول لحذف تعليق.",
@@ -1445,6 +1514,21 @@ export const translations: Record<Locale, TranslationTree> = {
                 commentDeleted: "تم حذف التعليق بنجاح.",
                 postDeleted: "تم حذف المنشور بنجاح.",
             },
+        },
+        postDialog: {
+            fallbackObserver: "المراقب",
+            delete: "حذف",
+            deleting: "جارٍ الحذف",
+            pdfAttachment: "مرفق PDF",
+            openInNewTab: "فتح في تبويب جديد",
+            pdfViewer: "عارض PDF",
+            postMedia: "وسائط المنشور",
+            fieldDossierExp: "ملف الميدان - EXP {id}",
+            filmRollExp: "بكرة الفيلم 42 - EXP {id}",
+            commentCount: "عدد التعليقات",
+            favoritePost: "المنشور المفضل",
+            likePost: "الإعجاب بالمنشور",
+            discussion: "المناقشة",
         },
         api: {
             posts: {

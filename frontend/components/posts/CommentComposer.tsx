@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
 import { SocialComposer } from "@/components/ui/SocialComposer";
 
 type CommentComposerProps = {
@@ -18,6 +19,8 @@ export const CommentComposer = forwardRef<
 	{ postId, value, submitting, onChange, onSubmit },
 	ref,
 ) {
+	const { t } = useI18n();
+
 	return (
 		<SocialComposer
 			ref={ref}
@@ -25,9 +28,13 @@ export const CommentComposer = forwardRef<
 			submitting={submitting}
 			onChange={(nextValue) => onChange(postId, nextValue)}
 			onSubmit={() => onSubmit(postId)}
-			placeholder="Add a comment..."
-			label="Add a comment to this post"
-			submitLabel={submitting ? "Sending comment" : "Submit comment"}
+			placeholder={t("postInteractions.composer.placeholder")}
+			label={t("postInteractions.composer.label")}
+			submitLabel={
+				submitting
+					? t("postInteractions.composer.sending")
+					: t("postInteractions.composer.submit")
+			}
 			rows={1}
 			textareaClassName="min-h-8"
 		/>
