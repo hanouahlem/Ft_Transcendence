@@ -57,11 +57,11 @@ export const translations: Record<Locale, TranslationTree> = {
             rosterTitle: "Project team",
             rosterMeta: "Page 1 / Vol I",
             roster: {
-                curtis: { name: "Curtis Moncoq", role: "Full-stack integration", quote: "Connected the app shell, social pages, Docker evaluation flow, OAuth routing, lessons, and production polish into one explainable project." },
-                ahlem: { name: "Ahlem Bey", role: "Backend services", quote: "Worked across backend data flows and service logic so posts, users, and persistence stay understandable during evaluation." },
-                manar: { name: "Manar Bengharbi", role: "Database + backend", quote: "Contributed to the Prisma/PostgreSQL side of the app, where account records, posts, relationships, and project data are structured." },
-                nabil: { name: "Nabil Abboud", role: "Public API + security", quote: "Helped build the external API layer, including API-key protection, rate limiting, documentation, and backend service wiring." },
-                walid: { name: "Walid", role: "Frontend experience", quote: "Contributed to the user-facing routes and archive interface, including feed, search, right-rail, login, and navigation refinements." },
+                curtis: { name: "Curtis Moncoq", role: "Tech Lead, Backend & Real-time", quote: "Led the technical architecture and implemented real-time features such as WebSockets and chat, along with OAuth integration and the design system." },
+                ahlem: { name: "Ahlem Bey", role: "Backend & Database", quote: "Worked on Prisma ORM, database structure, authentication flows including 2FA, and sentiment analysis for comment moderation." },
+                manar: { name: "Manar Bengharbi", role: "Backend & Public API", quote: "Developed the public API and notification system, handling external access and backend communication between services." },
+                nabil: { name: "Nabil Abboud", role: "Frontend & Features", quote: "Implemented core user features including posts, image upload, and the user dashboard, ensuring a smooth user experience." },
+                walid: { name: "Walid Larbi Aissa", role: "Frontend & Internationalization", quote: "Worked on multi-language support (i18n), RTL interface, and browser compatibility to improve accessibility across users." },
             },
         },
         auth: {

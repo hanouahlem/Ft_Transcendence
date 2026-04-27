@@ -296,6 +296,9 @@ Open the evaluation stack at:
 
 - `https://localhost:4433/.`
 
+ Open the API documentation at:
+ 
+- `https://localhost:4433/api-docs/`
 
 
 Useful Commands

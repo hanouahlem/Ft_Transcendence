@@ -17,10 +17,12 @@ try {
 }
 
 const app = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", 1); // Permet a Express de recuperer la vraie IP du client derriere un proxy
 app.use(cors());
 app.use(express.json());
 
+
+// Route simple pour verifier que le serveur est actif
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
@@ -62,12 +64,14 @@ httpServer.listen(PORT, () => {
 
 let isShuttingDown = false;
 
+
+// fonction appelee quand on arrete le serveur
 const shutdown = (signal) => {
   if (isShuttingDown) return;
-  isShuttingDown = true;
+  isShuttingDown = true; // Empeche les appels multiples à shutdown
 
   console.log(`Received ${signal}. Shutting down gracefully...`);
-
+  // stop le serveur proprement
   httpServer.close((error) => {
     if (error) {
       console.error("Error during HTTP server shutdown:", error);
