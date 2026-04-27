@@ -48,7 +48,6 @@ type PostFilters = {
 };
 
 type UserFilters = {
-  onlineOnly: boolean;
   friendsOnly: boolean;
   sort: UserSortOption;
 };
@@ -61,7 +60,6 @@ const DEFAULT_POST_FILTERS: PostFilters = {
 };
 
 const DEFAULT_USER_FILTERS: UserFilters = {
-  onlineOnly: false,
   friendsOnly: false,
   sort: "alpha-asc",
 };
@@ -300,7 +298,6 @@ function SearchPageContent() {
         const result = await searchUsersAdvanced(
           {
             q: currentQuery,
-            onlineOnly: userFilters.onlineOnly,
             friendsOnly: userFilters.friendsOnly,
             sort: userFilters.sort,
             page: requestedPage,
@@ -657,20 +654,6 @@ function SearchPageContent() {
                           </label>
 
                           <div className="flex flex-col gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-label sm:mt-6">
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                checked={userFilters.onlineOnly}
-                                onChange={(event) =>
-                                  setUserFilters((prev) => ({
-                                    ...prev,
-                                    onlineOnly: event.target.checked,
-                                  }))
-                                }
-                                className="h-4 w-4 accent-accent-orange"
-                              />
-                              {t("search.userFilters.onlineOnly")}
-                            </label>
                             <label className="flex items-center gap-2">
                               <input
                                 type="checkbox"

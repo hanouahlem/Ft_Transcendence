@@ -192,6 +192,11 @@ export function usePostInteractions({ token }: UsePostInteractionsOptions) {
         return;
       }
 
+      if (data?.blocked) {
+        notifyError(data.message || t("postInteractions.errors.addComment"));
+        return;
+      }
+
       setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
       if (data.comment) {
         const normalizedComment = normalizeUploadedMediaPayload(data.comment);

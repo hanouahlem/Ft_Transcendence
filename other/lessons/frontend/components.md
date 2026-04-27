@@ -896,6 +896,7 @@ How it works:
 - it fetches all posts plus all users, then enriches user cards with public profile data and friend counts
 - post search matches post content, author names, and comment text
 - user search matches only username and display name
+- user advanced filters now expose `Sort by` and `Friends only` (the `Online only` toggle was removed from the search page UI)
 - the `posts` tab reuses `PostCard`, so likes, favorites, deletes, and the post dialog still use the same real handlers as the feed
 - the `users` tab renders `SearchUserCard`, which reuses `ProfileBanner`, `ProfilePicture`, and `FriendActionButton`
 - the visible results are paginated client-side, while the active page is still controlled from the URL

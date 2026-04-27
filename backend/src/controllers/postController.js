@@ -28,7 +28,7 @@ export const getPostsHandler = async (req, res) => {
     const posts = await getAllPosts(currentUserId);
     res.status(200).json(posts);
   } catch (error) {
-    console.error("Erreur getPostsHandler :", error);
+    // console.error("Erreur getPostsHandler :", error);
     res.status(500).json({ message: "Unable to fetch posts." });
   }
 };
@@ -47,7 +47,7 @@ export const searchPostsHandler = async (req, res) => {
     });
     res.status(200).json(result);
   } catch (error) {
-    console.error("Erreur searchPostsHandler :", error);
+    // console.error("Erreur searchPostsHandler :", error);
     res.status(500).json({ message: "Unable to search posts." });
   }
 };
@@ -314,7 +314,8 @@ export const createCommentHandler = async (req, res) => {
     });
   } catch (error) {
     if (error.message === "This comment contains inappropriate content.") {
-      return res.status(422).json({
+      return res.status(200).json({
+        blocked: true,
         message: error.message,
       });
     }
