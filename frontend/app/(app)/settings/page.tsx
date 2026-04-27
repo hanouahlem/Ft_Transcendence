@@ -600,8 +600,8 @@ export default function SettingsPage() {
       }
 
       setTwoFactorCodeSent(true);
-      setTwoFactorMessage(result.data.message);
-      notifySuccess(result.data.message);
+      setTwoFactorMessage(t("auth.login.twoFactor.codeSentByEmail"));
+      notifySuccess(t("auth.login.twoFactor.codeSentByEmail"));
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t("settingsPage.twoFactor.errors.sendFallback");

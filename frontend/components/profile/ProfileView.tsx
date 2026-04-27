@@ -442,7 +442,7 @@ export function ProfileView({ profileUsername = null }: ProfileViewProps) {
                                     size={18}
                                     strokeWidth={1.9}
                                   />
-                                  Message
+                                  {t("profile.message")}
                                 </Link>
                               </Button>
                             </>

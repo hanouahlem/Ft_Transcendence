@@ -55,6 +55,24 @@ function LoginPageContent() {
 	const [twoFactorConfirming, setTwoFactorConfirming] = useState(false);
 	const [twoFactorSending, setTwoFactorSending] = useState(false);
 
+	const mapLoginErrorMessage = useCallback(
+		(message?: string | null) => {
+			if (!message) {
+				return "";
+			}
+
+			switch (message) {
+				case "Username/email or password is incorrect.":
+					return t("auth.login.errors.invalidCredentials");
+				case "Login credentials are required.":
+					return t("auth.login.errors.required");
+				default:
+					return message;
+			}
+		},
+		[t],
+	);
+
 	useEffect(() => {
 		if (!isAuthLoading && isLoggedIn) {
 			router.replace("/feed");
@@ -109,19 +127,22 @@ function LoginPageContent() {
 			});
 
 			if (!result.ok) {
-				if (result.fieldErrors?.identifier) {
-					setIdentifierError(result.fieldErrors.identifier);
+				const identifierFieldError = mapLoginErrorMessage(result.fieldErrors?.identifier);
+				const passwordFieldError = mapLoginErrorMessage(result.fieldErrors?.password);
+
+				if (identifierFieldError) {
+					setIdentifierError(identifierFieldError);
 				}
-				if (result.fieldErrors?.password) {
-					setPasswordError(result.fieldErrors.password);
+				if (passwordFieldError) {
+					setPasswordError(passwordFieldError);
 				}
 				if (
-					!result.fieldErrors?.identifier &&
-					!result.fieldErrors?.password
+					!identifierFieldError &&
+					!passwordFieldError
 				) {
 					archiveToaster.error({
 						title: t("common.error"),
-						description: result.message,
+						description: mapLoginErrorMessage(result.message),
 						duration: 6000,
 					});
 				}
@@ -252,10 +273,10 @@ function LoginPageContent() {
 
 			setTwoFactorCodeSent(true);
 			setTwoFactorEmail(result.data.email);
-			setTwoFactorMessage(result.data.message);
+			setTwoFactorMessage(t("auth.login.twoFactor.codeSentByEmail"));
 			archiveToaster.success({
 				title: t("auth.login.twoFactor.codeSent"),
-				description: result.data.message,
+				description: t("auth.login.twoFactor.codeSentByEmail"),
 				duration: 4500,
 			});
 		} catch (error) {

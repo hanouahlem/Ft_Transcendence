@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useArchiveToasts } from "@/hooks/useArchiveToasts";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -30,6 +31,7 @@ export function useFriendRequests({
   onFriendAccepted,
 }: UseFriendRequestsOptions) {
   const { notifyError, notifySuccess } = useArchiveToasts();
+  const { t } = useI18n();
   const [sentRequests, setSentRequests] = useState<number[]>([]);
   const [incomingRequestIdsBySender, setIncomingRequestIdsBySender] = useState<
     Record<number, number>
@@ -37,6 +39,39 @@ export function useFriendRequests({
   const [connectedFriendshipIdsByUser, setConnectedFriendshipIdsByUser] =
     useState<Record<number, number>>({});
   const [sendingFriendId, setSendingFriendId] = useState<number | null>(null);
+
+  const mapFriendBackendMessage = (
+    message: unknown,
+    fallbackKey: string,
+  ): string => {
+    if (typeof message !== "string") {
+      return t(fallbackKey);
+    }
+
+    switch (message) {
+      case "receiverId is required":
+        return t("friendRequests.errors.missingReceiver");
+      case "You cannot add yourself":
+        return t("friendRequests.errors.cannotAddSelf");
+      case "User not found":
+        return t("friendRequests.errors.userNotFound");
+      case "Friend request already exists":
+        return t("friendRequests.success.alreadySent");
+      case "Friend request not found":
+        return t("friendRequests.errors.requestNotFound");
+      case "Not authorized":
+        return t("friendRequests.errors.notAuthorized");
+      case "Request already handled":
+        return t("friendRequests.errors.requestHandled");
+      case "Friend not found":
+        return t("friendRequests.errors.friendNotFound");
+      case "userId required":
+      case "userId is required":
+        return t("friendRequests.errors.userIdRequired");
+      default:
+        return t(fallbackKey);
+    }
+  };
 
   useEffect(() => {
     if (!token) {
@@ -132,7 +167,7 @@ export function useFriendRequests({
 
   const handleAddFriend = async (receiverId: number) => {
     if (!token) {
-      notifyError("You must be logged in to send a friend request.");
+      notifyError(t("friendRequests.errors.loginSend"));
       return;
     }
 
@@ -153,18 +188,20 @@ export function useFriendRequests({
       if (!res.ok) {
         if (data.message === "Friend request already exists") {
           setSentRequests((prev) => (prev.includes(receiverId) ? prev : [...prev, receiverId]));
-          notifySuccess("Friend request already sent.");
+          notifySuccess(t("friendRequests.success.alreadySent"));
           return;
         }
 
-        throw new Error(data.message || "Unable to send the friend request.");
+        throw new Error(mapFriendBackendMessage(data.message, "friendRequests.errors.send"));
       }
 
       setSentRequests((prev) => (prev.includes(receiverId) ? prev : [...prev, receiverId]));
-      notifySuccess(data.message || "Friend request sent.");
+      notifySuccess(t("friendRequests.success.sent"));
     } catch (error) {
       console.error("handleAddFriend error:", error);
-      notifyError(error instanceof Error ? error.message : "Failed to send the friend request.");
+      notifyError(
+        error instanceof Error ? error.message : t("friendRequests.errors.sendFallback"),
+      );
     } finally {
       setSendingFriendId(null);
     }
@@ -172,14 +209,14 @@ export function useFriendRequests({
 
   const handleAcceptFriend = async (senderId: number) => {
     if (!token) {
-      notifyError("You must be logged in to accept a friend request.");
+      notifyError(t("friendRequests.errors.loginAccept"));
       return;
     }
 
     const requestId = incomingRequestIdsBySender[senderId];
 
     if (!requestId) {
-      notifyError("Friend request not found.");
+      notifyError(t("friendRequests.errors.requestNotFound"));
       return;
     }
 
@@ -196,7 +233,7 @@ export function useFriendRequests({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to accept the friend request.");
+        throw new Error(mapFriendBackendMessage(data.message, "friendRequests.errors.accept"));
       }
 
       setIncomingRequestIdsBySender((prev) => {
@@ -209,12 +246,12 @@ export function useFriendRequests({
         [senderId]: data.friend.id,
       }));
 
-      notifySuccess("Friend request accepted.");
+      notifySuccess(t("friendRequests.success.accepted"));
       onFriendAccepted?.(senderId);
     } catch (error) {
       console.error("handleAcceptFriend error:", error);
       notifyError(
-        error instanceof Error ? error.message : "Failed to accept the friend request.",
+        error instanceof Error ? error.message : t("friendRequests.errors.acceptFallback"),
       );
     } finally {
       setSendingFriendId(null);
@@ -223,14 +260,14 @@ export function useFriendRequests({
 
   const handleRemoveFriend = async (userId: number) => {
     if (!token) {
-      notifyError("You must be logged in to remove a friend.");
+      notifyError(t("friendRequests.errors.loginRemove"));
       return;
     }
 
     const friendshipId = connectedFriendshipIdsByUser[userId];
 
     if (!friendshipId) {
-      notifyError("Friendship not found.");
+      notifyError(t("friendRequests.errors.friendshipNotFound"));
       return;
     }
 
@@ -247,7 +284,7 @@ export function useFriendRequests({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Unable to remove the friend.");
+        throw new Error(mapFriendBackendMessage(data.message, "friendRequests.errors.remove"));
       }
 
       setConnectedFriendshipIdsByUser((prev) => {
@@ -255,10 +292,12 @@ export function useFriendRequests({
         delete next[userId];
         return next;
       });
-      notifySuccess(data.message || "Friend removed.");
+      notifySuccess(t("friendRequests.success.removed"));
     } catch (error) {
       console.error("handleRemoveFriend error:", error);
-      notifyError(error instanceof Error ? error.message : "Failed to remove the friend.");
+      notifyError(
+        error instanceof Error ? error.message : t("friendRequests.errors.removeFallback"),
+      );
     } finally {
       setSendingFriendId(null);
     }

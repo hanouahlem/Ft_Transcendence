@@ -80,7 +80,7 @@ export function ProfilePhotoUploader({
               <div className="flex flex-col items-center justify-center gap-2 px-4 text-center text-label transition group-hover:text-accent-orange">
                 <Camera className="h-6 w-6" />
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em]">
-                  [ Attach Photo ]
+                  {t("settingsPage.fields.attachPhoto")}
                 </span>
               </div>
             )}
