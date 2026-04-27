@@ -215,6 +215,36 @@ The team worked collaboratively with regular meetings (2–3 times per week) to 
 
 ---
 
+## Browser Compatibility
+
+The subject requires the application to run on the latest stable Google Chrome without browser console errors or warnings. The claimed Multi-browser support module also requires proof that the application was tested on additional browsers.
+
+Test target URL:
+
+- `https://localhost:4433/`
+
+| Browser | Version | Status | Notes |
+|---------|---------|--------|-------|
+| Google Chrome | 147.0.7727.57 | Required baseline | Used as the mandatory evaluation browser. Check DevTools console during the final dry run. |
+| Safari | 26.1 | Additional browser tested locally | Installed on the development machine. Use it to verify login, feed, profile, messages, notifications, search, settings, Privacy Policy, and Terms of Service. |
+| Firefox or Microsoft Edge | To be filled before evaluation | Required for module validation | Not installed on this machine at the time this README section was added. Test one of them before claiming the Multi-browser support module as validated. |
+
+Known limitations:
+
+- The Multi-browser support module should not be considered fully validated until one additional browser beyond Safari is tested and recorded here.
+- OAuth provider settings may require callback URLs to exactly match the HTTPS evaluation URL.
+- Self-signed local HTTPS certificates may show a browser trust warning until the certificate is accepted locally.
+
+Manual browser test checklist:
+
+- Open the app over HTTPS.
+- Register and log in with email/password.
+- Navigate through feed, profile, friends, messages, notifications, search, and settings.
+- Verify Privacy Policy and Terms of Service pages are accessible.
+- Check that responsive layouts remain usable.
+- Check DevTools console for app errors.
+
+---
 
 ## Modules
 

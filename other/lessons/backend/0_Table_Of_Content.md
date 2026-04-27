@@ -95,6 +95,21 @@ Study file:
 
 - `lessons/backend/4c_WebSockets_and_Socket_IO.md`
 
+## 4d. Notifications
+
+Goal: understand the full notification system from database row to live frontend update.
+
+- `Notification` Prisma model: recipient, actor, type, read state, optional post
+- why notifications are created by feature controllers, not directly by users
+- notification service helpers: create, create-if-relevant, delete-if-exists, read emit
+- REST routes for listing, marking read, and deleting notifications
+- Socket.io events for created/read/deleted notifications and unread counts
+- frontend notification page state, filtering, grouping, toasts, and reconnect recovery
+
+Study file:
+
+- `lessons/backend/4d_Notifications.md`
+
 ## 5. Prisma and Database Layer
 
 Goal: understand how backend code talks to Postgres.
@@ -162,10 +177,11 @@ Study file:
 4. Authentication and Authorization
 5. OAuth and External Authentication
 6. WebSockets and Socket.io
-7. Prisma and Database Layer
-8. Business Logic by Feature
-9. File Uploads and Static Media
-10. Dev Workflow and Failure Modes
+7. Notifications
+8. Prisma and Database Layer
+9. Business Logic by Feature
+10. File Uploads and Static Media
+11. Dev Workflow and Failure Modes
 
 ## Notes
 

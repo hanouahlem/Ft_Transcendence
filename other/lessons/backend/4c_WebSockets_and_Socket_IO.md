@@ -454,10 +454,26 @@ Why:
 
 ### On Notification Delete
 
-If a deleted notification was unread, the controller emits refreshed unread counts.
+There are two delete paths to know:
 
-We do **not** currently emit a live delete event to remove the card from another open notifications page.
-That is a limitation of the current implementation.
+- `backend/src/controllers/notifController.js` deletes a notification when the recipient clicks delete in the notification UI.
+- `backend/src/services/notificationService.js` deletes a generated notification when the original action is undone, for example unliking a post.
+
+When `deleteNotificationIfExists(...)` is used, it emits:
+
+```js
+getSocketServer()
+  .to(getUserRoomName(recipientId))
+  .emit(SOCKET_EVENTS.NOTIFICATION_DELETED, { notificationId: match.id });
+```
+
+The notifications page listens to `notification:deleted` and removes the item from local state.
+
+Important limitation:
+
+- direct `DELETE /notifications/:id` refreshes unread counts if needed
+- action-undo deletion through `deleteNotificationIfExists(...)` emits `notification:deleted`
+- if the user deletes a notification manually from one tab, the current controller does not emit `notification:deleted` for the other tabs
 
 ## 11. Message Real-Time Flow
 
@@ -792,7 +808,7 @@ Not implemented:
 - participant-to-participant seen receipts
 - conversation room joins like `conversation:<id>`
 - typing indicators
-- live notification deletion events
+- live manual-notification deletion synchronization from `DELETE /notifications/:id`
 
 Those are conscious scope boundaries, not forgotten basics.
 
