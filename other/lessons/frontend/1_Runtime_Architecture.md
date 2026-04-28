@@ -71,6 +71,35 @@ In this repo, that means:
 
 If `AuthProvider` was not placed here, auth state would not be available across the full app.
 
+## Protected App Shell And Responsive Legal Links
+
+Logged-in routes are wrapped by:
+
+- `frontend/app/(app)/layout.tsx`
+- `frontend/components/layout/AppSidebarShell.tsx`
+
+Real code:
+
+```tsx
+<AppSidebarShell>{children}</AppSidebarShell>
+```
+
+`AppSidebarShell` owns shared UI that should appear around protected pages: the sidebar, mobile bottom navigation, live inbox toasts, post composer, and the responsive legal footer.
+
+Real code:
+
+```tsx
+{!isMessagePage ? (
+  <footer className="... xl:hidden">
+    <Link href="/terms">{t("rightRail.footerLinks.terms")}</Link>
+    <span aria-hidden="true">·</span>
+    <Link href="/privacy">{t("rightRail.footerLinks.privacy")}</Link>
+  </footer>
+) : null}
+```
+
+This footer is hidden on `xl` screens because the same links already appear in `frontend/components/layout/RightRail.tsx`. Below `xl`, the right rail is hidden, so the shell renders the links at the bottom of the page instead.
+
 ## Global CSS
 
 The root layout imports:

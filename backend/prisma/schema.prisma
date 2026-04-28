@@ -29,7 +29,6 @@ model User {
   posts           Post[]
   likes           Like[]
   comments        Comment[]
-  reposts         Repost[]
   sentFriends     Friends[] @relation("sent")
   receivedFriends Friends[] @relation("received")
   notificationsReceived Notification[] @relation("notificationRecipient")
@@ -51,18 +50,7 @@ model Post {
   likes     Like[]
   comments  Comment[]
   favorites Favorite[]
-  reposts   Repost[]
   notifications Notification[]
-}
-
-model Repost {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
-  post   Post @relation(fields: [postId], references: [id])
-  postId Int
-
-  @@unique([userId, postId])
 }
 
 model Favorite {

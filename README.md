@@ -69,9 +69,6 @@ The team worked collaboratively with regular meetings (2–3 times per week) to 
 ## Database Schema
 
 ### Main tables
-## Database Schema
-
-### Main tables
 
 **User**
   - id

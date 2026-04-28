@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { LiveInboxToasts } from "@/components/layout/LiveInboxToasts";
@@ -39,7 +40,7 @@ function AppSidebarShellContent({
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { unreadMessagesCount, unreadNotificationsCount } = useInboxUnread();
-  const { isRtl } = useI18n();
+  const { isRtl, t } = useI18n();
   const isMessagePage = pathname === "/message";
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -107,6 +108,19 @@ function AppSidebarShellContent({
             )}
           >
             {children}
+            {!isMessagePage ? (
+              <footer className="mt-12 border-t border-dashed border-label/30 pt-5 pb-2 font-mono text-[10px] leading-relaxed text-label xl:hidden">
+                <p className="flex flex-wrap items-center justify-center gap-x-1 gap-y-0.5">
+                  <Link className="transition-colors hover:text-ink hover:underline" href="/terms">
+                    {t("rightRail.footerLinks.terms")}
+                  </Link>
+                  <span aria-hidden="true">·</span>
+                  <Link className="transition-colors hover:text-ink hover:underline" href="/privacy">
+                    {t("rightRail.footerLinks.privacy")}
+                  </Link>
+                </p>
+              </footer>
+            ) : null}
           </div>
 
           <NewPostDialog
