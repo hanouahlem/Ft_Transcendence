@@ -248,15 +248,14 @@ Manual browser test checklist:
 ### Major (2 pts)
 
 - Framework frontend + backend (all team)
-- User Management - manbengh, ahbey, cumoncoq, nabboud
-- Public API – manbengh
 - User interaction – cumoncoq
 - Real-time features (WebSockets) – cumoncoq
+- User Management - manbengh, ahbey, cumoncoq, nabboud
+- Public API – manbengh
 
 ### Minor (1 pt)
 
 - Prisma ORM – ahbey
-- File upload – nabboud
 - Notifications – manbengh, cumoncoq
 - OAuth – cumoncoq
 - 2FA – ahbey
@@ -267,6 +266,7 @@ Manual browser test checklist:
 - Design system – cumoncoq
 - Content moderation AI ahbey
 - Search advance - nabboud, wlarbi-a
+- File upload – nabboud
 
 ### Total Points
 
