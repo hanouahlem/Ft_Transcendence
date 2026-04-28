@@ -1,9 +1,3 @@
-/**
- * CONFIGURATION i18n - Les locales supportées et leurs métadonnées
- * ================================================================
- * Ce fichier définit les paramètres de base du système de traduction.
- */
-
 // Liste de toutes les langues/locales supportées dans l'application.
 // - "en" = Anglais
 // - "fr" = Français
